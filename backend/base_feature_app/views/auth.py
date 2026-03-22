@@ -19,7 +19,22 @@ from base_feature_app.utils.auth_utils import (
     send_password_reset_code,
     send_verification_code
 )
-from base_feature_app.views.captcha_views import verify_recaptcha
+def verify_recaptcha(token):
+    """Placeholder reCAPTCHA verification. Returns True in DEBUG mode."""
+    from django.conf import settings as _settings
+    if _settings.DEBUG:
+        return True
+    if not token:
+        return False
+    try:
+        resp = requests.post(
+            'https://www.google.com/recaptcha/api/siteverify',
+            data={'secret': getattr(_settings, 'RECAPTCHA_SECRET_KEY', ''), 'response': token},
+            timeout=5,
+        )
+        return resp.json().get('success', False)
+    except Exception:
+        return False
 
 User = get_user_model()
 

@@ -1,25 +1,29 @@
 import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import './globals.css';
 import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
 import Providers from './providers';
 
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
-  title: 'Base Django + React + Next Feature Template',
-  description: 'A template for building web applications with Django and React',
+  title: 'Mi Huella — Adopta, Apadrina, Transforma',
+  description: 'Plataforma de adopción y apadrinamiento animal. Conectamos refugios con personas que quieren dar un hogar o apoyar a un animal.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" suppressHydrationWarning>
+    <html lang="es" className={inter.variable} suppressHydrationWarning>
       <body className="antialiased" suppressHydrationWarning>
         <Providers>
           <Header />
-          {children}
-          <footer className="border-t mt-16">
-            <div className="max-w-6xl mx-auto px-6 py-10 text-sm text-gray-600">
-              &copy; 2026 Base Django + React + Next Feature Template
-            </div>
-          </footer>
+          <main className="min-h-screen">{children}</main>
+          <Footer />
         </Providers>
       </body>
     </html>

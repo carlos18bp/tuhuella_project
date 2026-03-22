@@ -4,12 +4,16 @@ import { API_ENDPOINTS, COOKIE_KEYS, PAGINATION, ROUTES } from '../constants';
 
 describe('constants', () => {
   describe('API_ENDPOINTS', () => {
-    it('BLOG_DETAIL returns the correct API path for a given id', () => {
-      expect(API_ENDPOINTS.BLOG_DETAIL(42)).toBe('/blogs-data/42/');
+    it('ANIMAL_DETAIL returns the correct API path for a given id', () => {
+      expect(API_ENDPOINTS.ANIMAL_DETAIL(42)).toBe('/animals/42/');
     });
 
-    it('PRODUCT_DETAIL returns the correct API path for a given id', () => {
-      expect(API_ENDPOINTS.PRODUCT_DETAIL(7)).toBe('/products/7/');
+    it('SHELTER_DETAIL returns the correct API path for a given id', () => {
+      expect(API_ENDPOINTS.SHELTER_DETAIL(7)).toBe('/shelters/7/');
+    });
+
+    it('CAMPAIGN_DETAIL returns the correct API path for a given id', () => {
+      expect(API_ENDPOINTS.CAMPAIGN_DETAIL(3)).toBe('/campaigns/3/');
     });
   });
 
@@ -22,8 +26,16 @@ describe('constants', () => {
       expect(ROUTES.SIGN_IN).toBe('/sign-in');
     });
 
-    it('exposes DASHBOARD route', () => {
-      expect(ROUTES.DASHBOARD).toBe('/dashboard');
+    it('exposes ANIMALS route', () => {
+      expect(ROUTES.ANIMALS).toBe('/animales');
+    });
+
+    it('exposes SHELTERS route', () => {
+      expect(ROUTES.SHELTERS).toBe('/refugios');
+    });
+
+    it('exposes CAMPAIGNS route', () => {
+      expect(ROUTES.CAMPAIGNS).toBe('/campanas');
     });
   });
 

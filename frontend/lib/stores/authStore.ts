@@ -5,12 +5,15 @@ import { create } from 'zustand';
 import { api } from '@/lib/services/http';
 import { clearTokens, getAccessToken, getRefreshToken, setTokens } from '@/lib/services/tokens';
 
+import type { UserRole } from '@/lib/types';
+
 type User = {
   id: number;
   email: string;
   first_name: string;
   last_name: string;
-  role: string;
+  city: string;
+  role: UserRole;
   is_staff: boolean;
 };
 

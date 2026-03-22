@@ -4,9 +4,20 @@ Test helper utilities shared across multiple test modules.
 These are utility functions (not fixtures) that provide common
 data-building or response-parsing operations reused in tests.
 """
+from decimal import Decimal
+
+from django.contrib.auth import get_user_model
 from django_attachments.models import Library
 
-from base_feature_app.models import Blog, Product, Sale, SoldProduct
+from base_feature_app.models import (
+    Animal,
+    Campaign,
+    Donation,
+    Shelter,
+    Sponsorship,
+)
+
+User = get_user_model()
 
 
 def get_paginated_results(response_data):
@@ -37,75 +48,149 @@ def make_library(title='Test Library'):
     return Library.objects.create(title=title)
 
 
-def make_product(title='Test Product', price=29.99, category='Electronics', sub_category='Gadgets'):
+def make_user(email='adopter@example.com', password='testpass123', role='adopter', **kwargs):
     """
-    Create and return a Product instance with a fresh gallery.
+    Create and return a User instance.
 
     Args:
-        title: Product display name.
-        price: Unit price in default currency.
-        category: Top-level product category.
-        sub_category: Secondary product category.
+        email: User email address.
+        password: Plain text password.
+        role: User role (adopter, shelter_admin, admin).
 
     Returns:
-        Product: The created Product instance.
+        User: The created User instance.
     """
-    gallery = make_library(f'{title} Gallery')
-    return Product.objects.create(
+    defaults = {
+        'first_name': 'Test',
+        'last_name': 'User',
+        'city': 'Bogotá',
+    }
+    defaults.update(kwargs)
+    return User.objects.create_user(email=email, password=password, role=role, **defaults)
+
+
+def make_shelter(owner=None, name='Refugio Test', city='Bogotá', verification_status='verified'):
+    """
+    Create and return a Shelter instance.
+
+    Args:
+        owner: User who owns the shelter. Created if not provided.
+        name: Shelter display name.
+        city: Shelter city.
+        verification_status: pending, verified, or rejected.
+
+    Returns:
+        Shelter: The created Shelter instance.
+    """
+    if owner is None:
+        owner = make_user(email=f'shelter-owner-{name}@example.com', role='shelter_admin')
+    return Shelter.objects.create(
+        owner=owner,
+        name=name,
+        city=city,
+        verification_status=verification_status,
+    )
+
+
+def make_animal(shelter=None, name='Luna', species='dog', status='published'):
+    """
+    Create and return an Animal instance.
+
+    Args:
+        shelter: Shelter FK. Created if not provided.
+        name: Animal name.
+        species: dog, cat, or other.
+        status: draft, published, in_process, adopted, archived.
+
+    Returns:
+        Animal: The created Animal instance.
+    """
+    if shelter is None:
+        shelter = make_shelter()
+    return Animal.objects.create(
+        shelter=shelter,
+        name=name,
+        species=species,
+        breed='Mestizo',
+        age_range='adult',
+        gender='female',
+        size='medium',
+        description=f'{name} is a friendly animal.',
+        status=status,
+        is_vaccinated=True,
+        is_sterilized=True,
+    )
+
+
+def make_campaign(shelter=None, title='Campaña de emergencia', goal_amount=500000):
+    """
+    Create and return a Campaign instance.
+
+    Args:
+        shelter: Shelter FK. Created if not provided.
+        title: Campaign title.
+        goal_amount: Fundraising goal.
+
+    Returns:
+        Campaign: The created Campaign instance.
+    """
+    if shelter is None:
+        shelter = make_shelter(name='Refugio Campaña')
+    return Campaign.objects.create(
+        shelter=shelter,
         title=title,
-        category=category,
-        sub_category=sub_category,
-        description=f'Description for {title}',
-        price=price,
-        gallery=gallery,
+        description='Help us care for more animals.',
+        goal_amount=Decimal(str(goal_amount)),
+        raised_amount=Decimal('0'),
+        status='active',
     )
 
 
-def make_blog(title='Test Blog', category='Tech'):
+def make_donation(user=None, shelter=None, campaign=None, amount=50000):
     """
-    Create and return a Blog instance with a fresh image library.
+    Create and return a Donation instance.
 
     Args:
-        title: Blog post title.
-        category: Blog category label.
+        user: User FK. Created if not provided.
+        shelter: Optional Shelter FK.
+        campaign: Optional Campaign FK.
+        amount: Donation amount.
 
     Returns:
-        Blog: The created Blog instance.
+        Donation: The created Donation instance.
     """
-    image = make_library(f'{title} Image')
-    return Blog.objects.create(
-        title=title,
-        description=f'Description for {title}',
-        category=category,
-        image=image,
+    if user is None:
+        user = make_user(email='donor@example.com')
+    return Donation.objects.create(
+        user=user,
+        shelter=shelter,
+        campaign=campaign,
+        amount=Decimal(str(amount)),
+        status='pending',
     )
 
 
-def make_sale(email='buyer@example.com', products_and_quantities=None):
+def make_sponsorship(user=None, animal=None, amount=30000, frequency='monthly'):
     """
-    Create and return a Sale with associated SoldProduct records.
+    Create and return a Sponsorship instance.
 
     Args:
-        email: Customer email address for the sale.
-        products_and_quantities: List of (Product, quantity) tuples.
-            Defaults to creating one product with quantity 1.
+        user: User FK. Created if not provided.
+        animal: Animal FK. Created if not provided.
+        amount: Sponsorship amount.
+        frequency: monthly or one_time.
 
     Returns:
-        Sale: The created Sale instance.
+        Sponsorship: The created Sponsorship instance.
     """
-    if products_and_quantities is None:
-        product = make_product()
-        products_and_quantities = [(product, 1)]
-
-    sale = Sale.objects.create(
-        email=email,
-        address='123 Test Street',
-        city='Test City',
-        state='Test State',
-        postal_code='12345',
+    if user is None:
+        user = make_user(email='sponsor@example.com')
+    if animal is None:
+        animal = make_animal()
+    return Sponsorship.objects.create(
+        user=user,
+        animal=animal,
+        amount=Decimal(str(amount)),
+        frequency=frequency,
+        status='active',
     )
-    for product, quantity in products_and_quantities:
-        sold = SoldProduct.objects.create(product=product, quantity=quantity)
-        sale.sold_products.add(sold)
-
-    return sale

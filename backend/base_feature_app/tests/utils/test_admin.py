@@ -3,13 +3,22 @@ from django.test import RequestFactory
 from django_attachments.models import Library
 
 from base_feature_app.admin import (
-    BlogAdmin,
+    AnimalAdmin,
+    CampaignAdmin,
     PasswordCodeAdmin,
-    ProductAdmin,
-    SaleAdmin,
+    ShelterAdmin,
+    UpdatePostAdmin,
     admin_site,
 )
-from base_feature_app.models import Blog, PasswordCode, Product, Sale, SoldProduct, User
+from base_feature_app.models import (
+    Animal,
+    Campaign,
+    PasswordCode,
+    Shelter,
+    UpdatePost,
+    User,
+)
+from base_feature_app.tests.helpers import make_animal, make_campaign, make_shelter
 
 
 @pytest.mark.django_db
@@ -21,71 +30,68 @@ def test_password_code_admin_disables_add_permission():
 
 
 @pytest.mark.django_db
-def test_blog_admin_delete_queryset_removes_objects():
-    library = Library.objects.create(title='Blog Library')
-    blog = Blog.objects.create(
-        title='Test Blog',
-        description='Desc',
-        category='Cat',
-        image=library,
-    )
+def test_shelter_admin_delete_queryset_removes_objects():
+    """Verifies ShelterAdmin.delete_queryset removes the shelter and its associated image libraries."""
+    shelter = make_shelter(name='Delete Test Shelter')
 
-    admin = BlogAdmin(Blog, admin_site)
-    admin.delete_queryset(RequestFactory().get('/admin/'), Blog.objects.filter(id=blog.id))
+    admin = ShelterAdmin(Shelter, admin_site)
+    admin.delete_queryset(RequestFactory().get('/admin/'), Shelter.objects.filter(id=shelter.id))
 
-    assert Blog.objects.count() == 0
+    assert Shelter.objects.filter(id=shelter.id).count() == 0
 
 
 @pytest.mark.django_db
-def test_product_admin_delete_queryset_removes_gallery():
-    """Verifies ProductAdmin.delete_queryset removes the product and its associated gallery library."""
-    library = Library.objects.create(title='Product Library')
-    product = Product.objects.create(
-        title='Test Product',
-        category='Cat',
-        sub_category='Sub',
-        description='Desc',
-        price=50,
-        gallery=library,
+def test_animal_admin_delete_queryset_removes_gallery():
+    """Verifies AnimalAdmin.delete_queryset removes the animal and its associated gallery library."""
+    shelter = make_shelter(name='Animal Admin Shelter')
+    gallery = Library.objects.create(title='Animal Gallery')
+    animal = Animal.objects.create(
+        shelter=shelter,
+        name='Test Animal',
+        species='dog',
+        breed='Mestizo',
+        age_range='adult',
+        gender='female',
+        size='medium',
+        status='published',
+        gallery=gallery,
     )
 
-    admin = ProductAdmin(Product, admin_site)
-    admin.delete_queryset(RequestFactory().get('/admin/'), Product.objects.filter(id=product.id))
+    admin = AnimalAdmin(Animal, admin_site)
+    admin.delete_queryset(RequestFactory().get('/admin/'), Animal.objects.filter(id=animal.id))
 
-    assert Product.objects.count() == 0
-    assert Library.objects.filter(id=library.id).count() == 0
+    assert Animal.objects.filter(id=animal.id).count() == 0
+    assert Library.objects.filter(id=gallery.id).count() == 0
 
 
 @pytest.mark.django_db
-def test_sale_admin_delete_queryset_and_total():
-    """Verifies SaleAdmin computes total products correctly and deletes the sale with its sold products."""
-    library = Library.objects.create(title='Sale Library')
-    product = Product.objects.create(
-        title='Test Product',
-        category='Cat',
-        sub_category='Sub',
-        description='Desc',
-        price=50,
-        gallery=library,
+def test_campaign_admin_delete_queryset_removes_cover():
+    """Verifies CampaignAdmin.delete_queryset removes the campaign and its cover image library."""
+    campaign = make_campaign(title='Delete Test Campaign')
+
+    admin = CampaignAdmin(Campaign, admin_site)
+    admin.delete_queryset(RequestFactory().get('/admin/'), Campaign.objects.filter(id=campaign.id))
+
+    assert Campaign.objects.filter(id=campaign.id).count() == 0
+
+
+@pytest.mark.django_db
+def test_update_post_admin_delete_queryset_removes_image():
+    """Verifies UpdatePostAdmin.delete_queryset removes the post and its image library."""
+    shelter = make_shelter(name='Post Admin Shelter')
+    image = Library.objects.create(title='Post Image')
+    post = UpdatePost.objects.create(
+        shelter=shelter,
+        title='Test Post',
+        content='Some content',
+        image=image,
     )
-    sold_product = SoldProduct.objects.create(product=product, quantity=2)
-    sale = Sale.objects.create(
-        email='buyer@example.com',
-        address='Addr',
-        city='City',
-        state='State',
-        postal_code='12345',
-    )
-    sale.sold_products.add(sold_product)
 
-    admin = SaleAdmin(Sale, admin_site)
+    admin = UpdatePostAdmin(UpdatePost, admin_site)
+    admin.delete_queryset(RequestFactory().get('/admin/'), UpdatePost.objects.filter(id=post.id))
 
-    assert admin.get_total_products(sale) == 1
-
-    admin.delete_queryset(RequestFactory().get('/admin/'), Sale.objects.filter(id=sale.id))
-
-    assert Sale.objects.count() == 0
-    assert SoldProduct.objects.count() == 0
+    assert UpdatePost.objects.filter(id=post.id).count() == 0
+    assert Library.objects.filter(id=image.id).count() == 0
 
 
 @pytest.mark.django_db
@@ -99,4 +105,10 @@ def test_admin_site_custom_sections():
 
     object_names = {model['object_name'] for section in app_list for model in section['models']}
 
-    assert {'User', 'PasswordCode', 'Blog', 'Product', 'Sale', 'SoldProduct'}.issubset(object_names)
+    expected_models = {
+        'User', 'PasswordCode', 'Shelter', 'Animal', 'Favorite',
+        'AdoptionApplication', 'AdopterIntent', 'ShelterInvite',
+        'Campaign', 'Donation', 'Sponsorship', 'Payment', 'Subscription',
+        'UpdatePost', 'NotificationPreference', 'NotificationLog',
+    }
+    assert expected_models.issubset(object_names)
