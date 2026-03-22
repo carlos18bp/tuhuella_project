@@ -137,3 +137,37 @@ def test_application_update_status_rejects_invalid(
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     adoption_application.refresh_from_db()
     assert adoption_application.status == 'submitted'
+
+
+@pytest.mark.django_db
+def test_application_detail_returns_404_for_missing(authenticated_client):
+    """Detail endpoint returns 404 for non-existent application."""
+    response = authenticated_client.get(
+        reverse('adoption-detail', args=[99999])
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+def test_application_create_returns_400_for_invalid_data(authenticated_client):
+    """Invalid payload returns 400 with serializer errors."""
+    response = authenticated_client.post(
+        reverse('adoption-create'),
+        {},
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+def test_application_update_status_returns_404_for_missing(shelter_admin_client):
+    """Updating status of a non-existent application returns 404."""
+    response = shelter_admin_client.patch(
+        reverse('adoption-update-status', args=[99999]),
+        {'status': 'approved'},
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND

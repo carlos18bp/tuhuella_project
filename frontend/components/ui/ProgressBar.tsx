@@ -18,6 +18,7 @@ export default function ProgressBar({
   return (
     <div className={`w-full bg-stone-100 rounded-full ${height} ${className}`}>
       <div
+        data-testid="progress-fill"
         className={`${color} ${height} rounded-full transition-all`}
         style={{ width: `${clampedPercentage}%` }}
       />

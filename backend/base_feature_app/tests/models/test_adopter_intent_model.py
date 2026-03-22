@@ -1,5 +1,5 @@
 import pytest
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 
 from base_feature_app.models import AdopterIntent
 
@@ -35,11 +35,14 @@ def test_adopter_intent_default_visibility(existing_user):
 @pytest.mark.django_db
 def test_adopter_intent_one_to_one_constraint(adopter_intent, existing_user):
     """Cannot create two intents for the same user."""
-    with pytest.raises(IntegrityError):
-        AdopterIntent.objects.create(
-            user=existing_user,
-            description='Duplicate intent',
-        )
+    with transaction.atomic():
+        with pytest.raises(IntegrityError):
+            AdopterIntent.objects.create(
+                user=existing_user,
+                description='Duplicate intent',
+            )
+
+    assert AdopterIntent.objects.filter(user=existing_user).count() == 1
 
 
 @pytest.mark.django_db

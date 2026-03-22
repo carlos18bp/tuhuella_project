@@ -1,5 +1,5 @@
 import pytest
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 
 from base_feature_app.models import ShelterInvite
 
@@ -27,12 +27,15 @@ def test_shelter_invite_default_status(shelter, adopter_intent):
 @pytest.mark.django_db
 def test_shelter_invite_unique_together(shelter_invite, shelter, adopter_intent):
     """Cannot create duplicate invites for the same shelter + adopter_intent."""
-    with pytest.raises(IntegrityError):
-        ShelterInvite.objects.create(
-            shelter=shelter,
-            adopter_intent=adopter_intent,
-            message='Duplicate invite',
-        )
+    with transaction.atomic():
+        with pytest.raises(IntegrityError):
+            ShelterInvite.objects.create(
+                shelter=shelter,
+                adopter_intent=adopter_intent,
+                message='Duplicate invite',
+            )
+
+    assert ShelterInvite.objects.filter(shelter=shelter, adopter_intent=adopter_intent).count() == 1
 
 
 @pytest.mark.django_db

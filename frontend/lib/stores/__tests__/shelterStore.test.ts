@@ -66,6 +66,39 @@ describe('shelterStore', () => {
     expect(useShelterStore.getState().shelter?.name).toBe('Happy Paws');
   });
 
+  it('sets fallback error when fetchShelters rejects with non-Error', async () => {
+    mockApi.get.mockRejectedValueOnce('string rejection');
+
+    await act(async () => {
+      await useShelterStore.getState().fetchShelters();
+    });
+
+    expect(useShelterStore.getState().error).toBe('Failed to fetch shelters');
+    expect(useShelterStore.getState().loading).toBe(false);
+  });
+
+  it('sets error when fetchShelter fails', async () => {
+    mockApi.get.mockRejectedValueOnce(new Error('Not found'));
+
+    await act(async () => {
+      await useShelterStore.getState().fetchShelter(999);
+    });
+
+    expect(useShelterStore.getState().error).toBe('Not found');
+    expect(useShelterStore.getState().loading).toBe(false);
+  });
+
+  it('sets fallback error when fetchShelter rejects with non-Error', async () => {
+    mockApi.get.mockRejectedValueOnce('string rejection');
+
+    await act(async () => {
+      await useShelterStore.getState().fetchShelter(1);
+    });
+
+    expect(useShelterStore.getState().error).toBe('Failed to fetch shelter');
+    expect(useShelterStore.getState().loading).toBe(false);
+  });
+
   it('creates a shelter via API', async () => {
     mockApi.post.mockResolvedValueOnce({ data: SHELTER_FIXTURE });
 

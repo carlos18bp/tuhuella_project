@@ -3,8 +3,8 @@ from django.core.management import call_command
 
 from base_feature_app.models import (
     AdopterIntent,
-    Animal,
     AdoptionApplication,
+    Animal,
     Campaign,
     Donation,
     Favorite,

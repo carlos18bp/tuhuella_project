@@ -1,6 +1,7 @@
 import React from 'react';
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import Header from '../Header';
 import { useAuthStore } from '@/lib/stores/authStore';
@@ -120,5 +121,84 @@ describe('Header', () => {
     setupMock();
     render(<Header />);
     expect(screen.getByRole('button', { name: 'Toggle menu' })).toBeInTheDocument();
+  });
+
+  it('opens mobile menu when toggle button is clicked', async () => {
+    setupMock();
+    render(<Header />);
+    const toggle = screen.getByRole('button', { name: 'Toggle menu' });
+
+    await userEvent.click(toggle);
+
+    const mobileLinks = screen.getAllByRole('link', { name: 'Animales' });
+    expect(mobileLinks.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('closes mobile menu when a mobile nav link is clicked', async () => {
+    setupMock();
+    render(<Header />);
+    const toggle = screen.getByRole('button', { name: 'Toggle menu' });
+
+    await userEvent.click(toggle);
+    const mobileLinks = screen.getAllByRole('link', { name: 'Animales' });
+    await userEvent.click(mobileLinks[mobileLinks.length - 1]);
+
+    const remainingLinks = screen.getAllByRole('link', { name: 'Animales' });
+    expect(remainingLinks).toHaveLength(1);
+  });
+
+  it('calls signOut when sign-out button is clicked', async () => {
+    const mockSignOut = jest.fn();
+    setupMock({
+      isAuthenticated: true,
+      user: { role: 'adopter' },
+      signOut: mockSignOut,
+    });
+    render(<Header />);
+    const signOutBtn = screen.getByRole('button', { name: 'Salir' });
+
+    await userEvent.click(signOutBtn);
+
+    expect(mockSignOut).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows mobile authenticated links when authenticated and menu open', async () => {
+    setupMock({
+      isAuthenticated: true,
+      user: { role: 'adopter' },
+    });
+    render(<Header />);
+    const toggle = screen.getByRole('button', { name: 'Toggle menu' });
+
+    await userEvent.click(toggle);
+
+    const favLinks = screen.getAllByRole('link', { name: 'Favoritos' });
+    expect(favLinks.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('calls signOut and closes mobile menu on mobile sign-out click', async () => {
+    const mockSignOut = jest.fn();
+    setupMock({
+      isAuthenticated: true,
+      user: { role: 'adopter' },
+      signOut: mockSignOut,
+    });
+    render(<Header />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Toggle menu' }));
+    const salirButtons = screen.getAllByRole('button', { name: 'Salir' });
+    await userEvent.click(salirButtons[salirButtons.length - 1]);
+
+    expect(mockSignOut).toHaveBeenCalled();
+  });
+
+  it('shows sign-in and sign-up in mobile menu when unauthenticated', async () => {
+    setupMock();
+    render(<Header />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Toggle menu' }));
+
+    const signInLinks = screen.getAllByRole('link', { name: 'Iniciar sesión' });
+    expect(signInLinks.length).toBeGreaterThanOrEqual(2);
   });
 });

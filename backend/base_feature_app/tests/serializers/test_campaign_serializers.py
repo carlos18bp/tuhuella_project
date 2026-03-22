@@ -1,8 +1,10 @@
 import pytest
 
-from base_feature_app.serializers.campaign_list import CampaignListSerializer
+from base_feature_app.serializers.campaign_create_update import (
+    CampaignCreateUpdateSerializer,
+)
 from base_feature_app.serializers.campaign_detail import CampaignDetailSerializer
-from base_feature_app.serializers.campaign_create_update import CampaignCreateUpdateSerializer
+from base_feature_app.serializers.campaign_list import CampaignListSerializer
 
 
 @pytest.mark.django_db

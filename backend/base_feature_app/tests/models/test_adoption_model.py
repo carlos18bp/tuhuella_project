@@ -1,5 +1,5 @@
 import pytest
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 
 from base_feature_app.models import AdoptionApplication
 
@@ -26,11 +26,14 @@ def test_adoption_default_status_is_submitted(existing_user, animal):
 @pytest.mark.django_db
 def test_adoption_unique_together(adoption_application, existing_user, animal):
     """Cannot create two applications for the same user + animal."""
-    with pytest.raises(IntegrityError):
-        AdoptionApplication.objects.create(
-            animal=animal,
-            user=existing_user,
-        )
+    with transaction.atomic():
+        with pytest.raises(IntegrityError):
+            AdoptionApplication.objects.create(
+                animal=animal,
+                user=existing_user,
+            )
+
+    assert AdoptionApplication.objects.filter(user=existing_user, animal=animal).count() == 1
 
 
 @pytest.mark.django_db

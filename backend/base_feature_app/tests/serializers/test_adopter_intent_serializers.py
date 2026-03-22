@@ -1,8 +1,12 @@
 import pytest
 
+from base_feature_app.serializers.adopter_intent_create_update import (
+    AdopterIntentCreateUpdateSerializer,
+)
+from base_feature_app.serializers.adopter_intent_detail import (
+    AdopterIntentDetailSerializer,
+)
 from base_feature_app.serializers.adopter_intent_list import AdopterIntentListSerializer
-from base_feature_app.serializers.adopter_intent_detail import AdopterIntentDetailSerializer
-from base_feature_app.serializers.adopter_intent_create_update import AdopterIntentCreateUpdateSerializer
 
 
 @pytest.mark.django_db

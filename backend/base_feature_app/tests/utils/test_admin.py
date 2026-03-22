@@ -18,7 +18,7 @@ from base_feature_app.models import (
     UpdatePost,
     User,
 )
-from base_feature_app.tests.helpers import make_animal, make_campaign, make_shelter
+from base_feature_app.tests.helpers import make_campaign, make_shelter
 
 
 @pytest.mark.django_db

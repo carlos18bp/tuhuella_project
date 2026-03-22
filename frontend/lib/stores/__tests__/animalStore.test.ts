@@ -108,6 +108,42 @@ describe('animalStore', () => {
     expect(mockApi.post).toHaveBeenCalledTimes(1);
   });
 
+  it('sets fallback error when fetchAnimals rejects with non-Error', async () => {
+    mockApi.get.mockRejectedValueOnce('string rejection');
+
+    await act(async () => {
+      await useAnimalStore.getState().fetchAnimals();
+    });
+
+    expect(useAnimalStore.getState().error).toBe('Failed to fetch animals');
+    expect(useAnimalStore.getState().loading).toBe(false);
+  });
+
+  it('sets fallback error when fetchAnimal rejects with non-Error', async () => {
+    mockApi.get.mockRejectedValueOnce('string rejection');
+
+    await act(async () => {
+      await useAnimalStore.getState().fetchAnimal(1);
+    });
+
+    expect(useAnimalStore.getState().error).toBe('Failed to fetch animal');
+    expect(useAnimalStore.getState().loading).toBe(false);
+  });
+
+  it('uses stored filters when fetchAnimals is called without args', async () => {
+    useAnimalStore.setState({ filters: { species: 'cat' } });
+    mockApi.get.mockResolvedValueOnce({ data: [] });
+
+    await act(async () => {
+      await useAnimalStore.getState().fetchAnimals();
+    });
+
+    expect(mockApi.get).toHaveBeenCalledWith(
+      expect.any(String),
+      { params: { species: 'cat' } },
+    );
+  });
+
   it('updates an animal via API', async () => {
     const updated = { ...ANIMAL_FIXTURE, name: 'Luna Updated' };
     mockApi.patch.mockResolvedValueOnce({ data: updated });

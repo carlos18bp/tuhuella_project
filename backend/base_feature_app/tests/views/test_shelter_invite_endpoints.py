@@ -106,3 +106,27 @@ def test_shelter_invite_respond_rejects_invalid_status(
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     shelter_invite.refresh_from_db()
     assert shelter_invite.status == 'pending'
+
+
+@pytest.mark.django_db
+def test_shelter_invite_create_returns_400_for_invalid_data(shelter_admin_client):
+    """Invalid payload returns 400 with serializer errors."""
+    response = shelter_admin_client.post(
+        reverse('shelter-invite-create'),
+        {},
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+def test_shelter_invite_respond_returns_404_for_missing(authenticated_client):
+    """Responding to a non-existent invite returns 404."""
+    response = authenticated_client.patch(
+        reverse('shelter-invite-respond', args=[99999]),
+        {'status': 'accepted'},
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND

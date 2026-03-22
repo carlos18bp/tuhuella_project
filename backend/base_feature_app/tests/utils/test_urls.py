@@ -4,6 +4,22 @@ from pathlib import Path
 
 import pytest
 
+URL_SUB_MODULES = [
+    'base_feature_app.urls.auth',
+    'base_feature_app.urls.shelter',
+    'base_feature_app.urls.animal',
+    'base_feature_app.urls.adoption',
+    'base_feature_app.urls.campaign',
+    'base_feature_app.urls.donation',
+    'base_feature_app.urls.sponsorship',
+    'base_feature_app.urls.payment',
+    'base_feature_app.urls.update_post',
+    'base_feature_app.urls.adopter_intent',
+    'base_feature_app.urls.shelter_invite',
+    'base_feature_app.urls.admin_urls',
+    'base_feature_app.urls.favorite',
+]
+
 
 @pytest.mark.django_db
 def test_url_modules_import_and_have_patterns():
@@ -29,22 +45,7 @@ def test_url_modules_import_and_have_patterns():
 @pytest.mark.django_db
 def test_all_url_modules_importable():
     """Verifies all 13 URL sub-modules import without errors."""
-    modules = [
-        'base_feature_app.urls.auth',
-        'base_feature_app.urls.shelter',
-        'base_feature_app.urls.animal',
-        'base_feature_app.urls.adoption',
-        'base_feature_app.urls.campaign',
-        'base_feature_app.urls.donation',
-        'base_feature_app.urls.sponsorship',
-        'base_feature_app.urls.payment',
-        'base_feature_app.urls.update_post',
-        'base_feature_app.urls.adopter_intent',
-        'base_feature_app.urls.shelter_invite',
-        'base_feature_app.urls.admin_urls',
-        'base_feature_app.urls.favorite',
-    ]
-    for module_path in modules:
+    for module_path in URL_SUB_MODULES:
         mod = importlib.import_module(module_path)
         assert hasattr(mod, 'urlpatterns'), f'{module_path} missing urlpatterns'
         assert len(mod.urlpatterns) >= 1, f'{module_path} has no URL patterns'

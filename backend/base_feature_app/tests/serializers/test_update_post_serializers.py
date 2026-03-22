@@ -1,8 +1,10 @@
 import pytest
 
-from base_feature_app.serializers.update_post_list import UpdatePostListSerializer
+from base_feature_app.serializers.update_post_create_update import (
+    UpdatePostCreateUpdateSerializer,
+)
 from base_feature_app.serializers.update_post_detail import UpdatePostDetailSerializer
-from base_feature_app.serializers.update_post_create_update import UpdatePostCreateUpdateSerializer
+from base_feature_app.serializers.update_post_list import UpdatePostListSerializer
 
 
 @pytest.mark.django_db

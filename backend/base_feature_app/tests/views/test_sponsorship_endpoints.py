@@ -104,3 +104,27 @@ def test_sponsorship_update_status_rejects_invalid(
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     sponsorship.refresh_from_db()
     assert sponsorship.status == 'active'
+
+
+@pytest.mark.django_db
+def test_sponsorship_create_returns_400_for_invalid_data(authenticated_client):
+    """Invalid payload returns 400 with serializer errors."""
+    response = authenticated_client.post(
+        reverse('sponsorship-create'),
+        {},
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+def test_sponsorship_update_status_returns_404_for_missing(authenticated_client):
+    """Updating status of a non-existent sponsorship returns 404."""
+    response = authenticated_client.patch(
+        reverse('sponsorship-update-status', args=[99999]),
+        {'status': 'paused'},
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND

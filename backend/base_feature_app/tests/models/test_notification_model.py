@@ -1,5 +1,5 @@
 import pytest
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 
 from base_feature_app.models import NotificationLog, NotificationPreference
 
@@ -40,12 +40,19 @@ def test_notification_preference_default_enabled(existing_user):
 @pytest.mark.django_db
 def test_notification_preference_unique_together(notification_preference, existing_user):
     """Cannot create duplicate preferences for the same user + event_key + channel."""
-    with pytest.raises(IntegrityError):
-        NotificationPreference.objects.create(
-            user=existing_user,
-            event_key='adoption_status_change',
-            channel=NotificationPreference.Channel.EMAIL,
-        )
+    with transaction.atomic():
+        with pytest.raises(IntegrityError):
+            NotificationPreference.objects.create(
+                user=existing_user,
+                event_key='adoption_status_change',
+                channel=NotificationPreference.Channel.EMAIL,
+            )
+
+    assert NotificationPreference.objects.filter(
+        user=existing_user,
+        event_key='adoption_status_change',
+        channel=NotificationPreference.Channel.EMAIL,
+    ).count() == 1
 
 
 @pytest.mark.django_db

@@ -1,8 +1,10 @@
 import pytest
 
-from base_feature_app.serializers.sponsorship_list import SponsorshipListSerializer
+from base_feature_app.serializers.sponsorship_create_update import (
+    SponsorshipCreateUpdateSerializer,
+)
 from base_feature_app.serializers.sponsorship_detail import SponsorshipDetailSerializer
-from base_feature_app.serializers.sponsorship_create_update import SponsorshipCreateUpdateSerializer
+from base_feature_app.serializers.sponsorship_list import SponsorshipListSerializer
 
 
 @pytest.mark.django_db

@@ -1,5 +1,5 @@
 import pytest
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 
 from base_feature_app.models import Favorite
 
@@ -15,8 +15,11 @@ def test_favorite_str_representation(favorite):
 @pytest.mark.django_db
 def test_favorite_unique_together(favorite, existing_user, animal):
     """Cannot create duplicate favorites for the same user + animal."""
-    with pytest.raises(IntegrityError):
-        Favorite.objects.create(user=existing_user, animal=animal)
+    with transaction.atomic():
+        with pytest.raises(IntegrityError):
+            Favorite.objects.create(user=existing_user, animal=animal)
+
+    assert Favorite.objects.filter(user=existing_user, animal=animal).count() == 1
 
 
 @pytest.mark.django_db

@@ -39,8 +39,8 @@ describe('CampaignCard', () => {
   });
 
   it('renders progress bar with correct width', () => {
-    const { container } = render(<CampaignCard campaign={mockCampaigns[0]} />);
-    const progressBar = container.querySelector('[style*="width"]');
+    render(<CampaignCard campaign={mockCampaigns[0]} />);
+    const progressBar = screen.getByTestId('progress-bar-fill');
     expect(progressBar).toHaveStyle({ width: '25%' });
   });
 
@@ -49,8 +49,8 @@ describe('CampaignCard', () => {
       ...mockCampaigns[0],
       progress_percentage: 120,
     };
-    const { container } = render(<CampaignCard campaign={overFundedCampaign} />);
-    const progressBar = container.querySelector('[style*="width"]');
+    render(<CampaignCard campaign={overFundedCampaign} />);
+    const progressBar = screen.getByTestId('progress-bar-fill');
     expect(progressBar).toHaveStyle({ width: '100%' });
   });
 });

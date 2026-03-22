@@ -27,6 +27,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
         </div>
         <div className="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
           <div
+            data-testid="progress-bar-fill"
             className="h-full bg-amber-500 rounded-full transition-all"
             style={{ width: `${Math.min(campaign.progress_percentage, 100)}%` }}
           />

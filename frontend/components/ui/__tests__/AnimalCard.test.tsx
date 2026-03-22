@@ -61,4 +61,17 @@ describe('AnimalCard', () => {
     const { container } = render(<AnimalCard animal={mockAnimals[1]} />);
     expect(container.textContent).toContain('🐈');
   });
+
+  it('renders generic emoji for other species', () => {
+    const otherAnimal = { ...mockAnimals[0], species: 'rabbit' as never };
+    const { container } = render(<AnimalCard animal={otherAnimal} />);
+    expect(container.textContent).toContain('🐾');
+  });
+
+  it('hides gender badge when gender is unknown', () => {
+    const unknownGender = { ...mockAnimals[0], gender: 'unknown' as never };
+    render(<AnimalCard animal={unknownGender} />);
+    expect(screen.queryByText('Macho')).not.toBeInTheDocument();
+    expect(screen.queryByText('Hembra')).not.toBeInTheDocument();
+  });
 });

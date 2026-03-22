@@ -2,8 +2,6 @@ import pytest
 from django.urls import reverse
 from rest_framework import status
 
-from base_feature_app.models import Shelter
-
 
 @pytest.mark.django_db
 def test_admin_dashboard_requires_auth(api_client):

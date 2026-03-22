@@ -144,3 +144,77 @@ def test_animal_delete_denied_for_non_owner(authenticated_client, animal):
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
     assert Animal.objects.filter(pk=animal.pk).exists()
+
+
+@pytest.mark.django_db
+def test_animal_list_filters_by_age_range(api_client, animal):
+    """age_range query param filters the animal list."""
+    response = api_client.get(reverse('animal-list'), {'age_range': 'young'})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 1
+    assert response.json()[0]['name'] == 'Luna'
+
+
+@pytest.mark.django_db
+def test_animal_list_filters_by_shelter(api_client, animal, shelter):
+    """shelter query param filters the animal list."""
+    response = api_client.get(reverse('animal-list'), {'shelter': shelter.pk})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 1
+    assert response.json()[0]['name'] == 'Luna'
+
+
+@pytest.mark.django_db
+def test_animal_list_filters_by_gender(api_client, animal):
+    """gender query param filters the animal list."""
+    response = api_client.get(reverse('animal-list'), {'gender': 'female'})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 1
+    assert response.json()[0]['name'] == 'Luna'
+
+
+@pytest.mark.django_db
+def test_animal_create_returns_400_for_invalid_data(shelter_admin_client):
+    """Invalid payload returns 400 with serializer errors."""
+    response = shelter_admin_client.post(
+        reverse('animal-create'),
+        {},
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+def test_animal_update_returns_404_for_missing(shelter_admin_client):
+    """Updating a non-existent animal returns 404."""
+    response = shelter_admin_client.patch(
+        reverse('animal-update', args=[99999]),
+        {'name': 'Ghost'},
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+def test_animal_update_returns_400_for_invalid_data(shelter_admin_client, animal):
+    """Invalid update payload returns 400."""
+    response = shelter_admin_client.patch(
+        reverse('animal-update', args=[animal.pk]),
+        {'species': 'invalid_species'},
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+def test_animal_delete_returns_404_for_missing(shelter_admin_client):
+    """Deleting a non-existent animal returns 404."""
+    response = shelter_admin_client.delete(reverse('animal-delete', args=[99999]))
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND

@@ -1,7 +1,7 @@
 from decimal import Decimal
+from unittest.mock import PropertyMock, patch
 
 import pytest
-from django.utils import timezone
 
 from base_feature_app.models import Campaign
 
@@ -42,3 +42,38 @@ def test_campaign_shelter_relationship(campaign, shelter):
     """Campaign is linked to its shelter."""
     assert campaign.shelter == shelter
     assert campaign in shelter.campaigns.all()
+
+
+@pytest.mark.django_db
+def test_campaign_progress_percentage_zero_when_goal_is_zero(campaign):
+    """Progress returns 0 when goal_amount is 0."""
+    campaign.goal_amount = Decimal('0.00')
+    campaign.save()
+    campaign.refresh_from_db()
+
+    assert campaign.progress_percentage == 0
+
+
+@pytest.mark.django_db
+def test_campaign_delete_with_cover_image(campaign):
+    """delete() removes cover_image library before deleting the campaign."""
+    mock_library = type('FakeLibrary', (), {'delete': lambda self: None})()
+    with patch.object(type(campaign), 'cover_image', new_callable=PropertyMock, return_value=mock_library):
+        campaign.delete()
+
+    assert not Campaign.objects.filter(pk=campaign.pk).exists()
+
+
+@pytest.mark.django_db
+def test_campaign_delete_handles_missing_cover_image_library(campaign):
+    """delete() handles Library.DoesNotExist gracefully when cover_image library is missing."""
+    from django_attachments.models import Library
+
+    with patch.object(
+        type(campaign), 'cover_image',
+        new_callable=PropertyMock,
+        side_effect=Library.DoesNotExist,
+    ):
+        campaign.delete()
+
+    assert not Campaign.objects.filter(pk=campaign.pk).exists()

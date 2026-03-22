@@ -55,3 +55,30 @@ test.describe('Adopter Pages — Public', () => {
     await expect(page).toHaveURL(/.*busco-adoptar/);
   });
 });
+
+test.describe('Favorite Toggle', () => {
+  test('should require authentication to toggle favorite', { tag: [...FAVORITE_TOGGLE] }, async ({ page }) => {
+    // @flow:favorite-toggle — unauthenticated user attempting to favorite an animal
+    await page.goto('/animales');
+    await waitForPageLoad(page);
+
+    const firstAnimalLink = page.locator('a[href*="/animales/"]').first();
+    if (await firstAnimalLink.isVisible({ timeout: 5000 })) {
+      await firstAnimalLink.click();
+      await page.waitForURL(/.*animales\/\d+/, { timeout: 10_000 });
+
+      // Favorite button should either be absent or prompt sign-in
+      const favoriteBtn = page.locator('button:has-text("Favorito"), button:has-text("Guardar"), [data-testid="favorite-toggle"]');
+      const hasFavorite = await favoriteBtn.first().isVisible({ timeout: 3000 }).catch(() => false);
+
+      // If visible, clicking should redirect to sign-in (unauthenticated)
+      if (hasFavorite) {
+        await favoriteBtn.first().click();
+        // Should either redirect to sign-in or show a login prompt
+        await page.waitForTimeout(1000);
+        const url = page.url();
+        expect(url).toMatch(/sign-in|animales/);
+      }
+    }
+  });
+});

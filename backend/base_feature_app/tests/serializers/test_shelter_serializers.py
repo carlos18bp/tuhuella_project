@@ -1,8 +1,10 @@
 import pytest
 
-from base_feature_app.serializers.shelter_list import ShelterListSerializer
+from base_feature_app.serializers.shelter_create_update import (
+    ShelterCreateUpdateSerializer,
+)
 from base_feature_app.serializers.shelter_detail import ShelterDetailSerializer
-from base_feature_app.serializers.shelter_create_update import ShelterCreateUpdateSerializer
+from base_feature_app.serializers.shelter_list import ShelterListSerializer
 
 
 @pytest.mark.django_db

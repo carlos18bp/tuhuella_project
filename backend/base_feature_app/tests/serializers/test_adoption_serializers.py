@@ -1,8 +1,10 @@
 import pytest
 
-from base_feature_app.serializers.adoption_list import AdoptionListSerializer
+from base_feature_app.serializers.adoption_create_update import (
+    AdoptionCreateUpdateSerializer,
+)
 from base_feature_app.serializers.adoption_detail import AdoptionDetailSerializer
-from base_feature_app.serializers.adoption_create_update import AdoptionCreateUpdateSerializer
+from base_feature_app.serializers.adoption_list import AdoptionListSerializer
 
 
 @pytest.mark.django_db

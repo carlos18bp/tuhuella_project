@@ -1,8 +1,10 @@
 import pytest
 
-from base_feature_app.serializers.animal_list import AnimalListSerializer
+from base_feature_app.serializers.animal_create_update import (
+    AnimalCreateUpdateSerializer,
+)
 from base_feature_app.serializers.animal_detail import AnimalDetailSerializer
-from base_feature_app.serializers.animal_create_update import AnimalCreateUpdateSerializer
+from base_feature_app.serializers.animal_list import AnimalListSerializer
 
 
 @pytest.mark.django_db

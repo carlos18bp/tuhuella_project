@@ -1,8 +1,8 @@
 import pytest
 
 from base_feature_app.serializers.notification import (
-    NotificationPreferenceSerializer,
     NotificationLogSerializer,
+    NotificationPreferenceSerializer,
 )
 
 

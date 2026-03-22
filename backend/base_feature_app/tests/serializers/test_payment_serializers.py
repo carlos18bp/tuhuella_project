@@ -1,7 +1,7 @@
 import pytest
 
-from base_feature_app.serializers.payment_list import PaymentListSerializer
 from base_feature_app.serializers.payment_detail import PaymentDetailSerializer
+from base_feature_app.serializers.payment_list import PaymentListSerializer
 
 
 @pytest.mark.django_db

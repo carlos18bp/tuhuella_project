@@ -56,6 +56,39 @@ describe('campaignStore', () => {
     expect(useCampaignStore.getState().loading).toBe(false);
   });
 
+  it('sets fallback error when fetchCampaigns rejects with non-Error', async () => {
+    mockApi.get.mockRejectedValueOnce('string rejection');
+
+    await act(async () => {
+      await useCampaignStore.getState().fetchCampaigns();
+    });
+
+    expect(useCampaignStore.getState().error).toBe('Failed to fetch campaigns');
+    expect(useCampaignStore.getState().loading).toBe(false);
+  });
+
+  it('sets error when fetchCampaign fails', async () => {
+    mockApi.get.mockRejectedValueOnce(new Error('Not found'));
+
+    await act(async () => {
+      await useCampaignStore.getState().fetchCampaign(999);
+    });
+
+    expect(useCampaignStore.getState().error).toBe('Not found');
+    expect(useCampaignStore.getState().loading).toBe(false);
+  });
+
+  it('sets fallback error when fetchCampaign rejects with non-Error', async () => {
+    mockApi.get.mockRejectedValueOnce('string rejection');
+
+    await act(async () => {
+      await useCampaignStore.getState().fetchCampaign(1);
+    });
+
+    expect(useCampaignStore.getState().error).toBe('Failed to fetch campaign');
+    expect(useCampaignStore.getState().loading).toBe(false);
+  });
+
   it('fetches a single campaign detail', async () => {
     mockApi.get.mockResolvedValueOnce({ data: CAMPAIGN_FIXTURE });
 

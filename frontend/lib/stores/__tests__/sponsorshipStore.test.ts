@@ -55,6 +55,17 @@ describe('sponsorshipStore', () => {
     expect(useSponsorshipStore.getState().loading).toBe(false);
   });
 
+  it('sets fallback error when fetchSponsorships rejects with non-Error', async () => {
+    mockApi.get.mockRejectedValueOnce('string rejection');
+
+    await act(async () => {
+      await useSponsorshipStore.getState().fetchSponsorships();
+    });
+
+    expect(useSponsorshipStore.getState().error).toBe('Failed to fetch sponsorships');
+    expect(useSponsorshipStore.getState().loading).toBe(false);
+  });
+
   it('creates a sponsorship via API', async () => {
     mockApi.post.mockResolvedValueOnce({ data: SPONSORSHIP_FIXTURE });
 

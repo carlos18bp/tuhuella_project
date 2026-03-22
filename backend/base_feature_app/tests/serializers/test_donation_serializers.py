@@ -1,8 +1,10 @@
 import pytest
 
-from base_feature_app.serializers.donation_list import DonationListSerializer
+from base_feature_app.serializers.donation_create_update import (
+    DonationCreateUpdateSerializer,
+)
 from base_feature_app.serializers.donation_detail import DonationDetailSerializer
-from base_feature_app.serializers.donation_create_update import DonationCreateUpdateSerializer
+from base_feature_app.serializers.donation_list import DonationListSerializer
 
 
 @pytest.mark.django_db

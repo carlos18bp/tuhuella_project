@@ -57,6 +57,17 @@ describe('adoptionStore', () => {
     expect(useAdoptionStore.getState().loading).toBe(false);
   });
 
+  it('sets fallback error when fetchApplications rejects with non-Error', async () => {
+    mockApi.get.mockRejectedValueOnce('string rejection');
+
+    await act(async () => {
+      await useAdoptionStore.getState().fetchApplications();
+    });
+
+    expect(useAdoptionStore.getState().error).toBe('Failed to fetch applications');
+    expect(useAdoptionStore.getState().loading).toBe(false);
+  });
+
   it('creates an application via API', async () => {
     mockApi.post.mockResolvedValueOnce({ data: APPLICATION_FIXTURE });
 

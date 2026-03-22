@@ -1,5 +1,5 @@
 import pytest
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 
 from base_feature_app.models import Subscription
 
@@ -44,11 +44,14 @@ def test_subscription_default_status(sponsorship):
 @pytest.mark.django_db
 def test_subscription_one_to_one_constraint(subscription, sponsorship):
     """Cannot create two subscriptions for the same sponsorship."""
-    with pytest.raises(IntegrityError):
-        Subscription.objects.create(
-            sponsorship=sponsorship,
-            provider_reference='SUB-DUP-001',
-        )
+    with transaction.atomic():
+        with pytest.raises(IntegrityError):
+            Subscription.objects.create(
+                sponsorship=sponsorship,
+                provider_reference='SUB-DUP-001',
+            )
+
+    assert Subscription.objects.filter(sponsorship=sponsorship).count() == 1
 
 
 @pytest.mark.django_db

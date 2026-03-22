@@ -56,6 +56,17 @@ describe('donationStore', () => {
     expect(useDonationStore.getState().loading).toBe(false);
   });
 
+  it('sets fallback error when fetchDonations rejects with non-Error', async () => {
+    mockApi.get.mockRejectedValueOnce('string rejection');
+
+    await act(async () => {
+      await useDonationStore.getState().fetchDonations();
+    });
+
+    expect(useDonationStore.getState().error).toBe('Failed to fetch donations');
+    expect(useDonationStore.getState().loading).toBe(false);
+  });
+
   it('creates a donation via API', async () => {
     mockApi.post.mockResolvedValueOnce({ data: DONATION_FIXTURE });
 

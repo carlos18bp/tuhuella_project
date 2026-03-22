@@ -96,3 +96,39 @@ def test_campaign_update_denied_for_non_owner(authenticated_client, campaign):
     assert response.status_code == status.HTTP_403_FORBIDDEN
     campaign.refresh_from_db()
     assert campaign.title == 'Medical Fund'
+
+
+@pytest.mark.django_db
+def test_campaign_create_returns_400_for_invalid_data(shelter_admin_client):
+    """Invalid payload returns 400 with serializer errors."""
+    response = shelter_admin_client.post(
+        reverse('campaign-create'),
+        {},
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+def test_campaign_update_returns_404_for_missing(shelter_admin_client):
+    """Updating a non-existent campaign returns 404."""
+    response = shelter_admin_client.patch(
+        reverse('campaign-update', args=[99999]),
+        {'title': 'Ghost'},
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+def test_campaign_update_returns_400_for_invalid_data(shelter_admin_client, campaign):
+    """Invalid update payload returns 400."""
+    response = shelter_admin_client.patch(
+        reverse('campaign-update', args=[campaign.pk]),
+        {'goal_amount': 'not-a-number'},
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
