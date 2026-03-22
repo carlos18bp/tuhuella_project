@@ -26,14 +26,20 @@ describe('components/ui barrel exports', () => {
     expect(ui.CampaignCard).toBeDefined();
     expect(ui.ShelterCard).toBeDefined();
     expect(ui.ApplicationStatusBadge).toBeDefined();
+    expect(ui.ApplicationTimeline).toBeDefined();
     expect(ui.StatusBadge).toBeDefined();
     expect(ui.VerifiedBadge).toBeDefined();
   });
 
   it('exports payment components', () => {
     expect(ui.DonationForm).toBeDefined();
+    expect(ui.CheckoutForm).toBeDefined();
     expect(ui.PaymentConfirmation).toBeDefined();
     expect(ui.PaymentMethodSelector).toBeDefined();
+  });
+
+  it('exports adoption components', () => {
+    expect(ui.AdoptionForm).toBeDefined();
   });
 
   it('exports section components', () => {
