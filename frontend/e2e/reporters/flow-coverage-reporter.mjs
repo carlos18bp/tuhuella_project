@@ -79,7 +79,6 @@ class FlowCoverageReporter {
     const tags = test.tags || [];
     const flowTags = tags.filter((t) => t.startsWith('@flow:'));
     const specFile = test.location.file;
-
     // If the test has no @flow: tag, record it as unmapped
     if (flowTags.length === 0) {
       this.unmappedTests.push({ title: test.title, file: specFile });

@@ -16,9 +16,8 @@ test.describe('Animal Browse & Detail', () => {
     await page.goto('/animales');
     await waitForPageLoad(page);
 
-    await expect(page.getByRole('combobox').first()).toBeVisible();
-
-    const speciesSelect = page.locator('select').first();
+    // Target the species select by its unique option content
+    const speciesSelect = page.locator('select', { has: page.locator('option', { hasText: 'Todas las especies' }) });
     await expect(speciesSelect).toBeVisible();
     await expect(speciesSelect).toContainText('Todas las especies');
   });
@@ -27,11 +26,26 @@ test.describe('Animal Browse & Detail', () => {
     await page.goto('/animales');
     await waitForPageLoad(page);
 
-    const speciesSelect = page.locator('select').first();
-    await speciesSelect.selectOption('dog');
+    // Wait for initial animals API load
+    await page.waitForResponse((resp) => resp.url().includes('/api/animals') && resp.status() === 200);
 
-    await page.waitForTimeout(500);
-    await expect(speciesSelect).toHaveValue('dog');
+    // Target the species select by its unique option content
+    const speciesSelect = page.locator('select', { has: page.locator('option', { hasText: 'Todas las especies' }) });
+    await expect(speciesSelect).toBeVisible();
+
+    // Use evaluate to change value and dispatch event for React controlled component
+    await speciesSelect.evaluate((el) => {
+      const select = el as HTMLSelectElement;
+      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value')?.set;
+      nativeInputValueSetter?.call(select, 'dog');
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    // Wait for the filtered API call
+    await page.waitForResponse(
+      (resp) => resp.url().includes('/api/animals') && resp.url().includes('species=dog'),
+      { timeout: 10_000 }
+    );
   });
 
   test('should navigate to animal detail from listing', { tag: [...ANIMAL_DETAIL] }, async ({ page }) => {
