@@ -48,8 +48,8 @@ class Command(BaseCommand):
                 recipient=user,
                 event_key=random.choice(EVENT_KEYS),
                 channel=random.choice([
-                    NotificationLog.Channel.EMAIL,
-                    NotificationLog.Channel.IN_APP,
+                    NotificationPreference.Channel.EMAIL,
+                    NotificationPreference.Channel.IN_APP,
                 ]),
                 status=random.choice([
                     NotificationLog.Status.SENT,

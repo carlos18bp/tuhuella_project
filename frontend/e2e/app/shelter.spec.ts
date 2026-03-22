@@ -23,6 +23,7 @@ test.describe('Shelter Public Pages', () => {
     await page.goto('/refugios');
     await waitForPageLoad(page);
 
+    // quality: allow-fragile-selector (dynamic data: no testid on shelter cards, first visible link needed)
     const shelterLink = page.locator('a[href*="/refugios/"]').first();
     if (await shelterLink.isVisible({ timeout: 5000 })) {
       await shelterLink.click();
@@ -69,7 +70,7 @@ test.describe('Shelter Panel', () => {
     // Unauthenticated user is redirected to sign-in; authenticated sees dashboard heading
     const isSignIn = page.url().includes('sign-in');
     const isDashboard = page.url().includes('refugio/dashboard');
-    expect(isSignIn || isDashboard).toBeTruthy();
+    expect(isSignIn || isDashboard).toBe(true);
   });
 
   test('should redirect unauthenticated user from shelter animals', { tag: [...SHELTER_PANEL_ANIMALS] }, async ({ page }) => {

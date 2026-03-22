@@ -62,22 +62,22 @@ test.describe('Favorite Toggle', () => {
     await page.goto('/animales');
     await waitForPageLoad(page);
 
+    // quality: allow-fragile-selector (dynamic data: no testid on animal cards, first visible link needed)
     const firstAnimalLink = page.locator('a[href*="/animales/"]').first();
     if (await firstAnimalLink.isVisible({ timeout: 5000 })) {
       await firstAnimalLink.click();
       await page.waitForURL(/.*animales\/\d+/, { timeout: 10_000 });
 
       // Favorite button should either be absent or prompt sign-in
+      // quality: allow-fragile-selector (no stable testid on all favorite button variants)
       const favoriteBtn = page.locator('button:has-text("Favorito"), button:has-text("Guardar"), [data-testid="favorite-toggle"]');
       const hasFavorite = await favoriteBtn.first().isVisible({ timeout: 3000 }).catch(() => false);
 
       // If visible, clicking should redirect to sign-in (unauthenticated)
       if (hasFavorite) {
         await favoriteBtn.first().click();
-        // Should either redirect to sign-in or show a login prompt
-        await page.waitForTimeout(1000);
-        const url = page.url();
-        expect(url).toMatch(/sign-in|animales/);
+        await page.waitForURL(/sign-in|animales/, { timeout: 5_000 }).catch(() => {});
+        expect(page.url()).toMatch(/sign-in|animales/);
       }
     }
   });

@@ -54,7 +54,7 @@ describe('useScrollReveal', () => {
   });
 
   it('animates the container element when stagger is 0', async () => {
-    mockContext.mockImplementationOnce((fn: () => void, el: HTMLElement) => {
+    mockContext.mockImplementationOnce((fn: () => void, _el: HTMLElement) => {
       fn();
       return { revert: mockRevert };
     });

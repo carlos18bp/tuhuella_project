@@ -52,6 +52,7 @@ test.describe('Animal Browse & Detail', () => {
     await page.goto('/animales');
     await waitForPageLoad(page);
 
+    // quality: allow-fragile-selector (dynamic data: no testid on animal cards, first visible link needed)
     const firstAnimalLink = page.locator('a[href*="/animales/"]').first();
     if (await firstAnimalLink.isVisible({ timeout: 5000 })) {
       await firstAnimalLink.click();
@@ -65,6 +66,7 @@ test.describe('Animal Browse & Detail', () => {
     await page.goto('/animales');
     await waitForPageLoad(page);
 
+    // quality: allow-fragile-selector (dynamic data: no testid on animal cards, first visible link needed)
     const firstAnimalLink = page.locator('a[href*="/animales/"]').first();
     if (await firstAnimalLink.isVisible({ timeout: 5000 })) {
       await firstAnimalLink.click();
@@ -79,6 +81,7 @@ test.describe('Animal Browse & Detail', () => {
     await page.goto('/animales');
     await waitForPageLoad(page);
 
+    // quality: allow-fragile-selector (dynamic data: no testid on animal cards, first visible link needed)
     const firstAnimalLink = page.locator('a[href*="/animales/"]').first();
     if (await firstAnimalLink.isVisible({ timeout: 5000 })) {
       await firstAnimalLink.click();
@@ -92,13 +95,15 @@ test.describe('Animal Browse & Detail', () => {
     await page.goto('/animales');
     await waitForPageLoad(page);
 
+    // quality: allow-fragile-selector (dynamic data: no testid on animal cards, first visible link needed)
     const firstAnimalLink = page.locator('a[href*="/animales/"]').first();
     if (await firstAnimalLink.isVisible({ timeout: 5000 })) {
       await firstAnimalLink.click();
       await page.waitForURL(/.*animales\/\d+/, { timeout: 10_000 });
 
       // Gallery component should be rendered in the detail page
-      await expect(page.locator('.grid, .swiper, img').first()).toBeVisible();
+      // quality: allow-fragile-selector (positional needed: gallery has no testid, first image is sufficient proof)
+      await expect(page.locator('img').first()).toBeVisible();
     }
   });
 });

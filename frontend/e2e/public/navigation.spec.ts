@@ -36,6 +36,7 @@ test.describe('Navigation', () => {
 
     // The shelters section heading is "Refugios destacados"; the "Ver todos" link next to it goes to /refugios
     const shelterSection = page.locator('section', { has: page.getByText('Refugios destacados') });
+    await expect(shelterSection).toBeVisible({ timeout: 15_000 });
     await shelterSection.getByRole('link', { name: /Ver todos/i }).click();
     await page.waitForURL(/.*refugios/, { timeout: 10_000 });
 
@@ -56,7 +57,7 @@ test.describe('Navigation', () => {
     await page.goto('/');
     await waitForPageLoad(page);
 
-    const header = page.locator('header').first();
+    const header = page.getByRole('banner');
     await expect(header).toBeVisible();
 
     const links = header.locator('a');

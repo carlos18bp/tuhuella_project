@@ -37,7 +37,7 @@ test.describe('Admin Panel', () => {
 
       const hasHeading = await heading.isVisible().catch(() => false);
       const hasDenied = await denied.isVisible().catch(() => false);
-      expect(hasHeading || hasDenied).toBeTruthy();
+      expect(hasHeading || hasDenied).toBe(true);
     }
   });
 
