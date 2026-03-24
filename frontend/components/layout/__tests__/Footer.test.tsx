@@ -2,47 +2,50 @@ import React from 'react';
 import { describe, it, expect } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 
+jest.mock('@/i18n/navigation', () => ({
+  Link: ({ href, children, ...props }: { href: string; children: React.ReactNode; [key: string]: unknown }) =>
+    React.createElement('a', { href, ...props }, children),
+}));
+
 import Footer from '../Footer';
 
 describe('Footer', () => {
-  it('renders Mi Huella brand name', () => {
+  it('renders Tu Huella brand name', () => {
     render(<Footer />);
-    const matches = screen.getAllByText(/Mi\s*Huella/);
+    const matches = screen.getAllByText(/Tu\s*Huella/);
     expect(matches.length).toBeGreaterThanOrEqual(1);
   });
 
   it('renders explore section links', () => {
     render(<Footer />);
-    expect(screen.getByRole('link', { name: 'Animales' })).toHaveAttribute('href', '/animales');
-    expect(screen.getByRole('link', { name: 'Refugios' })).toHaveAttribute('href', '/refugios');
-    expect(screen.getByRole('link', { name: 'Campañas' })).toHaveAttribute('href', '/campanas');
-    expect(screen.getByRole('link', { name: 'Busco Adoptar' })).toHaveAttribute('href', '/busco-adoptar');
+    expect(screen.getByRole('link', { name: 'Animales' })).toHaveAttribute('href', '/animals');
+    expect(screen.getByRole('link', { name: 'Refugios' })).toHaveAttribute('href', '/shelters');
+    expect(screen.getByRole('link', { name: 'Campañas' })).toHaveAttribute('href', '/campaigns');
+    expect(screen.getByRole('link', { name: 'Busco Adoptar' })).toHaveAttribute('href', '/looking-to-adopt');
   });
 
-  it('renders account section links', () => {
+  it('hides account section links when not authenticated', () => {
     render(<Footer />);
-    expect(screen.getByRole('link', { name: 'Favoritos' })).toHaveAttribute('href', '/favoritos');
-    expect(screen.getByRole('link', { name: 'Mis Solicitudes' })).toHaveAttribute('href', '/mis-solicitudes');
-    expect(screen.getByRole('link', { name: 'Mis Donaciones' })).toHaveAttribute('href', '/mis-donaciones');
-    expect(screen.getByRole('link', { name: 'Mis Apadrinamientos' })).toHaveAttribute('href', '/mis-apadrinamientos');
+    expect(screen.queryByRole('link', { name: 'Favoritos' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Mis Solicitudes' })).not.toBeInTheDocument();
   });
 
   it('renders info section links', () => {
     render(<Footer />);
     expect(screen.getByRole('link', { name: 'Preguntas Frecuentes' })).toHaveAttribute('href', '/faq');
-    expect(screen.getByRole('link', { name: 'Registrar Refugio' })).toHaveAttribute('href', '/refugio/onboarding');
+    expect(screen.getByRole('link', { name: 'Registrar Refugio' })).toHaveAttribute('href', '/shelter/onboarding');
   });
 
   it('renders copyright text with current year', () => {
     render(<Footer />);
     const currentYear = new Date().getFullYear().toString();
-    expect(screen.getByText(new RegExp(`${currentYear}.*Mi Huella`))).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(`${currentYear}.*Tu Huella`))).toBeInTheDocument();
   });
 
   it('renders section headings', () => {
     render(<Footer />);
     expect(screen.getByText('Explorar')).toBeInTheDocument();
-    expect(screen.getByText('Mi Cuenta')).toBeInTheDocument();
+    expect(screen.queryByText('Mi Cuenta')).not.toBeInTheDocument();
     expect(screen.getByText('Información')).toBeInTheDocument();
   });
 });

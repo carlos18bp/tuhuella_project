@@ -22,5 +22,6 @@ class Command(BaseCommand):
         call_command('create_payments', '--count', '10')
         call_command('create_subscriptions', '--count', '5')
         call_command('create_notifications', '--count', '10')
+        call_command('create_blog_posts', '--count', '8')
 
         self.stdout.write(self.style.SUCCESS('All fake data created successfully!'))

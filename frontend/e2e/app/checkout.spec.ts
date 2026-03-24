@@ -4,7 +4,7 @@ import { DONATION_CHECKOUT, SPONSORSHIP_CHECKOUT, PAYMENT_CONFIRMATION } from '.
 
 test.describe('Checkout Flows', () => {
   test('should redirect unauthenticated user from donation checkout', { tag: [...DONATION_CHECKOUT] }, async ({ page }) => {
-    await page.goto('/checkout/donacion');
+    await page.goto('/checkout/donation');
     await waitForPageLoad(page);
 
     await expect(page).toHaveURL(/sign-in|donacion/);
@@ -12,7 +12,7 @@ test.describe('Checkout Flows', () => {
 
   test('should display donation checkout page when authenticated', { tag: [...DONATION_CHECKOUT] }, async ({ page }) => {
     // Navigate to the page — useRequireAuth will redirect if not logged in
-    await page.goto('/checkout/donacion');
+    await page.goto('/checkout/donation');
     await waitForPageLoad(page);
 
     // If redirected, the flow requires authentication
@@ -32,14 +32,14 @@ test.describe('Checkout Flows', () => {
   });
 
   test('should redirect unauthenticated user from sponsorship checkout', { tag: [...SPONSORSHIP_CHECKOUT] }, async ({ page }) => {
-    await page.goto('/checkout/apadrinamiento');
+    await page.goto('/checkout/sponsorship');
     await waitForPageLoad(page);
 
     await expect(page).toHaveURL(/sign-in|apadrinamiento/);
   });
 
   test('should display payment confirmation page', { tag: [...PAYMENT_CONFIRMATION] }, async ({ page }) => {
-    await page.goto('/checkout/confirmacion?type=donation&status=placeholder');
+    await page.goto('/checkout/confirmation?type=donation&status=placeholder');
     await waitForPageLoad(page);
 
     await expect(page).toHaveURL(/confirmacion/);

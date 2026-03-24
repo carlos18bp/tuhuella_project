@@ -1,0 +1,247 @@
+'use client';
+
+import { useEffect, useState, useCallback } from 'react';
+import { Link } from '@/i18n/navigation';
+import { useBlogStore } from '@/lib/stores/blogStore';
+import { ROUTES } from '@/lib/constants';
+import type { BlogPost } from '@/lib/types';
+
+const CATEGORIES = [
+  { slug: '', label: 'Todos' },
+  { slug: 'adopcion', label: 'Adopción' },
+  { slug: 'cuidado-animal', label: 'Cuidado Animal' },
+  { slug: 'salud-animal', label: 'Salud Animal' },
+  { slug: 'historias', label: 'Historias' },
+  { slug: 'consejos', label: 'Consejos' },
+  { slug: 'eventos', label: 'Eventos' },
+  { slug: 'voluntariado', label: 'Voluntariado' },
+  { slug: 'nutricion', label: 'Nutrición' },
+  { slug: 'entrenamiento', label: 'Entrenamiento' },
+  { slug: 'legislacion', label: 'Legislación' },
+];
+
+const AUTHORS: Record<string, { name: string; role: string }> = {
+  'tuhuella-team': { name: 'Mi Huella Team', role: 'Equipo editorial' },
+  'laura-blanco': { name: 'Laura Blanco', role: 'Veterinaria' },
+};
+
+function formatDate(dateStr: string | null) {
+  if (!dateStr) return '';
+  return new Date(dateStr).toLocaleDateString('es-CO', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
+function PostCard({ post }: { post: BlogPost }) {
+  const author = AUTHORS[post.author] || AUTHORS['tuhuella-team'];
+  return (
+    <Link
+      href={ROUTES.BLOG_DETAIL(post.slug)}
+      className="group bg-white rounded-2xl border border-stone-200/60 overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col"
+    >
+      {post.cover_image && (
+        <div className="relative aspect-[16/10] overflow-hidden bg-stone-100">
+          <img
+            src={post.cover_image}
+            alt={post.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+          />
+        </div>
+      )}
+      <div className="p-5 flex flex-col flex-1">
+        {post.category && (
+          <span className="text-xs font-medium text-teal-600 uppercase tracking-wider mb-2">
+            {CATEGORIES.find((c) => c.slug === post.category)?.label || post.category}
+          </span>
+        )}
+        <h3 className="text-lg font-semibold text-stone-800 mb-2 group-hover:text-teal-700 transition-colors line-clamp-2">
+          {post.title}
+        </h3>
+        <p className="text-sm text-stone-500 leading-relaxed mb-4 line-clamp-2 flex-1">
+          {post.excerpt}
+        </p>
+        <div className="flex items-center justify-between text-xs text-stone-400">
+          <span>{author.name}</span>
+          <div className="flex items-center gap-3">
+            {post.read_time_minutes > 0 && <span>{post.read_time_minutes} min</span>}
+            <span>{formatDate(post.published_at)}</span>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function FeaturedPost({ post }: { post: BlogPost }) {
+  const author = AUTHORS[post.author] || AUTHORS['tuhuella-team'];
+  return (
+    <Link
+      href={ROUTES.BLOG_DETAIL(post.slug)}
+      className="group relative bg-white rounded-2xl border border-stone-200/60 overflow-hidden hover:shadow-xl transition-all duration-300 grid md:grid-cols-2 gap-0"
+    >
+      {post.cover_image && (
+        <div className="relative aspect-[16/10] md:aspect-auto overflow-hidden bg-stone-100">
+          <img
+            src={post.cover_image}
+            alt={post.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+          />
+        </div>
+      )}
+      <div className="p-8 flex flex-col justify-center">
+        <span className="text-xs font-medium text-teal-600 uppercase tracking-wider mb-3">
+          ⭐ Destacado · {CATEGORIES.find((c) => c.slug === post.category)?.label || post.category}
+        </span>
+        <h2 className="text-2xl md:text-3xl font-bold text-stone-800 mb-3 group-hover:text-teal-700 transition-colors">
+          {post.title}
+        </h2>
+        <p className="text-stone-500 leading-relaxed mb-6">{post.excerpt}</p>
+        <div className="flex items-center gap-4 text-sm text-stone-400">
+          <span>{author.name}</span>
+          {post.read_time_minutes > 0 && <span>{post.read_time_minutes} min de lectura</span>}
+          <span>{formatDate(post.published_at)}</span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+export default function BlogListingPage() {
+  const { posts, pagination, loading, error, fetchPosts } = useBlogStore();
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const loadPosts = useCallback(
+    (page = 1) => {
+      fetchPosts({ page, page_size: 6, lang: 'es' });
+    },
+    [fetchPosts],
+  );
+
+  useEffect(() => {
+    loadPosts();
+  }, [loadPosts]);
+
+  const featuredPost = posts.find((p) => p.is_featured);
+  const filteredPosts = posts.filter((p) => {
+    if (featuredPost && p.id === featuredPost.id) return false;
+    if (selectedCategory && p.category !== selectedCategory) return false;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      return p.title.toLowerCase().includes(q) || p.excerpt.toLowerCase().includes(q);
+    }
+    return true;
+  });
+
+  return (
+    <div className="min-h-screen bg-stone-50">
+      {/* Hero */}
+      <section className="bg-gradient-to-b from-teal-50 to-stone-50 pt-16 pb-12">
+        <div className="mx-auto max-w-[1200px] px-6 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-stone-800 mb-4">
+            Blog Mi Huella
+          </h1>
+          <p className="text-lg text-stone-500 max-w-2xl mx-auto">
+            Artículos sobre adopción, cuidado animal, historias inspiradoras y mucho más.
+          </p>
+        </div>
+      </section>
+
+      <div className="mx-auto max-w-[1200px] px-6 pb-20">
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8">
+          <div className="relative flex-1 max-w-md">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Buscar artículos..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all bg-white"
+            />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat.slug}
+                type="button"
+                onClick={() => setSelectedCategory(cat.slug)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                  selectedCategory === cat.slug
+                    ? 'bg-teal-600 text-white'
+                    : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-100'
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {loading && (
+          <div className="flex justify-center py-20">
+            <div className="w-8 h-8 border-2 border-teal-500/30 border-t-teal-500 rounded-full animate-spin" />
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-600 text-sm mb-8">
+            {error}
+          </div>
+        )}
+
+        {!loading && !error && (
+          <>
+            {featuredPost && !selectedCategory && !searchQuery && (
+              <div className="mb-10">
+                <FeaturedPost post={featuredPost} />
+              </div>
+            )}
+
+            {filteredPosts.length > 0 ? (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+                {filteredPosts.map((post) => (
+                  <PostCard key={post.id} post={post} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 text-stone-400">
+                No se encontraron artículos.
+              </div>
+            )}
+
+            {pagination.totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2">
+                <button
+                  type="button"
+                  disabled={pagination.page <= 1}
+                  onClick={() => loadPosts(pagination.page - 1)}
+                  className="px-4 py-2 rounded-lg text-sm font-medium border border-stone-200 hover:bg-stone-100 disabled:opacity-40 transition-colors"
+                >
+                  ← Anterior
+                </button>
+                <span className="text-sm text-stone-500 px-3">
+                  Página {pagination.page} de {pagination.totalPages}
+                </span>
+                <button
+                  type="button"
+                  disabled={pagination.page >= pagination.totalPages}
+                  onClick={() => loadPosts(pagination.page + 1)}
+                  className="px-4 py-2 rounded-lg text-sm font-medium border border-stone-200 hover:bg-stone-100 disabled:opacity-40 transition-colors"
+                >
+                  Siguiente →
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}

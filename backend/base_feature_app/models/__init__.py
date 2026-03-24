@@ -13,3 +13,4 @@ from .shelter_invite import ShelterInvite
 from .subscription import Subscription
 from .favorite import Favorite
 from .notification import NotificationPreference, NotificationLog
+from .blog_post import BlogPost

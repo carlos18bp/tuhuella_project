@@ -12,35 +12,35 @@ import {
 
 test.describe('Adopter Pages — Protected Routes', () => {
   test('should redirect unauthenticated user from favorites', { tag: [...FAVORITE_LIST] }, async ({ page }) => {
-    await page.goto('/favoritos');
+    await page.goto('/favorites');
     await waitForPageLoad(page);
 
     await expect(page).toHaveURL(/sign-in|favoritos/);
   });
 
   test('should redirect unauthenticated user from donation history', { tag: [...DONATION_HISTORY] }, async ({ page }) => {
-    await page.goto('/mis-donaciones');
+    await page.goto('/my-donations');
     await waitForPageLoad(page);
 
     await expect(page).toHaveURL(/sign-in|mis-donaciones/);
   });
 
   test('should redirect unauthenticated user from sponsorship history', { tag: [...SPONSORSHIP_HISTORY] }, async ({ page }) => {
-    await page.goto('/mis-apadrinamientos');
+    await page.goto('/my-sponsorships');
     await waitForPageLoad(page);
 
     await expect(page).toHaveURL(/sign-in|mis-apadrinamientos/);
   });
 
   test('should redirect unauthenticated user from adopter intent', { tag: [...ADOPTER_INTENT_CREATE] }, async ({ page }) => {
-    await page.goto('/mi-intencion');
+    await page.goto('/my-intent');
     await waitForPageLoad(page);
 
     await expect(page).toHaveURL(/sign-in|mi-intencion/);
   });
 
   test('should redirect unauthenticated user from profile', { tag: [...ADOPTER_PROFILE] }, async ({ page }) => {
-    await page.goto('/mi-perfil');
+    await page.goto('/my-profile');
     await waitForPageLoad(page);
 
     await expect(page).toHaveURL(/sign-in|mi-perfil/);
@@ -49,7 +49,7 @@ test.describe('Adopter Pages — Protected Routes', () => {
 
 test.describe('Adopter Pages — Public', () => {
   test('should display busco adoptar listing', { tag: [...ADOPTER_INTENT_BROWSE] }, async ({ page }) => {
-    await page.goto('/busco-adoptar');
+    await page.goto('/looking-to-adopt');
     await waitForPageLoad(page);
 
     await expect(page).toHaveURL(/.*busco-adoptar/);
@@ -59,11 +59,11 @@ test.describe('Adopter Pages — Public', () => {
 test.describe('Favorite Toggle', () => {
   test('should require authentication to toggle favorite', { tag: [...FAVORITE_TOGGLE] }, async ({ page }) => {
     // @flow:favorite-toggle — unauthenticated user attempting to favorite an animal
-    await page.goto('/animales');
+    await page.goto('/animals');
     await waitForPageLoad(page);
 
     // quality: allow-fragile-selector (dynamic data: no testid on animal cards, first visible link needed)
-    const firstAnimalLink = page.locator('a[href*="/animales/"]').first();
+    const firstAnimalLink = page.locator('a[href*="/animals/"]').first();
     if (await firstAnimalLink.isVisible({ timeout: 5000 })) {
       await firstAnimalLink.click();
       await page.waitForURL(/.*animales\/\d+/, { timeout: 10_000 });

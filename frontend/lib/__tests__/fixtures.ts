@@ -1,5 +1,8 @@
 import type {
   Animal,
+  BlogPost,
+  BlogPostAdmin,
+  BlogPostDetail,
   Shelter,
   Campaign,
   Donation,
@@ -224,3 +227,90 @@ export const mockFavorites: Favorite[] = [
 export const mockShelter: Shelter = mockShelters[0];
 export const mockAnimal: Animal = mockAnimals[0];
 export const mockCampaign: Campaign = mockCampaigns[0];
+
+export const mockBlogPosts: BlogPost[] = [
+  {
+    id: 1,
+    title: 'Guía de adopción responsable',
+    slug: 'guia-de-adopcion-responsable',
+    cover_image: 'http://example.com/blog1.jpg',
+    excerpt: 'Todo lo que necesitas saber para adoptar.',
+    category: 'adopcion',
+    read_time_minutes: 5,
+    is_featured: true,
+    author: 'tuhuella-team',
+    is_published: true,
+    published_at: '2026-03-01T10:00:00Z',
+    created_at: '2026-03-01T08:00:00Z',
+  },
+  {
+    id: 2,
+    title: 'Cuidados básicos para tu mascota',
+    slug: 'cuidados-basicos-para-tu-mascota',
+    cover_image: 'http://example.com/blog2.jpg',
+    excerpt: 'Consejos esenciales para nuevos dueños.',
+    category: 'cuidado-animal',
+    read_time_minutes: 8,
+    is_featured: false,
+    author: 'laura-blanco',
+    is_published: true,
+    published_at: '2026-03-05T12:00:00Z',
+    created_at: '2026-03-05T10:00:00Z',
+  },
+];
+
+export const mockBlogPostDetail: BlogPostDetail = {
+  ...mockBlogPosts[0],
+  cover_image_credit: 'Photo by Example',
+  cover_image_credit_url: 'http://example.com/credit',
+  content: '<h2>Introducción</h2><p>Contenido del blog.</p>',
+  content_json: {
+    intro: 'Adoptar es un acto de amor.',
+    sections: [
+      { type: 'heading', level: 2, text: 'Paso 1' },
+      { type: 'paragraph', text: 'Investiga refugios cercanos.' },
+    ],
+  },
+  sources: [
+    { name: 'OMS Animal', url: 'http://example.com/source' },
+  ],
+  meta_title: 'Guía de adopción',
+  meta_description: 'Todo sobre adopción responsable.',
+  meta_keywords: 'adopción, mascotas',
+  updated_at: '2026-03-01T10:00:00Z',
+};
+
+export const mockBlogPostAdmin: BlogPostAdmin = {
+  id: 1,
+  title_es: 'Guía de adopción responsable',
+  title_en: 'Responsible Adoption Guide',
+  slug: 'guia-de-adopcion-responsable',
+  cover_image: 'http://example.com/blog1.jpg',
+  cover_image_url: '',
+  cover_image_display: 'http://example.com/blog1.jpg',
+  cover_image_credit: 'Photo by Example',
+  cover_image_credit_url: 'http://example.com/credit',
+  excerpt_es: 'Todo lo que necesitas saber.',
+  excerpt_en: 'Everything you need to know.',
+  content_es: '<p>Contenido</p>',
+  content_en: '<p>Content</p>',
+  content_json_es: { intro: 'Hola', sections: [] },
+  content_json_en: { intro: 'Hello', sections: [] },
+  sources: [{ name: 'OMS', url: 'http://example.com' }],
+  category: 'adopcion',
+  read_time_minutes: 5,
+  is_featured: true,
+  author: 'tuhuella-team',
+  meta_title_es: 'Guía',
+  meta_title_en: 'Guide',
+  meta_description_es: 'Descripción',
+  meta_description_en: 'Description',
+  meta_keywords_es: 'adopción',
+  meta_keywords_en: 'adoption',
+  is_published: true,
+  published_at: '2026-03-01T10:00:00Z',
+  created_at: '2026-03-01T08:00:00Z',
+  updated_at: '2026-03-01T10:00:00Z',
+};
+
+export const mockBlogPost: BlogPost = mockBlogPosts[0];

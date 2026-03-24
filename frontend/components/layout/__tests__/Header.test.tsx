@@ -6,6 +6,11 @@ import userEvent from '@testing-library/user-event';
 import Header from '../Header';
 import { useAuthStore } from '@/lib/stores/authStore';
 
+jest.mock('@/i18n/navigation', () => ({
+  Link: ({ href, children, ...props }: { href: string; children: React.ReactNode; [key: string]: unknown }) =>
+    React.createElement('a', { href, ...props }, children),
+}));
+
 jest.mock('@/lib/stores/authStore', () => ({
   useAuthStore: jest.fn(),
 }));
@@ -32,20 +37,20 @@ describe('Header', () => {
     jest.clearAllMocks();
   });
 
-  it('renders Mi Huella brand link', () => {
+  it('renders Tu Huella brand link', () => {
     setupMock();
     render(<Header />);
-    const brandLink = screen.getByRole('link', { name: /mi\s*huella/i });
+    const brandLink = screen.getByRole('link', { name: /tu\s*huella/i });
     expect(brandLink).toHaveAttribute('href', '/');
   });
 
   it('renders public navigation links', () => {
     setupMock();
     render(<Header />);
-    expect(screen.getByRole('link', { name: 'Animales' })).toHaveAttribute('href', '/animales');
-    expect(screen.getByRole('link', { name: 'Refugios' })).toHaveAttribute('href', '/refugios');
-    expect(screen.getByRole('link', { name: 'Campañas' })).toHaveAttribute('href', '/campanas');
-    expect(screen.getByRole('link', { name: 'Busco Adoptar' })).toHaveAttribute('href', '/busco-adoptar');
+    expect(screen.getByRole('link', { name: 'Animales' })).toHaveAttribute('href', '/animals');
+    expect(screen.getByRole('link', { name: 'Refugios' })).toHaveAttribute('href', '/shelters');
+    expect(screen.getByRole('link', { name: 'Campañas' })).toHaveAttribute('href', '/campaigns');
+    expect(screen.getByRole('link', { name: 'Busco Adoptar' })).toHaveAttribute('href', '/looking-to-adopt');
   });
 
   it('renders sign-in and sign-up links when unauthenticated', () => {
@@ -71,8 +76,8 @@ describe('Header', () => {
       user: { role: 'adopter' },
     });
     render(<Header />);
-    expect(screen.getByRole('link', { name: 'Favoritos' })).toHaveAttribute('href', '/favoritos');
-    expect(screen.getByRole('link', { name: 'Mi Perfil' })).toHaveAttribute('href', '/mi-perfil');
+    expect(screen.getByRole('link', { name: 'Favoritos' })).toHaveAttribute('href', '/favorites');
+    expect(screen.getByRole('link', { name: 'Mi Perfil' })).toHaveAttribute('href', '/my-profile');
   });
 
   it('renders shelter panel link for shelter_admin role', () => {
@@ -81,7 +86,7 @@ describe('Header', () => {
       user: { role: 'shelter_admin' },
     });
     render(<Header />);
-    expect(screen.getByRole('link', { name: 'Panel Refugio' })).toHaveAttribute('href', '/refugio/dashboard');
+    expect(screen.getByRole('link', { name: 'Panel Refugio' })).toHaveAttribute('href', '/shelter/dashboard');
   });
 
   it('hides shelter panel link for non-shelter users', () => {

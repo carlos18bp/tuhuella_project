@@ -9,6 +9,7 @@ from base_feature_app.models import (
     AdopterIntent,
     Animal,
     AdoptionApplication,
+    BlogPost,
     Campaign,
     Donation,
     Favorite,
@@ -271,4 +272,36 @@ def notification_log(existing_user):
         channel=NotificationPreference.Channel.EMAIL,
         status=NotificationLog.Status.SENT,
         metadata={'application_id': 1},
+    )
+
+
+@pytest.fixture
+def blog_post(db):
+    """Published blog post for testing."""
+    return BlogPost.objects.create(
+        title_es='Guía de adopción responsable',
+        title_en='Responsible Adoption Guide',
+        excerpt_es='Todo lo que necesitas saber.',
+        excerpt_en='Everything you need to know.',
+        category='adopcion',
+        author='tuhuella-team',
+        read_time_minutes=5,
+        is_published=True,
+        published_at=timezone.now(),
+        content_json_es={'intro': 'Test intro', 'sections': []},
+        content_json_en={'intro': 'Test intro EN', 'sections': []},
+    )
+
+
+@pytest.fixture
+def draft_blog_post(db):
+    """Unpublished (draft) blog post for testing."""
+    return BlogPost.objects.create(
+        title_es='Borrador de artículo',
+        title_en='Draft article',
+        excerpt_es='Aún no publicado.',
+        excerpt_en='Not yet published.',
+        category='consejos',
+        author='laura-blanco',
+        is_published=False,
     )

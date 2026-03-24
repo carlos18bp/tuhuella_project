@@ -24,7 +24,7 @@ describe('ShelterCard', () => {
   it('links to shelter detail page', () => {
     render(<ShelterCard shelter={mockShelters[0]} />);
     const link = screen.getByRole('link');
-    expect(link).toHaveAttribute('href', '/refugios/1');
+    expect(link).toHaveAttribute('href', '/shelters/1');
   });
 
   it('shows verified badge for verified shelters', () => {

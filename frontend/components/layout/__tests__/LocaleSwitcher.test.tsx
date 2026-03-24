@@ -3,40 +3,45 @@ import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { useLocaleStore } from '@/lib/stores/localeStore';
-
 import LocaleSwitcher from '../LocaleSwitcher';
 
+const mockReplace = jest.fn();
+
+jest.mock('next-intl', () => ({
+  useLocale: () => 'es',
+}));
+
+jest.mock('@/i18n/navigation', () => ({
+  useRouter: () => ({ replace: mockReplace }),
+  usePathname: () => '/animals',
+}));
+
 describe('LocaleSwitcher', () => {
-  let consoleErrorSpy: jest.SpiedFunction<typeof console.error>;
-
   beforeEach(() => {
-    useLocaleStore.setState({ locale: 'en' });
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    mockReplace.mockClear();
   });
 
-  afterEach(() => {
-    consoleErrorSpy.mockRestore();
-  });
-
-  it('renders select with current locale value', () => {
+  it('renders ES and EN toggle buttons', () => {
     render(<LocaleSwitcher />);
-    const select = screen.getByRole('combobox', { name: 'Select language' });
-    expect(select).toHaveValue('en');
+    expect(screen.getByRole('radio', { name: 'ES' })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: 'EN' })).toBeInTheDocument();
   });
 
-  it('renders all supported locale options', () => {
+  it('marks current locale as checked', () => {
     render(<LocaleSwitcher />);
-    expect(screen.getByRole('option', { name: 'English' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Español' })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: 'ES' })).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByRole('radio', { name: 'EN' })).toHaveAttribute('aria-checked', 'false');
   });
 
-  it('updates locale store when selection changes', async () => {
+  it('calls router.replace with new locale when toggled', async () => {
     render(<LocaleSwitcher />);
-    const select = screen.getByRole('combobox', { name: 'Select language' });
+    await userEvent.click(screen.getByRole('radio', { name: 'EN' }));
+    expect(mockReplace).toHaveBeenCalledWith('/animals', { locale: 'en' });
+  });
 
-    await userEvent.selectOptions(select, 'es');
-
-    expect(useLocaleStore.getState().locale).toBe('es');
+  it('does not navigate when clicking current locale', async () => {
+    render(<LocaleSwitcher />);
+    await userEvent.click(screen.getByRole('radio', { name: 'ES' }));
+    expect(mockReplace).not.toHaveBeenCalled();
   });
 });

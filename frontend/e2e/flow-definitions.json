@@ -393,6 +393,54 @@
       "priority": "P2",
       "description": "Admin views payment audit table at /admin/pagos",
       "expectedSpecs": 1
+    },
+    "blog-browse": {
+      "name": "Blog listing page",
+      "module": "blog",
+      "roles": ["shared"],
+      "priority": "P2",
+      "description": "User browses blog listing at /blog with category filters and search",
+      "expectedSpecs": 1
+    },
+    "blog-detail": {
+      "name": "Blog post detail",
+      "module": "blog",
+      "roles": ["shared"],
+      "priority": "P2",
+      "description": "User reads a full blog post at /blog/:slug with content, progress bar, sharing",
+      "expectedSpecs": 1
+    },
+    "blog-admin-list": {
+      "name": "Admin blog list",
+      "module": "blog-admin",
+      "roles": ["admin"],
+      "priority": "P2",
+      "description": "Admin views all blog posts (published, draft, scheduled) with actions",
+      "expectedSpecs": 1
+    },
+    "blog-admin-create": {
+      "name": "Admin blog create",
+      "module": "blog-admin",
+      "roles": ["admin"],
+      "priority": "P2",
+      "description": "Admin creates a new blog post via manual form or JSON import",
+      "expectedSpecs": 1
+    },
+    "blog-admin-edit": {
+      "name": "Admin blog edit",
+      "module": "blog-admin",
+      "roles": ["admin"],
+      "priority": "P2",
+      "description": "Admin edits an existing blog post fields, JSON content, SEO, cover image",
+      "expectedSpecs": 1
+    },
+    "blog-admin-calendar": {
+      "name": "Admin blog calendar",
+      "module": "blog-admin",
+      "roles": ["admin"],
+      "priority": "P3",
+      "description": "Admin views blog calendar with monthly post overview and status colors",
+      "expectedSpecs": 1
     }
   }
 }

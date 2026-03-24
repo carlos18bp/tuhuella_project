@@ -82,6 +82,14 @@ export const ADMIN_MODERATION = ['@flow:admin-moderation', '@module:admin', '@pr
 export const ADMIN_METRICS = ['@flow:admin-metrics', '@module:admin', '@priority:P2'];
 export const ADMIN_PAYMENTS = ['@flow:admin-payments', '@module:admin', '@priority:P2'];
 
+// ── Blog ──
+export const BLOG_BROWSE = ['@flow:blog-browse', '@module:blog', '@priority:P2'];
+export const BLOG_DETAIL = ['@flow:blog-detail', '@module:blog', '@priority:P2'];
+export const BLOG_ADMIN_LIST = ['@flow:blog-admin-list', '@module:blog-admin', '@priority:P2'];
+export const BLOG_ADMIN_CREATE = ['@flow:blog-admin-create', '@module:blog-admin', '@priority:P2'];
+export const BLOG_ADMIN_EDIT = ['@flow:blog-admin-edit', '@module:blog-admin', '@priority:P2'];
+export const BLOG_ADMIN_CALENDAR = ['@flow:blog-admin-calendar', '@module:blog-admin', '@priority:P3'];
+
 // ── Navigation ──
 export const NAVIGATION_HEADER = ['@flow:navigation-header', '@module:navigation', '@priority:P2'];
 export const NAVIGATION_FOOTER = ['@flow:navigation-footer', '@module:navigation', '@priority:P4'];

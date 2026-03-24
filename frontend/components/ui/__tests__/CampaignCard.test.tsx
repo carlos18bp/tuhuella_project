@@ -24,7 +24,7 @@ describe('CampaignCard', () => {
   it('links to campaign detail page', () => {
     render(<CampaignCard campaign={mockCampaigns[0]} />);
     const link = screen.getByRole('link');
-    expect(link).toHaveAttribute('href', '/campanas/1');
+    expect(link).toHaveAttribute('href', '/campaigns/1');
   });
 
   it('renders progress percentage', () => {

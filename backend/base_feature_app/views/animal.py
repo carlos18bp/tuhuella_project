@@ -16,19 +16,23 @@ def animal_list(request):
 
     species = request.query_params.get('species')
     if species:
-        queryset = queryset.filter(species=species)
+        values = [v.strip() for v in species.split(',') if v.strip()]
+        queryset = queryset.filter(species__in=values) if len(values) > 1 else queryset.filter(species=values[0])
     size = request.query_params.get('size')
     if size:
-        queryset = queryset.filter(size=size)
+        values = [v.strip() for v in size.split(',') if v.strip()]
+        queryset = queryset.filter(size__in=values) if len(values) > 1 else queryset.filter(size=values[0])
     age_range = request.query_params.get('age_range')
     if age_range:
-        queryset = queryset.filter(age_range=age_range)
+        values = [v.strip() for v in age_range.split(',') if v.strip()]
+        queryset = queryset.filter(age_range__in=values) if len(values) > 1 else queryset.filter(age_range=values[0])
     shelter_id = request.query_params.get('shelter')
     if shelter_id:
         queryset = queryset.filter(shelter_id=shelter_id)
     gender = request.query_params.get('gender')
     if gender:
-        queryset = queryset.filter(gender=gender)
+        values = [v.strip() for v in gender.split(',') if v.strip()]
+        queryset = queryset.filter(gender__in=values) if len(values) > 1 else queryset.filter(gender=values[0])
 
     serializer = AnimalListSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data)

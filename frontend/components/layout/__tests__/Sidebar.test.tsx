@@ -5,30 +5,32 @@ import userEvent from '@testing-library/user-event';
 
 import Sidebar from '../Sidebar';
 
-let mockPathname = '/refugio/dashboard';
-jest.mock('next/navigation', () => ({
+let mockPathname = '/shelter/dashboard';
+jest.mock('@/i18n/navigation', () => ({
   usePathname: () => mockPathname,
+  Link: ({ href, children, onClick, ...props }: { href: string; children: React.ReactNode; onClick?: () => void; [key: string]: unknown }) =>
+    React.createElement('a', { href, onClick, ...props }, children),
 }));
 
 const shelterItems = [
-  { label: 'Dashboard', href: '/refugio/dashboard' },
-  { label: 'Animales', href: '/refugio/animales' },
-  { label: 'Solicitudes', href: '/refugio/solicitudes' },
+  { label: 'Dashboard', href: '/shelter/dashboard' },
+  { label: 'Animales', href: '/shelter/animals' },
+  { label: 'Solicitudes', href: '/shelter/applications' },
 ];
 
 describe('Sidebar', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockPathname = '/refugio/dashboard';
+    mockPathname = '/shelter/dashboard';
   });
 
   it('renders all navigation items in desktop sidebar', () => {
     render(<Sidebar title="Refugio" items={shelterItems} />);
     const links = screen.getAllByRole('link');
     expect(links).toHaveLength(shelterItems.length);
-    expect(screen.getByRole('link', { name: 'Dashboard' })).toHaveAttribute('href', '/refugio/dashboard');
-    expect(screen.getByRole('link', { name: 'Animales' })).toHaveAttribute('href', '/refugio/animales');
-    expect(screen.getByRole('link', { name: 'Solicitudes' })).toHaveAttribute('href', '/refugio/solicitudes');
+    expect(screen.getByRole('link', { name: 'Dashboard' })).toHaveAttribute('href', '/shelter/dashboard');
+    expect(screen.getByRole('link', { name: 'Animales' })).toHaveAttribute('href', '/shelter/animals');
+    expect(screen.getByRole('link', { name: 'Solicitudes' })).toHaveAttribute('href', '/shelter/applications');
   });
 
   it('renders the sidebar title in the desktop heading', () => {
@@ -91,7 +93,7 @@ describe('Sidebar', () => {
   });
 
   it('highlights the correct active item when pathname changes', () => {
-    mockPathname = '/refugio/animales';
+    mockPathname = '/shelter/animals';
     render(<Sidebar title="Refugio" items={shelterItems} />);
     const animalesLinks = screen.getAllByRole('link', { name: 'Animales' });
     const hasAriaCurrent = animalesLinks.some((link) => link.getAttribute('aria-current') === 'page');

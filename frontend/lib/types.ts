@@ -204,3 +204,63 @@ export type Favorite = {
   shelter_name: string;
   created_at: string;
 };
+
+export type BlogPost = {
+  id: number;
+  title: string;
+  slug: string;
+  cover_image: string;
+  excerpt: string;
+  category: string;
+  read_time_minutes: number;
+  is_featured: boolean;
+  author: string;
+  is_published: boolean;
+  published_at: string | null;
+  created_at: string;
+};
+
+export type BlogPostDetail = BlogPost & {
+  cover_image_credit: string;
+  cover_image_credit_url: string;
+  content: string;
+  content_json: Record<string, unknown>;
+  sources: Array<{ name: string; url: string }>;
+  meta_title: string;
+  meta_description: string;
+  meta_keywords: string;
+  updated_at: string;
+};
+
+export type BlogPostAdmin = {
+  id: number;
+  title_es: string;
+  title_en: string;
+  slug: string;
+  cover_image: string;
+  cover_image_url: string;
+  cover_image_display: string;
+  cover_image_credit: string;
+  cover_image_credit_url: string;
+  excerpt_es: string;
+  excerpt_en: string;
+  content_es: string;
+  content_en: string;
+  content_json_es: Record<string, unknown>;
+  content_json_en: Record<string, unknown>;
+  sources: Array<{ name: string; url: string }>;
+  category: string;
+  read_time_minutes: number;
+  is_featured: boolean;
+  author: string;
+  meta_title_es: string;
+  meta_title_en: string;
+  meta_description_es: string;
+  meta_description_en: string;
+  meta_keywords_es: string;
+  meta_keywords_en: string;
+  is_published: boolean;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+};

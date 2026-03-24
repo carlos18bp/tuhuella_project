@@ -1,27 +1,53 @@
 'use client';
 
-import { useLocaleStore } from '@/lib/stores/localeStore';
-import { SUPPORTED_LOCALES, LOCALE_LABELS } from '@/lib/i18n/config';
+import { useLocale } from 'next-intl';
+import { useRouter, usePathname } from '@/i18n/navigation';
 
 export default function LocaleSwitcher() {
-  const locale = useLocaleStore((s) => s.locale);
-  const setLocale = useLocaleStore((s) => s.setLocale);
+  const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const toggle = (target: 'es' | 'en') => {
+    if (locale === target) return;
+    router.replace(pathname, { locale: target });
+  };
 
   return (
-    <select
-      value={locale}
-      onChange={(e) => {
-        setLocale(e.target.value);
-        window.location.reload();
-      }}
-      className="text-xs bg-transparent border border-stone-300 rounded-lg px-2 py-1.5 text-stone-600 cursor-pointer hover:border-stone-400 transition-colors"
+    <div
+      className="relative flex items-center rounded-full border border-stone-300 bg-stone-100 p-0.5 text-xs font-medium select-none"
+      role="radiogroup"
       aria-label="Select language"
     >
-      {SUPPORTED_LOCALES.map((loc) => (
-        <option key={loc} value={loc}>
-          {LOCALE_LABELS[loc]}
-        </option>
-      ))}
-    </select>
+      {/* Sliding highlight */}
+      <span
+        className={`absolute top-0.5 bottom-0.5 w-[calc(50%-2px)] rounded-full bg-teal-600 transition-transform duration-200 ease-in-out ${
+          locale === 'en' ? 'translate-x-[calc(100%+4px)]' : 'translate-x-0'
+        }`}
+      />
+
+      <button
+        type="button"
+        role="radio"
+        aria-checked={locale === 'es'}
+        onClick={() => toggle('es')}
+        className={`relative z-10 px-3 py-1 rounded-full transition-colors duration-200 ${
+          locale === 'es' ? 'text-white' : 'text-stone-500 hover:text-stone-700'
+        }`}
+      >
+        ES
+      </button>
+      <button
+        type="button"
+        role="radio"
+        aria-checked={locale === 'en'}
+        onClick={() => toggle('en')}
+        className={`relative z-10 px-3 py-1 rounded-full transition-colors duration-200 ${
+          locale === 'en' ? 'text-white' : 'text-stone-500 hover:text-stone-700'
+        }`}
+      >
+        EN
+      </button>
+    </div>
   );
 }

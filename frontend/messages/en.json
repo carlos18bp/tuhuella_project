@@ -23,7 +23,8 @@
     "favorites": "Favorites",
     "myProfile": "My Profile",
     "shelterPanel": "Shelter Panel",
-    "admin": "Admin"
+    "admin": "Admin",
+    "blog": "Blog"
   },
   "home": {
     "badge": "Animal adoption and sponsorship platform",

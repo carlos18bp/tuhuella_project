@@ -42,28 +42,28 @@ test.describe('Admin Panel', () => {
   });
 
   test('should redirect unauthenticated user from approve shelters', { tag: [...ADMIN_APPROVE_SHELTERS] }, async ({ page }) => {
-    await page.goto('/admin/refugios/aprobar');
+    await page.goto('/admin/shelters/aprobar');
     await waitForPageLoad(page);
 
     await expect(page).toHaveURL(/sign-in|aprobar/);
   });
 
   test('should redirect unauthenticated user from moderation', { tag: [...ADMIN_MODERATION] }, async ({ page }) => {
-    await page.goto('/admin/moderacion');
+    await page.goto('/admin/moderation');
     await waitForPageLoad(page);
 
     await expect(page).toHaveURL(/sign-in|moderacion/);
   });
 
   test('should redirect unauthenticated user from metrics', { tag: [...ADMIN_METRICS] }, async ({ page }) => {
-    await page.goto('/admin/metricas');
+    await page.goto('/admin/metrics');
     await waitForPageLoad(page);
 
     await expect(page).toHaveURL(/sign-in|metricas/);
   });
 
   test('should redirect unauthenticated user from payments', { tag: [...ADMIN_PAYMENTS] }, async ({ page }) => {
-    await page.goto('/admin/pagos');
+    await page.goto('/admin/payments');
     await waitForPageLoad(page);
 
     await expect(page).toHaveURL(/sign-in|pagos/);

@@ -73,17 +73,17 @@ test.describe('Navigation', () => {
     await expect(footer).toBeVisible();
   });
 
-  test('should maintain navigation across Mi Huella pages', { tag: [...NAVIGATION_BETWEEN_PAGES] }, async ({ page }) => {
+  test('should maintain navigation across Tu Huella pages', { tag: [...NAVIGATION_BETWEEN_PAGES] }, async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveURL('/');
 
-    await page.goto('/animales', { waitUntil: 'domcontentloaded' });
+    await page.goto('/animals', { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveURL(/.*animales/);
 
-    await page.goto('/refugios', { waitUntil: 'domcontentloaded' });
+    await page.goto('/shelters', { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveURL(/.*refugios/);
 
-    await page.goto('/campanas', { waitUntil: 'domcontentloaded' });
+    await page.goto('/campaigns', { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveURL(/.*campanas/);
 
     await page.goto('/sign-in', { waitUntil: 'domcontentloaded' });

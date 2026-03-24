@@ -4,7 +4,7 @@ import { ANIMAL_BROWSE, ANIMAL_FILTER, ANIMAL_DETAIL, ANIMAL_GALLERY } from '../
 
 test.describe('Animal Browse & Detail', () => {
   test('should display animal listing page', { tag: [...ANIMAL_BROWSE] }, async ({ page }) => {
-    await page.goto('/animales');
+    await page.goto('/animals');
     await waitForPageLoad(page);
 
     await expect(page).toHaveURL(/.*animales/);
@@ -13,33 +13,28 @@ test.describe('Animal Browse & Detail', () => {
   });
 
   test('should show filter dropdowns on animal listing', { tag: [...ANIMAL_FILTER] }, async ({ page }) => {
-    await page.goto('/animales');
+    await page.goto('/animals');
     await waitForPageLoad(page);
 
-    // Target the species select by its unique option content
-    const speciesSelect = page.locator('select', { has: page.locator('option', { hasText: 'Todas las especies' }) });
-    await expect(speciesSelect).toBeVisible();
-    await expect(speciesSelect).toContainText('Todas las especies');
+    // Multi-select dropdown buttons for each filter category
+    const speciesFilter = page.getByTestId('filter-Especies');
+    await expect(speciesFilter).toBeVisible();
+    await expect(speciesFilter.getByRole('button').first()).toContainText('Especies');
   });
 
   test('should filter animals by species', { tag: [...ANIMAL_FILTER] }, async ({ page }) => {
-    await page.goto('/animales');
+    await page.goto('/animals');
     await waitForPageLoad(page);
 
     // Wait for initial animals API load
     await page.waitForResponse((resp) => resp.url().includes('/api/animals') && resp.status() === 200);
 
-    // Target the species select by its unique option content
-    const speciesSelect = page.locator('select', { has: page.locator('option', { hasText: 'Todas las especies' }) });
-    await expect(speciesSelect).toBeVisible();
+    // Open the species multi-select dropdown
+    const speciesFilter = page.getByTestId('filter-Especies');
+    await speciesFilter.getByRole('button').first().click();
 
-    // Use evaluate to change value and dispatch event for React controlled component
-    await speciesSelect.evaluate((el) => {
-      const select = el as HTMLSelectElement;
-      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value')?.set;
-      nativeInputValueSetter?.call(select, 'dog');
-      select.dispatchEvent(new Event('change', { bubbles: true }));
-    });
+    // Click the "Perros" checkbox option
+    await speciesFilter.getByRole('button', { name: 'Perros' }).click();
 
     // Wait for the filtered API call
     await page.waitForResponse(
@@ -49,11 +44,11 @@ test.describe('Animal Browse & Detail', () => {
   });
 
   test('should navigate to animal detail from listing', { tag: [...ANIMAL_DETAIL] }, async ({ page }) => {
-    await page.goto('/animales');
+    await page.goto('/animals');
     await waitForPageLoad(page);
 
     // quality: allow-fragile-selector (dynamic data: no testid on animal cards, first visible link needed)
-    const firstAnimalLink = page.locator('a[href*="/animales/"]').first();
+    const firstAnimalLink = page.locator('a[href*="/animals/"]').first();
     if (await firstAnimalLink.isVisible({ timeout: 5000 })) {
       await firstAnimalLink.click();
       await page.waitForURL(/.*animales\/\d+/, { timeout: 10_000 });
@@ -63,11 +58,11 @@ test.describe('Animal Browse & Detail', () => {
   });
 
   test('should display animal detail with info sections', { tag: [...ANIMAL_DETAIL] }, async ({ page }) => {
-    await page.goto('/animales');
+    await page.goto('/animals');
     await waitForPageLoad(page);
 
     // quality: allow-fragile-selector (dynamic data: no testid on animal cards, first visible link needed)
-    const firstAnimalLink = page.locator('a[href*="/animales/"]').first();
+    const firstAnimalLink = page.locator('a[href*="/animals/"]').first();
     if (await firstAnimalLink.isVisible({ timeout: 5000 })) {
       await firstAnimalLink.click();
       await page.waitForURL(/.*animales\/\d+/, { timeout: 10_000 });
@@ -78,11 +73,11 @@ test.describe('Animal Browse & Detail', () => {
   });
 
   test('should show adoption CTA for unauthenticated users', { tag: [...ANIMAL_DETAIL] }, async ({ page }) => {
-    await page.goto('/animales');
+    await page.goto('/animals');
     await waitForPageLoad(page);
 
     // quality: allow-fragile-selector (dynamic data: no testid on animal cards, first visible link needed)
-    const firstAnimalLink = page.locator('a[href*="/animales/"]').first();
+    const firstAnimalLink = page.locator('a[href*="/animals/"]').first();
     if (await firstAnimalLink.isVisible({ timeout: 5000 })) {
       await firstAnimalLink.click();
       await page.waitForURL(/.*animales\/\d+/, { timeout: 10_000 });
@@ -92,11 +87,11 @@ test.describe('Animal Browse & Detail', () => {
   });
 
   test('should display animal gallery section', { tag: [...ANIMAL_GALLERY] }, async ({ page }) => {
-    await page.goto('/animales');
+    await page.goto('/animals');
     await waitForPageLoad(page);
 
     // quality: allow-fragile-selector (dynamic data: no testid on animal cards, first visible link needed)
-    const firstAnimalLink = page.locator('a[href*="/animales/"]').first();
+    const firstAnimalLink = page.locator('a[href*="/animals/"]').first();
     if (await firstAnimalLink.isVisible({ timeout: 5000 })) {
       await firstAnimalLink.click();
       await page.waitForURL(/.*animales\/\d+/, { timeout: 10_000 });

@@ -37,12 +37,12 @@ describe('PaymentConfirmation', () => {
 
   it('renders correct navigation links for donation type', () => {
     render(<PaymentConfirmation type="donation" />);
-    expect(screen.getByRole('link', { name: 'Explorar animales' })).toHaveAttribute('href', '/animales');
-    expect(screen.getByRole('link', { name: 'Ver mis donaciones' })).toHaveAttribute('href', '/mis-donaciones');
+    expect(screen.getByRole('link', { name: 'Explorar animales' })).toHaveAttribute('href', '/animals');
+    expect(screen.getByRole('link', { name: 'Ver mis donaciones' })).toHaveAttribute('href', '/my-donations');
   });
 
   it('renders correct navigation links for sponsorship type', () => {
     render(<PaymentConfirmation type="sponsorship" />);
-    expect(screen.getByRole('link', { name: 'Ver mis apadrinamientos' })).toHaveAttribute('href', '/mis-apadrinamientos');
+    expect(screen.getByRole('link', { name: 'Ver mis apadrinamientos' })).toHaveAttribute('href', '/my-sponsorships');
   });
 });

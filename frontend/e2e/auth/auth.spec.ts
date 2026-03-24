@@ -175,7 +175,7 @@ test.describe('Authentication', () => {
 
   test('should redirect non-shelter-admin from shelter panel', { tag: [...AUTH_ROLE_REDIRECT] }, async ({ page }) => {
     // @flow:auth-role-redirect — unauthenticated user accessing shelter panel
-    await page.goto('/refugio/animales');
+    await page.goto('/shelter/animales');
     await waitForPageLoad(page);
 
     await expect(page).toHaveURL(/sign-in|animales/);
@@ -192,7 +192,7 @@ test.describe('Authentication', () => {
     await expect(emailInput).toBeVisible();
 
     // After visiting a protected route, user is redirected back (no session)
-    await page.goto('/mi-perfil');
+    await page.goto('/my-profile');
     await waitForPageLoad(page);
     await expect(page).toHaveURL(/sign-in|mi-perfil/);
   });
@@ -200,7 +200,7 @@ test.describe('Authentication', () => {
   test('should not persist session across fresh navigation without cookies', { tag: [...AUTH_SESSION_PERSISTENCE] }, async ({ page, context }) => {
     // @flow:auth-session-persistence — verify cookies drive session
     await context.clearCookies();
-    await page.goto('/mi-perfil');
+    await page.goto('/my-profile');
     await waitForPageLoad(page);
 
     // Without cookies, protected routes should redirect

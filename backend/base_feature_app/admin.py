@@ -7,7 +7,7 @@ from .models import (
     User, PasswordCode, Shelter, Animal, AdoptionApplication,
     Campaign, Donation, Sponsorship, Payment, UpdatePost,
     AdopterIntent, ShelterInvite, Subscription, Favorite,
-    NotificationPreference, NotificationLog,
+    NotificationPreference, NotificationLog, BlogPost,
 )
 
 
@@ -184,6 +184,36 @@ class NotificationLogAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at',)
 
 
+class BlogPostAdmin(admin.ModelAdmin):
+    list_display = ('title_es', 'slug', 'category', 'author', 'is_published', 'is_featured', 'published_at', 'created_at')
+    list_filter = ('is_published', 'is_featured', 'category', 'author')
+    search_fields = ('title_es', 'title_en', 'slug', 'excerpt_es', 'excerpt_en')
+    prepopulated_fields = {'slug': ('title_es',)}
+    readonly_fields = ('created_at', 'updated_at')
+    fieldsets = (
+        ('Español', {
+            'fields': ('title_es', 'excerpt_es', 'content_es', 'content_json_es'),
+        }),
+        ('English', {
+            'fields': ('title_en', 'excerpt_en', 'content_en', 'content_json_en'),
+        }),
+        (None, {
+            'fields': ('slug', 'cover_image', 'cover_image_url', 'cover_image_credit', 'cover_image_credit_url',
+                       'sources', 'category', 'read_time_minutes', 'is_featured', 'author'),
+        }),
+        ('SEO', {
+            'fields': ('meta_title_es', 'meta_title_en', 'meta_description_es', 'meta_description_en',
+                       'meta_keywords_es', 'meta_keywords_en'),
+        }),
+        ('Publication', {
+            'fields': ('is_published', 'published_at'),
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+        }),
+    )
+
+
 # ============================================================================
 # CUSTOM ADMIN SITE - ORGANIZED BY SECTIONS
 # ============================================================================
@@ -246,6 +276,14 @@ class MiHuellaAdminSite(admin.AdminSite):
                     if m['object_name'] in ['UpdatePost', 'NotificationPreference', 'NotificationLog']
                 ],
             },
+            {
+                'name': _('📝 Blog'),
+                'app_label': 'blog',
+                'models': [
+                    m for m in base_app_models
+                    if m['object_name'] in ['BlogPost']
+                ],
+            },
         ]
 
         return [s for s in custom_app_list if s['models']]
@@ -273,3 +311,4 @@ admin_site.register(Subscription, SubscriptionAdmin)
 admin_site.register(UpdatePost, UpdatePostAdmin)
 admin_site.register(NotificationPreference, NotificationPreferenceAdmin)
 admin_site.register(NotificationLog, NotificationLogAdmin)
+admin_site.register(BlogPost, BlogPostAdmin)

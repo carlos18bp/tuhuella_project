@@ -24,7 +24,7 @@ describe('AnimalCard', () => {
   it('links to animal detail page', () => {
     render(<AnimalCard animal={mockAnimals[0]} />);
     const link = screen.getByRole('link');
-    expect(link).toHaveAttribute('href', '/animales/1');
+    expect(link).toHaveAttribute('href', '/animals/1');
   });
 
   it('shows gender badge for female animal', () => {

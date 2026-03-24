@@ -86,6 +86,31 @@
 | Fix stale test files | ✅ | helpers.py, test_admin.py, test_urls.py, Role.CUSTOMER |
 | Sync docs/e2e-flow-definitions.json | ✅ | |
 
+## Phase 9 — Blog Feature
+| Task | Status | Notes |
+|------|--------|-------|
+| BlogPost model (bilingual, JSON content, SEO, 10 categories, 2 authors) | ✅ | `base_feature_app/models/blog_post.py` |
+| Blog serializers (7: public list/detail, admin list/detail, create/update, JSON import, template) | ✅ | `serializers/blog.py` |
+| Blog views (14 endpoints: public + admin CRUD, duplicate, upload, calendar, JSON template) | ✅ | `views/blog.py` |
+| Blog URLs (public + admin) | ✅ | `urls/blog.py` |
+| BlogPostAdmin (Django admin, organized fieldsets) | ✅ | `admin.py` |
+| `create_blog_posts` management command (10 sample posts) | ✅ | |
+| Frontend types (BlogPost, BlogPostDetail, BlogPostAdmin) | ✅ | `lib/types.ts` |
+| Frontend constants (routes + API endpoints) | ✅ | `lib/constants.ts` |
+| blogStore (Zustand: CRUD, calendar, JSON import, cover upload) | ✅ | `lib/stores/blogStore.ts` |
+| BlogContentRenderer (JSON structured content) | ✅ | `components/blog/` |
+| ReadingProgressBar (scroll + time remaining) | ✅ | `components/blog/` |
+| Public blog listing page | ✅ | `[locale]/blog/page.tsx` |
+| Public blog detail page | ✅ | `[locale]/blog/[slug]/page.tsx` |
+| Admin blog list page | ✅ | `[locale]/admin/blog/page.tsx` |
+| Admin blog create page | ✅ | `[locale]/admin/blog/crear/page.tsx` |
+| Admin blog edit page | ✅ | `[locale]/admin/blog/[id]/editar/page.tsx` |
+| Admin blog calendar page | ✅ | `[locale]/admin/blog/calendario/page.tsx` |
+| i18n messages + Header/Footer nav links | ✅ | `messages/es.json`, `messages/en.json` |
+| Backend tests (8 model + 16 view, 88.8% view coverage) | ✅ | |
+| Frontend unit tests (blogStore 18, BlogContentRenderer 14, ReadingProgressBar 7, pages 15 = 54) | ✅ | |
+| E2E flow definitions (6 flows) + blog.spec.ts (7 tests) | ✅ | |
+
 ## Methodology Setup
 | Task | Status | Notes |
 |------|--------|-------|

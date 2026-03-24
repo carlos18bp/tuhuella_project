@@ -79,31 +79,31 @@ describe('constants', () => {
     });
 
     it('exposes ANIMALS route', () => {
-      expect(ROUTES.ANIMALS).toBe('/animales');
+      expect(ROUTES.ANIMALS).toBe('/animals');
     });
 
     it('ANIMAL_DETAIL returns the correct route for a given id', () => {
-      expect(ROUTES.ANIMAL_DETAIL(5)).toBe('/animales/5');
+      expect(ROUTES.ANIMAL_DETAIL(5)).toBe('/animals/5');
     });
 
     it('ANIMAL_DETAIL accepts string id', () => {
-      expect(ROUTES.ANIMAL_DETAIL('abc')).toBe('/animales/abc');
+      expect(ROUTES.ANIMAL_DETAIL('abc')).toBe('/animals/abc');
     });
 
     it('exposes SHELTERS route', () => {
-      expect(ROUTES.SHELTERS).toBe('/refugios');
+      expect(ROUTES.SHELTERS).toBe('/shelters');
     });
 
     it('SHELTER_DETAIL returns the correct route for a given id', () => {
-      expect(ROUTES.SHELTER_DETAIL(3)).toBe('/refugios/3');
+      expect(ROUTES.SHELTER_DETAIL(3)).toBe('/shelters/3');
     });
 
     it('exposes CAMPAIGNS route', () => {
-      expect(ROUTES.CAMPAIGNS).toBe('/campanas');
+      expect(ROUTES.CAMPAIGNS).toBe('/campaigns');
     });
 
     it('CAMPAIGN_DETAIL returns the correct route for a given id', () => {
-      expect(ROUTES.CAMPAIGN_DETAIL(7)).toBe('/campanas/7');
+      expect(ROUTES.CAMPAIGN_DETAIL(7)).toBe('/campaigns/7');
     });
   });
 

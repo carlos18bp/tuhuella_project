@@ -14,4 +14,5 @@ urlpatterns = [
     path('shelter-invites/', include('base_feature_app.urls.shelter_invite')),
     path('admin/', include('base_feature_app.urls.admin_urls')),
     path('favorites/', include('base_feature_app.urls.favorite')),
+    path('blog/', include('base_feature_app.urls.blog')),
 ]

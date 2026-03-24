@@ -14,6 +14,7 @@ export { default as FAQAccordion } from './FAQAccordion';
 export { default as Hero } from './Hero';
 export { default as HowItWorks } from './HowItWorks';
 export { default as LoadingSpinner } from './LoadingSpinner';
+export { default as MultiSelectDropdown } from './MultiSelectDropdown';
 export { default as PaymentConfirmation } from './PaymentConfirmation';
 export { default as PaymentMethodSelector } from './PaymentMethodSelector';
 export { default as ProgressBar } from './ProgressBar';

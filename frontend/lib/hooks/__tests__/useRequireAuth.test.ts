@@ -3,9 +3,9 @@ import { renderHook, waitFor } from '@testing-library/react';
 
 import { useRequireAuth } from '../useRequireAuth';
 import { useAuthStore } from '../../stores/authStore';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 
-jest.mock('next/navigation', () => ({
+jest.mock('@/i18n/navigation', () => ({
   useRouter: jest.fn(),
 }));
 
