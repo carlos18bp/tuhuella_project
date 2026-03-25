@@ -96,12 +96,13 @@ describe('SignUpPage', () => {
 
     render(<SignUpPage />);
 
-    fireEvent.change(screen.getByPlaceholderText('First Name'), { target: { value: 'Test' } });
-    fireEvent.change(screen.getByPlaceholderText('Last Name'), { target: { value: 'User' } });
-    fireEvent.change(screen.getByPlaceholderText('Email'), { target: { value: 'user@example.com' } });
-    fireEvent.change(screen.getByPlaceholderText('Password'), { target: { value: 'password123' } });
-    fireEvent.change(screen.getByPlaceholderText('Confirm Password'), { target: { value: 'password456' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
+    fireEvent.change(screen.getByPlaceholderText('Juan'), { target: { value: 'Test' } });
+    fireEvent.change(screen.getByPlaceholderText('Pérez'), { target: { value: 'User' } });
+    fireEvent.change(screen.getByPlaceholderText('tu@email.com'), { target: { value: 'user@example.com' } });
+    const passwordFields = screen.getAllByPlaceholderText('••••••••');
+    fireEvent.change(passwordFields[0], { target: { value: 'password123' } });
+    fireEvent.change(passwordFields[1], { target: { value: 'password456' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Crear cuenta' }));
 
     expect(await screen.findByText('Passwords do not match')).toBeInTheDocument();
     expect(signUp).not.toHaveBeenCalled();
@@ -114,10 +115,11 @@ describe('SignUpPage', () => {
 
     render(<SignUpPage />);
 
-    fireEvent.change(screen.getByPlaceholderText('Email'), { target: { value: 'user@example.com' } });
-    fireEvent.change(screen.getByPlaceholderText('Password'), { target: { value: 'short' } });
-    fireEvent.change(screen.getByPlaceholderText('Confirm Password'), { target: { value: 'short' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
+    fireEvent.change(screen.getByPlaceholderText('tu@email.com'), { target: { value: 'user@example.com' } });
+    const passwordFields = screen.getAllByPlaceholderText('••••••••');
+    fireEvent.change(passwordFields[0], { target: { value: 'short' } });
+    fireEvent.change(passwordFields[1], { target: { value: 'short' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Crear cuenta' }));
 
     expect(await screen.findByText('Password must be at least 8 characters')).toBeInTheDocument();
     expect(signUp).not.toHaveBeenCalled();
@@ -131,12 +133,13 @@ describe('SignUpPage', () => {
 
     render(<SignUpPage />);
 
-    fireEvent.change(screen.getByPlaceholderText('First Name'), { target: { value: 'Test' } });
-    fireEvent.change(screen.getByPlaceholderText('Last Name'), { target: { value: 'User' } });
-    fireEvent.change(screen.getByPlaceholderText('Email'), { target: { value: 'user@example.com' } });
-    fireEvent.change(screen.getByPlaceholderText('Password'), { target: { value: 'password123' } });
-    fireEvent.change(screen.getByPlaceholderText('Confirm Password'), { target: { value: 'password123' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
+    fireEvent.change(screen.getByPlaceholderText('Juan'), { target: { value: 'Test' } });
+    fireEvent.change(screen.getByPlaceholderText('Pérez'), { target: { value: 'User' } });
+    fireEvent.change(screen.getByPlaceholderText('tu@email.com'), { target: { value: 'user@example.com' } });
+    const passwordFields = screen.getAllByPlaceholderText('••••••••');
+    fireEvent.change(passwordFields[0], { target: { value: 'password123' } });
+    fireEvent.change(passwordFields[1], { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Crear cuenta' }));
 
     await waitFor(() => {
       expect(signUp).toHaveBeenCalledWith({
@@ -196,10 +199,11 @@ describe('SignUpPage', () => {
 
     render(<SignUpPage />);
 
-    fireEvent.change(screen.getByPlaceholderText('Email'), { target: { value: 'user@example.com' } });
-    fireEvent.change(screen.getByPlaceholderText('Password'), { target: { value: 'password123' } });
-    fireEvent.change(screen.getByPlaceholderText('Confirm Password'), { target: { value: 'password123' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
+    fireEvent.change(screen.getByPlaceholderText('tu@email.com'), { target: { value: 'user@example.com' } });
+    const passwordFields = screen.getAllByPlaceholderText('••••••••');
+    fireEvent.change(passwordFields[0], { target: { value: 'password123' } });
+    fireEvent.change(passwordFields[1], { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Crear cuenta' }));
 
     expect(await screen.findByText('Registration failed')).toBeInTheDocument();
   });
@@ -211,10 +215,11 @@ describe('SignUpPage', () => {
 
     render(<SignUpPage />);
 
-    fireEvent.change(screen.getByPlaceholderText('Email'), { target: { value: 'user@example.com' } });
-    fireEvent.change(screen.getByPlaceholderText('Password'), { target: { value: 'password123' } });
-    fireEvent.change(screen.getByPlaceholderText('Confirm Password'), { target: { value: 'password123' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
+    fireEvent.change(screen.getByPlaceholderText('tu@email.com'), { target: { value: 'user@example.com' } });
+    const passwordFields = screen.getAllByPlaceholderText('••••••••');
+    fireEvent.change(passwordFields[0], { target: { value: 'password123' } });
+    fireEvent.change(passwordFields[1], { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Crear cuenta' }));
 
     expect(await screen.findByText('Registration failed')).toBeInTheDocument();
   });

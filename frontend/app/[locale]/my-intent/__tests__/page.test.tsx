@@ -46,7 +46,7 @@ describe('MiIntencionPage', () => {
     mockApi.get.mockReturnValueOnce(new Promise(() => {}));
     setupMock();
     const { container } = render(<MiIntencionPage />);
-    expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
+    expect(container.querySelector('.animate-shimmer')).toBeInTheDocument();
   });
 
   it('renders form after loading when no intent exists', async () => {

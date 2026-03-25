@@ -11,9 +11,9 @@ describe('MiPerfilPage', () => {
     useAuthStore.setState({ user: null });
   });
 
-  it('renders loading state when user is null', () => {
-    render(<MiPerfilPage />);
-    expect(screen.getByText('Cargando perfil...')).toBeInTheDocument();
+  it('renders loading skeleton when user is null', () => {
+    const { container } = render(<MiPerfilPage />);
+    expect(container.querySelector('.animate-shimmer')).toBeInTheDocument();
   });
 
   it('renders user profile when user is set', () => {

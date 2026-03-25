@@ -175,7 +175,7 @@ describe('authStore', () => {
       await useAuthStore.getState().sendPasswordResetCode('user@example.com');
     });
 
-    expect(mockApi.post).toHaveBeenCalledWith('send_passcode/', { email: 'user@example.com' });
+    expect(mockApi.post).toHaveBeenCalledWith('/auth/send_passcode/', { email: 'user@example.com' });
   });
 
   it('resets password', async () => {
@@ -187,7 +187,7 @@ describe('authStore', () => {
         .resetPassword({ email: 'user@example.com', code: '123456', new_password: 'password123' });
     });
 
-    expect(mockApi.post).toHaveBeenCalledWith('verify_passcode_and_reset_password/', {
+    expect(mockApi.post).toHaveBeenCalledWith('/auth/verify_passcode_and_reset_password/', {
       email: 'user@example.com',
       code: '123456',
       new_password: 'password123',

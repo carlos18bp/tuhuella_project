@@ -85,7 +85,7 @@ describe('HomePage', () => {
   it('renders loading skeletons when no animals', () => {
     setupMocks({ animals: [] });
     const { container } = render(<HomePage />);
-    expect(container.querySelectorAll('.animate-pulse').length).toBeGreaterThan(0);
+    expect(container.querySelectorAll('.animate-shimmer').length).toBeGreaterThan(0);
   });
 
   it('renders featured animal cards when animals are loaded', () => {
@@ -127,10 +127,10 @@ describe('HomePage', () => {
     expect(state.fetchAnimals).toHaveBeenCalled();
   });
 
-  it('does not call fetchAnimals when animals already loaded', () => {
+  it('calls fetchAnimals with locale even when animals already loaded', () => {
     const state = setupMocks({ animals: mockAnimals });
     render(<HomePage />);
-    expect(state.fetchAnimals).not.toHaveBeenCalled();
+    expect(state.fetchAnimals).toHaveBeenCalledWith(undefined, 'es');
   });
 
   it('renders feature cards in hero section', () => {

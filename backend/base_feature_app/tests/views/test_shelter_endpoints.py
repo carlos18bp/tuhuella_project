@@ -60,7 +60,7 @@ def test_shelter_create_success(authenticated_client, existing_user):
         {
             'name': 'New Shelter',
             'city': 'Cali',
-            'description': 'A new place',
+            'description_es': 'A new place',
             'phone': '3009876543',
             'email': 'new@shelter.org',
         },

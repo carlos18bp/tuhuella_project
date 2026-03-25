@@ -11,8 +11,8 @@ describe('EmptyState', () => {
   });
 
   it('renders default icon when none provided', () => {
-    render(<EmptyState message="Empty" />);
-    expect(screen.getByText('🔍')).toBeInTheDocument();
+    const { container } = render(<EmptyState message="Empty" />);
+    expect(container.querySelector('svg.lucide-search-x')).toBeInTheDocument();
   });
 
   it('renders custom icon when provided', () => {

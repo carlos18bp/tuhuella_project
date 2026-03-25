@@ -6,8 +6,8 @@ Use this document to understand each flow's steps, branching conditions, role re
 
 > **Flow IDs in this document match `e2e/flow-definitions.json` and `e2e/helpers/flow-tags.ts` exactly.**
 
-**Version:** 3.0.0
-**Last Updated:** 2026-03-22
+**Version:** 4.0.0
+**Last Updated:** 2026-03-25
 
 ---
 
@@ -29,7 +29,9 @@ Use this document to understand each flow's steps, branching conditions, role re
 14. [Admin Module](#admin-module)
 15. [Navigation Module](#navigation-module)
 16. [Public Module](#public-module)
-17. [Cross-Reference](#cross-reference)
+17. [Blog Module](#blog-module)
+18. [Blog Admin Module](#blog-admin-module)
+19. [Cross-Reference](#cross-reference)
 
 ---
 
@@ -86,6 +88,32 @@ Use this document to understand each flow's steps, branching conditions, role re
 | `navigation-footer` | Footer navigation | navigation | P4 | shared | all pages |
 | `navigation-between-pages` | Cross-page navigation | navigation | P2 | shared | all pages |
 | `public-faq` | FAQ page | public | P4 | shared | `/faq` |
+| `shelter-panel-applications` | Shelter manage adoption applications | shelter-panel | P1 | shelter_admin | `/refugio/solicitudes` |
+| `adoption-form-wizard` | Adoption form wizard completion | adoption | P1 | adopter | `/adopt/[id]` |
+| `donation-checkout-submit` | Donation checkout form submission | donation | P1 | adopter | `/checkout/donacion` |
+| `sponsorship-checkout-submit` | Sponsorship checkout form submission | sponsorship | P1 | adopter | `/checkout/apadrinamiento` |
+| `notification-preferences` | Notification preferences management | adopter | P2 | adopter | `/my-profile/notifications` |
+| `notification-bell` | Notification bell interaction | navigation | P2 | adopter, shelter_admin, admin | all pages |
+| `shelter-panel-updates` | Shelter manage update posts | shelter-panel | P2 | shelter_admin | `/refugio/updates` |
+| `shelter-panel-update-create` | Shelter create update post | shelter-panel | P2 | shelter_admin | `/refugio/updates/create` |
+| `shelter-detail-view-animals` | Shelter detail view animals link | shelter | P2 | shared | `/refugios/[id]` |
+| `locale-switch` | Locale switcher toggle | navigation | P2 | shared | all pages |
+| `campaign-tab-toggle` | Campaign tab toggle | campaign | P3 | shared | `/campanas` |
+| `campaign-donate-cta` | Campaign donate CTA | campaign | P2 | shared | `/campanas/[id]` |
+| `shelter-detail-gallery` | Shelter detail gallery lightbox | shelter | P3 | shared | `/refugios/[id]` |
+| `home-featured-animals-carousel` | Home featured animals carousel | home | P3 | shared | `/` |
+| `home-active-campaigns-carousel` | Home active campaigns carousel | home | P3 | shared | `/` |
+| `public-about` | About page | public | P4 | shared | `/about` |
+| `public-terms` | Terms page | public | P4 | shared | `/terms` |
+| `public-work-with-us` | Work with us page | public | P4 | shared | `/work-with-us` |
+| `public-strategic-allies` | Strategic allies page | public | P4 | shared | `/strategic-allies` |
+| `my-applications-list` | View my adoption applications | adoption | P2 | adopter | `/mis-solicitudes` |
+| `blog-browse` | Blog listing page | blog | P2 | shared | `/blog` |
+| `blog-detail` | Blog post detail | blog | P2 | shared | `/blog/[slug]` |
+| `blog-admin-list` | Admin blog list | blog-admin | P2 | admin | `/admin/blog` |
+| `blog-admin-create` | Admin blog create | blog-admin | P2 | admin | `/admin/blog/crear` |
+| `blog-admin-edit` | Admin blog edit | blog-admin | P2 | admin | `/admin/blog/[id]/editar` |
+| `blog-admin-calendar` | Admin blog calendar | blog-admin | P3 | admin | `/admin/blog/calendario` |
 
 ---
 
@@ -163,6 +191,44 @@ Use this document to understand each flow's steps, branching conditions, role re
 1. User is on the home page (`/`).
 2. User clicks active campaigns section link or CTA.
 3. User is navigated to `/campanas`.
+
+---
+
+### home-featured-animals-carousel
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P3 |
+| **Roles** | shared |
+| **Frontend route** | `/` |
+
+**Preconditions:** None.
+
+**Steps:**
+
+1. User is on the home page (`/`).
+2. Featured animals carousel renders with AnimalCard components.
+3. User clicks next/prev arrows or swipe gestures to navigate cards.
+4. User clicks an animal card and is navigated to `/animales/[id]`.
+
+---
+
+### home-active-campaigns-carousel
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P3 |
+| **Roles** | shared |
+| **Frontend route** | `/` |
+
+**Preconditions:** None.
+
+**Steps:**
+
+1. User is on the home page (`/`).
+2. Active campaigns carousel renders with CampaignCard components.
+3. User clicks next/prev arrows or swipe gestures to navigate cards.
+4. User clicks a campaign card and is navigated to `/campanas/[id]`.
 
 ---
 
@@ -598,6 +664,46 @@ Use this document to understand each flow's steps, branching conditions, role re
 
 ---
 
+### shelter-detail-view-animals
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | shared |
+| **Frontend route** | `/refugios/[id]` |
+| **API endpoints** | `GET /api/animals/?shelter=<id>` |
+
+**Preconditions:** Shelter with given ID exists and has published animals.
+
+**Steps:**
+
+1. User is on shelter detail page (`/refugios/[id]`).
+2. User clicks **View Animals** button.
+3. User is navigated to `/animales` with shelter filter applied.
+4. Animal listing shows only animals belonging to that shelter.
+
+---
+
+### shelter-detail-gallery
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P3 |
+| **Roles** | shared |
+| **Frontend route** | `/refugios/[id]` |
+
+**Preconditions:** Shelter has gallery images.
+
+**Steps:**
+
+1. User is on shelter detail page.
+2. Gallery section renders shelter images in a grid.
+3. User clicks an image to open lightbox modal.
+4. Lightbox displays full-size image.
+5. User clicks outside image or X button to close lightbox.
+
+---
+
 ## Campaign Module
 
 ### campaign-browse
@@ -651,6 +757,52 @@ Use this document to understand each flow's steps, branching conditions, role re
 |-----------|----------|
 | Not authenticated | Donate CTA redirects to `/sign-in` |
 | Campaign completed | Donate CTA disabled, "Goal reached" badge shown |
+
+---
+
+### campaign-tab-toggle
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P3 |
+| **Roles** | shared |
+| **Frontend route** | `/campanas` |
+| **API endpoints** | `GET /api/campaigns/` |
+
+**Preconditions:** None.
+
+**Steps:**
+
+1. User is on campaigns listing page (`/campanas`).
+2. Page shows Active and Completed tab toggle.
+3. By default, Active tab is selected showing active campaigns.
+4. User clicks Completed tab.
+5. Listing updates to show only completed campaigns.
+6. User clicks Active tab to return to active campaigns.
+
+---
+
+### campaign-donate-cta
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | shared |
+| **Frontend route** | `/campanas/[id]` → `/checkout/donacion` |
+
+**Preconditions:** Campaign exists and is active. User is authenticated.
+
+**Steps:**
+
+1. User is on campaign detail page (`/campanas/[id]`).
+2. User clicks **Donate** CTA button.
+3. User is navigated to `/checkout/donacion` with campaign context (campaign ID pre-filled).
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| Not authenticated | Redirects to `/sign-in` |
 
 ---
 
@@ -734,6 +886,72 @@ Use this document to understand each flow's steps, branching conditions, role re
 
 ---
 
+### adoption-form-wizard
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P1 |
+| **Roles** | adopter |
+| **Frontend route** | `/adopt/[animalId]` |
+| **API endpoints** | `POST /api/adoptions/create/` |
+
+**Preconditions:** User is authenticated with `adopter` role. Animal exists with `published` status.
+
+**Steps:**
+
+1. User clicks **Solicitar adopción** on animal detail page.
+2. Adoption wizard opens at Step 1 (Questionnaire) with 6 sections:
+   - Basic Info: full name, phone, email, city (required).
+   - Home & Context: housing type, yard, hours alone.
+   - Experience: previous pets, current pets, experience level.
+   - Compatibility: children, children ages, cats, other dogs.
+   - Commitment: vaccination, sterilization, follow-up checkboxes (required).
+   - Logistics: availability date, transport, delivery preference, motivation.
+3. User fills all required fields and clicks **Continue**.
+4. Step 2 (Review) displays read-only summary of answers by section.
+5. User reviews and clicks **Continue**.
+6. Step 3 (Submit) shows optional notes textarea and **Submit** button.
+7. User optionally adds notes and clicks **Submit**.
+8. Frontend sends `POST /api/adoptions/create/` with `{ animal, form_answers, notes }`.
+9. Backend creates `AdoptionApplication` with `status=submitted` (HTTP 201).
+10. Success message displayed.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| Required fields missing | Form validation prevents advancing to next step |
+| Commitment checkboxes unchecked | Cannot proceed past questionnaire |
+| API error | Error message shown, form remains on submit step |
+
+---
+
+### my-applications-list
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | adopter |
+| **Frontend route** | `/mis-solicitudes` |
+| **API endpoints** | `GET /api/adoptions/` |
+
+**Preconditions:** User is authenticated with `adopter` role.
+
+**Steps:**
+
+1. User navigates to `/mis-solicitudes`.
+2. Page loads adoption applications from `GET /api/adoptions/`.
+3. Each application card shows animal name, shelter name, submission date, and status badge.
+4. Status badges display: Submitted, Reviewing, Interview, Approved, Rejected.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| No applications | Empty state message shown |
+
+---
+
 ## Donation Module
 
 ### donation-checkout
@@ -802,6 +1020,40 @@ Use this document to understand each flow's steps, branching conditions, role re
 
 ---
 
+### donation-checkout-submit
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P1 |
+| **Roles** | adopter |
+| **Frontend route** | `/checkout/donacion` |
+| **API endpoints** | `POST /api/donations/create/`, `POST /api/payments/create-intent/` |
+
+**Preconditions:** User is authenticated with `adopter` role.
+
+**Steps:**
+
+1. User navigates to `/checkout/donacion`.
+2. Page renders preset donation amount buttons (e.g., 10,000 / 50,000 COP) and custom amount input.
+3. User selects a preset amount or enters custom amount.
+4. User selects payment method: Tarjeta (card), PSE, or Nequi.
+5. User optionally enters a message in the textarea.
+6. Amount summary updates dynamically.
+7. User clicks **Submit** / **Donar** button.
+8. Frontend sends `POST /api/donations/create/` followed by `POST /api/payments/create-intent/`.
+9. Payment provider (Wompi) processes the transaction.
+10. User is redirected to `/checkout/confirmacion` with status.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| No amount selected | Submit button disabled |
+| No payment method selected | Submit button disabled |
+| Payment fails | Error message shown, user remains on checkout |
+
+---
+
 ## Sponsorship Module
 
 ### sponsorship-checkout
@@ -849,6 +1101,40 @@ Use this document to understand each flow's steps, branching conditions, role re
 |-----------|----------|
 | No sponsorships | Empty state: "No tienes apadrinamientos activos" |
 | API loading | Loading spinner |
+
+---
+
+### sponsorship-checkout-submit
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P1 |
+| **Roles** | adopter |
+| **Frontend route** | `/checkout/apadrinamiento` |
+| **API endpoints** | `POST /api/sponsorships/create/`, `POST /api/payments/create-intent/` |
+
+**Preconditions:** User is authenticated with `adopter` role.
+
+**Steps:**
+
+1. User navigates to `/checkout/apadrinamiento`.
+2. Page renders frequency selector: Monthly / One-time toggle.
+3. User selects frequency.
+4. Preset sponsorship amount buttons displayed. User selects preset or enters custom amount.
+5. User selects payment method: Tarjeta (card), PSE, or Nequi.
+6. Submit button shows selected amount and frequency.
+7. User clicks **Submit** button.
+8. Frontend sends `POST /api/sponsorships/create/` followed by `POST /api/payments/create-intent/`.
+9. Payment provider processes the transaction.
+10. User is redirected to `/checkout/confirmacion` with status.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| No amount selected | Submit button disabled |
+| No payment method selected | Submit button disabled |
+| Payment fails | Error message shown |
 
 ---
 
@@ -971,6 +1257,28 @@ Use this document to understand each flow's steps, branching conditions, role re
 3. Form displays: first name, last name, phone, city.
 4. User edits fields and submits.
 5. Profile updates and success message shown.
+
+---
+
+### notification-preferences
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | adopter |
+| **Frontend route** | `/my-profile/notifications` |
+| **API endpoints** | `GET /api/notifications/preferences/`, `PUT /api/notifications/preferences/update/` |
+
+**Preconditions:** User is authenticated with `adopter` role.
+
+**Steps:**
+
+1. User navigates to `/my-profile/notifications`.
+2. Page loads notification preferences from `GET /api/notifications/preferences/`.
+3. Preferences display toggle switches for each notification event group (email, in-app channels).
+4. User toggles a preference switch.
+5. Frontend sends `PUT /api/notifications/preferences/update/` with updated preferences.
+6. Success confirmation shown.
 
 ---
 
@@ -1099,6 +1407,85 @@ Use this document to understand each flow's steps, branching conditions, role re
 3. Form displays: name, legal name, description, city, address, phone, email, website.
 4. Admin edits fields and submits.
 5. Shelter info updates and success message shown.
+
+---
+
+### shelter-panel-applications
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P1 |
+| **Roles** | shelter_admin |
+| **Frontend route** | `/refugio/solicitudes` |
+| **API endpoints** | `GET /api/adoptions/`, `PUT /api/adoptions/<id>/status/` |
+
+**Preconditions:** User is authenticated with `shelter_admin` role. Shelter has received adoption applications.
+
+**Steps:**
+
+1. Shelter admin navigates to `/refugio/solicitudes`.
+2. Page loads applications for the shelter from `GET /api/adoptions/`.
+3. Each application card shows applicant email, animal name, status badge, submission date.
+4. Admin clicks status action buttons: **Revisar** → **Entrevista** → **Aprobar** / **Rechazar**.
+5. Frontend sends `PUT /api/adoptions/<id>/status/` with `{ status }`.
+6. Application status updates in the list.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| No applications | Empty state message shown |
+| Status already final (approved/rejected) | No further action buttons |
+
+---
+
+### shelter-panel-updates
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | shelter_admin |
+| **Frontend route** | `/refugio/updates` |
+| **API endpoints** | `GET /api/updates/`, `DELETE /api/updates/<id>/delete/` |
+
+**Preconditions:** User is authenticated with `shelter_admin` role.
+
+**Steps:**
+
+1. Shelter admin navigates to `/refugio/updates`.
+2. Page loads update posts from `GET /api/updates/`.
+3. Each post card shows title, content preview, creation date.
+4. Admin can click **Create** button to navigate to `/refugio/updates/create`.
+5. Admin can delete a post by clicking delete action.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| No update posts | Empty state message shown |
+
+---
+
+### shelter-panel-update-create
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | shelter_admin |
+| **Frontend route** | `/refugio/updates/create` |
+| **API endpoints** | `POST /api/updates/create/` |
+
+**Preconditions:** User is authenticated with `shelter_admin` role.
+
+**Steps:**
+
+1. Shelter admin navigates to `/refugio/updates/create`.
+2. Form renders: title, content, optional campaign/animal association, image upload.
+3. Admin fills form fields.
+4. Admin clicks **Publish** / **Submit** button.
+5. Frontend sends `POST /api/updates/create/` with form data.
+6. Backend creates update post (HTTP 201).
+7. Redirect to `/refugio/updates`.
 
 ---
 
@@ -1260,6 +1647,51 @@ Use this document to understand each flow's steps, branching conditions, role re
 
 ---
 
+### notification-bell
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | adopter, shelter_admin, admin |
+| **Frontend route** | all pages |
+| **API endpoints** | `GET /api/notifications/unread-count/`, `GET /api/notifications/logs/`, `PUT /api/notifications/logs/mark-all-read/` |
+
+**Preconditions:** User is authenticated.
+
+**Steps:**
+
+1. Authenticated user sees bell icon in header.
+2. Bell displays unread count badge (polled every 30 seconds).
+3. User clicks bell icon to open notification dropdown.
+4. Dropdown shows up to 10 recent notifications.
+5. User clicks **Mark all as read** button.
+6. Frontend sends `PUT /api/notifications/logs/mark-all-read/`.
+7. Unread count resets to 0, badge disappears.
+8. User can click **View all notifications** link to navigate to full notifications page.
+
+---
+
+### locale-switch
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | shared |
+| **Frontend route** | all pages |
+
+**Preconditions:** None.
+
+**Steps:**
+
+1. User sees ES/EN locale switcher in header.
+2. Current locale is highlighted (default: ES).
+3. User clicks the alternate locale toggle.
+4. Page content re-renders in the target language without full page reload.
+5. URL updates to reflect new locale prefix (e.g., `/es/animales` → `/en/animales`).
+6. Locale preference persists across navigation.
+
+---
+
 ## Public Module
 
 ### public-faq
@@ -1277,6 +1709,208 @@ Use this document to understand each flow's steps, branching conditions, role re
 1. User navigates to `/faq`.
 2. Page renders FAQ accordion with questions and answers.
 3. User can expand/collapse individual questions.
+
+---
+
+### public-about
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P4 |
+| **Roles** | shared |
+| **Frontend route** | `/about` |
+
+**Preconditions:** None.
+
+**Steps:**
+
+1. User navigates to `/about`.
+2. Page renders organization information and mission statement.
+
+---
+
+### public-terms
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P4 |
+| **Roles** | shared |
+| **Frontend route** | `/terms` |
+
+**Preconditions:** None.
+
+**Steps:**
+
+1. User navigates to `/terms`.
+2. Page renders terms of service content.
+
+---
+
+### public-work-with-us
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P4 |
+| **Roles** | shared |
+| **Frontend route** | `/work-with-us` |
+
+**Preconditions:** None.
+
+**Steps:**
+
+1. User navigates to `/work-with-us`.
+2. Page renders volunteer and work opportunities information.
+
+---
+
+### public-strategic-allies
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P4 |
+| **Roles** | shared |
+| **Frontend route** | `/strategic-allies` |
+| **API endpoints** | `GET /api/strategic-allies/` |
+
+**Preconditions:** None.
+
+**Steps:**
+
+1. User navigates to `/strategic-allies`.
+2. Page loads partner organizations from `GET /api/strategic-allies/`.
+3. Each ally card shows name, logo, and website link.
+
+---
+
+## Blog Module
+
+### blog-browse
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | shared |
+| **Frontend route** | `/blog` |
+| **API endpoints** | `GET /api/blog/` |
+
+**Preconditions:** None.
+
+**Steps:**
+
+1. User navigates to `/blog`.
+2. Page renders featured post card (large) and regular post grid.
+3. Search bar allows client-side filtering by title/excerpt.
+4. Category filter buttons filter posts by category.
+5. Pagination with Previous/Next buttons navigates between pages.
+6. User clicks a blog post card to navigate to `/blog/[slug]`.
+
+---
+
+### blog-detail
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | shared |
+| **Frontend route** | `/blog/[slug]` |
+| **API endpoints** | `GET /api/blog/<slug>/` |
+
+**Preconditions:** Blog post with given slug exists and is published.
+
+**Steps:**
+
+1. User navigates to `/blog/[slug]`.
+2. Page renders full article with title, content, author, reading time, date.
+3. Reading progress bar tracks scroll position.
+4. Back link returns user to blog listing.
+
+---
+
+## Blog Admin Module
+
+### blog-admin-list
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | admin |
+| **Frontend route** | `/admin/blog` |
+| **API endpoints** | `GET /api/blog/admin/` |
+
+**Preconditions:** User is authenticated with `admin` role.
+
+**Steps:**
+
+1. Admin navigates to `/admin/blog`.
+2. Page lists all blog posts (published, draft, scheduled) with status indicators.
+3. Links to **Nuevo Post** (create) and **Calendario** (calendar view).
+4. Each post row has edit/delete actions.
+
+---
+
+### blog-admin-create
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | admin |
+| **Frontend route** | `/admin/blog/crear` |
+| **API endpoints** | `POST /api/blog/admin/create/` |
+
+**Preconditions:** User is authenticated with `admin` role.
+
+**Steps:**
+
+1. Admin navigates to `/admin/blog/crear`.
+2. Page shows Manual and JSON import tabs.
+3. Manual tab: form with title (ES/EN), slug, content, category, cover image, SEO fields.
+4. JSON import tab: paste JSON content for bulk creation.
+5. Admin fills form and clicks **Publish** / **Save as Draft**.
+6. Frontend sends `POST /api/blog/admin/create/` with form data.
+7. Blog post created, redirect to admin blog list.
+
+---
+
+### blog-admin-edit
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | admin |
+| **Frontend route** | `/admin/blog/[id]/editar` |
+| **API endpoints** | `GET /api/blog/admin/<id>/`, `PUT /api/blog/admin/<id>/update/` |
+
+**Preconditions:** User is authenticated with `admin` role. Blog post with given ID exists.
+
+**Steps:**
+
+1. Admin navigates to `/admin/blog/[id]/editar`.
+2. Form loads existing post data: title, content, JSON content, SEO fields, cover image.
+3. Admin edits fields.
+4. Admin clicks **Update** / **Save**.
+5. Frontend sends `PUT /api/blog/admin/<id>/update/` with updated data.
+6. Blog post updated, success message shown.
+
+---
+
+### blog-admin-calendar
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P3 |
+| **Roles** | admin |
+| **Frontend route** | `/admin/blog/calendario` |
+| **API endpoints** | `GET /api/blog/admin/calendar/` |
+
+**Preconditions:** User is authenticated with `admin` role.
+
+**Steps:**
+
+1. Admin navigates to `/admin/blog/calendario`.
+2. Calendar view renders monthly overview with post indicators.
+3. Posts color-coded by status (published, draft, scheduled).
+4. Navigation arrows allow moving between months.
+5. Clicking a day/post navigates to the edit page.
 
 ---
 

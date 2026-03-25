@@ -109,7 +109,7 @@ def shelter(shelter_admin_user):
     return Shelter.objects.create(
         name='Happy Paws',
         legal_name='Happy Paws Foundation',
-        description='A great shelter',
+        description_es='A great shelter',
         city='Bogotá',
         address='Calle 123',
         phone='3001234567',
@@ -130,7 +130,7 @@ def animal(shelter):
         age_range=Animal.AgeRange.YOUNG,
         gender=Animal.Gender.FEMALE,
         size=Animal.Size.MEDIUM,
-        description='Friendly dog',
+        description_es='Friendly dog',
         status=Animal.Status.PUBLISHED,
         is_vaccinated=True,
         is_sterilized=False,
@@ -143,8 +143,8 @@ def campaign(shelter):
     now = timezone.now()
     return Campaign.objects.create(
         shelter=shelter,
-        title='Medical Fund',
-        description='Help us cover medical costs',
+        title_es='Medical Fund',
+        description_es='Help us cover medical costs',
         goal_amount=Decimal('500000.00'),
         status=Campaign.Status.ACTIVE,
         starts_at=now,
@@ -200,8 +200,8 @@ def update_post(shelter, campaign, animal):
         shelter=shelter,
         campaign=campaign,
         animal=animal,
-        title='Luna recovered!',
-        content='Luna is doing great after surgery.',
+        title_es='Luna recovered!',
+        content_es='Luna is doing great after surgery.',
     )
 
 

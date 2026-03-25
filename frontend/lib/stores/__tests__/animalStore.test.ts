@@ -38,7 +38,9 @@ describe('animalStore', () => {
   });
 
   it('fetches animals list and stores them', async () => {
-    mockApi.get.mockResolvedValueOnce({ data: [ANIMAL_FIXTURE] });
+    mockApi.get.mockResolvedValueOnce({
+      data: { results: [ANIMAL_FIXTURE], count: 1, page: 1, page_size: 20, total_pages: 1 },
+    });
 
     await act(async () => {
       await useAnimalStore.getState().fetchAnimals();
@@ -75,7 +77,9 @@ describe('animalStore', () => {
   });
 
   it('passes filters to fetchAnimals', async () => {
-    mockApi.get.mockResolvedValueOnce({ data: [] });
+    mockApi.get.mockResolvedValueOnce({
+      data: { results: [], count: 0, page: 1, page_size: 20, total_pages: 0 },
+    });
     const filters = { species: 'cat', size: 'small' };
 
     await act(async () => {
@@ -84,7 +88,7 @@ describe('animalStore', () => {
 
     expect(mockApi.get).toHaveBeenCalledWith(
       expect.any(String),
-      { params: filters },
+      { params: { ...filters, page: 1, page_size: 20 } },
     );
   });
 
@@ -132,7 +136,9 @@ describe('animalStore', () => {
 
   it('uses stored filters when fetchAnimals is called without args', async () => {
     useAnimalStore.setState({ filters: { species: 'cat' } });
-    mockApi.get.mockResolvedValueOnce({ data: [] });
+    mockApi.get.mockResolvedValueOnce({
+      data: { results: [], count: 0, page: 1, page_size: 20, total_pages: 0 },
+    });
 
     await act(async () => {
       await useAnimalStore.getState().fetchAnimals();
@@ -140,7 +146,7 @@ describe('animalStore', () => {
 
     expect(mockApi.get).toHaveBeenCalledWith(
       expect.any(String),
-      { params: { species: 'cat' } },
+      { params: { species: 'cat', page: 1, page_size: 20 } },
     );
   });
 

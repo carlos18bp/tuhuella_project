@@ -34,8 +34,8 @@ def test_update_post_create_update_serializer_valid(shelter):
     """Create serializer accepts valid data."""
     serializer = UpdatePostCreateUpdateSerializer(data={
         'shelter': shelter.pk,
-        'title': 'New arrival',
-        'content': 'We just rescued a kitten!',
+        'title_es': 'New arrival',
+        'content_es': 'We just rescued a kitten!',
     })
 
     assert serializer.is_valid(), serializer.errors
@@ -46,8 +46,8 @@ def test_update_post_create_update_serializer_rejects_missing_title(shelter):
     """Create serializer rejects missing title."""
     serializer = UpdatePostCreateUpdateSerializer(data={
         'shelter': shelter.pk,
-        'content': 'Some content',
+        'content_es': 'Some content',
     })
 
     assert not serializer.is_valid()
-    assert 'title' in serializer.errors
+    assert 'title_es' in serializer.errors

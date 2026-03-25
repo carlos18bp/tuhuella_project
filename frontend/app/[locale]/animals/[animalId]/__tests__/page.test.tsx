@@ -19,6 +19,10 @@ jest.mock('@/lib/stores/authStore', () => ({ useAuthStore: jest.fn() }));
 jest.mock('@/components/ui', () => ({
   AnimalGallery: ({ name }: any) =>
     React.createElement('div', { 'data-testid': 'gallery' }, name),
+  FAQAccordion: () => null,
+}));
+jest.mock('@/lib/hooks/useFAQs', () => ({
+  useFAQsByTopic: () => ({ items: [], loading: false }),
 }));
 
 const mockUseAnimalStore = useAnimalStore as unknown as jest.Mock;
@@ -33,6 +37,7 @@ const setupMocks = (overrides: Record<string, unknown> = {}) => {
     isAuthenticated: false,
     toggleFavorite: jest.fn(),
     isFavorited: jest.fn().mockReturnValue(false),
+    fetchFavorites: jest.fn(),
     user: null,
   };
   const state = { ...defaults, ...overrides };
@@ -50,13 +55,13 @@ describe('AnimalDetailPage', () => {
   it('renders loading skeleton when loading', () => {
     setupMocks({ loading: true, animal: null });
     const { container } = render(<AnimalDetailPage />);
-    expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
+    expect(container.querySelector('.animate-shimmer')).toBeInTheDocument();
   });
 
   it('renders loading skeleton when animal is null', () => {
     setupMocks({ loading: false, animal: null });
     const { container } = render(<AnimalDetailPage />);
-    expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
+    expect(container.querySelector('.animate-shimmer')).toBeInTheDocument();
   });
 
   it('renders animal name when loaded', () => {
@@ -155,20 +160,23 @@ describe('AnimalDetailPage', () => {
 
   it('shows favorite button when authenticated', () => {
     setupMocks({ loading: false, animal: mockAnimal, isAuthenticated: true });
-    render(<AnimalDetailPage />);
-    expect(screen.getByText('♥')).toBeInTheDocument();
+    const { container } = render(<AnimalDetailPage />);
+    const heartBtn = container.querySelector('button svg.lucide-heart')?.closest('button');
+    expect(heartBtn).toBeInTheDocument();
   });
 
   it('hides favorite button when not authenticated', () => {
     setupMocks({ loading: false, animal: mockAnimal, isAuthenticated: false });
-    render(<AnimalDetailPage />);
-    expect(screen.queryByText('♥')).not.toBeInTheDocument();
+    const { container } = render(<AnimalDetailPage />);
+    const heartBtn = container.querySelector('button svg.lucide-heart');
+    expect(heartBtn).not.toBeInTheDocument();
   });
 
   it('calls toggleFavorite when favorite button clicked', async () => {
     const state = setupMocks({ loading: false, animal: mockAnimal, isAuthenticated: true });
-    render(<AnimalDetailPage />);
-    await userEvent.click(screen.getByText('♥'));
+    const { container } = render(<AnimalDetailPage />);
+    const heartBtn = container.querySelector('button svg.lucide-heart')!.closest('button')!;
+    await userEvent.click(heartBtn);
     expect(state.toggleFavorite).toHaveBeenCalledWith(1);
   });
 
@@ -179,14 +187,14 @@ describe('AnimalDetailPage', () => {
       isAuthenticated: true,
       isFavorited: jest.fn().mockReturnValue(true),
     });
-    render(<AnimalDetailPage />);
-    const btn = screen.getByText('♥').closest('button');
-    expect(btn?.className).toContain('bg-red-50');
+    const { container } = render(<AnimalDetailPage />);
+    const heartBtn = container.querySelector('button svg.lucide-heart')?.closest('button');
+    expect(heartBtn?.className).toContain('bg-red-50');
   });
 
   it('calls fetchAnimal on mount with id from params', () => {
     const state = setupMocks();
     render(<AnimalDetailPage />);
-    expect(state.fetchAnimal).toHaveBeenCalledWith(1);
+    expect(state.fetchAnimal).toHaveBeenCalledWith(1, 'es');
   });
 });

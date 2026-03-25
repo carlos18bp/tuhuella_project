@@ -133,7 +133,7 @@ def test_delete_fake_data_clears_records():
     call_command('create_shelters', '--count', '2')
     call_command('create_animals', '--count', '5')
 
-    call_command('delete_fake_data')
+    call_command('delete_fake_data', '--confirm')
 
     assert Animal.objects.count() == 0
     assert Shelter.objects.count() == 0
@@ -146,7 +146,7 @@ def test_delete_fake_data_preserves_superusers():
     call_command('create_users', '--count', '2')
 
     superuser_count_before = User.objects.filter(is_superuser=True).count()
-    call_command('delete_fake_data')
+    call_command('delete_fake_data', '--confirm')
     superuser_count_after = User.objects.filter(is_superuser=True).count()
 
     assert superuser_count_after == superuser_count_before

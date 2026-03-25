@@ -82,8 +82,8 @@ def test_update_post_admin_delete_queryset_removes_image():
     image = Library.objects.create(title='Post Image')
     post = UpdatePost.objects.create(
         shelter=shelter,
-        title='Test Post',
-        content='Some content',
+        title_es='Test Post',
+        content_es='Some content',
         image=image,
     )
 

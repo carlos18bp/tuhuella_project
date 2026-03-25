@@ -61,8 +61,9 @@ class Campaign(models.Model):
         return 0
 
     def delete(self, *args, **kwargs):
-        for field in [self.cover_image, self.evidence_gallery]:
+        for attr in ['cover_image', 'evidence_gallery']:
             try:
+                field = getattr(self, attr)
                 if field:
                     field.delete()
             except Library.DoesNotExist:

@@ -19,8 +19,8 @@ const setAuthStoreState = (state: any) => {
 };
 
 const submitEmail = () => {
-  fireEvent.change(screen.getByPlaceholderText('Email'), { target: { value: 'user@example.com' } });
-  fireEvent.click(screen.getByRole('button', { name: 'Send verification code' }));
+  fireEvent.change(screen.getByPlaceholderText('tu@email.com'), { target: { value: 'user@example.com' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Enviar código de verificación' }));
 };
 
 const advanceToCodeStep = async () => {
@@ -91,9 +91,10 @@ describe('ForgotPasswordPage', () => {
     await advanceToCodeStep();
 
     fireEvent.change(screen.getByPlaceholderText('000000'), { target: { value: '123456' } });
-    fireEvent.change(screen.getByPlaceholderText('New Password'), { target: { value: 'password123' } });
-    fireEvent.change(screen.getByPlaceholderText('Confirm New Password'), { target: { value: 'password456' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Reset password' }));
+    const pwFields = screen.getAllByPlaceholderText('••••••••');
+    fireEvent.change(pwFields[0], { target: { value: 'password123' } });
+    fireEvent.change(pwFields[1], { target: { value: 'password456' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Restablecer contraseña' }));
 
     expect(await screen.findByText('Passwords do not match')).toBeInTheDocument();
     expect(resetPassword).not.toHaveBeenCalled();
@@ -110,9 +111,10 @@ describe('ForgotPasswordPage', () => {
     await advanceToCodeStep();
 
     fireEvent.change(screen.getByPlaceholderText('000000'), { target: { value: '123456' } });
-    fireEvent.change(screen.getByPlaceholderText('New Password'), { target: { value: 'short' } });
-    fireEvent.change(screen.getByPlaceholderText('Confirm New Password'), { target: { value: 'short' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Reset password' }));
+    const pwFields = screen.getAllByPlaceholderText('••••••••');
+    fireEvent.change(pwFields[0], { target: { value: 'short' } });
+    fireEvent.change(pwFields[1], { target: { value: 'short' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Restablecer contraseña' }));
 
     expect(await screen.findByText('Password must be at least 8 characters')).toBeInTheDocument();
     expect(resetPassword).not.toHaveBeenCalled();
@@ -131,9 +133,10 @@ describe('ForgotPasswordPage', () => {
     await advanceToCodeStep();
 
     fireEvent.change(screen.getByPlaceholderText('000000'), { target: { value: '123456' } });
-    fireEvent.change(screen.getByPlaceholderText('New Password'), { target: { value: 'password123' } });
-    fireEvent.change(screen.getByPlaceholderText('Confirm New Password'), { target: { value: 'password123' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Reset password' }));
+    const pwFields = screen.getAllByPlaceholderText('••••••••');
+    fireEvent.change(pwFields[0], { target: { value: 'password123' } });
+    fireEvent.change(pwFields[1], { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Restablecer contraseña' }));
 
     await waitFor(() => {
       expect(resetPassword).toHaveBeenCalledWith({
@@ -163,9 +166,10 @@ describe('ForgotPasswordPage', () => {
     await advanceToCodeStep();
 
     fireEvent.change(screen.getByPlaceholderText('000000'), { target: { value: '123456' } });
-    fireEvent.change(screen.getByPlaceholderText('New Password'), { target: { value: 'password123' } });
-    fireEvent.change(screen.getByPlaceholderText('Confirm New Password'), { target: { value: 'password123' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Reset password' }));
+    const pwFields = screen.getAllByPlaceholderText('••••••••');
+    fireEvent.change(pwFields[0], { target: { value: 'password123' } });
+    fireEvent.change(pwFields[1], { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Restablecer contraseña' }));
 
     expect(await screen.findByText('Failed to reset password')).toBeInTheDocument();
   });
@@ -181,9 +185,10 @@ describe('ForgotPasswordPage', () => {
     await advanceToCodeStep();
 
     fireEvent.change(screen.getByPlaceholderText('000000'), { target: { value: '123456' } });
-    fireEvent.change(screen.getByPlaceholderText('New Password'), { target: { value: 'password123' } });
-    fireEvent.change(screen.getByPlaceholderText('Confirm New Password'), { target: { value: 'password123' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Reset password' }));
+    const pwFields = screen.getAllByPlaceholderText('••••••••');
+    fireEvent.change(pwFields[0], { target: { value: 'password123' } });
+    fireEvent.change(pwFields[1], { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Restablecer contraseña' }));
 
     expect(await screen.findByText('Failed to reset password')).toBeInTheDocument();
   });
@@ -197,8 +202,8 @@ describe('ForgotPasswordPage', () => {
 
     await advanceToCodeStep();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Back to email' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Volver al correo' }));
 
-    expect(screen.getByPlaceholderText('Email')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('tu@email.com')).toBeInTheDocument();
   });
 });

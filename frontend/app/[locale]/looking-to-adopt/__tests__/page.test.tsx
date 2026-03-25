@@ -23,9 +23,8 @@ describe('BuscoAdoptarPage', () => {
     expect(screen.getByText('¿Cómo funciona?')).toBeInTheDocument();
   });
 
-  it('renders call-to-action links', () => {
+  it('renders sign-in link when not authenticated', () => {
     render(<BuscoAdoptarPage />);
-    expect(screen.getByRole('link', { name: 'Mi intención de adopción' })).toHaveAttribute('href', '/my-intent');
     expect(screen.getByRole('link', { name: 'Iniciar sesión' })).toHaveAttribute('href', '/sign-in');
   });
 });

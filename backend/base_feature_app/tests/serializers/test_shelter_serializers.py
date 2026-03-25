@@ -40,7 +40,7 @@ def test_shelter_create_update_serializer_valid(shelter_admin_user):
     serializer = ShelterCreateUpdateSerializer(data={
         'name': 'Test Shelter',
         'city': 'Cali',
-        'description': 'New shelter',
+        'description_es': 'New shelter',
         'phone': '3009999999',
         'email': 'test@shelter.org',
     })

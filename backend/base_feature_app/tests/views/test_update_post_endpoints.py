@@ -49,7 +49,7 @@ def test_update_post_create_requires_auth(api_client):
     """Unauthenticated users cannot create posts."""
     response = api_client.post(
         reverse('update-post-create'),
-        {'title': 'Test'},
+        {'title_es': 'Test'},
         format='json',
     )
 
@@ -63,14 +63,14 @@ def test_update_post_create_success(authenticated_client, shelter):
         reverse('update-post-create'),
         {
             'shelter': shelter.pk,
-            'title': 'Great news!',
-            'content': 'We adopted 5 animals this week.',
+            'title_es': 'Great news!',
+            'content_es': 'We adopted 5 animals this week.',
         },
         format='json',
     )
 
     assert response.status_code == status.HTTP_201_CREATED
-    assert UpdatePost.objects.filter(title='Great news!').exists()
+    assert UpdatePost.objects.filter(title_es='Great news!').exists()
 
 
 @pytest.mark.django_db
@@ -78,7 +78,7 @@ def test_update_post_create_rejects_missing_title(authenticated_client, shelter)
     """Create endpoint rejects missing title."""
     response = authenticated_client.post(
         reverse('update-post-create'),
-        {'shelter': shelter.pk, 'content': 'No title'},
+        {'shelter': shelter.pk, 'content_es': 'No title'},
         format='json',
     )
 

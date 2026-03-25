@@ -1,18 +1,40 @@
 import React from 'react';
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import CheckoutDonacionPage from '../page';
+import { api } from '@/lib/services/http';
 
 const mockPush = jest.fn();
-jest.mock('@/i18n/navigation', () => ({ useRouter: () => ({ push: mockPush }) }));
+jest.mock('@/i18n/navigation', () => ({
+  Link: ({ href, children, ...rest }: any) => React.createElement('a', { href, ...rest }, children),
+  useRouter: () => ({ push: mockPush }),
+}));
 jest.mock('@/lib/hooks/useRequireAuth', () => ({ useRequireAuth: jest.fn() }));
+jest.mock('@/lib/hooks/useFAQs', () => ({
+  useFAQsByTopic: () => ({ items: [], loading: false }),
+}));
+jest.mock('@/lib/services/http', () => ({
+  api: { get: jest.fn(), post: jest.fn() },
+}));
+
+const mockApi = api as jest.Mocked<typeof api>;
+
+const AMOUNT_OPTIONS = [
+  { id: 1, amount: 10000, label: '' },
+  { id: 2, amount: 25000, label: '' },
+  { id: 3, amount: 50000, label: '' },
+  { id: 4, amount: 100000, label: '' },
+];
 
 describe('CheckoutDonacionPage', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockApi.get.mockResolvedValue({ data: AMOUNT_OPTIONS });
+  });
 
-  it('renders page heading', () => {
+  it('renders page heading', async () => {
     render(<CheckoutDonacionPage />);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Donar');
   });
@@ -22,9 +44,11 @@ describe('CheckoutDonacionPage', () => {
     expect(screen.getByText(/modo placeholder/)).toBeInTheDocument();
   });
 
-  it('renders preset amount buttons', () => {
+  it('renders preset amount buttons', async () => {
     render(<CheckoutDonacionPage />);
-    expect(screen.getByText('$10,000')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('$10,000')).toBeInTheDocument();
+    });
     expect(screen.getByText('$25,000')).toBeInTheDocument();
     expect(screen.getByText('$50,000')).toBeInTheDocument();
     expect(screen.getByText('$100,000')).toBeInTheDocument();
@@ -32,9 +56,12 @@ describe('CheckoutDonacionPage', () => {
 
   it('selects preset amount when clicked', async () => {
     render(<CheckoutDonacionPage />);
+    await waitFor(() => {
+      expect(screen.getByText('$25,000')).toBeInTheDocument();
+    });
     await userEvent.click(screen.getByText('$25,000'));
-    const input = screen.getByPlaceholderText('Otro monto');
-    expect(input).toHaveValue(25000);
+    const btn = screen.getByRole('button', { name: /Donar/ });
+    expect(btn.textContent).toContain('25,000');
   });
 
   it('renders payment method options', () => {
@@ -49,15 +76,18 @@ describe('CheckoutDonacionPage', () => {
     expect(screen.getByLabelText(/Mensaje/)).toBeInTheDocument();
   });
 
-  it('disables submit button when no amount entered', () => {
+  it('disables submit button when no amount selected', () => {
     render(<CheckoutDonacionPage />);
     const btn = screen.getByRole('button', { name: /Donar/ });
     expect(btn).toBeDisabled();
   });
 
-  it('enables submit button when amount is entered', () => {
+  it('enables submit button when preset amount is selected', async () => {
     render(<CheckoutDonacionPage />);
-    fireEvent.change(screen.getByPlaceholderText('Otro monto'), { target: { value: '5000' } });
+    await waitFor(() => {
+      expect(screen.getByText('$25,000')).toBeInTheDocument();
+    });
+    await userEvent.click(screen.getByText('$25,000'));
     const btn = screen.getByRole('button', { name: /Donar/ });
     expect(btn).not.toBeDisabled();
   });
@@ -67,11 +97,5 @@ describe('CheckoutDonacionPage', () => {
     const pseRadio = screen.getByDisplayValue('pse');
     await userEvent.click(pseRadio);
     expect(pseRadio).toBeChecked();
-  });
-
-  it('allows entering custom amount via input', () => {
-    render(<CheckoutDonacionPage />);
-    fireEvent.change(screen.getByPlaceholderText('Otro monto'), { target: { value: '7500' } });
-    expect(screen.getByPlaceholderText('Otro monto')).toHaveValue(7500);
   });
 });

@@ -115,7 +115,7 @@ def make_animal(shelter=None, name='Luna', species='dog', status='published'):
         age_range='adult',
         gender='female',
         size='medium',
-        description=f'{name} is a friendly animal.',
+        description_es=f'{name} is a friendly animal.',
         status=status,
         is_vaccinated=True,
         is_sterilized=True,
@@ -138,8 +138,8 @@ def make_campaign(shelter=None, title='Campaña de emergencia', goal_amount=5000
         shelter = make_shelter(name='Refugio Campaña')
     return Campaign.objects.create(
         shelter=shelter,
-        title=title,
-        description='Help us care for more animals.',
+        title_es=title,
+        description_es='Help us care for more animals.',
         goal_amount=Decimal(str(goal_amount)),
         raised_amount=Decimal('0'),
         status='active',

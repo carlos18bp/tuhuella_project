@@ -66,7 +66,7 @@ describe('AnimalesPage', () => {
   it('renders loading skeleton when loading', () => {
     setupMock({ loading: true });
     const { container } = render(<AnimalesPage />);
-    const skeletons = container.querySelectorAll('.animate-pulse');
+    const skeletons = container.querySelectorAll('.animate-shimmer');
     expect(skeletons.length).toBeGreaterThan(0);
   });
 

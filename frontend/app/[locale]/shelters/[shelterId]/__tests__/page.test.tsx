@@ -33,13 +33,13 @@ describe('ShelterDetailPage', () => {
   it('renders loading skeleton when loading', () => {
     setupMock({ loading: true, shelter: null });
     const { container } = render(<ShelterDetailPage />);
-    expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
+    expect(container.querySelector('.animate-shimmer')).toBeInTheDocument();
   });
 
   it('renders loading skeleton when shelter is null', () => {
     setupMock({ loading: false, shelter: null });
     const { container } = render(<ShelterDetailPage />);
-    expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
+    expect(container.querySelector('.animate-shimmer')).toBeInTheDocument();
   });
 
   it('renders shelter name when loaded', () => {

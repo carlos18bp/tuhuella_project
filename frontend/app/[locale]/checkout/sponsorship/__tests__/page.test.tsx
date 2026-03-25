@@ -1,16 +1,38 @@
 import React from 'react';
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import CheckoutApadrinamientoPage from '../page';
+import { api } from '@/lib/services/http';
 
 const mockPush = jest.fn();
-jest.mock('@/i18n/navigation', () => ({ useRouter: () => ({ push: mockPush }) }));
+jest.mock('@/i18n/navigation', () => ({
+  Link: ({ href, children, ...rest }: any) => React.createElement('a', { href, ...rest }, children),
+  useRouter: () => ({ push: mockPush }),
+}));
 jest.mock('@/lib/hooks/useRequireAuth', () => ({ useRequireAuth: jest.fn() }));
+jest.mock('@/lib/hooks/useFAQs', () => ({
+  useFAQsByTopic: () => ({ items: [], loading: false }),
+}));
+jest.mock('@/lib/services/http', () => ({
+  api: { get: jest.fn(), post: jest.fn() },
+}));
+
+const mockApi = api as jest.Mocked<typeof api>;
+
+const AMOUNT_OPTIONS = [
+  { id: 1, amount: 15000, label: '' },
+  { id: 2, amount: 30000, label: '' },
+  { id: 3, amount: 50000, label: '' },
+  { id: 4, amount: 75000, label: '' },
+];
 
 describe('CheckoutApadrinamientoPage', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockApi.get.mockResolvedValue({ data: AMOUNT_OPTIONS });
+  });
 
   it('renders page heading', () => {
     render(<CheckoutApadrinamientoPage />);
@@ -28,14 +50,19 @@ describe('CheckoutApadrinamientoPage', () => {
     expect(screen.getByRole('button', { name: 'Pago único' })).toBeInTheDocument();
   });
 
-  it('renders preset amount buttons with /mes suffix for monthly', () => {
+  it('renders preset amount buttons with /mes suffix for monthly', async () => {
     render(<CheckoutApadrinamientoPage />);
-    expect(screen.getByText('$15,000/mes')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('$15,000/mes')).toBeInTheDocument();
+    });
     expect(screen.getByText('$30,000/mes')).toBeInTheDocument();
   });
 
   it('removes /mes suffix when one_time frequency selected', async () => {
     render(<CheckoutApadrinamientoPage />);
+    await waitFor(() => {
+      expect(screen.getByText('$15,000/mes')).toBeInTheDocument();
+    });
     await userEvent.click(screen.getByRole('button', { name: 'Pago único' }));
     expect(screen.getByText('$15,000')).toBeInTheDocument();
     expect(screen.queryByText('$15,000/mes')).not.toBeInTheDocument();
@@ -43,8 +70,12 @@ describe('CheckoutApadrinamientoPage', () => {
 
   it('selects preset amount when clicked', async () => {
     render(<CheckoutApadrinamientoPage />);
+    await waitFor(() => {
+      expect(screen.getByText('$30,000/mes')).toBeInTheDocument();
+    });
     await userEvent.click(screen.getByText('$30,000/mes'));
-    expect(screen.getByPlaceholderText('Otro monto')).toHaveValue(30000);
+    const btn = screen.getByRole('button', { name: /Apadrinar/ });
+    expect(btn.textContent).toContain('30,000');
   });
 
   it('renders payment method options', () => {
@@ -54,28 +85,28 @@ describe('CheckoutApadrinamientoPage', () => {
     expect(screen.getByText('Nequi')).toBeInTheDocument();
   });
 
-  it('disables submit button when no amount entered', () => {
+  it('disables submit button when no amount selected', () => {
     render(<CheckoutApadrinamientoPage />);
     const btn = screen.getByRole('button', { name: /Apadrinar/ });
     expect(btn).toBeDisabled();
   });
 
-  it('enables submit button when amount is entered', () => {
+  it('enables submit button when preset amount is selected', async () => {
     render(<CheckoutApadrinamientoPage />);
-    fireEvent.change(screen.getByPlaceholderText('Otro monto'), { target: { value: '5000' } });
+    await waitFor(() => {
+      expect(screen.getByText('$30,000/mes')).toBeInTheDocument();
+    });
+    await userEvent.click(screen.getByText('$30,000/mes'));
     const btn = screen.getByRole('button', { name: /Apadrinar/ });
     expect(btn).not.toBeDisabled();
   });
 
-  it('allows entering custom amount via input', () => {
+  it('shows /mes in submit button for monthly frequency', async () => {
     render(<CheckoutApadrinamientoPage />);
-    fireEvent.change(screen.getByPlaceholderText('Otro monto'), { target: { value: '7500' } });
-    expect(screen.getByPlaceholderText('Otro monto')).toHaveValue(7500);
-  });
-
-  it('shows /mes in submit button for monthly frequency', () => {
-    render(<CheckoutApadrinamientoPage />);
-    fireEvent.change(screen.getByPlaceholderText('Otro monto'), { target: { value: '10000' } });
+    await waitFor(() => {
+      expect(screen.getByText('$15,000/mes')).toBeInTheDocument();
+    });
+    await userEvent.click(screen.getByText('$15,000/mes'));
     const submitBtn = screen.getByRole('button', { name: /Apadrinar/ });
     expect(submitBtn.textContent).toContain('/mes');
   });

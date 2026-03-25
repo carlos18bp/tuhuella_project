@@ -52,20 +52,20 @@ describe('AnimalCard', () => {
     expect(screen.queryByText('Vacunado')).not.toBeInTheDocument();
   });
 
-  it('renders dog emoji for dog species', () => {
+  it('renders dog icon for dog species', () => {
     const { container } = render(<AnimalCard animal={mockAnimals[0]} />);
-    expect(container.textContent).toContain('🐕');
+    expect(container.querySelector('svg.lucide-dog')).toBeInTheDocument();
   });
 
-  it('renders cat emoji for cat species', () => {
+  it('renders cat icon for cat species', () => {
     const { container } = render(<AnimalCard animal={mockAnimals[1]} />);
-    expect(container.textContent).toContain('🐈');
+    expect(container.querySelector('svg.lucide-cat')).toBeInTheDocument();
   });
 
-  it('renders generic emoji for other species', () => {
+  it('renders paw icon for other species', () => {
     const otherAnimal = { ...mockAnimals[0], species: 'rabbit' as never };
     const { container } = render(<AnimalCard animal={otherAnimal} />);
-    expect(container.textContent).toContain('🐾');
+    expect(container.querySelector('svg.lucide-paw-print')).toBeInTheDocument();
   });
 
   it('hides gender badge when gender is unknown', () => {

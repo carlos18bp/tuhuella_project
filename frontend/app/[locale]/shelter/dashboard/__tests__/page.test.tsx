@@ -34,7 +34,7 @@ describe('ShelterDashboardPage', () => {
     mockApi.get.mockReturnValueOnce(new Promise(() => {}));
     setupMock();
     const { container } = render(<ShelterDashboardPage />);
-    expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
+    expect(container.querySelector('.animate-shimmer')).toBeInTheDocument();
   });
 
   it('renders registration prompt when no shelter found', async () => {

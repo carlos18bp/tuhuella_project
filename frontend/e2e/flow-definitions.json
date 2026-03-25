@@ -1,6 +1,6 @@
 {
-  "version": "2.1.0",
-  "lastUpdated": "2026-03-22",
+  "version": "3.0.0",
+  "lastUpdated": "2026-03-25",
   "flows": {
     "home-loads": {
       "name": "Home page loads",
@@ -440,6 +440,166 @@
       "roles": ["admin"],
       "priority": "P3",
       "description": "Admin views blog calendar with monthly post overview and status colors",
+      "expectedSpecs": 1
+    },
+    "shelter-panel-applications": {
+      "name": "Shelter manage adoption applications",
+      "module": "shelter-panel",
+      "roles": ["shelter_admin"],
+      "priority": "P1",
+      "description": "Shelter admin views received adoption applications and changes status (reviewing/interview/approved/rejected) at /refugio/solicitudes",
+      "expectedSpecs": 1
+    },
+    "adoption-form-wizard": {
+      "name": "Adoption form wizard completion",
+      "module": "adoption",
+      "roles": ["adopter"],
+      "priority": "P1",
+      "description": "Authenticated adopter completes the 3-step adoption wizard (6-section questionnaire, review, submit) for a specific animal",
+      "expectedSpecs": 1
+    },
+    "donation-checkout-submit": {
+      "name": "Donation checkout form submission",
+      "module": "donation",
+      "roles": ["adopter"],
+      "priority": "P1",
+      "description": "Authenticated user selects preset amount, chooses payment method (card/PSE/Nequi), fills optional message, and submits donation form",
+      "expectedSpecs": 1
+    },
+    "sponsorship-checkout-submit": {
+      "name": "Sponsorship checkout form submission",
+      "module": "sponsorship",
+      "roles": ["adopter"],
+      "priority": "P1",
+      "description": "Authenticated user selects frequency (monthly/one-time), preset amount, payment method, and submits sponsorship form",
+      "expectedSpecs": 1
+    },
+    "notification-preferences": {
+      "name": "Notification preferences management",
+      "module": "adopter",
+      "roles": ["adopter"],
+      "priority": "P2",
+      "description": "User visits /my-profile/notifications and toggles email/in_app notification preferences per event group",
+      "expectedSpecs": 1
+    },
+    "notification-bell": {
+      "name": "Notification bell interaction",
+      "module": "navigation",
+      "roles": ["adopter", "shelter_admin", "admin"],
+      "priority": "P2",
+      "description": "Authenticated user sees bell icon with unread count, opens dropdown, views notifications, and clicks mark all read",
+      "expectedSpecs": 1
+    },
+    "shelter-panel-updates": {
+      "name": "Shelter manage update posts",
+      "module": "shelter-panel",
+      "roles": ["shelter_admin"],
+      "priority": "P2",
+      "description": "Shelter admin views and manages update posts at /refugio/updates",
+      "expectedSpecs": 1
+    },
+    "shelter-panel-update-create": {
+      "name": "Shelter create update post",
+      "module": "shelter-panel",
+      "roles": ["shelter_admin"],
+      "priority": "P2",
+      "description": "Shelter admin creates a new update post with content and images at /refugio/updates/create",
+      "expectedSpecs": 1
+    },
+    "shelter-detail-view-animals": {
+      "name": "Shelter detail view animals link",
+      "module": "shelter",
+      "roles": ["shared"],
+      "priority": "P2",
+      "description": "User clicks View Animals on shelter detail page and sees filtered animal list for that shelter",
+      "expectedSpecs": 1
+    },
+    "locale-switch": {
+      "name": "Locale switcher toggle",
+      "module": "navigation",
+      "roles": ["shared"],
+      "priority": "P2",
+      "description": "User toggles ES/EN locale switcher in header and page content re-renders in the target language",
+      "expectedSpecs": 1
+    },
+    "campaign-tab-toggle": {
+      "name": "Campaign tab toggle",
+      "module": "campaign",
+      "roles": ["shared"],
+      "priority": "P3",
+      "description": "User toggles between Active and Completed tabs on campaigns listing and sees correct campaigns in each",
+      "expectedSpecs": 1
+    },
+    "campaign-donate-cta": {
+      "name": "Campaign donate CTA",
+      "module": "campaign",
+      "roles": ["shared"],
+      "priority": "P2",
+      "description": "User clicks Donate CTA on campaign detail page and is routed to donation checkout with campaign context",
+      "expectedSpecs": 1
+    },
+    "shelter-detail-gallery": {
+      "name": "Shelter detail gallery lightbox",
+      "module": "shelter",
+      "roles": ["shared"],
+      "priority": "P3",
+      "description": "User opens lightbox gallery on shelter detail page and navigates images",
+      "expectedSpecs": 1
+    },
+    "home-featured-animals-carousel": {
+      "name": "Home featured animals carousel",
+      "module": "home",
+      "roles": ["shared"],
+      "priority": "P3",
+      "description": "User interacts with featured animals carousel on home page (next/prev navigation, click card)",
+      "expectedSpecs": 1
+    },
+    "home-active-campaigns-carousel": {
+      "name": "Home active campaigns carousel",
+      "module": "home",
+      "roles": ["shared"],
+      "priority": "P3",
+      "description": "User interacts with active campaigns carousel on home page (next/prev navigation, click card)",
+      "expectedSpecs": 1
+    },
+    "public-about": {
+      "name": "About page",
+      "module": "public",
+      "roles": ["shared"],
+      "priority": "P4",
+      "description": "User visits /about and sees organization information",
+      "expectedSpecs": 1
+    },
+    "public-terms": {
+      "name": "Terms page",
+      "module": "public",
+      "roles": ["shared"],
+      "priority": "P4",
+      "description": "User visits /terms and sees terms of service content",
+      "expectedSpecs": 1
+    },
+    "public-work-with-us": {
+      "name": "Work with us page",
+      "module": "public",
+      "roles": ["shared"],
+      "priority": "P4",
+      "description": "User visits /work-with-us page",
+      "expectedSpecs": 1
+    },
+    "public-strategic-allies": {
+      "name": "Strategic allies page",
+      "module": "public",
+      "roles": ["shared"],
+      "priority": "P4",
+      "description": "User visits /strategic-allies and sees partner organizations",
+      "expectedSpecs": 1
+    },
+    "my-applications-list": {
+      "name": "View my adoption applications",
+      "module": "adoption",
+      "roles": ["adopter"],
+      "priority": "P2",
+      "description": "Authenticated adopter views submitted applications at /my-applications with status badges and application details",
       "expectedSpecs": 1
     }
   }

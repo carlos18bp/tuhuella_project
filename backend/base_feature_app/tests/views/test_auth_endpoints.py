@@ -553,7 +553,7 @@ def test_sign_up_rejects_failed_captcha(api_client, monkeypatch):
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert 'captcha_token' in response.json()
+    assert 'error' in response.json()
 
 
 @pytest.mark.django_db
@@ -583,4 +583,4 @@ def test_sign_in_rejects_failed_captcha(api_client, monkeypatch):
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert 'captcha_token' in response.json()
+    assert 'error' in response.json()

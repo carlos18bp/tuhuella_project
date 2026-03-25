@@ -17,7 +17,7 @@ def test_animal_list_returns_only_published(api_client, shelter, animal):
     response = api_client.get(reverse('animal-list'))
 
     assert response.status_code == status.HTTP_200_OK
-    names = [a['name'] for a in response.json()]
+    names = [a['name'] for a in response.json()['results']]
     assert 'Luna' in names
     assert 'Hidden' not in names
 
@@ -34,7 +34,7 @@ def test_animal_list_filters_by_species(api_client, shelter, animal):
     response = api_client.get(reverse('animal-list'), {'species': 'cat'})
 
     assert response.status_code == status.HTTP_200_OK
-    names = [a['name'] for a in response.json()]
+    names = [a['name'] for a in response.json()['results']]
     assert 'Michi' in names
     assert 'Luna' not in names
 
@@ -45,8 +45,9 @@ def test_animal_list_filters_by_size(api_client, animal):
     response = api_client.get(reverse('animal-list'), {'size': 'medium'})
 
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 1
-    assert response.json()[0]['name'] == 'Luna'
+    results = response.json()['results']
+    assert len(results) == 1
+    assert results[0]['name'] == 'Luna'
 
 
 @pytest.mark.django_db
@@ -152,8 +153,9 @@ def test_animal_list_filters_by_age_range(api_client, animal):
     response = api_client.get(reverse('animal-list'), {'age_range': 'young'})
 
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 1
-    assert response.json()[0]['name'] == 'Luna'
+    results = response.json()['results']
+    assert len(results) == 1
+    assert results[0]['name'] == 'Luna'
 
 
 @pytest.mark.django_db
@@ -162,8 +164,9 @@ def test_animal_list_filters_by_shelter(api_client, animal, shelter):
     response = api_client.get(reverse('animal-list'), {'shelter': shelter.pk})
 
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 1
-    assert response.json()[0]['name'] == 'Luna'
+    results = response.json()['results']
+    assert len(results) == 1
+    assert results[0]['name'] == 'Luna'
 
 
 @pytest.mark.django_db
@@ -172,8 +175,9 @@ def test_animal_list_filters_by_gender(api_client, animal):
     response = api_client.get(reverse('animal-list'), {'gender': 'female'})
 
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 1
-    assert response.json()[0]['name'] == 'Luna'
+    results = response.json()['results']
+    assert len(results) == 1
+    assert results[0]['name'] == 'Luna'
 
 
 @pytest.mark.django_db

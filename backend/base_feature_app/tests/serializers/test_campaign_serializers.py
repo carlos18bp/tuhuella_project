@@ -33,8 +33,8 @@ def test_campaign_create_update_serializer_valid(shelter):
     """Create serializer accepts valid data."""
     serializer = CampaignCreateUpdateSerializer(data={
         'shelter': shelter.pk,
-        'title': 'New Campaign',
-        'description': 'Help us',
+        'title_es': 'New Campaign',
+        'description_es': 'Help us',
         'goal_amount': '200000.00',
     })
 
@@ -50,4 +50,4 @@ def test_campaign_create_update_serializer_rejects_missing_title(shelter):
     })
 
     assert not serializer.is_valid()
-    assert 'title' in serializer.errors
+    assert 'title_es' in serializer.errors

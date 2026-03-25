@@ -100,9 +100,9 @@ describe('SignInPage', () => {
 
     render(<SignInPage />);
 
-    fireEvent.change(screen.getByPlaceholderText('Email'), { target: { value: 'user@example.com' } });
-    fireEvent.change(screen.getByPlaceholderText('Password'), { target: { value: 'password123' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+    fireEvent.change(screen.getByPlaceholderText('tu@email.com'), { target: { value: 'user@example.com' } });
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
 
     await waitFor(() => {
       expect(signIn).toHaveBeenCalledWith({ email: 'user@example.com', password: 'password123', captcha_token: undefined });
@@ -117,9 +117,9 @@ describe('SignInPage', () => {
 
     render(<SignInPage />);
 
-    fireEvent.change(screen.getByPlaceholderText('Email'), { target: { value: 'user@example.com' } });
-    fireEvent.change(screen.getByPlaceholderText('Password'), { target: { value: 'password123' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+    fireEvent.change(screen.getByPlaceholderText('tu@email.com'), { target: { value: 'user@example.com' } });
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
 
     expect(await screen.findByText('Invalid')).toBeInTheDocument();
   });
@@ -131,9 +131,9 @@ describe('SignInPage', () => {
 
     render(<SignInPage />);
 
-    fireEvent.change(screen.getByPlaceholderText('Email'), { target: { value: 'user@example.com' } });
-    fireEvent.change(screen.getByPlaceholderText('Password'), { target: { value: 'password123' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+    fireEvent.change(screen.getByPlaceholderText('tu@email.com'), { target: { value: 'user@example.com' } });
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
 
     expect(await screen.findByText('Invalid credentials')).toBeInTheDocument();
   });
@@ -145,9 +145,9 @@ describe('SignInPage', () => {
 
     render(<SignInPage />);
 
-    fireEvent.change(screen.getByPlaceholderText('Email'), { target: { value: 'user@example.com' } });
-    fireEvent.change(screen.getByPlaceholderText('Password'), { target: { value: 'password123' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+    fireEvent.change(screen.getByPlaceholderText('tu@email.com'), { target: { value: 'user@example.com' } });
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
 
     expect(await screen.findByText('Invalid credentials')).toBeInTheDocument();
   });

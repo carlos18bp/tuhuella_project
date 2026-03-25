@@ -10,8 +10,8 @@ def test_campaign_list_returns_only_active(api_client, shelter, campaign):
     """Only active campaigns appear in the public list."""
     Campaign.objects.create(
         shelter=shelter,
-        title='Finished Campaign',
-        description='Done',
+        title_es='Finished Campaign',
+        description_es='Done',
         goal_amount=100000,
         status=Campaign.Status.COMPLETED,
     )
@@ -45,7 +45,7 @@ def test_campaign_create_requires_auth(api_client):
     """Unauthenticated users cannot create campaigns."""
     response = api_client.post(
         reverse('campaign-create'),
-        {'title': 'Sneak Campaign'},
+        {'title_es': 'Sneak Campaign'},
         format='json',
     )
 
@@ -59,15 +59,15 @@ def test_campaign_create_success(shelter_admin_client, shelter):
         reverse('campaign-create'),
         {
             'shelter': shelter.pk,
-            'title': 'New Campaign',
-            'description': 'Help us',
+            'title_es': 'New Campaign',
+            'description_es': 'Help us',
             'goal_amount': '200000.00',
         },
         format='json',
     )
 
     assert response.status_code == status.HTTP_201_CREATED
-    assert Campaign.objects.filter(title='New Campaign').exists()
+    assert Campaign.objects.filter(title_es='New Campaign').exists()
 
 
 @pytest.mark.django_db
@@ -75,13 +75,13 @@ def test_campaign_update_by_shelter_owner(shelter_admin_client, campaign):
     """Shelter owner can update their campaign."""
     response = shelter_admin_client.patch(
         reverse('campaign-update', args=[campaign.pk]),
-        {'title': 'Updated Fund'},
+        {'title_es': 'Updated Fund'},
         format='json',
     )
 
     assert response.status_code == status.HTTP_200_OK
     campaign.refresh_from_db()
-    assert campaign.title == 'Updated Fund'
+    assert campaign.title_es == 'Updated Fund'
 
 
 @pytest.mark.django_db
@@ -89,13 +89,13 @@ def test_campaign_update_denied_for_non_owner(authenticated_client, campaign):
     """Non-owner cannot update a campaign."""
     response = authenticated_client.patch(
         reverse('campaign-update', args=[campaign.pk]),
-        {'title': 'Hijacked'},
+        {'title_es': 'Hijacked'},
         format='json',
     )
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
     campaign.refresh_from_db()
-    assert campaign.title == 'Medical Fund'
+    assert campaign.title_es == 'Medical Fund'
 
 
 @pytest.mark.django_db
@@ -115,7 +115,7 @@ def test_campaign_update_returns_404_for_missing(shelter_admin_client):
     """Updating a non-existent campaign returns 404."""
     response = shelter_admin_client.patch(
         reverse('campaign-update', args=[99999]),
-        {'title': 'Ghost'},
+        {'title_es': 'Ghost'},
         format='json',
     )
 

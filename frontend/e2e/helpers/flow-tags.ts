@@ -94,3 +94,41 @@ export const BLOG_ADMIN_CALENDAR = ['@flow:blog-admin-calendar', '@module:blog-a
 export const NAVIGATION_HEADER = ['@flow:navigation-header', '@module:navigation', '@priority:P2'];
 export const NAVIGATION_FOOTER = ['@flow:navigation-footer', '@module:navigation', '@priority:P4'];
 export const NAVIGATION_BETWEEN_PAGES = ['@flow:navigation-between-pages', '@module:navigation', '@priority:P2'];
+export const NOTIFICATION_BELL = ['@flow:notification-bell', '@module:navigation', '@priority:P2'];
+export const LOCALE_SWITCH = ['@flow:locale-switch', '@module:navigation', '@priority:P2'];
+
+// ── Shelter Panel (additional) ──
+export const SHELTER_PANEL_APPLICATIONS = ['@flow:shelter-panel-applications', '@module:shelter-panel', '@priority:P1'];
+export const SHELTER_PANEL_UPDATES = ['@flow:shelter-panel-updates', '@module:shelter-panel', '@priority:P2'];
+export const SHELTER_PANEL_UPDATE_CREATE = ['@flow:shelter-panel-update-create', '@module:shelter-panel', '@priority:P2'];
+
+// ── Adoption (additional) ──
+export const ADOPTION_FORM_WIZARD = ['@flow:adoption-form-wizard', '@module:adoption', '@priority:P1'];
+export const MY_APPLICATIONS_LIST = ['@flow:my-applications-list', '@module:adoption', '@priority:P2'];
+
+// ── Donation (additional) ──
+export const DONATION_CHECKOUT_SUBMIT = ['@flow:donation-checkout-submit', '@module:donation', '@priority:P1'];
+
+// ── Sponsorship (additional) ──
+export const SPONSORSHIP_CHECKOUT_SUBMIT = ['@flow:sponsorship-checkout-submit', '@module:sponsorship', '@priority:P1'];
+
+// ── Adopter (additional) ──
+export const NOTIFICATION_PREFERENCES = ['@flow:notification-preferences', '@module:adopter', '@priority:P2'];
+
+// ── Shelter (additional) ──
+export const SHELTER_DETAIL_VIEW_ANIMALS = ['@flow:shelter-detail-view-animals', '@module:shelter', '@priority:P2'];
+export const SHELTER_DETAIL_GALLERY = ['@flow:shelter-detail-gallery', '@module:shelter', '@priority:P3'];
+
+// ── Campaign (additional) ──
+export const CAMPAIGN_TAB_TOGGLE = ['@flow:campaign-tab-toggle', '@module:campaign', '@priority:P3'];
+export const CAMPAIGN_DONATE_CTA = ['@flow:campaign-donate-cta', '@module:campaign', '@priority:P2'];
+
+// ── Home (additional) ──
+export const HOME_FEATURED_ANIMALS_CAROUSEL = ['@flow:home-featured-animals-carousel', '@module:home', '@priority:P3'];
+export const HOME_ACTIVE_CAMPAIGNS_CAROUSEL = ['@flow:home-active-campaigns-carousel', '@module:home', '@priority:P3'];
+
+// ── Public (additional) ──
+export const PUBLIC_ABOUT = ['@flow:public-about', '@module:public', '@priority:P4'];
+export const PUBLIC_TERMS = ['@flow:public-terms', '@module:public', '@priority:P4'];
+export const PUBLIC_WORK_WITH_US = ['@flow:public-work-with-us', '@module:public', '@priority:P4'];
+export const PUBLIC_STRATEGIC_ALLIES = ['@flow:public-strategic-allies', '@module:public', '@priority:P4'];

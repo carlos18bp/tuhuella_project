@@ -35,8 +35,8 @@ def test_update_post_nullable_campaign(shelter):
     """Campaign is optional for update posts."""
     post = UpdatePost.objects.create(
         shelter=shelter,
-        title='General update',
-        content='No campaign attached',
+        title_es='General update',
+        content_es='No campaign attached',
     )
     assert post.campaign is None
 
@@ -46,7 +46,7 @@ def test_update_post_nullable_animal(shelter):
     """Animal is optional for update posts."""
     post = UpdatePost.objects.create(
         shelter=shelter,
-        title='Shelter news',
-        content='No animal attached',
+        title_es='Shelter news',
+        content_es='No animal attached',
     )
     assert post.animal is None

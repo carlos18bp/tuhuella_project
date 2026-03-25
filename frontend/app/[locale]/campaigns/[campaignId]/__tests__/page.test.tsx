@@ -13,6 +13,9 @@ jest.mock('next/navigation', () => ({
 
 jest.mock('@/lib/stores/campaignStore', () => ({ useCampaignStore: jest.fn() }));
 jest.mock('@/lib/stores/authStore', () => ({ useAuthStore: jest.fn() }));
+jest.mock('@/lib/hooks/useFAQs', () => ({
+  useFAQsByTopic: () => ({ items: [], loading: false }),
+}));
 
 const mockUseCampaignStore = useCampaignStore as unknown as jest.Mock;
 const mockUseAuthStore = useAuthStore as unknown as jest.Mock;
@@ -38,13 +41,13 @@ describe('CampaignDetailPage', () => {
   it('renders loading skeleton when loading', () => {
     setupMocks({ loading: true, campaign: null });
     const { container } = render(<CampaignDetailPage />);
-    expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
+    expect(container.querySelector('.animate-shimmer')).toBeInTheDocument();
   });
 
   it('renders loading skeleton when campaign is null', () => {
     setupMocks({ loading: false, campaign: null });
     const { container } = render(<CampaignDetailPage />);
-    expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
+    expect(container.querySelector('.animate-shimmer')).toBeInTheDocument();
   });
 
   it('renders campaign title when loaded', () => {
@@ -106,7 +109,7 @@ describe('CampaignDetailPage', () => {
   it('calls fetchCampaign on mount', () => {
     const state = setupMocks();
     render(<CampaignDetailPage />);
-    expect(state.fetchCampaign).toHaveBeenCalledWith(1);
+    expect(state.fetchCampaign).toHaveBeenCalledWith(1, 'es');
   });
 
   it('caps progress bar width at 100%', () => {
