@@ -6,9 +6,9 @@ interface VerifiedBadgeProps {
 }
 
 const statusConfig: Record<string, { label: string; color: string }> = {
-  verified: { label: 'Verificado', color: 'bg-emerald-50 text-emerald-700' },
-  pending: { label: 'Pendiente de verificación', color: 'bg-amber-50 text-amber-700' },
-  rejected: { label: 'Rechazado', color: 'bg-red-50 text-red-700' },
+  verified: { label: 'Verificado', color: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60' },
+  pending: { label: 'Pendiente de verificación', color: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200/60' },
+  rejected: { label: 'Rechazado', color: 'bg-red-50 text-red-700 ring-1 ring-red-200/60' },
 };
 
 const sizeStyles: Record<string, string> = {

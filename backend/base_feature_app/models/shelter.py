@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from django_attachments.fields import SingleImageField
+from django_attachments.fields import SingleImageField, GalleryField
 from django_attachments.models import Library
 
 
@@ -17,10 +17,11 @@ class Shelter(models.Model):
     )
     name = models.CharField(max_length=200)
     legal_name = models.CharField(max_length=300, blank=True)
-    description = models.TextField(blank=True)
-    city = models.CharField(max_length=100)
+    description_es = models.TextField()
+    description_en = models.TextField(blank=True)
+    city = models.CharField(max_length=100, blank=True)
     address = models.CharField(max_length=300, blank=True)
-    phone = models.CharField(max_length=50, blank=True)
+    phone = models.CharField(max_length=50)
     email = models.EmailField(blank=True)
     website = models.URLField(blank=True)
 
@@ -32,6 +33,12 @@ class Shelter(models.Model):
     )
     cover_image = SingleImageField(
         related_name='shelter_cover',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    gallery = GalleryField(
+        related_name='shelter_gallery',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -58,7 +65,7 @@ class Shelter(models.Model):
         return self.verification_status == self.VerificationStatus.VERIFIED
 
     def delete(self, *args, **kwargs):
-        for field in [self.logo, self.cover_image]:
+        for field in [self.logo, self.cover_image, self.gallery]:
             try:
                 if field:
                     field.delete()

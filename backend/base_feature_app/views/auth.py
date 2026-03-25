@@ -56,7 +56,7 @@ def sign_up(request):
     captcha_token = request.data.get('captcha_token', '')
     if not verify_recaptcha(captcha_token):
         return Response(
-            {'captcha_token': ['reCAPTCHA verification failed.']},
+            {'error': 'reCAPTCHA verification failed.'},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -111,19 +111,19 @@ def sign_in(request):
     captcha_token = request.data.get('captcha_token', '')
     if not verify_recaptcha(captcha_token):
         return Response(
-            {'captcha_token': ['reCAPTCHA verification failed.']},
+            {'error': 'reCAPTCHA verification failed.'},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
     email = request.data.get('email', '').strip().lower()
     password = request.data.get('password')
-    
+
     if not email or not password:
         return Response(
             {'error': 'Email and password are required'},
             status=status.HTTP_400_BAD_REQUEST
         )
-    
+
     try:
         user = User.objects.get(email=email)
     except User.DoesNotExist:
@@ -392,6 +392,13 @@ def update_password(request):
         {'message': 'Password updated successfully'},
         status=status.HTTP_200_OK
     )
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_captcha_site_key(request):
+    """Return the reCAPTCHA site key for frontend widgets."""
+    return Response({'site_key': settings.RECAPTCHA_SITE_KEY})
 
 
 @api_view(['GET'])

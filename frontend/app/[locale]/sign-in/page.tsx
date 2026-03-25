@@ -100,10 +100,11 @@ export default function SignInPage() {
   };
 
   return (
-    <main className="min-h-[calc(100vh-72px)] flex items-center justify-center px-6 py-12 bg-gradient-to-b from-stone-50 to-stone-100/50">
-      <div className="w-full max-w-md bg-white border border-stone-200 rounded-2xl p-8 shadow-sm">
+    <main className="relative min-h-[calc(100vh-72px)] flex items-center justify-center px-6 py-12 bg-gradient-to-b from-stone-50 to-stone-100/50">
+      <div className="absolute top-1/4 right-1/4 w-64 h-64 rounded-full bg-teal-100/30 blur-3xl pointer-events-none" />
+      <div className="w-full max-w-md bg-white border border-stone-200 rounded-2xl p-8 shadow-lg ring-1 ring-black/[0.02]">
         <div className="flex items-center gap-2 mb-6">
-          <div className="h-10 w-10 rounded-xl bg-teal-50 flex items-center justify-center">
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-50 to-teal-100 shadow-sm flex items-center justify-center">
             <PawPrint className="h-5 w-5 text-teal-600" />
           </div>
           <div>
@@ -117,7 +118,7 @@ export default function SignInPage() {
             <label htmlFor="signin-email" className="block text-sm font-medium text-stone-700 mb-1.5">Correo electrónico</label>
             <input 
               id="signin-email"
-              className="border border-stone-200 rounded-xl px-3.5 py-2.5 w-full bg-white text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-colors" 
+              className="border border-stone-200 rounded-xl px-3.5 py-2.5 w-full bg-white text-stone-800 placeholder:text-stone-400 shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] focus:outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-colors" 
               placeholder="tu@email.com" 
               type="email"
               value={email} 
@@ -131,7 +132,7 @@ export default function SignInPage() {
             <label htmlFor="signin-password" className="block text-sm font-medium text-stone-700 mb-1.5">Contraseña</label>
             <input 
               id="signin-password"
-              className="border border-stone-200 rounded-xl px-3.5 py-2.5 w-full bg-white text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-colors" 
+              className="border border-stone-200 rounded-xl px-3.5 py-2.5 w-full bg-white text-stone-800 placeholder:text-stone-400 shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] focus:outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-colors" 
               placeholder="••••••••" 
               value={password} 
               onChange={(e) => setPassword(e.target.value)} 
@@ -153,14 +154,14 @@ export default function SignInPage() {
           )}
 
           <button 
-            className="bg-teal-600 text-white rounded-full px-5 py-3 w-full font-medium disabled:opacity-50 hover:bg-teal-700 btn-base shadow-sm" 
+            className="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600 text-white rounded-full px-5 py-3 w-full font-medium disabled:opacity-50 btn-base shadow-sm hover:shadow-md" 
             type="submit" 
             disabled={loading}
           >
             {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
           </button>
 
-          {error ? <p className="text-red-600 text-sm">{error}</p> : null}
+          {error ? <p className="text-red-600 text-sm bg-red-50 border border-red-200/60 rounded-lg px-3 py-2">{error}</p> : null}
         </form>
 
         <div className="mt-4 text-center">
@@ -201,7 +202,16 @@ export default function SignInPage() {
           </Link>
         </div>
 
-        <p className="mt-6 text-center text-[10px] text-stone-400">
+        {siteKey && (
+          <p className="mt-4 text-center text-[10px] text-stone-400 leading-relaxed">
+            Protegido por reCAPTCHA de Google.{' '}
+            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline">Privacidad</a>
+            {' y '}
+            <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline">Términos</a>.
+          </p>
+        )}
+
+        <p className="mt-4 text-center text-[10px] text-stone-400">
           Powered by{' '}
           <a href="https://projectapp.co" target="_blank" rel="noopener noreferrer" className="hover:text-teal-500 transition-colors">
             ProjectApp.co

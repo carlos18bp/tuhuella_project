@@ -24,8 +24,10 @@ class UpdatePost(models.Model):
         related_name='update_posts',
     )
 
-    title = models.CharField(max_length=300)
-    content = models.TextField()
+    title_es = models.CharField(max_length=300)
+    title_en = models.CharField(max_length=300, default='')
+    content_es = models.TextField()
+    content_en = models.TextField(default='')
 
     image = SingleImageField(
         related_name='update_post_image',
@@ -41,7 +43,7 @@ class UpdatePost(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return self.title
+        return self.title_es
 
     def delete(self, *args, **kwargs):
         try:

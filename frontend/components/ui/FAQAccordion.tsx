@@ -18,7 +18,7 @@ function AccordionItem({ faq }: { faq: FAQItem }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="rounded-xl border border-stone-200 bg-white overflow-hidden shadow-sm">
+    <div className={`rounded-xl border border-stone-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 ${open ? 'border-l-2 border-l-teal-500' : ''}`}>
       <button
         type="button"
         onClick={() => setOpen(!open)}
@@ -26,8 +26,8 @@ function AccordionItem({ faq }: { faq: FAQItem }) {
       >
         <h3 className="font-semibold text-stone-800 pr-4">{faq.question}</h3>
         <ChevronDown
-          className={`h-5 w-5 shrink-0 text-stone-400 transition-transform duration-200 ${
-            open ? 'rotate-180' : ''
+          className={`h-5 w-5 shrink-0 transition-transform duration-200 ${
+            open ? 'rotate-180 text-teal-500' : 'text-stone-400'
           }`}
         />
       </button>
@@ -37,7 +37,7 @@ function AccordionItem({ faq }: { faq: FAQItem }) {
         }`}
       >
         <div className="overflow-hidden">
-          <p className="px-5 pb-5 text-sm text-stone-600 leading-relaxed">
+          <p className="px-5 pb-5 text-sm text-stone-600 leading-[1.7]">
             {faq.answer}
           </p>
         </div>

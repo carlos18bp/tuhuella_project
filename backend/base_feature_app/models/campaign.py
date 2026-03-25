@@ -1,5 +1,5 @@
 from django.db import models
-from django_attachments.fields import SingleImageField
+from django_attachments.fields import SingleImageField, GalleryField
 from django_attachments.models import Library
 
 
@@ -16,8 +16,10 @@ class Campaign(models.Model):
         on_delete=models.CASCADE,
         related_name='campaigns',
     )
-    title = models.CharField(max_length=300)
-    description = models.TextField(blank=True)
+    title_es = models.CharField(max_length=300)
+    title_en = models.CharField(max_length=300, default='')
+    description_es = models.TextField(blank=True)
+    description_en = models.TextField(blank=True)
     goal_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     raised_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
@@ -33,6 +35,12 @@ class Campaign(models.Model):
         null=True,
         blank=True,
     )
+    evidence_gallery = GalleryField(
+        related_name='campaign_evidence',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
 
     starts_at = models.DateTimeField(null=True, blank=True)
     ends_at = models.DateTimeField(null=True, blank=True)
@@ -44,7 +52,7 @@ class Campaign(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return self.title
+        return self.title_es
 
     @property
     def progress_percentage(self):
@@ -53,9 +61,10 @@ class Campaign(models.Model):
         return 0
 
     def delete(self, *args, **kwargs):
-        try:
-            if self.cover_image:
-                self.cover_image.delete()
-        except Library.DoesNotExist:
-            pass
+        for field in [self.cover_image, self.evidence_gallery]:
+            try:
+                if field:
+                    field.delete()
+            except Library.DoesNotExist:
+                pass
         super().delete(*args, **kwargs)

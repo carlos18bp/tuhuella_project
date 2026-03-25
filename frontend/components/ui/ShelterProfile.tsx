@@ -12,7 +12,7 @@ export default function ShelterProfile({ shelter }: ShelterProfileProps) {
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-stone-800">{shelter.name}</h1>
+          <h1 className="text-3xl font-bold text-stone-800 tracking-[-0.02em]">{shelter.name}</h1>
           <p className="text-stone-500 mt-1">{shelter.city}</p>
         </div>
         <VerifiedBadge status={shelter.verification_status} size="md" />
@@ -24,20 +24,20 @@ export default function ShelterProfile({ shelter }: ShelterProfileProps) {
 
       <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {shelter.phone && (
-          <div className="rounded-xl border border-stone-200 p-4">
-            <p className="text-xs text-stone-500">Teléfono</p>
+          <div className="rounded-xl border border-stone-200/80 bg-stone-50/50 p-5 hover:bg-white hover:shadow-sm hover:border-stone-300/80 transition-all duration-200">
+            <p className="text-xs font-medium text-stone-400 uppercase tracking-wider">Teléfono</p>
             <p className="text-sm font-medium text-stone-700 mt-1">{shelter.phone}</p>
           </div>
         )}
         {shelter.email && (
-          <div className="rounded-xl border border-stone-200 p-4">
-            <p className="text-xs text-stone-500">Email</p>
+          <div className="rounded-xl border border-stone-200/80 bg-stone-50/50 p-5 hover:bg-white hover:shadow-sm hover:border-stone-300/80 transition-all duration-200">
+            <p className="text-xs font-medium text-stone-400 uppercase tracking-wider">Email</p>
             <p className="text-sm font-medium text-stone-700 mt-1">{shelter.email}</p>
           </div>
         )}
         {shelter.website && (
-          <div className="rounded-xl border border-stone-200 p-4">
-            <p className="text-xs text-stone-500">Sitio web</p>
+          <div className="rounded-xl border border-stone-200/80 bg-stone-50/50 p-5 hover:bg-white hover:shadow-sm hover:border-stone-300/80 transition-all duration-200">
+            <p className="text-xs font-medium text-stone-400 uppercase tracking-wider">Sitio web</p>
             <a
               href={shelter.website}
               target="_blank"

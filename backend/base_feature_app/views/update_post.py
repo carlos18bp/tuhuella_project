@@ -44,6 +44,42 @@ def update_post_detail(request, pk):
 def update_post_create(request):
     serializer = UpdatePostCreateUpdateSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        post = serializer.save()
+        return Response(
+            UpdatePostDetailSerializer(post, context={'request': request}).data,
+            status=status.HTTP_201_CREATED,
+        )
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_post_update(request, pk):
+    try:
+        post = UpdatePost.objects.select_related('shelter').get(pk=pk)
+    except UpdatePost.DoesNotExist:
+        return Response({'error': 'Update post not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if post.shelter.owner != request.user:
+        return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
+    serializer = UpdatePostCreateUpdateSerializer(post, data=request.data, partial=True, context={'request': request})
+    if serializer.is_valid():
+        post = serializer.save()
+        return Response(UpdatePostDetailSerializer(post, context={'request': request}).data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def update_post_delete(request, pk):
+    try:
+        post = UpdatePost.objects.select_related('shelter').get(pk=pk)
+    except UpdatePost.DoesNotExist:
+        return Response({'error': 'Update post not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if post.shelter.owner != request.user:
+        return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
+    post.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)

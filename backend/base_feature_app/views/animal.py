@@ -1,3 +1,5 @@
+import math
+
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -34,8 +36,24 @@ def animal_list(request):
         values = [v.strip() for v in gender.split(',') if v.strip()]
         queryset = queryset.filter(gender__in=values) if len(values) > 1 else queryset.filter(gender=values[0])
 
-    serializer = AnimalListSerializer(queryset, many=True, context={'request': request})
-    return Response(serializer.data)
+    page = int(request.query_params.get('page', 1))
+    page_size = int(request.query_params.get('page_size', 20))
+    page = max(1, page)
+    page_size = max(1, min(page_size, 100))
+
+    total = queryset.count()
+    total_pages = math.ceil(total / page_size) if total > 0 else 1
+    start = (page - 1) * page_size
+    end = start + page_size
+
+    serializer = AnimalListSerializer(queryset[start:end], many=True, context={'request': request})
+    return Response({
+        'count': total,
+        'page': page,
+        'page_size': page_size,
+        'total_pages': total_pages,
+        'results': serializer.data,
+    })
 
 
 @api_view(['GET'])

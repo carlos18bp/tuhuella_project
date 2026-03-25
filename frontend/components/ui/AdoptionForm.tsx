@@ -1,15 +1,36 @@
 'use client';
 
 import { useState } from 'react';
-
-type FormStep = 'questionnaire' | 'review' | 'submit';
+import { useTranslations } from 'next-intl';
 
 export type AdoptionFormData = {
+  // Section 1: Basic info
+  full_name: string;
+  phone: string;
+  email: string;
+  city: string;
+  // Section 2: Home & context
   housing_type: string;
   has_yard: string;
-  other_pets: string;
+  hours_alone: string;
+  // Section 3: Experience
+  previous_pets: string;
+  current_pets: string;
   experience: string;
-  daily_hours: string;
+  // Section 4: Compatibility
+  has_children: string;
+  children_ages: string;
+  has_cats: string;
+  has_other_dogs: string;
+  // Section 5: Commitment
+  accepts_vaccination: boolean;
+  accepts_sterilization: boolean;
+  accepts_followup: boolean;
+  // Section 6: Logistics
+  availability_date: string;
+  has_transport: string;
+  delivery_preference: string;
+  // Extra
   motivation: string;
 };
 
@@ -17,65 +38,120 @@ interface AdoptionFormProps {
   animalName: string;
   onSubmit: (data: { form_answers: AdoptionFormData; notes: string }) => void | Promise<void>;
   submitting?: boolean;
+  defaultValues?: Partial<AdoptionFormData>;
 }
 
-const QUESTIONS: { key: keyof AdoptionFormData; label: string; type: 'select' | 'textarea'; options?: string[] }[] = [
+type FormStep = 'questionnaire' | 'review' | 'submit';
+
+type FieldDef = {
+  key: keyof AdoptionFormData;
+  type: 'select' | 'textarea' | 'text' | 'checkbox';
+  options?: string[];
+  optionKeys?: string[];
+  required?: boolean;
+};
+
+type SectionDef = {
+  titleKey: string;
+  fields: FieldDef[];
+};
+
+const SECTIONS: SectionDef[] = [
   {
-    key: 'housing_type',
-    label: '¿Qué tipo de vivienda tienes?',
-    type: 'select',
-    options: ['Apartamento', 'Casa', 'Finca', 'Otro'],
+    titleKey: 'sectionBasicInfo',
+    fields: [
+      { key: 'full_name', type: 'text', required: true },
+      { key: 'phone', type: 'text', required: true },
+      { key: 'email', type: 'text', required: true },
+      { key: 'city', type: 'text', required: true },
+    ],
   },
   {
-    key: 'has_yard',
-    label: '¿Tienes patio o jardín?',
-    type: 'select',
-    options: ['Sí', 'No'],
+    titleKey: 'sectionHomeContext',
+    fields: [
+      { key: 'housing_type', type: 'select', optionKeys: ['apartment', 'house', 'farm', 'other'], required: true },
+      { key: 'has_yard', type: 'select', optionKeys: ['yes', 'no'], required: true },
+      { key: 'hours_alone', type: 'select', optionKeys: ['lessThan2', '2to4', '4to6', 'moreThan6'], required: true },
+    ],
   },
   {
-    key: 'other_pets',
-    label: '¿Tienes otras mascotas actualmente?',
-    type: 'select',
-    options: ['No', 'Sí, perro(s)', 'Sí, gato(s)', 'Sí, otros'],
+    titleKey: 'sectionExperience',
+    fields: [
+      { key: 'previous_pets', type: 'select', optionKeys: ['none', 'dogs', 'cats', 'both', 'other'], required: true },
+      { key: 'current_pets', type: 'select', optionKeys: ['none', 'dogs', 'cats', 'both', 'other'], required: true },
+      { key: 'experience', type: 'select', optionKeys: ['none', 'little', 'moderate', 'extensive'], required: true },
+    ],
   },
   {
-    key: 'experience',
-    label: '¿Tienes experiencia previa con mascotas?',
-    type: 'select',
-    options: ['Ninguna', 'Poca', 'Moderada', 'Mucha'],
+    titleKey: 'sectionCompatibility',
+    fields: [
+      { key: 'has_children', type: 'select', optionKeys: ['yes', 'no'], required: true },
+      { key: 'children_ages', type: 'text' },
+      { key: 'has_cats', type: 'select', optionKeys: ['yes', 'no'], required: true },
+      { key: 'has_other_dogs', type: 'select', optionKeys: ['yes', 'no'], required: true },
+    ],
   },
   {
-    key: 'daily_hours',
-    label: '¿Cuántas horas al día puedes dedicar a la mascota?',
-    type: 'select',
-    options: ['Menos de 2 horas', '2-4 horas', '4-6 horas', 'Más de 6 horas'],
+    titleKey: 'sectionCommitment',
+    fields: [
+      { key: 'accepts_vaccination', type: 'checkbox', required: true },
+      { key: 'accepts_sterilization', type: 'checkbox', required: true },
+      { key: 'accepts_followup', type: 'checkbox', required: true },
+    ],
   },
   {
-    key: 'motivation',
-    label: '¿Por qué deseas adoptar a este animal?',
-    type: 'textarea',
+    titleKey: 'sectionLogistics',
+    fields: [
+      { key: 'availability_date', type: 'text', required: true },
+      { key: 'has_transport', type: 'select', optionKeys: ['yes', 'no'], required: true },
+      { key: 'delivery_preference', type: 'select', optionKeys: ['pickup', 'delivery', 'flexible'], required: true },
+      { key: 'motivation', type: 'textarea', required: true },
+    ],
   },
 ];
 
 const EMPTY_FORM: AdoptionFormData = {
+  full_name: '',
+  phone: '',
+  email: '',
+  city: '',
   housing_type: '',
   has_yard: '',
-  other_pets: '',
+  hours_alone: '',
+  previous_pets: '',
+  current_pets: '',
   experience: '',
-  daily_hours: '',
+  has_children: '',
+  children_ages: '',
+  has_cats: '',
+  has_other_dogs: '',
+  accepts_vaccination: false,
+  accepts_sterilization: false,
+  accepts_followup: false,
+  availability_date: '',
+  has_transport: '',
+  delivery_preference: '',
   motivation: '',
 };
 
-export default function AdoptionForm({ animalName, onSubmit, submitting = false }: AdoptionFormProps) {
+export default function AdoptionForm({ animalName, onSubmit, submitting = false, defaultValues }: AdoptionFormProps) {
+  const t = useTranslations('adoption');
   const [step, setStep] = useState<FormStep>('questionnaire');
-  const [formData, setFormData] = useState<AdoptionFormData>(EMPTY_FORM);
+  const [formData, setFormData] = useState<AdoptionFormData>({ ...EMPTY_FORM, ...defaultValues });
   const [notes, setNotes] = useState('');
 
-  const updateField = (key: keyof AdoptionFormData, value: string) => {
+  const updateField = (key: keyof AdoptionFormData, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  const isQuestionnaireComplete = QUESTIONS.every((q) => formData[q.key].trim() !== '');
+  const isQuestionnaireComplete = SECTIONS.every((section) =>
+    section.fields.every((f) => {
+      if (!f.required) return true;
+      const val = formData[f.key];
+      if (f.type === 'checkbox') return val === true;
+      return typeof val === 'string' && val.trim() !== '';
+    })
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,18 +167,33 @@ export default function AdoptionForm({ animalName, onSubmit, submitting = false 
   };
 
   const stepLabels: Record<FormStep, string> = {
-    questionnaire: 'Cuestionario',
-    review: 'Revisar',
-    submit: 'Enviar',
+    questionnaire: t('stepQuestionnaire'),
+    review: t('stepReview'),
+    submit: t('stepSubmit'),
   };
 
   const stepOrder: FormStep[] = ['questionnaire', 'review', 'submit'];
   const currentStepIdx = stepOrder.indexOf(step);
 
+  const getOptionLabel = (fieldKey: keyof AdoptionFormData, optionKey: string) => {
+    return t(`options.${fieldKey}.${optionKey}`);
+  };
+
+  const getDisplayValue = (field: FieldDef) => {
+    const val = formData[field.key];
+    if (field.type === 'checkbox') return val ? t('yes') : t('no');
+    if (field.type === 'select' && field.optionKeys && typeof val === 'string' && val) {
+      return getOptionLabel(field.key, val);
+    }
+    return String(val || '—');
+  };
+
+  const inputClasses = 'mt-1 w-full rounded-xl border border-stone-200 shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] p-3 text-sm text-stone-800 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/10 outline-none';
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Step indicator */}
-      <div className="flex items-center gap-2" role="list" aria-label="Pasos del formulario">
+      <div className="flex items-center gap-2" role="list" aria-label={t('stepsLabel')}>
         {stepOrder.map((s, idx) => (
           <div key={s} className="flex items-center gap-2" role="listitem">
             {idx > 0 && <div className={`w-8 h-0.5 rounded-full ${idx <= currentStepIdx ? 'bg-teal-500' : 'bg-stone-200'}`} />}
@@ -113,10 +204,10 @@ export default function AdoptionForm({ animalName, onSubmit, submitting = false 
                 idx < currentStepIdx
                   ? 'bg-emerald-500 border-emerald-500 text-white'
                   : idx === currentStepIdx
-                    ? 'border-teal-500 text-teal-700'
+                    ? 'border-teal-500 text-teal-700 shadow-sm'
                     : 'border-stone-200 text-stone-400'
               }`}>
-                {idx < currentStepIdx ? '✓' : idx + 1}
+                {idx < currentStepIdx ? '\u2713' : idx + 1}
               </span>
               <span className="hidden sm:inline">{stepLabels[s]}</span>
             </div>
@@ -125,40 +216,79 @@ export default function AdoptionForm({ animalName, onSubmit, submitting = false 
       </div>
 
       <h3 className="text-lg font-semibold text-stone-800">
-        Solicitud de adopción para {animalName}
+        {t('title', { animalName })}
       </h3>
 
       {/* Step 1: Questionnaire */}
       {step === 'questionnaire' && (
-        <div className="space-y-5">
-          {QUESTIONS.map((q) => (
-            <div key={q.key}>
-              <label htmlFor={`adoption-${q.key}`} className="block text-sm font-medium text-stone-700">
-                {q.label}
-              </label>
-              {q.type === 'select' ? (
-                <select
-                  id={`adoption-${q.key}`}
-                  value={formData[q.key]}
-                  onChange={(e) => updateField(q.key, e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-stone-200 p-3 text-sm text-stone-800 focus:border-teal-500 focus:ring-teal-500 outline-none"
-                >
-                  <option value="">Selecciona una opción</option>
-                  {q.options?.map((opt) => (
-                    <option key={opt} value={opt}>{opt}</option>
-                  ))}
-                </select>
-              ) : (
-                <textarea
-                  id={`adoption-${q.key}`}
-                  value={formData[q.key]}
-                  onChange={(e) => updateField(q.key, e.target.value)}
-                  rows={3}
-                  className="mt-1 w-full rounded-xl border border-stone-200 p-3 text-sm text-stone-800 focus:border-teal-500 focus:ring-teal-500 outline-none"
-                  placeholder="Escribe tu respuesta..."
-                />
-              )}
-            </div>
+        <div className="space-y-8">
+          {SECTIONS.map((section) => (
+            <fieldset key={section.titleKey} className="space-y-4">
+              <legend className="text-sm font-semibold text-teal-700 uppercase tracking-wide border-b border-stone-100 pb-2 w-full">
+                {t(section.titleKey)}
+              </legend>
+              <div className="space-y-4">
+                {section.fields.map((field) => (
+                  <div key={field.key}>
+                    <label htmlFor={`adoption-${field.key}`} className="block text-sm font-medium tracking-[-0.01em] text-stone-700">
+                      {t(`fields.${field.key}`)}
+                      {field.required && <span className="text-red-400 ml-0.5">*</span>}
+                    </label>
+
+                    {field.type === 'select' && (
+                      <select
+                        id={`adoption-${field.key}`}
+                        value={formData[field.key] as string}
+                        onChange={(e) => updateField(field.key, e.target.value)}
+                        className={inputClasses}
+                      >
+                        <option value="">{t('selectPlaceholder')}</option>
+                        {field.optionKeys?.map((optKey) => (
+                          <option key={optKey} value={optKey}>
+                            {getOptionLabel(field.key, optKey)}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+
+                    {field.type === 'text' && (
+                      <input
+                        id={`adoption-${field.key}`}
+                        type="text"
+                        value={formData[field.key] as string}
+                        onChange={(e) => updateField(field.key, e.target.value)}
+                        className={inputClasses}
+                        placeholder={t(`placeholders.${field.key}`)}
+                      />
+                    )}
+
+                    {field.type === 'textarea' && (
+                      <textarea
+                        id={`adoption-${field.key}`}
+                        value={formData[field.key] as string}
+                        onChange={(e) => updateField(field.key, e.target.value)}
+                        rows={3}
+                        className={inputClasses}
+                        placeholder={t(`placeholders.${field.key}`)}
+                      />
+                    )}
+
+                    {field.type === 'checkbox' && (
+                      <label htmlFor={`adoption-${field.key}`} className="mt-1 flex items-center gap-2.5 cursor-pointer">
+                        <input
+                          id={`adoption-${field.key}`}
+                          type="checkbox"
+                          checked={formData[field.key] as boolean}
+                          onChange={(e) => updateField(field.key, e.target.checked)}
+                          className="h-4 w-4 rounded border-stone-300 text-teal-600 focus:ring-teal-500"
+                        />
+                        <span className="text-sm text-stone-600">{t(`checkboxLabels.${field.key}`)}</span>
+                      </label>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </fieldset>
           ))}
         </div>
       )}
@@ -166,12 +296,17 @@ export default function AdoptionForm({ animalName, onSubmit, submitting = false 
       {/* Step 2: Review */}
       {step === 'review' && (
         <div className="space-y-4">
-          <p className="text-sm text-stone-500">Revisa tus respuestas antes de continuar:</p>
-          <div className="rounded-2xl border border-stone-200 bg-stone-50/50 p-5 space-y-3">
-            {QUESTIONS.map((q) => (
-              <div key={q.key}>
-                <dt className="text-xs font-medium text-stone-400">{q.label}</dt>
-                <dd className="text-sm text-stone-800 mt-0.5">{formData[q.key]}</dd>
+          <p className="text-sm text-stone-500">{t('reviewDescription')}</p>
+          <div className="space-y-6">
+            {SECTIONS.map((section) => (
+              <div key={section.titleKey} className="rounded-2xl border border-stone-200 bg-stone-50/50 p-5 space-y-3">
+                <h4 className="text-xs font-semibold text-teal-600 uppercase tracking-wide">{t(section.titleKey)}</h4>
+                {section.fields.map((field) => (
+                  <div key={field.key}>
+                    <dt className="text-xs font-medium text-stone-400">{t(`fields.${field.key}`)}</dt>
+                    <dd className="text-sm text-stone-800 mt-0.5">{getDisplayValue(field)}</dd>
+                  </div>
+                ))}
               </div>
             ))}
           </div>
@@ -181,16 +316,14 @@ export default function AdoptionForm({ animalName, onSubmit, submitting = false 
       {/* Step 3: Notes + Submit */}
       {step === 'submit' && (
         <div className="space-y-4">
-          <p className="text-sm text-stone-500">
-            ¿Deseas agregar algún comentario adicional para el refugio?
-          </p>
+          <p className="text-sm text-stone-500">{t('notesDescription')}</p>
           <textarea
             id="adoption-notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
-            className="w-full rounded-xl border border-stone-200 p-3 text-sm text-stone-800 focus:border-teal-500 focus:ring-teal-500 outline-none"
-            placeholder="Notas adicionales (opcional)..."
+            className={inputClasses}
+            placeholder={t('notesPlaceholder')}
           />
         </div>
       )}
@@ -203,7 +336,7 @@ export default function AdoptionForm({ animalName, onSubmit, submitting = false 
             onClick={() => setStep(stepOrder[currentStepIdx - 1])}
             className="rounded-full border border-stone-300 px-5 py-2.5 text-sm font-medium text-stone-600 hover:bg-stone-50 transition-colors"
           >
-            Atrás
+            {t('back')}
           </button>
         )}
         <button
@@ -212,11 +345,11 @@ export default function AdoptionForm({ animalName, onSubmit, submitting = false 
             (step === 'questionnaire' && !isQuestionnaireComplete) ||
             (step === 'submit' && submitting)
           }
-          className="flex-1 bg-teal-600 text-white rounded-full py-2.5 text-sm font-medium hover:bg-teal-700 transition-colors disabled:opacity-50"
+          className="flex-1 bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600 shadow-sm hover:shadow-md text-white rounded-full py-2.5 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {step === 'submit'
-            ? submitting ? 'Enviando...' : 'Enviar solicitud'
-            : 'Continuar'}
+            ? submitting ? t('submitting') : t('submitButton')
+            : t('continue')}
         </button>
       </div>
     </form>

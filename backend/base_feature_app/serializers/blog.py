@@ -1,15 +1,7 @@
 from rest_framework import serializers
 
 from base_feature_app.models import BlogPost
-
-
-def _get_lang(serializer):
-    """Return 'es' or 'en' from serializer context (default 'es')."""
-    request = serializer.context.get('request')
-    if request:
-        lang = request.query_params.get('lang', 'es')
-        return lang if lang in ('es', 'en') else 'es'
-    return serializer.context.get('lang', 'es')
+from base_feature_app.serializers.utils import get_lang
 
 
 # ---------------------------------------------------------------------------
@@ -42,11 +34,11 @@ class BlogPostListSerializer(serializers.ModelSerializer):
         )
 
     def get_title(self, obj):
-        lang = _get_lang(self)
+        lang = get_lang(self)
         return getattr(obj, f'title_{lang}')
 
     def get_excerpt(self, obj):
-        lang = _get_lang(self)
+        lang = get_lang(self)
         return getattr(obj, f'excerpt_{lang}')
 
     def get_cover_image(self, obj):
@@ -82,31 +74,31 @@ class BlogPostDetailSerializer(serializers.ModelSerializer):
         )
 
     def get_title(self, obj):
-        lang = _get_lang(self)
+        lang = get_lang(self)
         return getattr(obj, f'title_{lang}')
 
     def get_excerpt(self, obj):
-        lang = _get_lang(self)
+        lang = get_lang(self)
         return getattr(obj, f'excerpt_{lang}')
 
     def get_content(self, obj):
-        lang = _get_lang(self)
+        lang = get_lang(self)
         return getattr(obj, f'content_{lang}')
 
     def get_content_json(self, obj):
-        lang = _get_lang(self)
+        lang = get_lang(self)
         return getattr(obj, f'content_json_{lang}')
 
     def get_meta_title(self, obj):
-        lang = _get_lang(self)
+        lang = get_lang(self)
         return getattr(obj, f'meta_title_{lang}')
 
     def get_meta_description(self, obj):
-        lang = _get_lang(self)
+        lang = get_lang(self)
         return getattr(obj, f'meta_description_{lang}')
 
     def get_meta_keywords(self, obj):
-        lang = _get_lang(self)
+        lang = get_lang(self)
         return getattr(obj, f'meta_keywords_{lang}')
 
     def get_cover_image(self, obj):

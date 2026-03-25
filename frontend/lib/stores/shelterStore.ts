@@ -10,8 +10,8 @@ type ShelterState = {
   shelter: Shelter | null;
   loading: boolean;
   error: string | null;
-  fetchShelters: () => Promise<void>;
-  fetchShelter: (id: number) => Promise<void>;
+  fetchShelters: (lang?: string) => Promise<void>;
+  fetchShelter: (id: number, lang?: string) => Promise<void>;
   createShelter: (data: Partial<Shelter>) => Promise<Shelter>;
   updateShelter: (id: number, data: Partial<Shelter>) => Promise<Shelter>;
 };
@@ -22,10 +22,12 @@ export const useShelterStore = create<ShelterState>((set) => ({
   loading: false,
   error: null,
 
-  fetchShelters: async () => {
+  fetchShelters: async (lang?: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get(API_ENDPOINTS.SHELTERS);
+      const response = await api.get(API_ENDPOINTS.SHELTERS, {
+        params: lang ? { lang } : {},
+      });
       set({ shelters: response.data, loading: false });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to fetch shelters';
@@ -33,10 +35,12 @@ export const useShelterStore = create<ShelterState>((set) => ({
     }
   },
 
-  fetchShelter: async (id: number) => {
+  fetchShelter: async (id: number, lang?: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get(API_ENDPOINTS.SHELTER_DETAIL(id));
+      const response = await api.get(API_ENDPOINTS.SHELTER_DETAIL(id), {
+        params: lang ? { lang } : {},
+      });
       set({ shelter: response.data, loading: false });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to fetch shelter';

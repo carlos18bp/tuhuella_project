@@ -32,7 +32,9 @@ jest.mock('@/components/ui', () => ({
     React.createElement('div', { 'data-testid': `shelter-${shelter.id}` }, shelter.name),
   FAQAccordion: () => null,
 }));
-jest.mock('@/lib/data/faqs', () => ({ homeFaqs: [] }));
+jest.mock('@/lib/hooks/useFAQs', () => ({
+  useFAQsByTopic: () => ({ items: [], loading: false }),
+}));
 
 const mockUseAnimalStore = useAnimalStore as unknown as jest.Mock;
 const mockUseCampaignStore = useCampaignStore as unknown as jest.Mock;

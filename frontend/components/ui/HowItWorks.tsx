@@ -46,8 +46,8 @@ export default function HowItWorks({
 
       <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
         {steps.map((step) => (
-          <div key={step.number} className="bg-white rounded-2xl border border-stone-200 p-8">
-            <div className={`w-12 h-12 rounded-full ${step.accentColor} flex items-center justify-center text-xl font-bold mx-auto`}>
+          <div key={step.number} className="bg-white rounded-2xl border border-stone-200 p-8 hover:shadow-md transition-shadow duration-200">
+            <div className={`w-14 h-14 rounded-2xl ${step.accentColor} flex items-center justify-center text-xl font-bold mx-auto`}>
               {step.number}
             </div>
             <h3 className="mt-4 font-semibold text-stone-800">{step.title}</h3>

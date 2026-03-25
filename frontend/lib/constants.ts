@@ -19,6 +19,12 @@ export const ROUTES = {
   ADMIN_BLOG_EDIT: (id: number | string) => `/admin/blog/${id}/editar`,
   ADMIN_BLOG_CALENDAR: '/admin/blog/calendario',
 
+  ABOUT: '/about',
+  WORK_WITH_US: '/work-with-us',
+  STRATEGIC_ALLIES: '/strategic-allies',
+  TERMS: '/terms',
+  ADOPT: (id: number | string) => `/adopt/${id}`,
+
   MY_PROFILE: '/my-profile',
   FAVORITES: '/favorites',
   MY_INTENT: '/my-intent',
@@ -32,7 +38,11 @@ export const ROUTES = {
   SHELTER_APPLICATIONS: '/shelter/applications',
   SHELTER_CAMPAIGNS: '/shelter/campaigns',
   SHELTER_DONATIONS: '/shelter/donations',
+  SHELTER_UPDATES: '/shelter/updates',
+  SHELTER_UPDATES_CREATE: '/shelter/updates/create',
   SHELTER_SETTINGS: '/shelter/settings',
+
+  MY_NOTIFICATIONS: '/my-profile/notifications',
 
   ADMIN_DASHBOARD: '/admin/dashboard',
   ADMIN_APPROVE_SHELTERS: '/admin/shelters/approve',
@@ -90,6 +100,8 @@ export const API_ENDPOINTS = {
   UPDATES: '/updates/',
   UPDATE_DETAIL: (id: number) => `/updates/${id}/`,
   UPDATE_CREATE: '/updates/create/',
+  UPDATE_UPDATE: (id: number) => `/updates/${id}/update/`,
+  UPDATE_DELETE: (id: number) => `/updates/${id}/delete/`,
 
   ADOPTER_INTENTS: '/adopter-intents/',
   ADOPTER_INTENT_ME: '/adopter-intents/me/',
@@ -103,6 +115,7 @@ export const API_ENDPOINTS = {
   ADMIN_PENDING_SHELTERS: '/admin/shelters/pending/',
   ADMIN_APPROVE_SHELTER: (id: number) => `/admin/shelters/approve/${id}/`,
   ADMIN_METRICS: '/admin/metrics/',
+  SHELTER_METRICS: '/admin/shelter/metrics/',
 
   FAVORITES: '/favorites/',
   FAVORITE_TOGGLE: '/favorites/toggle/',
@@ -119,6 +132,23 @@ export const API_ENDPOINTS = {
   BLOG_ADMIN_DUPLICATE: (id: number) => `/blog/admin/${id}/duplicate/`,
   BLOG_ADMIN_UPLOAD_COVER: (id: number) => `/blog/admin/${id}/upload-cover/`,
   BLOG_ADMIN_CALENDAR: '/blog/admin/calendar/',
+
+  NOTIFICATION_PREFERENCES: '/notifications/preferences/',
+  NOTIFICATION_PREFERENCES_INIT: '/notifications/preferences/init/',
+  NOTIFICATION_PREFERENCES_UPDATE: '/notifications/preferences/update/',
+  NOTIFICATION_LOGS: '/notifications/logs/',
+  NOTIFICATION_LOG_READ: (id: number) => `/notifications/logs/${id}/read/`,
+  NOTIFICATION_MARK_ALL_READ: '/notifications/logs/mark-all-read/',
+  NOTIFICATION_UNREAD_COUNT: '/notifications/unread-count/',
+
+  FAQS_ALL: '/faqs/',
+  FAQS_BY_TOPIC: (slug: string) => `/faqs/${slug}/`,
+
+  DONATION_AMOUNTS: '/donation-amounts/',
+  SPONSORSHIP_AMOUNTS: '/sponsorship-amounts/',
+
+  VOLUNTEER_POSITIONS: '/volunteer-positions/',
+  STRATEGIC_ALLIES: '/strategic-allies/',
 } as const;
 
 export const COOKIE_KEYS = {

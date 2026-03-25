@@ -4,7 +4,8 @@ import { useEffect, useRef } from 'react';
 
 /**
  * Reveal elements on scroll using GSAP + ScrollTrigger.
- * Animates from opacity 0 / translateY(40px) to visible.
+ * Elements start visible by default. JS adds a hidden class, then GSAP animates to visible.
+ * If GSAP fails to load, the hidden class is never added and elements remain visible.
  *
  * @param stagger - Delay between child animations (seconds). 0 = animate container only.
  */
@@ -22,12 +23,16 @@ export function useScrollReveal<T extends HTMLElement>(stagger = 0) {
       const { ScrollTrigger } = await import('gsap/ScrollTrigger');
       gsap.registerPlugin(ScrollTrigger);
 
-      ctx = gsap.context(() => {
-        const targets = stagger > 0 ? el.children : el;
+      const targets = stagger > 0 ? el.children : el;
 
-        gsap.from(targets, {
-          y: 40,
-          opacity: 0,
+      // Apply hidden class via JS (so elements stay visible if GSAP never loads)
+      const elements = stagger > 0 ? Array.from(el.children) : [el];
+      elements.forEach((child) => child.classList.add('scroll-reveal-hidden'));
+
+      ctx = gsap.context(() => {
+        gsap.to(targets, {
+          y: 0,
+          opacity: 1,
           duration: 0.7,
           ease: 'power2.out',
           stagger: stagger > 0 ? stagger : undefined,
@@ -42,6 +47,9 @@ export function useScrollReveal<T extends HTMLElement>(stagger = 0) {
 
     return () => {
       ctx?.revert();
+      // Remove hidden class on cleanup so elements are visible if re-rendered
+      const elements = stagger > 0 && el ? Array.from(el.children) : el ? [el] : [];
+      elements.forEach((child) => child.classList.remove('scroll-reveal-hidden'));
     };
   }, [stagger]);
 

@@ -29,13 +29,13 @@ export default function PaymentMethodSelector({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-stone-700">Método de pago</label>
+      <label className="block text-sm font-medium tracking-[-0.01em] text-stone-700">Método de pago</label>
       <div className="mt-2 space-y-2">
         {methods.map((opt) => (
           <label
             key={opt.value}
             className={`flex items-center gap-3 rounded-xl border p-3 cursor-pointer transition-colors ${
-              selected === opt.value ? borderActive : 'border-stone-200 hover:bg-stone-50'
+              selected === opt.value ? `${borderActive} ring-1 ring-${accentColor}-500` : 'border-stone-200 hover:bg-stone-50 hover:border-stone-300 hover:shadow-sm'
             }`}
           >
             <input

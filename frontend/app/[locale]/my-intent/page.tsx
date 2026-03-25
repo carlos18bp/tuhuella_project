@@ -59,16 +59,16 @@ export default function MiIntencionPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <h1 className="text-3xl font-bold text-stone-800">Mi Intención de Adopción</h1>
+      <h1 className="text-3xl font-bold text-stone-800 heading-decorated">Mi Intención de Adopción</h1>
       <p className="mt-2 text-stone-500">
         Comparte lo que buscas y deja que los refugios te encuentren
       </p>
 
       {loading ? (
         <div className="mt-8 max-w-lg space-y-4">
-          <div className="rounded-xl border border-stone-200 p-6 animate-pulse">
-            <div className="h-5 bg-stone-100 rounded w-2/3" />
-            <div className="h-20 bg-stone-100 rounded mt-4" />
+          <div className="rounded-xl border border-stone-200 p-6">
+            <div className="h-5 animate-shimmer rounded w-2/3" />
+            <div className="h-20 animate-shimmer rounded mt-4" />
           </div>
         </div>
       ) : (
@@ -82,7 +82,7 @@ export default function MiIntencionPage() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
-              className="mt-2 w-full rounded-xl border border-stone-200 p-3 text-sm text-stone-800 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
+              className="mt-2 w-full rounded-xl border border-stone-200 shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] p-3 text-sm text-stone-800 placeholder:text-stone-400 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none transition-colors"
               placeholder="Describe qué tipo de animal te gustaría adoptar, tu situación, espacio disponible..."
             />
           </div>
@@ -95,7 +95,7 @@ export default function MiIntencionPage() {
               id="visibility"
               value={visibility}
               onChange={(e) => setVisibility(e.target.value as 'public' | 'private')}
-              className="mt-2 w-full rounded-xl border border-stone-200 p-3 text-sm text-stone-800 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
+              className="mt-2 w-full rounded-xl border border-stone-200 shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] p-3 text-sm text-stone-800 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
             >
               <option value="public">Pública — los refugios pueden ver tu intención</option>
               <option value="private">Privada — solo tú la ves</option>
@@ -118,7 +118,7 @@ export default function MiIntencionPage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="bg-teal-600 text-white rounded-full px-6 py-2.5 text-sm font-medium hover:bg-teal-700 transition-colors disabled:opacity-50"
+            className="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600 shadow-sm hover:shadow-md text-white rounded-full px-6 py-2.5 text-sm font-medium btn-base disabled:opacity-50"
           >
             {saving ? 'Guardando...' : intent ? 'Actualizar intención' : 'Crear intención'}
           </button>

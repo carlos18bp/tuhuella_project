@@ -7,6 +7,9 @@ jest.mock('swiper/modules', () => ({ Navigation: {}, Pagination: {} }));
 jest.mock('swiper/css', () => {});
 jest.mock('swiper/css/navigation', () => {});
 jest.mock('swiper/css/pagination', () => {});
+jest.mock('@/lib/hooks/useFAQs', () => ({
+  useFAQsByTopic: () => ({ items: [], loading: false }),
+}));
 
 import { useShelterStore } from '@/lib/stores/shelterStore';
 

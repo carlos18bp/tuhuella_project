@@ -6,6 +6,6 @@ class ShelterCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Shelter
         fields = [
-            'id', 'name', 'legal_name', 'description', 'city', 'address',
-            'phone', 'email', 'website',
+            'id', 'name', 'legal_name', 'description_es', 'description_en',
+            'city', 'address', 'phone', 'email', 'website',
         ]

@@ -2,6 +2,7 @@
 
 import { Link } from '@/i18n/navigation';
 import { useEffect } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
@@ -14,10 +15,14 @@ import { useCampaignStore } from '@/lib/stores/campaignStore';
 import { useShelterStore } from '@/lib/stores/shelterStore';
 import { AnimalCard, CampaignCard, ShelterCard, FAQAccordion } from '@/components/ui';
 import { useScrollReveal } from '@/lib/hooks/useScrollReveal';
+import { useFAQsByTopic } from '@/lib/hooks/useFAQs';
 import { ROUTES } from '@/lib/constants';
-import { homeFaqs } from '@/lib/data/faqs';
 
 export default function HomePage() {
+  const locale = useLocale();
+  const t = useTranslations('home');
+  const tCommon = useTranslations('common');
+
   const animals = useAnimalStore((s) => s.animals);
   const fetchAnimals = useAnimalStore((s) => s.fetchAnimals);
   const campaigns = useCampaignStore((s) => s.campaigns);
@@ -26,14 +31,16 @@ export default function HomePage() {
   const fetchShelters = useShelterStore((s) => s.fetchShelters);
 
   useEffect(() => {
-    if (animals.length === 0) void fetchAnimals();
-    if (campaigns.length === 0) void fetchCampaigns();
-    if (shelters.length === 0) void fetchShelters();
-  }, [fetchAnimals, animals.length, fetchCampaigns, campaigns.length, fetchShelters, shelters.length]);
+    void fetchAnimals(undefined, locale);
+    void fetchCampaigns(locale);
+    void fetchShelters(locale);
+  }, [fetchAnimals, fetchCampaigns, fetchShelters, locale]);
 
   const featuredAnimals = animals.slice(0, 8);
   const activeCampaigns = campaigns.slice(0, 6);
   const featuredShelters = shelters.slice(0, 3);
+
+  const { items: homeFaqs } = useFAQsByTopic('home');
 
   const stepsRef = useScrollReveal<HTMLDivElement>(0.15);
   const sheltersGridRef = useScrollReveal<HTMLDivElement>(0.1);
@@ -45,16 +52,15 @@ export default function HomePage() {
         <div className="mx-auto max-w-[1400px] px-6 py-20 md:py-28">
           <div className="max-w-3xl">
             <p className="inline-flex items-center text-xs font-medium text-teal-700 bg-teal-50 border border-teal-200 rounded-full px-3 py-1">
-              Plataforma de adopción y apadrinamiento animal
+              {t('badge')}
             </p>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-stone-900 mt-6 leading-tight">
-              Cada huella cuenta.
+              {t('title')}
               <br />
-              <span className="text-teal-600">Adopta, apadrina, transforma.</span>
+              <span className="text-teal-600">{t('titleAccent')}</span>
             </h1>
             <p className="mt-6 text-lg text-stone-600 max-w-2xl leading-relaxed">
-              Conectamos refugios con personas que quieren dar un hogar o apoyar a un animal.
-              Encuentra tu compañero ideal o ayuda desde donde estés.
+              {t('subtitle')}
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -62,34 +68,34 @@ export default function HomePage() {
                 href={ROUTES.ANIMALS}
                 className="bg-teal-600 text-white rounded-full px-6 py-3 font-medium hover:bg-teal-700 btn-base shadow-sm"
               >
-                Ver Animales
+                {t('ctaAnimals')}
               </Link>
               <Link
                 href={ROUTES.LOOKING_TO_ADOPT}
                 className="border border-stone-300 text-stone-700 rounded-full px-6 py-3 font-medium hover:bg-white btn-base shadow-sm"
               >
-                Busco Adoptar
+                {t('ctaAdopt')}
               </Link>
               <Link
                 href={ROUTES.CAMPAIGNS}
                 className="border border-amber-300 text-amber-700 rounded-full px-6 py-3 font-medium hover:bg-amber-50 btn-base shadow-sm"
               >
-                Donar
+                {t('ctaDonate')}
               </Link>
             </div>
 
             <div className="mt-10 grid grid-cols-2 sm:grid-cols-3 gap-3">
               <div className="rounded-2xl bg-white/80 border border-stone-200 p-4 shadow-sm hover:shadow-md transition-shadow">
-                <p className="text-xs text-stone-500">Adopción</p>
-                <p className="mt-1 text-sm font-semibold text-stone-900">Proceso guiado y seguro</p>
+                <p className="text-xs text-stone-500">{t('statAdoptionLabel')}</p>
+                <p className="mt-1 text-sm font-semibold text-stone-900">{t('statAdoption')}</p>
               </div>
               <div className="rounded-2xl bg-white/80 border border-stone-200 p-4 shadow-sm hover:shadow-md transition-shadow">
-                <p className="text-xs text-stone-500">Apadrinamiento</p>
-                <p className="mt-1 text-sm font-semibold text-stone-900">Apoya mensual o una vez</p>
+                <p className="text-xs text-stone-500">{t('statSponsorshipLabel')}</p>
+                <p className="mt-1 text-sm font-semibold text-stone-900">{t('statSponsorship')}</p>
               </div>
               <div className="rounded-2xl bg-white/80 border border-stone-200 p-4 shadow-sm hover:shadow-md transition-shadow">
-                <p className="text-xs text-stone-500">Refugios</p>
-                <p className="mt-1 text-sm font-semibold text-stone-900">Verificados y confiables</p>
+                <p className="text-xs text-stone-500">{t('statSheltersLabel')}</p>
+                <p className="mt-1 text-sm font-semibold text-stone-900">{t('statShelters')}</p>
               </div>
             </div>
           </div>
@@ -101,11 +107,11 @@ export default function HomePage() {
         <div className="mx-auto max-w-[1400px] px-6">
           <div className="flex items-end justify-between mb-8">
             <div>
-              <h2 className="text-2xl font-bold text-stone-800">Animales en busca de hogar</h2>
-              <p className="mt-1 text-stone-500">Estos amigos esperan por ti</p>
+              <h2 className="text-2xl font-bold text-stone-800 heading-decorated">{t('featuredTitle')}</h2>
+              <p className="mt-1 text-stone-500">{t('featuredSubtitle')}</p>
             </div>
             <Link href={ROUTES.ANIMALS} className="text-sm text-teal-600 hover:text-teal-700 font-medium">
-              Ver todos &rarr;
+              {t('viewAll')} &rarr;
             </Link>
           </div>
 
@@ -132,7 +138,7 @@ export default function HomePage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="rounded-2xl border border-stone-200 bg-white overflow-hidden">
+                <div key={i} className="rounded-2xl border border-stone-200/60 bg-white overflow-hidden shadow-sm">
                   <div className="aspect-[4/3] animate-shimmer" />
                   <div className="p-4 space-y-2">
                     <div className="h-4 animate-shimmer rounded w-2/3" />
@@ -146,11 +152,11 @@ export default function HomePage() {
       </section>
 
       {/* How It Works */}
-      <section className="py-16 bg-stone-100/50 border-y border-stone-200">
+      <section className="py-16 bg-gradient-to-b from-stone-100/60 via-stone-50/30 to-stone-100/60 border-y border-stone-200">
         <div className="mx-auto max-w-[1400px] px-6 text-center">
-          <h2 className="text-2xl font-bold text-stone-800">¿Cómo funciona?</h2>
+          <h2 className="text-2xl font-bold text-stone-800 heading-decorated-center">{t('howTitle')}</h2>
           <p className="mt-2 text-stone-500 max-w-lg mx-auto">
-            Tres pasos sencillos para transformar una vida
+            {t('howSubtitle')}
           </p>
 
           <div ref={stepsRef} className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -158,27 +164,27 @@ export default function HomePage() {
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-50 to-teal-100 text-teal-600 flex items-center justify-center text-xl font-bold mx-auto">
                 1
               </div>
-              <h3 className="mt-5 font-semibold text-stone-800">Explora</h3>
+              <h3 className="mt-5 font-semibold text-stone-800">{t('step1Title')}</h3>
               <p className="mt-2 text-sm text-stone-500 leading-relaxed">
-                Filtra por especie, tamaño, edad y ubicación. Encuentra al compañero ideal.
+                {t('step1Desc')}
               </p>
             </div>
             <div className="bg-white rounded-2xl border border-stone-200 p-8 shadow-sm hover:shadow-md transition-shadow">
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100 text-amber-600 flex items-center justify-center text-xl font-bold mx-auto">
                 2
               </div>
-              <h3 className="mt-5 font-semibold text-stone-800">Conecta</h3>
+              <h3 className="mt-5 font-semibold text-stone-800">{t('step2Title')}</h3>
               <p className="mt-2 text-sm text-stone-500 leading-relaxed">
-                Envía tu solicitud de adopción o elige apadrinar mensualmente.
+                {t('step2Desc')}
               </p>
             </div>
             <div className="bg-white rounded-2xl border border-stone-200 p-8 shadow-sm hover:shadow-md transition-shadow">
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-600 flex items-center justify-center text-xl font-bold mx-auto">
                 3
               </div>
-              <h3 className="mt-5 font-semibold text-stone-800">Transforma</h3>
+              <h3 className="mt-5 font-semibold text-stone-800">{t('step3Title')}</h3>
               <p className="mt-2 text-sm text-stone-500 leading-relaxed">
-                Dale un hogar, sigue su progreso, y recibe actualizaciones del refugio.
+                {t('step3Desc')}
               </p>
             </div>
           </div>
@@ -191,11 +197,11 @@ export default function HomePage() {
           <div className="mx-auto max-w-[1400px] px-6">
             <div className="flex items-end justify-between mb-8">
               <div>
-                <h2 className="text-2xl font-bold text-stone-800">Campañas activas</h2>
-                <p className="mt-1 text-stone-500">Ayuda a quienes más lo necesitan</p>
+                <h2 className="text-2xl font-bold text-stone-800 heading-decorated">{t('campaignsTitle')}</h2>
+                <p className="mt-1 text-stone-500">{t('campaignsSubtitle')}</p>
               </div>
               <Link href={ROUTES.CAMPAIGNS} className="text-sm text-amber-600 hover:text-amber-700 font-medium">
-                Ver todas &rarr;
+                {t('viewAllFeminine')} &rarr;
               </Link>
             </div>
 
@@ -207,8 +213,8 @@ export default function HomePage() {
               pagination={{ clickable: true }}
               autoplay={{ delay: 5000, disableOnInteraction: true }}
               breakpoints={{
-                640: { slidesPerView: 2 },
-                1024: { slidesPerView: 3 },
+                640: { slidesPerView: 1 },
+                768: { slidesPerView: 2 },
               }}
               className="pb-12"
             >
@@ -223,12 +229,12 @@ export default function HomePage() {
       )}
 
       {/* Why Adopt — Value Content */}
-      <section className="py-16 bg-stone-100/50 border-y border-stone-200">
+      <section className="py-16 bg-gradient-to-b from-stone-100/60 via-stone-50/30 to-stone-100/60 border-y border-stone-200">
         <div className="mx-auto max-w-[1400px] px-6">
           <div className="text-center mb-12">
-            <h2 className="text-2xl font-bold text-stone-800">¿Por qué adoptar?</h2>
+            <h2 className="text-2xl font-bold text-stone-800 heading-decorated-center">{t('whyAdoptTitle')}</h2>
             <p className="mt-2 text-stone-500 max-w-lg mx-auto">
-              Adoptar transforma vidas — la del animal y la tuya
+              {t('whyAdoptSubtitle')}
             </p>
           </div>
 
@@ -237,36 +243,36 @@ export default function HomePage() {
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-50 to-teal-100 flex items-center justify-center mx-auto">
                 <Heart className="h-6 w-6 text-teal-600" />
               </div>
-              <h3 className="mt-4 font-semibold text-stone-800">Salvas una vida</h3>
+              <h3 className="mt-4 font-semibold text-stone-800">{t('whySaveLives')}</h3>
               <p className="mt-2 text-sm text-stone-500 leading-relaxed">
-                Cada adopción libera un espacio en el refugio para rescatar otro animal.
+                {t('whySaveLivesDesc')}
               </p>
             </div>
             <div className="bg-white rounded-2xl border border-stone-200 p-6 text-center shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-50 to-amber-100 flex items-center justify-center mx-auto">
                 <Shield className="h-6 w-6 text-amber-600" />
               </div>
-              <h3 className="mt-4 font-semibold text-stone-800">Proceso seguro</h3>
+              <h3 className="mt-4 font-semibold text-stone-800">{t('whySafeProcess')}</h3>
               <p className="mt-2 text-sm text-stone-500 leading-relaxed">
-                Refugios verificados, seguimiento post-adopción y asesoría veterinaria.
+                {t('whySafeProcessDesc')}
               </p>
             </div>
             <div className="bg-white rounded-2xl border border-stone-200 p-6 text-center shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center mx-auto">
                 <Users className="h-6 w-6 text-emerald-600" />
               </div>
-              <h3 className="mt-4 font-semibold text-stone-800">Comunidad activa</h3>
+              <h3 className="mt-4 font-semibold text-stone-800">{t('whyCommunity')}</h3>
               <p className="mt-2 text-sm text-stone-500 leading-relaxed">
-                Únete a una red de personas comprometidas con el bienestar animal.
+                {t('whyCommunityDesc')}
               </p>
             </div>
             <div className="bg-white rounded-2xl border border-stone-200 p-6 text-center shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-rose-50 to-rose-100 flex items-center justify-center mx-auto">
                 <TrendingUp className="h-6 w-6 text-rose-600" />
               </div>
-              <h3 className="mt-4 font-semibold text-stone-800">Impacto real</h3>
+              <h3 className="mt-4 font-semibold text-stone-800">{t('whyImpact')}</h3>
               <p className="mt-2 text-sm text-stone-500 leading-relaxed">
-                Tus donaciones y apadrinamientos generan cambios medibles en los refugios.
+                {t('whyImpactDesc')}
               </p>
             </div>
           </div>
@@ -279,15 +285,15 @@ export default function HomePage() {
           <div className="mx-auto max-w-[1400px] px-6">
             <div className="flex items-end justify-between mb-8">
               <div>
-                <h2 className="text-2xl font-bold text-stone-800">Refugios destacados</h2>
-                <p className="mt-1 text-stone-500">Organizaciones verificadas que protegen vidas</p>
+                <h2 className="text-2xl font-bold text-stone-800 heading-decorated">{t('sheltersTitle')}</h2>
+                <p className="mt-1 text-stone-500">{t('sheltersSubtitle')}</p>
               </div>
               <Link href={ROUTES.SHELTERS} className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
-                Ver todos &rarr;
+                {t('viewAll')} &rarr;
               </Link>
             </div>
 
-            <div ref={sheltersGridRef} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div ref={sheltersGridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredShelters.map((shelter) => (
                 <ShelterCard key={shelter.id} shelter={shelter} />
               ))}
@@ -297,13 +303,15 @@ export default function HomePage() {
       )}
 
       {/* FAQ */}
-      <div className="border-t border-stone-200 bg-stone-50/50">
-        <FAQAccordion
-          items={homeFaqs}
-          title="Preguntas frecuentes"
-          subtitle="Todo lo que necesitas saber sobre Tu Huella"
-        />
-      </div>
+      {homeFaqs.length > 0 && (
+        <div className="border-t border-stone-200 bg-stone-50/50">
+          <FAQAccordion
+            items={homeFaqs}
+            title={tCommon('faq')}
+            subtitle={tCommon('faqSubtitle')}
+          />
+        </div>
+      )}
     </>
   );
 }

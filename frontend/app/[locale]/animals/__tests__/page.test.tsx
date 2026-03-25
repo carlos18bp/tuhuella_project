@@ -28,7 +28,9 @@ jest.mock('@/components/ui', () => ({
   FAQAccordion: () => null,
 }));
 
-jest.mock('@/lib/data/faqs', () => ({ animalsFaqs: [] }));
+jest.mock('@/lib/hooks/useFAQs', () => ({
+  useFAQsByTopic: () => ({ items: [], loading: false }),
+}));
 
 const mockUseAnimalStore = useAnimalStore as unknown as jest.Mock;
 

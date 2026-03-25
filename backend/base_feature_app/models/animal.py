@@ -43,8 +43,10 @@ class Animal(models.Model):
     age_range = models.CharField(max_length=10, choices=AgeRange.choices, default=AgeRange.ADULT)
     gender = models.CharField(max_length=10, choices=Gender.choices, default=Gender.UNKNOWN)
     size = models.CharField(max_length=10, choices=Size.choices, default=Size.MEDIUM)
-    description = models.TextField(blank=True)
-    special_needs = models.TextField(blank=True)
+    description_es = models.TextField(blank=True)
+    description_en = models.TextField(blank=True)
+    special_needs_es = models.TextField(blank=True)
+    special_needs_en = models.TextField(blank=True)
 
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.DRAFT)
 

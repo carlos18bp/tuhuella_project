@@ -3,14 +3,14 @@ import { render, act } from '@testing-library/react';
 import React from 'react';
 
 const mockRevert = jest.fn();
-const mockFrom = jest.fn();
+const mockTo = jest.fn();
 const mockContext = jest.fn().mockReturnValue({ revert: mockRevert });
 const mockRegisterPlugin = jest.fn();
 const mockScrollTrigger = { name: 'ScrollTrigger' };
 
 jest.mock('gsap', () => ({
   gsap: {
-    from: (...args: unknown[]) => mockFrom(...args),
+    to: (...args: unknown[]) => mockTo(...args),
     context: (...args: unknown[]) => mockContext(...args),
     registerPlugin: (...args: unknown[]) => mockRegisterPlugin(...args),
   },
@@ -62,11 +62,11 @@ describe('useScrollReveal', () => {
     render(<TestComponent stagger={0} />);
     await flush();
 
-    expect(mockFrom).toHaveBeenCalledWith(
+    expect(mockTo).toHaveBeenCalledWith(
       expect.any(HTMLDivElement),
       expect.objectContaining({
-        y: 40,
-        opacity: 0,
+        y: 0,
+        opacity: 1,
         duration: 0.7,
         stagger: undefined,
       }),
@@ -82,7 +82,7 @@ describe('useScrollReveal', () => {
     render(<TestComponent stagger={0.2} />);
     await flush();
 
-    expect(mockFrom).toHaveBeenCalledWith(
+    expect(mockTo).toHaveBeenCalledWith(
       expect.any(HTMLCollection),
       expect.objectContaining({
         stagger: 0.2,
@@ -104,5 +104,28 @@ describe('useScrollReveal', () => {
     await flush();
 
     expect(mockContext).not.toHaveBeenCalled();
+  });
+
+  it('adds scroll-reveal-hidden class to elements before animating', async () => {
+    mockContext.mockImplementationOnce((fn: () => void, el: HTMLElement) => {
+      fn();
+      return { revert: mockRevert };
+    });
+
+    const { getByTestId } = render(<TestComponent stagger={0} />);
+    await flush();
+
+    const target = getByTestId('target');
+    expect(target.classList.contains('scroll-reveal-hidden')).toBe(true);
+  });
+
+  it('removes scroll-reveal-hidden class on unmount', async () => {
+    const { getByTestId, unmount } = render(<TestComponent stagger={0} />);
+    await flush();
+
+    const target = getByTestId('target');
+    unmount();
+
+    expect(target.classList.contains('scroll-reveal-hidden')).toBe(false);
   });
 });

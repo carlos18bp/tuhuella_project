@@ -10,8 +10,8 @@ type CampaignState = {
   campaign: Campaign | null;
   loading: boolean;
   error: string | null;
-  fetchCampaigns: () => Promise<void>;
-  fetchCampaign: (id: number) => Promise<void>;
+  fetchCampaigns: (lang?: string, status?: string) => Promise<void>;
+  fetchCampaign: (id: number, lang?: string) => Promise<void>;
 };
 
 export const useCampaignStore = create<CampaignState>((set) => ({
@@ -20,10 +20,13 @@ export const useCampaignStore = create<CampaignState>((set) => ({
   loading: false,
   error: null,
 
-  fetchCampaigns: async () => {
+  fetchCampaigns: async (lang?: string, status?: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get(API_ENDPOINTS.CAMPAIGNS);
+      const params: Record<string, string> = {};
+      if (lang) params.lang = lang;
+      if (status) params.status = status;
+      const response = await api.get(API_ENDPOINTS.CAMPAIGNS, { params });
       set({ campaigns: response.data, loading: false });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to fetch campaigns';
@@ -31,10 +34,12 @@ export const useCampaignStore = create<CampaignState>((set) => ({
     }
   },
 
-  fetchCampaign: async (id: number) => {
+  fetchCampaign: async (id: number, lang?: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get(API_ENDPOINTS.CAMPAIGN_DETAIL(id));
+      const response = await api.get(API_ENDPOINTS.CAMPAIGN_DETAIL(id), {
+        params: lang ? { lang } : {},
+      });
       set({ campaign: response.data, loading: false });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to fetch campaign';

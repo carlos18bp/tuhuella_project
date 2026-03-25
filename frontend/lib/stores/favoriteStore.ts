@@ -28,9 +28,29 @@ export const useFavoriteStore = create<FavoriteState>((set, get) => ({
   },
 
   toggleFavorite: async (animalId: number) => {
-    const response = await api.post(API_ENDPOINTS.FAVORITE_TOGGLE, { animal_id: animalId });
-    await get().fetchFavorites();
-    return response.data;
+    const prev = get().favorites;
+    const alreadyFav = prev.some((f) => f.animal === animalId);
+
+    // Optimistic update
+    if (alreadyFav) {
+      set({ favorites: prev.filter((f) => f.animal !== animalId) });
+    } else {
+      set({
+        favorites: [
+          ...prev,
+          { id: -1, animal: animalId, animal_name: '', animal_species: 'dog', shelter_name: '', created_at: '' } as Favorite,
+        ],
+      });
+    }
+
+    try {
+      const response = await api.post(API_ENDPOINTS.FAVORITE_TOGGLE, { animal_id: animalId });
+      await get().fetchFavorites();
+      return response.data;
+    } catch (err) {
+      set({ favorites: prev });
+      throw err;
+    }
   },
 
   isFavorited: (animalId: number) => {

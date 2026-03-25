@@ -56,8 +56,8 @@ export default function MultiSelectDropdown({
         onClick={() => setOpen(!open)}
         className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${
           selected.length > 0
-            ? 'border-teal-400 bg-teal-50 text-teal-700'
-            : 'border-stone-300 bg-white text-stone-700 hover:border-stone-400'
+            ? 'border-teal-400 bg-teal-50 text-teal-700 ring-1 ring-teal-200/50'
+            : 'border-stone-300 bg-white text-stone-700 hover:border-stone-400 hover:shadow-sm'
         }`}
       >
         <span>{displayLabel}</span>
@@ -67,7 +67,7 @@ export default function MultiSelectDropdown({
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full z-30 mt-1 min-w-[200px] rounded-xl border border-stone-200 bg-white py-1 shadow-lg">
+        <div className="absolute left-0 top-full z-30 mt-1 min-w-[200px] rounded-xl border border-stone-200 bg-white py-1 shadow-xl ring-1 ring-black/5 animate-scale-in">
           {options.map((option) => {
             const isSelected = selected.includes(option.value);
             return (

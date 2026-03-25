@@ -8,6 +8,8 @@ from .models import (
     Campaign, Donation, Sponsorship, Payment, UpdatePost,
     AdopterIntent, ShelterInvite, Subscription, Favorite,
     NotificationPreference, NotificationLog, BlogPost,
+    FAQTopic, FAQItem, DonationAmountOption, SponsorshipAmountOption,
+    VolunteerPosition, StrategicAlly,
 )
 
 
@@ -119,8 +121,8 @@ class ShelterInviteAdmin(admin.ModelAdmin):
 # ============================================================================
 
 class CampaignAdmin(AttachmentsAdminMixin, admin.ModelAdmin):
-    list_display = ('title', 'shelter', 'status', 'goal_amount', 'raised_amount', 'progress_percentage')
-    search_fields = ('title', 'shelter__name')
+    list_display = ('title_es', 'shelter', 'status', 'goal_amount', 'raised_amount', 'progress_percentage')
+    search_fields = ('title_es', 'title_en', 'shelter__name')
     list_filter = ('status',)
     readonly_fields = ('created_at', 'updated_at')
 
@@ -131,7 +133,7 @@ class CampaignAdmin(AttachmentsAdminMixin, admin.ModelAdmin):
 
 class DonationAdmin(admin.ModelAdmin):
     list_display = ('user', 'amount', 'status', 'shelter', 'campaign', 'paid_at')
-    search_fields = ('user__email', 'shelter__name', 'campaign__title')
+    search_fields = ('user__email', 'shelter__name', 'campaign__title_es')
     list_filter = ('status',)
     readonly_fields = ('created_at', 'updated_at')
 
@@ -162,8 +164,8 @@ class SubscriptionAdmin(admin.ModelAdmin):
 # ============================================================================
 
 class UpdatePostAdmin(AttachmentsAdminMixin, admin.ModelAdmin):
-    list_display = ('title', 'shelter', 'campaign', 'animal', 'created_at')
-    search_fields = ('title', 'shelter__name')
+    list_display = ('title_es', 'shelter', 'campaign', 'animal', 'created_at')
+    search_fields = ('title_es', 'title_en', 'shelter__name')
     readonly_fields = ('created_at', 'updated_at')
 
     def delete_queryset(self, request, queryset):
@@ -212,6 +214,26 @@ class BlogPostAdmin(admin.ModelAdmin):
             'fields': ('created_at', 'updated_at'),
         }),
     )
+
+
+# ============================================================================
+# FAQ MANAGEMENT
+# ============================================================================
+
+class FAQItemInline(admin.TabularInline):
+    model = FAQItem
+    extra = 1
+    fields = ('question_es', 'question_en', 'answer_es', 'answer_en', 'order', 'is_active')
+    ordering = ('order',)
+
+
+class FAQTopicAdmin(admin.ModelAdmin):
+    list_display = ('display_name_es', 'slug', 'order', 'is_active', 'created_at')
+    search_fields = ('display_name_es', 'display_name_en', 'slug')
+    list_filter = ('is_active',)
+    prepopulated_fields = {'slug': ('display_name_es',)}
+    readonly_fields = ('created_at', 'updated_at')
+    inlines = [FAQItemInline]
 
 
 # ============================================================================
@@ -265,7 +287,7 @@ class MiHuellaAdminSite(admin.AdminSite):
                 'app_label': 'campaigns_donations',
                 'models': [
                     m for m in base_app_models
-                    if m['object_name'] in ['Campaign', 'Donation', 'Sponsorship', 'Payment', 'Subscription']
+                    if m['object_name'] in ['Campaign', 'Donation', 'Sponsorship', 'Payment', 'Subscription', 'DonationAmountOption', 'SponsorshipAmountOption']
                 ],
             },
             {
@@ -284,9 +306,61 @@ class MiHuellaAdminSite(admin.AdminSite):
                     if m['object_name'] in ['BlogPost']
                 ],
             },
+            {
+                'name': _('❓ FAQ'),
+                'app_label': 'faq',
+                'models': [
+                    m for m in base_app_models
+                    if m['object_name'] in ['FAQTopic', 'FAQItem']
+                ],
+            },
+            {
+                'name': _('🤝 Voluntariado y Aliados'),
+                'app_label': 'volunteers',
+                'models': [
+                    m for m in base_app_models
+                    if m['object_name'] in ['VolunteerPosition', 'StrategicAlly']
+                ],
+            },
         ]
 
         return [s for s in custom_app_list if s['models']]
+
+
+# ============================================================================
+# VOLUNTEER & ALLY MANAGEMENT
+# ============================================================================
+
+class VolunteerPositionAdmin(admin.ModelAdmin):
+    list_display = ('title_es', 'category', 'is_active', 'order')
+    list_filter = ('category', 'is_active')
+    search_fields = ('title_es', 'title_en')
+    ordering = ('order',)
+    fieldsets = (
+        (_('Spanish'), {'fields': ('title_es', 'description_es', 'requirements_es')}),
+        (_('English'), {'fields': ('title_en', 'description_en', 'requirements_en')}),
+        (_('Settings'), {'fields': ('category', 'icon', 'is_active', 'order')}),
+    )
+
+
+class StrategicAllyAdmin(AttachmentsAdminMixin, admin.ModelAdmin):
+    list_display = ('name', 'ally_type', 'is_active', 'order')
+    list_filter = ('ally_type', 'is_active')
+    search_fields = ('name',)
+    ordering = ('order',)
+    fieldsets = (
+        (None, {'fields': ('name', 'ally_type', 'website', 'logo')}),
+        (_('Spanish'), {'fields': ('description_es',)}),
+        (_('English'), {'fields': ('description_en',)}),
+        (_('Settings'), {'fields': ('is_active', 'order')}),
+    )
+
+    def delete_model(self, request, obj):
+        obj.delete()
+
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            obj.delete()
 
 
 # ============================================================================
@@ -312,3 +386,8 @@ admin_site.register(UpdatePost, UpdatePostAdmin)
 admin_site.register(NotificationPreference, NotificationPreferenceAdmin)
 admin_site.register(NotificationLog, NotificationLogAdmin)
 admin_site.register(BlogPost, BlogPostAdmin)
+admin_site.register(FAQTopic, FAQTopicAdmin)
+admin_site.register(DonationAmountOption)
+admin_site.register(SponsorshipAmountOption)
+admin_site.register(VolunteerPosition, VolunteerPositionAdmin)
+admin_site.register(StrategicAlly, StrategicAllyAdmin)

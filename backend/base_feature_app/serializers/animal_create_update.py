@@ -7,6 +7,7 @@ class AnimalCreateUpdateSerializer(serializers.ModelSerializer):
         model = Animal
         fields = [
             'id', 'shelter', 'name', 'species', 'breed', 'age_range',
-            'gender', 'size', 'description', 'special_needs', 'status',
+            'gender', 'size', 'description_es', 'description_en',
+            'special_needs_es', 'special_needs_en', 'status',
             'is_vaccinated', 'is_sterilized',
         ]

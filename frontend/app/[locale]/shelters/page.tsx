@@ -1,46 +1,53 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 
 import { useShelterStore } from '@/lib/stores/shelterStore';
 import { ShelterCard, EmptyState, FAQAccordion } from '@/components/ui';
-import { sheltersFaqs } from '@/lib/data/faqs';
+import { useFAQsByTopic } from '@/lib/hooks/useFAQs';
 
 export default function RefugiosPage() {
+  const locale = useLocale();
+  const t = useTranslations('shelters');
+
   const shelters = useShelterStore((s) => s.shelters);
   const loading = useShelterStore((s) => s.loading);
+  const { items: sheltersFaqs } = useFAQsByTopic('shelters');
   const fetchShelters = useShelterStore((s) => s.fetchShelters);
 
   useEffect(() => {
-    if (shelters.length === 0) void fetchShelters();
-  }, [fetchShelters, shelters.length]);
+    void fetchShelters(locale);
+  }, [fetchShelters, locale]);
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <h1 className="text-3xl font-bold text-stone-800">Refugios verificados</h1>
-      <p className="mt-2 text-stone-500">Conoce a las organizaciones que protegen vidas</p>
+      <h1 className="text-3xl font-bold text-stone-800 heading-decorated">{t('title')}</h1>
+      <p className="mt-2 text-stone-500">{t('subtitle')}</p>
 
       <div className="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading
           ? Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="rounded-2xl border border-stone-200 bg-white p-6 animate-pulse">
-                <div className="h-5 bg-stone-100 rounded w-2/3 mb-3" />
-                <div className="h-3 bg-stone-100 rounded w-1/2" />
+              <div key={i} className="rounded-2xl border border-stone-200/60 bg-white p-6 space-y-3 shadow-sm">
+                <div className="h-5 animate-shimmer rounded w-2/3" />
+                <div className="h-3 animate-shimmer rounded w-1/2" />
               </div>
             ))
           : shelters.map((shelter) => (
               <ShelterCard key={shelter.id} shelter={shelter} />
             ))}
         {!loading && shelters.length === 0 && (
-          <EmptyState message="No hay refugios disponibles." icon="🏠" />
+          <EmptyState message={t('noResults')} />
         )}
       </div>
 
-      <FAQAccordion
-        items={sheltersFaqs}
-        title="Preguntas frecuentes sobre refugios"
-        subtitle="Lo que necesitas saber para registrar o conocer un refugio"
-      />
+      {sheltersFaqs.length > 0 && (
+        <FAQAccordion
+          items={sheltersFaqs}
+          title={t('faqTitle')}
+          subtitle={t('faqSubtitle')}
+        />
+      )}
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { create } from 'zustand';
 
 import { api } from '@/lib/services/http';
 import { clearTokens, getAccessToken, getRefreshToken, setTokens } from '@/lib/services/tokens';
+import { API_ENDPOINTS } from '@/lib/constants';
 
 import type { UserRole } from '@/lib/types';
 
@@ -12,6 +13,7 @@ type User = {
   email: string;
   first_name: string;
   last_name: string;
+  phone: string;
   city: string;
   role: UserRole;
   is_staff: boolean;
@@ -44,7 +46,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
   
   signIn: async ({ email, password, captcha_token }) => {
-    const response = await api.post('sign_in/', { email, password, captcha_token });
+    const response = await api.post(API_ENDPOINTS.SIGN_IN, { email, password, captcha_token });
     const access = response.data?.access;
     const refresh = response.data?.refresh;
     const user = response.data?.user;
@@ -59,10 +61,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
   
   signUp: async ({ email, password, first_name, last_name, captcha_token }) => {
-    const response = await api.post('sign_up/', { 
-      email, 
-      password, 
-      first_name, 
+    const response = await api.post(API_ENDPOINTS.SIGN_UP, {
+      email,
+      password,
+      first_name,
       last_name,
       captcha_token,
     });
@@ -81,7 +83,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
   
   googleLogin: async ({ credential, email, given_name, family_name, picture }) => {
-    const response = await api.post('google_login/', {
+    const response = await api.post(API_ENDPOINTS.GOOGLE_LOGIN, {
       credential,
       email,
       given_name,
@@ -108,14 +110,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
   
   sendPasswordResetCode: async (email: string) => {
-    await api.post('send_passcode/', { email });
+    await api.post(API_ENDPOINTS.SEND_PASSCODE, { email });
   },
   
   resetPassword: async ({ email, code, new_password }) => {
-    await api.post('verify_passcode_and_reset_password/', { 
-      email, 
-      code, 
-      new_password 
+    await api.post(API_ENDPOINTS.RESET_PASSWORD, {
+      email,
+      code,
+      new_password
     });
   },
 }));

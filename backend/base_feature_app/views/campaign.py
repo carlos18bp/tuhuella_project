@@ -12,7 +12,11 @@ from base_feature_app.serializers.campaign_create_update import CampaignCreateUp
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def campaign_list(request):
-    queryset = Campaign.objects.filter(status=Campaign.Status.ACTIVE)
+    status_filter = request.query_params.get('status', 'active')
+    if status_filter == 'completed':
+        queryset = Campaign.objects.filter(status=Campaign.Status.COMPLETED)
+    else:
+        queryset = Campaign.objects.filter(status=Campaign.Status.ACTIVE)
     serializer = CampaignListSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data)
 

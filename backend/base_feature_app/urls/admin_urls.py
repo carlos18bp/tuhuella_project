@@ -6,4 +6,5 @@ urlpatterns = [
     path('shelters/approve/<int:pk>/', admin_views.approve_shelter, name='admin-approve-shelter'),
     path('shelters/pending/', admin_views.pending_shelters, name='admin-pending-shelters'),
     path('metrics/', admin_views.admin_metrics, name='admin-metrics'),
+    path('shelter/metrics/', admin_views.shelter_metrics, name='shelter-metrics'),
 ]

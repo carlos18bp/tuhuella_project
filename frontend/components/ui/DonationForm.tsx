@@ -28,8 +28,8 @@ export default function DonationForm({
   ];
 
   const accent = accentColor === 'teal'
-    ? { bg: 'bg-teal-600', hover: 'hover:bg-teal-700', border: 'border-teal-600', selected: 'border-teal-500 bg-teal-50', radio: 'accent-teal-600', focus: 'focus:border-teal-500 focus:ring-teal-500' }
-    : { bg: 'bg-amber-600', hover: 'hover:bg-amber-700', border: 'border-amber-600', selected: 'border-amber-500 bg-amber-50', radio: 'accent-amber-600', focus: 'focus:border-amber-500 focus:ring-amber-500' };
+    ? { bg: 'bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600 shadow-sm hover:shadow-md', hover: '', border: 'border-teal-600', selected: 'border-teal-500 bg-teal-50 ring-2 ring-offset-1 ring-teal-500', radio: 'accent-teal-600', focus: 'focus:border-teal-500 focus:ring-2 focus:ring-teal-500/10' }
+    : { bg: 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 shadow-sm hover:shadow-md', hover: '', border: 'border-amber-600', selected: 'border-amber-500 bg-amber-50 ring-2 ring-offset-1 ring-amber-500', radio: 'accent-amber-600', focus: 'focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10' };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +40,7 @@ export default function DonationForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <label className="block text-sm font-medium text-stone-700">Monto</label>
+        <label className="block text-sm font-medium tracking-[-0.01em] text-stone-700">Monto</label>
         <div className="mt-2 flex flex-wrap gap-2">
           {presetAmounts.map((preset) => (
             <button
@@ -63,24 +63,24 @@ export default function DonationForm({
           onChange={(e) => setAmount(e.target.value)}
           placeholder="Otro monto"
           min="1"
-          className={`mt-3 w-full rounded-xl border border-stone-200 p-3 text-sm text-stone-800 ${accent.focus} outline-none`}
+          className={`mt-3 w-full rounded-xl border border-stone-200 shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] p-3 text-sm text-stone-800 ${accent.focus} outline-none`}
         />
       </div>
 
       <div>
-        <label htmlFor="donation-message" className="block text-sm font-medium text-stone-700">Mensaje (opcional)</label>
+        <label htmlFor="donation-message" className="block text-sm font-medium tracking-[-0.01em] text-stone-700">Mensaje (opcional)</label>
         <textarea
           id="donation-message"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           rows={2}
-          className={`mt-1 w-full rounded-xl border border-stone-200 p-3 text-sm text-stone-800 ${accent.focus} outline-none`}
+          className={`mt-1 w-full rounded-xl border border-stone-200 shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] p-3 text-sm text-stone-800 ${accent.focus} outline-none`}
           placeholder="Un mensaje para el refugio..."
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-stone-700">Método de pago</label>
+        <label className="block text-sm font-medium tracking-[-0.01em] text-stone-700">Método de pago</label>
         <div className="mt-2 space-y-2">
           {methods.map((opt) => (
             <label
@@ -106,7 +106,7 @@ export default function DonationForm({
       <button
         type="submit"
         disabled={submitting || !amount || Number(amount) <= 0}
-        className={`w-full ${accent.bg} text-white rounded-full py-3 text-sm font-medium ${accent.hover} transition-colors disabled:opacity-50`}
+        className={`w-full ${accent.bg} text-white rounded-full py-3 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed`}
       >
         {submitting ? 'Procesando...' : submitLabel ?? `Donar $${Number(amount || 0).toLocaleString()}`}
       </button>

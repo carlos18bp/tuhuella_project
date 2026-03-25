@@ -47,16 +47,16 @@ export default function ApplicationTimeline({ status, className = '' }: Applicat
             <div key={step.key} className="flex-1 flex flex-col items-center" role="listitem">
               <div className="flex items-center w-full">
                 {idx > 0 && (
-                  <div className={`h-0.5 flex-1 rounded-full transition-colors ${
+                  <div className={`h-[3px] flex-1 rounded-full transition-colors ${
                     isCompleted || isCurrent ? lineColor : 'bg-stone-200'
                   }`} />
                 )}
                 <div
-                  className={`w-3.5 h-3.5 rounded-full border-2 flex-shrink-0 transition-all ${dotColor}`}
+                  className={`w-4 h-4 rounded-full border-2 flex-shrink-0 transition-all ${isCurrent ? 'scale-125 shadow-sm' : ''} ${dotColor}`}
                   aria-hidden="true"
                 />
                 {idx < STEPS.length - 1 && (
-                  <div className={`h-0.5 flex-1 rounded-full transition-colors ${
+                  <div className={`h-[3px] flex-1 rounded-full transition-colors ${
                     isCompleted ? lineColor : 'bg-stone-200'
                   }`} />
                 )}
@@ -70,7 +70,7 @@ export default function ApplicationTimeline({ status, className = '' }: Applicat
       </div>
 
       {isRejected && (
-        <div className="mt-4 flex items-center gap-2 rounded-xl bg-red-50 px-4 py-2.5" role="alert">
+        <div className="mt-4 flex items-center gap-2 rounded-xl bg-red-50 border border-red-200/60 px-4 py-2.5" role="alert">
           <svg className="w-4 h-4 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>

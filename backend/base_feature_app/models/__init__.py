@@ -14,3 +14,7 @@ from .subscription import Subscription
 from .favorite import Favorite
 from .notification import NotificationPreference, NotificationLog
 from .blog_post import BlogPost
+from .faq import FAQTopic, FAQItem
+from .amount_option import DonationAmountOption, SponsorshipAmountOption
+from .volunteer_position import VolunteerPosition
+from .strategic_ally import StrategicAlly

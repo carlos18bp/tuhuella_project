@@ -6,7 +6,9 @@ jest.mock('@/components/ui', () => ({
   FAQAccordion: () => null,
 }));
 
-jest.mock('@/lib/data/faqs', () => ({ buscoAdoptarFaqs: [] }));
+jest.mock('@/lib/hooks/useFAQs', () => ({
+  useFAQsByTopic: () => ({ items: [], loading: false }),
+}));
 
 import BuscoAdoptarPage from '../page';
 

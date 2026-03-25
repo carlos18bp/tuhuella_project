@@ -25,6 +25,9 @@ export type Shelter = {
   verification_status: 'pending' | 'verified' | 'rejected';
   verified_at?: string | null;
   is_verified: boolean;
+  logo_url?: string;
+  cover_image_url?: string;
+  gallery_urls?: string[];
   owner_email: string;
   created_at: string;
   updated_at?: string;
@@ -88,10 +91,39 @@ export type Campaign = {
   raised_amount: string;
   progress_percentage: number;
   cover_image_url?: string | null;
+  evidence_gallery_urls?: string[];
   starts_at?: string | null;
   ends_at?: string | null;
   created_at: string;
   updated_at?: string;
+};
+
+export type PaginatedResponse<T> = {
+  count: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+  results: T[];
+};
+
+export type VolunteerPosition = {
+  id: number;
+  title: string;
+  description: string;
+  requirements: string;
+  category: string;
+  icon: string;
+  order: number;
+};
+
+export type StrategicAlly = {
+  id: number;
+  name: string;
+  description: string;
+  logo_url: string;
+  website: string;
+  ally_type: string;
+  order: number;
 };
 
 export type DonationStatus = 'pending' | 'paid' | 'failed' | 'refunded';
