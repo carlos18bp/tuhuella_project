@@ -36,6 +36,12 @@ class FlowCoverageReporter {
   /** @type {{ title: string, file: string }[]} */
   unmappedTests = [];
 
+  /**
+   * Stores the latest result per test ID so retries overwrite earlier attempts.
+   * @type {Map<string, { test: import('@playwright/test/reporter').TestCase, result: import('@playwright/test/reporter').TestResult }>}
+   */
+  testResultsByTestId = new Map();
+
   /** @type {string} */
   outputDir;
 
@@ -69,81 +75,87 @@ class FlowCoverageReporter {
 
   // ---------- Playwright reporter lifecycle: onTestEnd ----------
   /**
-   * Called after each test finishes.
-   * Extracts @flow: tags and updates the corresponding flow stats.
+   * Called after each test finishes (including each retry attempt).
+   * Stores the latest result per test ID so retries overwrite earlier attempts.
    *
    * @param {import('@playwright/test/reporter').TestCase} test
    * @param {import('@playwright/test/reporter').TestResult} result
    */
   onTestEnd(test, result) {
-    const tags = test.tags || [];
-    const flowTags = tags.filter((t) => t.startsWith('@flow:'));
-    const specFile = test.location.file;
-    // If the test has no @flow: tag, record it as unmapped
-    if (flowTags.length === 0) {
-      this.unmappedTests.push({ title: test.title, file: specFile });
-      return;
-    }
-
-    // A single test can belong to multiple flows
-    for (const tag of flowTags) {
-      const flowId = tag.replace('@flow:', '');
-
-      let stats = this.flowStats.get(flowId);
-      if (!stats) {
-        // Flow not in definitions — create a dynamic entry so it still appears in the report
-        stats = {
-          flowId,
-          definition: {
-            name: flowId,
-            module: 'unknown',
-            roles: ['unknown'],
-            priority: 'P4',
-            description: 'Auto-detected flow (not in definitions)',
-            expectedSpecs: 1,
-          },
-          tests: { total: 0, passed: 0, failed: 0, skipped: 0 },
-          specs: new Set(),
-          status: 'missing',
-        };
-        this.flowStats.set(flowId, stats);
-      }
-
-      stats.tests.total++;
-      stats.specs.add(specFile);
-
-      switch (result.status) {
-        case 'passed':
-          stats.tests.passed++;
-          break;
-        case 'failed':
-        case 'timedOut':
-          stats.tests.failed++;
-          break;
-        case 'skipped':
-          stats.tests.skipped++;
-          break;
-      }
-    }
+    // Always overwrite — the last call for a given test ID is the final attempt
+    this.testResultsByTestId.set(test.id, { test, result });
   }
 
   // ---------- Playwright reporter lifecycle: onEnd ----------
   /**
    * Called after all tests finish.
-   * Computes final status for each flow, prints the report, writes JSON.
+   * Processes stored per-test results (deduplicated across retries),
+   * computes final status for each flow, prints the report, writes JSON.
    *
-   * @param {import('@playwright/test/reporter').FullResult} result
+   * @param {import('@playwright/test/reporter').FullResult} _fullResult
    */
-  onEnd(result) {
+  onEnd(_fullResult) {
+    // Process deduplicated test results — each test ID appears once with its final outcome
+    for (const { test, result: testResult } of this.testResultsByTestId.values()) {
+      const tags = test.tags || [];
+      const flowTags = tags.filter((t) => t.startsWith('@flow:'));
+      const specFile = test.location.file;
+
+      if (flowTags.length === 0) {
+        this.unmappedTests.push({ title: test.title, file: specFile });
+        continue;
+      }
+
+      for (const tag of flowTags) {
+        const flowId = tag.replace('@flow:', '');
+
+        let stats = this.flowStats.get(flowId);
+        if (!stats) {
+          stats = {
+            flowId,
+            definition: {
+              name: flowId,
+              module: 'unknown',
+              roles: ['unknown'],
+              priority: 'P4',
+              description: 'Auto-detected flow (not in definitions)',
+              expectedSpecs: 1,
+            },
+            tests: { total: 0, passed: 0, failed: 0, skipped: 0 },
+            specs: new Set(),
+            status: 'missing',
+          };
+          this.flowStats.set(flowId, stats);
+        }
+
+        stats.tests.total++;
+        stats.specs.add(specFile);
+
+        switch (testResult.status) {
+          case 'passed':
+            stats.tests.passed++;
+            break;
+          case 'failed':
+          case 'timedOut':
+            stats.tests.failed++;
+            break;
+          case 'skipped':
+            stats.tests.skipped++;
+            break;
+        }
+      }
+    }
+
+    // Compute final flow status
     for (const stats of this.flowStats.values()) {
       if (stats.tests.total === 0) {
-        stats.status = 'missing';           // No tests found for this flow
+        stats.status = 'missing';
       } else if (stats.tests.failed > 0) {
-        stats.status = 'failing';           // At least one test failed
+        stats.status = 'failing';
       } else if (stats.tests.passed > 0 && stats.tests.skipped === 0) {
-        stats.status = 'covered';           // All tests passed, none skipped
+        stats.status = 'covered';
       } else {
-        stats.status = 'partial';           // Some passed but some skipped
+        stats.status = 'partial';
       }
     }
 
