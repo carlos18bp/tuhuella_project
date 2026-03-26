@@ -317,7 +317,7 @@ flowchart TD
     Root --> Docs[docs/]
     Root --> Tasks[tasks/]
     Root --> Scripts[scripts/]
-    Root --> Claude[.claude/commands/]
+    Root --> Claude[.claude/skills/]
     Root --> GitHub[.github/workflows/]
 
     Backend --> BApp[base_feature_app/ — Django app]
@@ -339,7 +339,7 @@ flowchart TD
     Tasks --> ActiveCtx[active_context.md]
     Tasks --> TasksPlan[tasks_plan.md]
 
-    Claude --> CCommands[deploy-staging, deploy-and-check, debug, etc.]
+    Claude --> CSkills[plan, implement, debug, deploy, git-commit, etc.]
 ```
 
 ---
