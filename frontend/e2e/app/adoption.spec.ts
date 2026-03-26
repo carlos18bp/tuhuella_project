@@ -33,15 +33,14 @@ const mockAnimalsListResponse = {
 test.describe('Adoption Flows', () => {
   test.beforeEach(async ({ page }) => {
     // Mock animals API so animal list and detail pages have data
-    await page.route('**/api/animals/', (route) => {
-      if (route.request().url().includes('/api/animals/1')) {
-        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAnimal) });
-      }
-      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAnimalsListResponse) });
+    await page.route('**/api/animals/**', (route) => {
+      const isDetail = route.request().url().match(/\/api\/animals\/\d+/);
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(isDetail ? mockAnimal : mockAnimalsListResponse),
+      });
     });
-    await page.route('**/api/animals/1/**', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAnimal) }),
-    );
   });
 
   test('should redirect unauthenticated user from adoption tracking', { tag: [...ADOPTION_TRACK] }, async ({ page }) => {
@@ -75,15 +74,14 @@ test.describe('Adoption Flows', () => {
 test.describe.serial('Adoption Flows — Authenticated', () => {
   test.beforeEach(async ({ page }) => {
     // Mock animals API for authenticated flows
-    await page.route('**/api/animals/', (route) => {
-      if (route.request().url().includes('/api/animals/1')) {
-        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAnimal) });
-      }
-      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAnimalsListResponse) });
+    await page.route('**/api/animals/**', (route) => {
+      const isDetail = route.request().url().match(/\/api\/animals\/\d+/);
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(isDetail ? mockAnimal : mockAnimalsListResponse),
+      });
     });
-    await page.route('**/api/animals/1/**', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAnimal) }),
-    );
     // Mock adoption applications API
     await page.route('**/api/adoption-applications/**', (route) => {
       if (route.request().method() === 'POST') {

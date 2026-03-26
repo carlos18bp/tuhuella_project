@@ -99,6 +99,14 @@ export async function loginAs(page: any, role: 'adopter' | 'shelter_admin' | 'ad
       }),
     }),
   );
+  // Mock token refresh to prevent 401 → clearTokens → redirect loop
+  await page.route('**/api/token/refresh/**', (route: any) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ access: 'e2e-mock-access-token', refresh: 'e2e-mock-refresh-token' }),
+    }),
+  );
   await page.goto('/sign-in');
   await waitForPageLoad(page);
   await page.getByLabel(/correo/i).fill(user.email);
@@ -106,6 +114,8 @@ export async function loginAs(page: any, role: 'adopter' | 'shelter_admin' | 'ad
   await page.getByRole('button', { name: /iniciar sesión/i }).click();
   await page.waitForURL((url: URL) => !url.pathname.includes('sign-in'), { timeout: 10_000 });
   await page.waitForLoadState('domcontentloaded');
+  // Dismiss Next.js dev-mode hydration error overlay if present
+  await dismissErrorOverlay(page);
 }
 
 /**
@@ -142,10 +152,34 @@ export async function loginAndNavigate(page: any, role: 'adopter' | 'shelter_adm
     { name: 'refresh_token', value: refreshToken, domain: 'localhost', path: '/' },
   ]);
 
+  // Mock token refresh to prevent 401 → clearTokens → redirect loop with mock tokens
+  await page.route('**/api/token/refresh/**', (route: any) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ access: accessToken, refresh: refreshToken }),
+    }),
+  );
+
   // Navigate with commit-level wait (avoids ERR_ABORTED from useRequireAuth redirect race)
   await page.goto(targetUrl, { waitUntil: 'commit' });
   // Wait for page to stabilize — may have initial redirect then settle
   await page.waitForLoadState('domcontentloaded', { timeout: 15_000 });
+  // Dismiss Next.js dev-mode hydration error overlay if present
+  await dismissErrorOverlay(page);
+}
+
+/**
+ * Dismiss the Next.js dev-mode error overlay dialog if present.
+ * Hydration mismatches between SSR (no cookies) and client (auth cookies)
+ * trigger a "Recoverable Error" dialog that blocks page interaction.
+ */
+export async function dismissErrorOverlay(page: any) {
+  const dialog = page.locator('dialog');
+  if (await dialog.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    await page.keyboard.press('Escape');
+    await dialog.waitFor({ state: 'hidden', timeout: 2_000 }).catch(() => {});
+  }
 }
 
 /**

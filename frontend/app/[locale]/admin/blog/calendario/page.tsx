@@ -33,8 +33,16 @@ const STATUS_LABELS: Record<string, string> = {
 
 export default function AdminBlogCalendarPage() {
   const { calendarPosts, loading, fetchCalendarPosts } = useBlogStore();
-  const [year, setYear] = useState(() => new Date().getFullYear());
-  const [month, setMonth] = useState(() => new Date().getMonth());
+  const [mounted, setMounted] = useState(false);
+  const [year, setYear] = useState(2026);
+  const [month, setMonth] = useState(0);
+
+  useEffect(() => {
+    const now = new Date();
+    setYear(now.getFullYear());
+    setMonth(now.getMonth());
+    setMounted(true);
+  }, []);
 
   const loadMonth = useCallback(() => {
     const start = `${year}-${pad(month + 1)}-01`;
@@ -68,7 +76,10 @@ export default function AdminBlogCalendarPage() {
     return map;
   }, [calendarPosts]);
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = useMemo(() => {
+    if (!mounted) return '';
+    return new Date().toISOString().slice(0, 10);
+  }, [mounted]);
 
   return (
     <div className="max-w-[1200px] mx-auto px-6 py-8">
