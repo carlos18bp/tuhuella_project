@@ -1,5 +1,5 @@
 import { test, expect } from '../test-with-coverage';
-import { waitForPageLoad, loginAs, loginAndNavigate } from '../fixtures';
+import { waitForPageLoad, loginAndNavigate } from '../fixtures';
 import {
   HOME_LOADS,
   HOME_TO_ANIMALS,
