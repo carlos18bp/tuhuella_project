@@ -3,7 +3,6 @@ from django.urls import reverse
 
 from base_feature_app.models import BlogPost
 
-
 # ---------------------------------------------------------------------------
 # Public endpoints
 # ---------------------------------------------------------------------------

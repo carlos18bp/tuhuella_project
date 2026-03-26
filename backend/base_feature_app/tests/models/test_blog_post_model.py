@@ -1,5 +1,6 @@
 import pytest
 from django.utils import timezone
+from freezegun import freeze_time
 
 from base_feature_app.models import BlogPost
 
@@ -48,6 +49,7 @@ def test_blog_post_published_at_set_on_publish():
 
 
 @pytest.mark.django_db
+@freeze_time('2025-03-15 12:00:00')
 def test_blog_post_default_ordering():
     """Blog posts are ordered by -published_at, -created_at."""
     now = timezone.now()

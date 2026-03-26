@@ -107,7 +107,7 @@ describe('useScrollReveal', () => {
   });
 
   it('adds scroll-reveal-hidden class to elements before animating', async () => {
-    mockContext.mockImplementationOnce((fn: () => void, el: HTMLElement) => {
+    mockContext.mockImplementationOnce((fn: () => void, _el: HTMLElement) => {
       fn();
       return { revert: mockRevert };
     });
