@@ -41,17 +41,17 @@ export default function HowItWorks({
 }: HowItWorksProps) {
   return (
     <div className="text-center">
-      <h2 className="text-2xl font-bold text-stone-800">{title}</h2>
-      <p className="mt-2 text-stone-500 max-w-lg mx-auto">{subtitle}</p>
+      <h2 className="text-2xl font-bold text-text-primary">{title}</h2>
+      <p className="mt-2 text-text-tertiary max-w-lg mx-auto">{subtitle}</p>
 
       <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
         {steps.map((step) => (
-          <div key={step.number} className="bg-white rounded-2xl border border-stone-200 p-8 hover:shadow-md transition-shadow duration-200">
+          <div key={step.number} className="bg-surface-primary rounded-2xl border border-border-primary p-8 hover:shadow-md transition-shadow duration-200">
             <div className={`w-14 h-14 rounded-2xl ${step.accentColor} flex items-center justify-center text-xl font-bold mx-auto`}>
               {step.number}
             </div>
-            <h3 className="mt-4 font-semibold text-stone-800">{step.title}</h3>
-            <p className="mt-2 text-sm text-stone-500">{step.description}</p>
+            <h3 className="mt-4 font-semibold text-text-primary">{step.title}</h3>
+            <p className="mt-2 text-sm text-text-tertiary">{step.description}</p>
           </div>
         ))}
       </div>

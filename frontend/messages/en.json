@@ -459,5 +459,11 @@
     "terms": "Terms and Conditions",
     "designedBy": "Designed by",
     "supportedBy": "Supported by"
+  },
+  "theme": {
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode",
+    "light": "Light",
+    "dark": "Dark"
   }
 }

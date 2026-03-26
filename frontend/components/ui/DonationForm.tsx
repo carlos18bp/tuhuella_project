@@ -40,7 +40,7 @@ export default function DonationForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <label className="block text-sm font-medium tracking-[-0.01em] text-stone-700">Monto</label>
+        <label className="block text-sm font-medium tracking-[-0.01em] text-text-secondary">Monto</label>
         <div className="mt-2 flex flex-wrap gap-2">
           {presetAmounts.map((preset) => (
             <button
@@ -50,7 +50,7 @@ export default function DonationForm({
               className={`px-4 py-2 rounded-full text-sm border transition-colors ${
                 amount === String(preset)
                   ? `${accent.bg} text-white ${accent.border}`
-                  : 'border-stone-200 text-stone-600 hover:bg-stone-50'
+                  : 'border-border-primary text-text-secondary hover:bg-surface-hover'
               }`}
             >
               ${preset.toLocaleString()}
@@ -63,30 +63,30 @@ export default function DonationForm({
           onChange={(e) => setAmount(e.target.value)}
           placeholder="Otro monto"
           min="1"
-          className={`mt-3 w-full rounded-xl border border-stone-200 shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] p-3 text-sm text-stone-800 ${accent.focus} outline-none`}
+          className={`mt-3 w-full rounded-xl border border-border-primary shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] p-3 text-sm text-text-primary ${accent.focus} outline-none`}
         />
       </div>
 
       <div>
-        <label htmlFor="donation-message" className="block text-sm font-medium tracking-[-0.01em] text-stone-700">Mensaje (opcional)</label>
+        <label htmlFor="donation-message" className="block text-sm font-medium tracking-[-0.01em] text-text-secondary">Mensaje (opcional)</label>
         <textarea
           id="donation-message"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           rows={2}
-          className={`mt-1 w-full rounded-xl border border-stone-200 shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] p-3 text-sm text-stone-800 ${accent.focus} outline-none`}
+          className={`mt-1 w-full rounded-xl border border-border-primary shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] p-3 text-sm text-text-primary ${accent.focus} outline-none`}
           placeholder="Un mensaje para el refugio..."
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium tracking-[-0.01em] text-stone-700">Método de pago</label>
+        <label className="block text-sm font-medium tracking-[-0.01em] text-text-secondary">Método de pago</label>
         <div className="mt-2 space-y-2">
           {methods.map((opt) => (
             <label
               key={opt.value}
               className={`flex items-center gap-3 rounded-xl border p-3 cursor-pointer transition-colors ${
-                method === opt.value ? accent.selected : 'border-stone-200 hover:bg-stone-50'
+                method === opt.value ? accent.selected : 'border-border-primary hover:bg-surface-hover'
               }`}
             >
               <input
@@ -97,7 +97,7 @@ export default function DonationForm({
                 onChange={() => setMethod(opt.value)}
                 className={accent.radio}
               />
-              <span className="text-sm text-stone-700">{opt.label}</span>
+              <span className="text-sm text-text-secondary">{opt.label}</span>
             </label>
           ))}
         </div>

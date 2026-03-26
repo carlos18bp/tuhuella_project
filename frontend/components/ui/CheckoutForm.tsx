@@ -68,16 +68,16 @@ export default function CheckoutForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Recipient info */}
-      <div className="rounded-2xl border border-stone-200 bg-stone-50/50 p-4">
-        <p className="text-xs font-medium text-stone-400 uppercase tracking-wider">
+      <div className="rounded-2xl border border-border-primary bg-surface-secondary/50 p-4">
+        <p className="text-xs font-medium text-text-quaternary uppercase tracking-wider">
           {type === 'donation' ? 'Donación para' : 'Apadrinamiento de'}
         </p>
-        <p className="text-base font-semibold text-stone-800 mt-0.5">{recipientName}</p>
+        <p className="text-base font-semibold text-text-primary mt-0.5">{recipientName}</p>
       </div>
 
       {/* Amount selection */}
       <div>
-        <label className="block text-sm font-medium tracking-[-0.01em] text-stone-700">Monto</label>
+        <label className="block text-sm font-medium tracking-[-0.01em] text-text-secondary">Monto</label>
         <div className="mt-2 flex flex-wrap gap-2">
           {presetAmounts.map((preset) => (
             <button
@@ -87,7 +87,7 @@ export default function CheckoutForm({
               className={`px-4 py-2 rounded-full text-sm border transition-colors ${
                 amount === String(preset)
                   ? `${config.accent} text-white ${config.borderAccent}`
-                  : 'border-stone-200 text-stone-600 hover:bg-stone-50'
+                  : 'border-border-primary text-text-secondary hover:bg-surface-hover'
               }`}
             >
               ${preset.toLocaleString()}
@@ -100,19 +100,19 @@ export default function CheckoutForm({
           onChange={(e) => setAmount(e.target.value)}
           placeholder="Otro monto"
           min="1"
-          className={`mt-3 w-full rounded-xl border border-stone-200 shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] p-3 text-sm text-stone-800 ${config.focusAccent} outline-none`}
+          className={`mt-3 w-full rounded-xl border border-border-primary shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] p-3 text-sm text-text-primary ${config.focusAccent} outline-none`}
         />
       </div>
 
       {/* Payment method */}
       <div>
-        <label className="block text-sm font-medium tracking-[-0.01em] text-stone-700">Método de pago</label>
+        <label className="block text-sm font-medium tracking-[-0.01em] text-text-secondary">Método de pago</label>
         <div className="mt-2 space-y-2">
           {PAYMENT_METHODS.map((opt) => (
             <label
               key={opt.value}
               className={`flex items-center gap-3 rounded-xl border p-3 cursor-pointer transition-colors ${
-                method === opt.value ? config.selectedAccent : 'border-stone-200 hover:bg-stone-50 hover:border-stone-300 hover:shadow-sm'
+                method === opt.value ? config.selectedAccent : 'border-border-primary hover:bg-surface-hover hover:border-border-secondary hover:shadow-sm'
               }`}
             >
               <input
@@ -123,7 +123,7 @@ export default function CheckoutForm({
                 onChange={() => setMethod(opt.value)}
                 className={config.radioAccent}
               />
-              <span className="text-sm text-stone-700">{opt.label}</span>
+              <span className="text-sm text-text-secondary">{opt.label}</span>
             </label>
           ))}
         </div>
@@ -131,7 +131,7 @@ export default function CheckoutForm({
 
       {/* Message */}
       <div>
-        <label htmlFor="checkout-message" className="block text-sm font-medium tracking-[-0.01em] text-stone-700">
+        <label htmlFor="checkout-message" className="block text-sm font-medium tracking-[-0.01em] text-text-secondary">
           Mensaje (opcional)
         </label>
         <textarea
@@ -139,16 +139,16 @@ export default function CheckoutForm({
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           rows={2}
-          className={`mt-1 w-full rounded-xl border border-stone-200 shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] p-3 text-sm text-stone-800 ${config.focusAccent} outline-none`}
+          className={`mt-1 w-full rounded-xl border border-border-primary shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] p-3 text-sm text-text-primary ${config.focusAccent} outline-none`}
           placeholder="Un mensaje para el refugio..."
         />
       </div>
 
       {/* Summary + Submit */}
       {numericAmount > 0 && (
-        <div className="rounded-2xl border border-stone-200 bg-gradient-to-r from-stone-50 to-white p-4 flex items-center justify-between">
-          <span className="text-sm text-stone-500">Total</span>
-          <span className="text-lg font-bold text-stone-800">${numericAmount.toLocaleString()}</span>
+        <div className="rounded-2xl border border-border-primary bg-gradient-to-r from-stone-50 to-white p-4 flex items-center justify-between">
+          <span className="text-sm text-text-tertiary">Total</span>
+          <span className="text-lg font-bold text-text-primary">${numericAmount.toLocaleString()}</span>
         </div>
       )}
 

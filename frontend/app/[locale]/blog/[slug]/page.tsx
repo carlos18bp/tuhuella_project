@@ -53,7 +53,7 @@ function ShareButton({ title, slug }: { title: string; slug: string }) {
     <button
       type="button"
       onClick={handleShare}
-      className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-stone-200 text-sm text-stone-600 hover:bg-stone-100 transition-colors"
+      className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border-primary text-sm text-text-secondary hover:bg-surface-hover transition-colors"
     >
       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -77,7 +77,7 @@ export default function BlogDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-stone-50">
+      <div className="min-h-screen flex items-center justify-center bg-surface-secondary">
         <div className="w-8 h-8 border-2 border-teal-500/30 border-t-teal-500 rounded-full animate-spin" />
       </div>
     );
@@ -85,8 +85,8 @@ export default function BlogDetailPage() {
 
   if (error || !post) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-stone-50 gap-4">
-        <p className="text-stone-500">{error || 'Artículo no encontrado.'}</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-surface-secondary gap-4">
+        <p className="text-text-tertiary">{error || 'Artículo no encontrado.'}</p>
         <Link
           href={ROUTES.BLOG}
           className="text-teal-600 hover:text-teal-700 text-sm font-medium"
@@ -101,7 +101,7 @@ export default function BlogDetailPage() {
   const categoryLabel = CATEGORIES[post.category] || post.category;
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-surface-secondary">
       <ReadingProgressBar readTimeMinutes={post.read_time_minutes} lang="es" />
 
       {/* Header */}
@@ -109,7 +109,7 @@ export default function BlogDetailPage() {
         <div className="mx-auto max-w-[800px] px-6">
           <Link
             href={ROUTES.BLOG}
-            className="inline-flex items-center gap-1 text-sm text-stone-500 hover:text-stone-700 transition-colors mb-6"
+            className="inline-flex items-center gap-1 text-sm text-text-tertiary hover:text-text-secondary transition-colors mb-6"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -123,25 +123,25 @@ export default function BlogDetailPage() {
             </span>
           )}
 
-          <h1 className="text-3xl md:text-4xl font-bold text-stone-800 mb-4 leading-tight">
+          <h1 className="text-3xl md:text-4xl font-bold text-text-primary mb-4 leading-tight">
             {post.title}
           </h1>
 
-          <p className="text-lg text-stone-500 mb-6">{post.excerpt}</p>
+          <p className="text-lg text-text-tertiary mb-6">{post.excerpt}</p>
 
-          <div className="flex flex-wrap items-center gap-4 text-sm text-stone-500">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-text-tertiary">
             <div className="flex items-center gap-2">
               <span className="text-2xl">{author.avatar}</span>
               <div>
-                <p className="font-medium text-stone-700">{author.name}</p>
-                <p className="text-xs text-stone-400">{author.role}</p>
+                <p className="font-medium text-text-secondary">{author.name}</p>
+                <p className="text-xs text-text-quaternary">{author.role}</p>
               </div>
             </div>
-            <span className="hidden sm:inline text-stone-300">·</span>
+            <span className="hidden sm:inline text-border-secondary">·</span>
             <span>{formatDate(post.published_at)}</span>
             {post.read_time_minutes > 0 && (
               <>
-                <span className="hidden sm:inline text-stone-300">·</span>
+                <span className="hidden sm:inline text-border-secondary">·</span>
                 <span>{post.read_time_minutes} min de lectura</span>
               </>
             )}
@@ -159,13 +159,13 @@ export default function BlogDetailPage() {
               className="w-full rounded-2xl object-cover max-h-[500px] shadow-lg"
             />
             {post.cover_image_credit && (
-              <figcaption className="text-xs text-stone-400 mt-2 text-center">
+              <figcaption className="text-xs text-text-quaternary mt-2 text-center">
                 {post.cover_image_credit_url ? (
                   <a
                     href={post.cover_image_credit_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:text-stone-600 transition-colors"
+                    className="hover:text-text-secondary transition-colors"
                   >
                     {post.cover_image_credit}
                   </a>
@@ -187,8 +187,8 @@ export default function BlogDetailPage() {
 
         {/* Sources */}
         {post.sources && post.sources.length > 0 && (
-          <div className="mt-12 pt-8 border-t border-stone-200">
-            <h3 className="text-sm font-semibold text-stone-700 uppercase tracking-wider mb-3">
+          <div className="mt-12 pt-8 border-t border-border-primary">
+            <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-3">
               Fuentes
             </h3>
             <ul className="space-y-1">
@@ -209,7 +209,7 @@ export default function BlogDetailPage() {
         )}
 
         {/* Share + Nav */}
-        <div className="mt-12 pt-8 border-t border-stone-200 flex items-center justify-between">
+        <div className="mt-12 pt-8 border-t border-border-primary flex items-center justify-between">
           <ShareButton title={post.title} slug={post.slug} />
           <Link
             href={ROUTES.BLOG}

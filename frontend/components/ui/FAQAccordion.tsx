@@ -18,16 +18,16 @@ function AccordionItem({ faq }: { faq: FAQItem }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className={`rounded-xl border border-stone-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 ${open ? 'border-l-2 border-l-teal-500' : ''}`}>
+    <div className={`rounded-xl border border-border-primary bg-surface-primary overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 ${open ? 'border-l-2 border-l-teal-500' : ''}`}>
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className={`flex w-full items-center justify-between p-5 text-left transition-colors ${open ? 'bg-stone-50/50' : 'hover:bg-stone-50'}`}
+        className={`flex w-full items-center justify-between p-5 text-left transition-colors ${open ? 'bg-surface-secondary/50' : 'hover:bg-surface-hover'}`}
       >
-        <h3 className="font-semibold text-stone-800 pr-4">{faq.question}</h3>
+        <h3 className="font-semibold text-text-primary pr-4">{faq.question}</h3>
         <ChevronDown
           className={`h-5 w-5 shrink-0 transition-transform duration-200 ${
-            open ? 'rotate-180 text-teal-500' : 'text-stone-400'
+            open ? 'rotate-180 text-teal-500' : 'text-text-quaternary'
           }`}
         />
       </button>
@@ -37,7 +37,7 @@ function AccordionItem({ faq }: { faq: FAQItem }) {
         }`}
       >
         <div className="overflow-hidden">
-          <p className="px-5 pb-5 text-sm text-stone-600 leading-[1.7]">
+          <p className="px-5 pb-5 text-sm text-text-secondary leading-[1.7]">
             {faq.answer}
           </p>
         </div>
@@ -52,8 +52,8 @@ export default function FAQAccordion({ items, title, subtitle }: FAQAccordionPro
       <div className="mx-auto max-w-3xl px-6">
         {title && (
           <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-stone-800">{title}</h2>
-            {subtitle && <p className="mt-2 text-stone-500">{subtitle}</p>}
+            <h2 className="text-2xl font-bold text-text-primary">{title}</h2>
+            {subtitle && <p className="mt-2 text-text-tertiary">{subtitle}</p>}
           </div>
         )}
         <div className="space-y-3">

@@ -60,33 +60,33 @@ export default function AdminApproveSheltarsPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <h1 className="text-3xl font-bold text-stone-800">Aprobar Refugios</h1>
-      <p className="mt-1 text-stone-500">Revisa y aprueba solicitudes de nuevos refugios</p>
+      <h1 className="text-3xl font-bold text-text-primary">Aprobar Refugios</h1>
+      <p className="mt-1 text-text-tertiary">Revisa y aprueba solicitudes de nuevos refugios</p>
 
       {loading ? (
         <div className="mt-8 space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="rounded-xl border border-stone-200 p-5 animate-pulse">
-              <div className="h-5 bg-stone-100 rounded w-1/3" />
+            <div key={i} className="rounded-xl border border-border-primary p-5 animate-pulse">
+              <div className="h-5 bg-surface-tertiary rounded w-1/3" />
             </div>
           ))}
         </div>
       ) : shelters.length === 0 ? (
-        <div className="mt-8 rounded-xl border border-stone-200 bg-white p-8 text-center">
-          <p className="text-stone-400">No hay refugios pendientes de aprobación</p>
+        <div className="mt-8 rounded-xl border border-border-primary bg-surface-primary p-8 text-center">
+          <p className="text-text-quaternary">No hay refugios pendientes de aprobación</p>
         </div>
       ) : (
         <div className="mt-8 space-y-4">
           {shelters.map((shelter) => (
-            <div key={shelter.id} className="rounded-xl border border-stone-200 bg-white p-5">
+            <div key={shelter.id} className="rounded-xl border border-border-primary bg-surface-primary p-5">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                  <h3 className="font-semibold text-stone-800">{shelter.name}</h3>
+                  <h3 className="font-semibold text-text-primary">{shelter.name}</h3>
                   {shelter.legal_name && (
-                    <p className="text-sm text-stone-500">{shelter.legal_name}</p>
+                    <p className="text-sm text-text-tertiary">{shelter.legal_name}</p>
                   )}
-                  <p className="text-sm text-stone-500 mt-1">{shelter.city} · {shelter.owner_email}</p>
-                  <p className="text-xs text-stone-400 mt-1">
+                  <p className="text-sm text-text-tertiary mt-1">{shelter.city} · {shelter.owner_email}</p>
+                  <p className="text-xs text-text-quaternary mt-1">
                     Registrado: {new Date(shelter.created_at).toLocaleDateString('es')}
                   </p>
                 </div>

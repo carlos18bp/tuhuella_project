@@ -49,8 +49,8 @@ export default function ShelterOnboardingPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-10">
-      <h1 className="text-3xl font-bold text-stone-800">Registrar Refugio</h1>
-      <p className="mt-2 text-stone-500">
+      <h1 className="text-3xl font-bold text-text-primary">Registrar Refugio</h1>
+      <p className="mt-2 text-text-tertiary">
         Completa la información de tu refugio. Será revisado por nuestro equipo antes de ser publicado.
       </p>
 
@@ -61,54 +61,54 @@ export default function ShelterOnboardingPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-stone-700">Nombre del refugio *</label>
+            <label htmlFor="name" className="block text-sm font-medium text-text-secondary">Nombre del refugio *</label>
             <input id="name" name="name" value={form.name} onChange={handleChange} required
-              className="mt-1 w-full rounded-xl border border-stone-200 p-3 text-sm text-stone-800 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" />
+              className="mt-1 w-full rounded-xl border border-border-primary p-3 text-sm text-text-primary focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" />
           </div>
           <div>
-            <label htmlFor="legal_name" className="block text-sm font-medium text-stone-700">Razón social</label>
+            <label htmlFor="legal_name" className="block text-sm font-medium text-text-secondary">Razón social</label>
             <input id="legal_name" name="legal_name" value={form.legal_name} onChange={handleChange}
-              className="mt-1 w-full rounded-xl border border-stone-200 p-3 text-sm text-stone-800 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" />
+              className="mt-1 w-full rounded-xl border border-border-primary p-3 text-sm text-text-primary focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" />
           </div>
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-stone-700">Descripción</label>
+          <label htmlFor="description" className="block text-sm font-medium text-text-secondary">Descripción</label>
           <textarea id="description" name="description" value={form.description} onChange={handleChange} rows={3}
-            className="mt-1 w-full rounded-xl border border-stone-200 p-3 text-sm text-stone-800 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
+            className="mt-1 w-full rounded-xl border border-border-primary p-3 text-sm text-text-primary focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
             placeholder="Cuéntanos sobre tu refugio, misión, historia..." />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
-            <label htmlFor="city" className="block text-sm font-medium text-stone-700">Ciudad *</label>
+            <label htmlFor="city" className="block text-sm font-medium text-text-secondary">Ciudad *</label>
             <input id="city" name="city" value={form.city} onChange={handleChange} required
-              className="mt-1 w-full rounded-xl border border-stone-200 p-3 text-sm text-stone-800 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" />
+              className="mt-1 w-full rounded-xl border border-border-primary p-3 text-sm text-text-primary focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" />
           </div>
           <div>
-            <label htmlFor="address" className="block text-sm font-medium text-stone-700">Dirección</label>
+            <label htmlFor="address" className="block text-sm font-medium text-text-secondary">Dirección</label>
             <input id="address" name="address" value={form.address} onChange={handleChange}
-              className="mt-1 w-full rounded-xl border border-stone-200 p-3 text-sm text-stone-800 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" />
+              className="mt-1 w-full rounded-xl border border-border-primary p-3 text-sm text-text-primary focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" />
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-stone-700">Teléfono</label>
+            <label htmlFor="phone" className="block text-sm font-medium text-text-secondary">Teléfono</label>
             <input id="phone" name="phone" value={form.phone} onChange={handleChange}
-              className="mt-1 w-full rounded-xl border border-stone-200 p-3 text-sm text-stone-800 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" />
+              className="mt-1 w-full rounded-xl border border-border-primary p-3 text-sm text-text-primary focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" />
           </div>
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-stone-700">Email del refugio</label>
+            <label htmlFor="email" className="block text-sm font-medium text-text-secondary">Email del refugio</label>
             <input id="email" name="email" type="email" value={form.email} onChange={handleChange}
-              className="mt-1 w-full rounded-xl border border-stone-200 p-3 text-sm text-stone-800 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" />
+              className="mt-1 w-full rounded-xl border border-border-primary p-3 text-sm text-text-primary focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" />
           </div>
         </div>
 
         <div>
-          <label htmlFor="website" className="block text-sm font-medium text-stone-700">Sitio web</label>
+          <label htmlFor="website" className="block text-sm font-medium text-text-secondary">Sitio web</label>
           <input id="website" name="website" type="url" value={form.website} onChange={handleChange}
-            className="mt-1 w-full rounded-xl border border-stone-200 p-3 text-sm text-stone-800 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
+            className="mt-1 w-full rounded-xl border border-border-primary p-3 text-sm text-text-primary focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
             placeholder="https://" />
         </div>
 

@@ -39,30 +39,30 @@ export default function AdminPagosPage() {
     pending: { label: 'Pendiente', color: 'bg-amber-50 text-amber-700' },
     approved: { label: 'Aprobado', color: 'bg-emerald-50 text-emerald-700' },
     declined: { label: 'Rechazado', color: 'bg-red-50 text-red-700' },
-    voided: { label: 'Anulado', color: 'bg-stone-100 text-stone-600' },
+    voided: { label: 'Anulado', color: 'bg-surface-tertiary text-text-secondary' },
     error: { label: 'Error', color: 'bg-red-50 text-red-700' },
   };
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <h1 className="text-3xl font-bold text-stone-800">Auditoría de Pagos</h1>
-      <p className="mt-1 text-stone-500">Historial de transacciones en la plataforma</p>
+      <h1 className="text-3xl font-bold text-text-primary">Auditoría de Pagos</h1>
+      <p className="mt-1 text-text-tertiary">Historial de transacciones en la plataforma</p>
 
       {loading ? (
         <div className="mt-8 space-y-4">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="rounded-xl border border-stone-200 p-5 animate-pulse">
-              <div className="h-5 bg-stone-100 rounded w-1/4" />
+            <div key={i} className="rounded-xl border border-border-primary p-5 animate-pulse">
+              <div className="h-5 bg-surface-tertiary rounded w-1/4" />
             </div>
           ))}
         </div>
       ) : payments.length === 0 ? (
-        <p className="mt-8 text-stone-400">No hay transacciones registradas.</p>
+        <p className="mt-8 text-text-quaternary">No hay transacciones registradas.</p>
       ) : (
         <div className="mt-8 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs text-stone-500 border-b border-stone-200">
+              <tr className="text-left text-xs text-text-tertiary border-b border-border-primary">
                 <th className="pb-3 pr-4">ID</th>
                 <th className="pb-3 pr-4">Proveedor</th>
                 <th className="pb-3 pr-4">Referencia</th>
@@ -72,12 +72,12 @@ export default function AdminPagosPage() {
                 <th className="pb-3">Fecha</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-stone-100">
+            <tbody className="divide-y divide-border-tertiary">
               {payments.map((payment) => {
-                const st = statusLabels[payment.status] ?? { label: payment.status, color: 'bg-stone-100 text-stone-600' };
+                const st = statusLabels[payment.status] ?? { label: payment.status, color: 'bg-surface-tertiary text-text-secondary' };
                 const type = payment.donation ? 'Donación' : payment.sponsorship ? 'Apadrinamiento' : '—';
                 return (
-                  <tr key={payment.id} className="text-stone-700">
+                  <tr key={payment.id} className="text-text-secondary">
                     <td className="py-3 pr-4 font-mono text-xs">{payment.id}</td>
                     <td className="py-3 pr-4 capitalize">{payment.provider}</td>
                     <td className="py-3 pr-4 font-mono text-xs">{payment.provider_reference || '—'}</td>
@@ -86,7 +86,7 @@ export default function AdminPagosPage() {
                       <span className={`text-xs px-2 py-0.5 rounded-full ${st.color}`}>{st.label}</span>
                     </td>
                     <td className="py-3 pr-4 text-xs">{type}</td>
-                    <td className="py-3 text-xs text-stone-400">
+                    <td className="py-3 text-xs text-text-quaternary">
                       {new Date(payment.created_at).toLocaleDateString('es')}
                     </td>
                   </tr>

@@ -24,21 +24,21 @@ export default function StrategicAlliesPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <h1 className="text-3xl font-bold text-stone-800 heading-decorated">{t('title')}</h1>
-      <p className="mt-2 text-stone-500 max-w-2xl">{t('subtitle')}</p>
+      <h1 className="text-3xl font-bold text-text-primary heading-decorated">{t('title')}</h1>
+      <p className="mt-2 text-text-tertiary max-w-2xl">{t('subtitle')}</p>
 
       {loading ? (
         <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="rounded-2xl border border-stone-200 p-6 h-40 animate-shimmer" />
+            <div key={i} className="rounded-2xl border border-border-primary p-6 h-40 animate-shimmer" />
           ))}
         </div>
       ) : allies.length === 0 ? (
-        <p className="mt-10 text-stone-500">{t('noAllies')}</p>
+        <p className="mt-10 text-text-tertiary">{t('noAllies')}</p>
       ) : (
         <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {allies.map((ally) => (
-            <div key={ally.id} className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div key={ally.id} className="rounded-2xl border border-border-primary bg-surface-primary p-6 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center gap-4 mb-4">
                 {ally.logo_url ? (
                   <img src={ally.logo_url} alt={ally.name} className="h-14 w-14 rounded-xl object-cover flex-shrink-0" />
@@ -48,14 +48,14 @@ export default function StrategicAlliesPage() {
                   </div>
                 )}
                 <div className="min-w-0">
-                  <h3 className="font-semibold text-stone-800 truncate">{ally.name}</h3>
-                  <span className="inline-block mt-0.5 text-xs px-2 py-0.5 rounded-full bg-stone-100 text-stone-500 capitalize">
+                  <h3 className="font-semibold text-text-primary truncate">{ally.name}</h3>
+                  <span className="inline-block mt-0.5 text-xs px-2 py-0.5 rounded-full bg-surface-tertiary text-text-tertiary capitalize">
                     {t(`types.${ally.ally_type}`)}
                   </span>
                 </div>
               </div>
               {ally.description && (
-                <p className="text-sm text-stone-600 line-clamp-3">{ally.description}</p>
+                <p className="text-sm text-text-secondary line-clamp-3">{ally.description}</p>
               )}
               {ally.website && (
                 <a

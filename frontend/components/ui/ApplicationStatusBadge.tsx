@@ -3,7 +3,7 @@
 import type { AdoptionApplicationStatus } from '@/lib/types';
 
 const statusConfig: Record<AdoptionApplicationStatus, { label: string; color: string }> = {
-  submitted: { label: 'Enviada', color: 'bg-stone-100 text-stone-600' },
+  submitted: { label: 'Enviada', color: 'bg-surface-tertiary text-text-secondary' },
   reviewing: { label: 'En revisión', color: 'bg-amber-50 text-amber-700' },
   interview: { label: 'Entrevista', color: 'bg-teal-50 text-teal-700' },
   approved: { label: 'Aprobada', color: 'bg-emerald-50 text-emerald-700' },
@@ -15,7 +15,7 @@ interface ApplicationStatusBadgeProps {
 }
 
 export default function ApplicationStatusBadge({ status }: ApplicationStatusBadgeProps) {
-  const config = statusConfig[status] ?? { label: status, color: 'bg-stone-100 text-stone-600' };
+  const config = statusConfig[status] ?? { label: status, color: 'bg-surface-tertiary text-text-secondary' };
   return (
     <span className={`text-xs px-2 py-0.5 rounded-full ${config.color}`}>
       {config.label}

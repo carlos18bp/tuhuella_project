@@ -1,5 +1,5 @@
 import { test, expect } from '../test-with-coverage';
-import { waitForPageLoad } from '../fixtures';
+import { waitForPageLoad, loginAs } from '../fixtures';
 import {
   HOME_LOADS,
   HOME_TO_ANIMALS,
@@ -8,6 +8,8 @@ import {
   NAVIGATION_BETWEEN_PAGES,
   NAVIGATION_HEADER,
   NAVIGATION_FOOTER,
+  LOCALE_SWITCH,
+  NOTIFICATION_BELL,
 } from '../helpers/flow-tags';
 
 test.describe('Navigation', () => {
@@ -91,5 +93,50 @@ test.describe('Navigation', () => {
 
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveURL(/\/(es\/?)?$/);
+  });
+
+  test('should switch locale from Spanish to English', { tag: [...LOCALE_SWITCH] }, async ({ page }) => {
+    await page.goto('/');
+    await waitForPageLoad(page);
+
+    // Verify the page loads in Spanish by default
+    await expect(page.getByRole('heading', { name: /Cada huella cuenta/i })).toBeVisible();
+
+    // The LocaleSwitcher is a radiogroup with ES/EN buttons
+    const localeSwitcher = page.getByRole('radiogroup', { name: /Select language/i });
+    await expect(localeSwitcher).toBeVisible();
+
+    // Click the EN radio button to switch to English
+    const enButton = localeSwitcher.getByRole('radio', { name: 'EN' });
+    await enButton.click();
+
+    // Wait for navigation to complete (locale change triggers route replace)
+    await page.waitForURL(/\/en\/?/, { timeout: 10_000 });
+
+    // Verify content changed to English
+    await expect(page.getByRole('heading', { name: /Every paw print matters/i })).toBeVisible();
+  });
+});
+
+test.describe('Notification Bell (authenticated)', () => {
+  test.describe.configure({ mode: 'serial' });
+
+  test('should open notification dropdown when bell is clicked', { tag: [...NOTIFICATION_BELL] }, async ({ page }) => {
+    await loginAs(page, 'adopter');
+
+    await page.goto('/');
+    await waitForPageLoad(page);
+
+    // Click the notification bell button in the header
+    const bellButton = page.getByRole('button', { name: /Notificaciones/i });
+    await expect(bellButton).toBeVisible();
+    await bellButton.click();
+
+    // Verify the notification dropdown opens
+    const dropdown = page.locator('.absolute.right-0.top-full');
+    await expect(dropdown).toBeVisible({ timeout: 5000 });
+
+    // Verify dropdown has the notifications title header
+    await expect(dropdown.locator('text=Notificaciones').first()).toBeVisible();
   });
 });

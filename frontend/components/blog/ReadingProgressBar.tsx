@@ -42,7 +42,7 @@ export default function ReadingProgressBar({ readTimeMinutes = 0, lang = 'es' }:
         />
       </div>
       {showRemaining && (
-        <div className="fixed top-4 right-4 z-40 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-sm shadow-sm border border-stone-200/60 text-xs text-stone-500 pointer-events-none transition-opacity duration-300">
+        <div className="fixed top-4 right-4 z-40 px-3 py-1.5 rounded-full bg-surface-primary/90 backdrop-blur-sm shadow-sm border border-border-primary/60 text-xs text-text-tertiary pointer-events-none transition-opacity duration-300">
           ~{remainingMinutes} min {lang === 'en' ? 'remaining' : 'restantes'}
         </div>
       )}

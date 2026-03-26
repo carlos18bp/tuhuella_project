@@ -43,30 +43,30 @@ export default function AdminModeracionPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <h1 className="text-3xl font-bold text-stone-800">Moderación</h1>
-      <p className="mt-1 text-stone-500">Revisa contenido publicado en la plataforma</p>
+      <h1 className="text-3xl font-bold text-text-primary">Moderación</h1>
+      <p className="mt-1 text-text-tertiary">Revisa contenido publicado en la plataforma</p>
 
       {loading ? (
         <div className="mt-8 space-y-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="rounded-xl border border-stone-200 p-5 animate-pulse">
-              <div className="h-5 bg-stone-100 rounded w-1/3" />
+            <div key={i} className="rounded-xl border border-border-primary p-5 animate-pulse">
+              <div className="h-5 bg-surface-tertiary rounded w-1/3" />
             </div>
           ))}
         </div>
       ) : (
         <>
           <section className="mt-8">
-            <h2 className="text-xl font-semibold text-stone-800">Animales publicados recientes</h2>
+            <h2 className="text-xl font-semibold text-text-primary">Animales publicados recientes</h2>
             {animals.length === 0 ? (
-              <p className="mt-4 text-stone-400">No hay animales publicados.</p>
+              <p className="mt-4 text-text-quaternary">No hay animales publicados.</p>
             ) : (
               <div className="mt-4 space-y-3">
                 {animals.map((animal) => (
-                  <div key={animal.id} className="rounded-xl border border-stone-200 bg-white p-4 flex items-center justify-between">
+                  <div key={animal.id} className="rounded-xl border border-border-primary bg-surface-primary p-4 flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-stone-800">{animal.name}</p>
-                      <p className="text-sm text-stone-500">
+                      <p className="font-medium text-text-primary">{animal.name}</p>
+                      <p className="text-sm text-text-tertiary">
                         {animal.species === 'dog' ? 'Perro' : animal.species === 'cat' ? 'Gato' : 'Otro'} · {animal.shelter_name}
                       </p>
                     </div>
@@ -78,16 +78,16 @@ export default function AdminModeracionPage() {
           </section>
 
           <section className="mt-10">
-            <h2 className="text-xl font-semibold text-stone-800">Refugios registrados</h2>
+            <h2 className="text-xl font-semibold text-text-primary">Refugios registrados</h2>
             {shelters.length === 0 ? (
-              <p className="mt-4 text-stone-400">No hay refugios registrados.</p>
+              <p className="mt-4 text-text-quaternary">No hay refugios registrados.</p>
             ) : (
               <div className="mt-4 space-y-3">
                 {shelters.map((shelter) => (
-                  <div key={shelter.id} className="rounded-xl border border-stone-200 bg-white p-4 flex items-center justify-between">
+                  <div key={shelter.id} className="rounded-xl border border-border-primary bg-surface-primary p-4 flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-stone-800">{shelter.name}</p>
-                      <p className="text-sm text-stone-500">{shelter.city} · {shelter.owner_email}</p>
+                      <p className="font-medium text-text-primary">{shelter.name}</p>
+                      <p className="text-sm text-text-tertiary">{shelter.city} · {shelter.owner_email}</p>
                     </div>
                     <span className={`text-xs px-2 py-0.5 rounded-full ${
                       shelter.verification_status === 'verified' ? 'bg-emerald-50 text-emerald-700' :

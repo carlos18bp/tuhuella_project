@@ -30,9 +30,9 @@ export default function ApplicationTimeline({ status, className = '' }: Applicat
           const isCompleted = !isRejected && idx < currentIdx;
           const isCurrent = !isRejected && idx === currentIdx;
 
-          let dotColor = 'bg-stone-200 border-stone-300';
-          let lineColor = 'bg-stone-200';
-          let labelColor = 'text-stone-400';
+          let dotColor = 'bg-border-primary border-border-secondary';
+          let lineColor = 'bg-border-primary';
+          let labelColor = 'text-text-quaternary';
 
           if (isCompleted) {
             dotColor = 'bg-emerald-500 border-emerald-500';
@@ -48,7 +48,7 @@ export default function ApplicationTimeline({ status, className = '' }: Applicat
               <div className="flex items-center w-full">
                 {idx > 0 && (
                   <div className={`h-[3px] flex-1 rounded-full transition-colors ${
-                    isCompleted || isCurrent ? lineColor : 'bg-stone-200'
+                    isCompleted || isCurrent ? lineColor : 'bg-border-primary'
                   }`} />
                 )}
                 <div
@@ -57,7 +57,7 @@ export default function ApplicationTimeline({ status, className = '' }: Applicat
                 />
                 {idx < STEPS.length - 1 && (
                   <div className={`h-[3px] flex-1 rounded-full transition-colors ${
-                    isCompleted ? lineColor : 'bg-stone-200'
+                    isCompleted ? lineColor : 'bg-border-primary'
                   }`} />
                 )}
               </div>

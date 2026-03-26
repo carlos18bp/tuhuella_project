@@ -16,7 +16,7 @@ export default function MiPerfilPage() {
         <div className="h-8 animate-shimmer rounded w-1/4 mb-8" />
         <div className="max-w-lg space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="rounded-xl border border-stone-200 p-4 h-16 animate-shimmer" />
+            <div key={i} className="rounded-xl border border-border-primary p-4 h-16 animate-shimmer" />
           ))}
         </div>
       </div>
@@ -38,38 +38,38 @@ export default function MiPerfilPage() {
           {user.first_name?.[0]?.toUpperCase() ?? <User className="h-6 w-6" />}
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-stone-800">{t('title')}</h1>
-          <p className="text-sm text-stone-500">{t('subtitle')}</p>
+          <h1 className="text-3xl font-bold text-text-primary">{t('title')}</h1>
+          <p className="text-sm text-text-tertiary">{t('subtitle')}</p>
         </div>
       </div>
 
       <div className="max-w-lg space-y-4">
-        <div className="rounded-xl border border-stone-200 border-l-4 border-l-teal-500 p-4 shadow-sm">
+        <div className="rounded-xl border border-border-primary border-l-4 border-l-teal-500 p-4 shadow-sm">
           <div className="flex items-center gap-2">
-            <User className="h-4 w-4 text-stone-400" />
-            <p className="text-xs text-stone-500">{t('name')}</p>
+            <User className="h-4 w-4 text-text-quaternary" />
+            <p className="text-xs text-text-tertiary">{t('name')}</p>
           </div>
-          <p className="text-sm font-medium text-stone-700 mt-1.5">{user.first_name} {user.last_name}</p>
+          <p className="text-sm font-medium text-text-secondary mt-1.5">{user.first_name} {user.last_name}</p>
         </div>
-        <div className="rounded-xl border border-stone-200 border-l-4 border-l-teal-500 p-4 shadow-sm">
+        <div className="rounded-xl border border-border-primary border-l-4 border-l-teal-500 p-4 shadow-sm">
           <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4 text-stone-400" />
-            <p className="text-xs text-stone-500">{t('email')}</p>
+            <Mail className="h-4 w-4 text-text-quaternary" />
+            <p className="text-xs text-text-tertiary">{t('email')}</p>
           </div>
-          <p className="text-sm font-medium text-stone-700 mt-1.5">{user.email}</p>
+          <p className="text-sm font-medium text-text-secondary mt-1.5">{user.email}</p>
         </div>
-        <div className="rounded-xl border border-stone-200 border-l-4 border-l-teal-500 p-4 shadow-sm">
+        <div className="rounded-xl border border-border-primary border-l-4 border-l-teal-500 p-4 shadow-sm">
           <div className="flex items-center gap-2">
-            <Shield className="h-4 w-4 text-stone-400" />
-            <p className="text-xs text-stone-500">{t('role')}</p>
+            <Shield className="h-4 w-4 text-text-quaternary" />
+            <p className="text-xs text-text-tertiary">{t('role')}</p>
           </div>
-          <p className="text-sm font-medium text-stone-700 mt-1.5 capitalize">{user.role.replace('_', ' ')}</p>
+          <p className="text-sm font-medium text-text-secondary mt-1.5 capitalize">{user.role.replace('_', ' ')}</p>
         </div>
       </div>
 
       {/* Activity Dashboard */}
       <div className="mt-12">
-        <h2 className="text-xl font-bold text-stone-800 mb-4">{t('myActivity')}</h2>
+        <h2 className="text-xl font-bold text-text-primary mb-4">{t('myActivity')}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {activityLinks.map((item) => {
             const Icon = item.icon;
@@ -77,16 +77,16 @@ export default function MiPerfilPage() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="group rounded-xl border border-stone-200 p-5 shadow-sm hover:shadow-md hover:border-stone-300 transition-all"
+                className="group rounded-xl border border-border-primary p-5 shadow-sm hover:shadow-md hover:border-border-secondary transition-all"
               >
                 <div className="flex items-start justify-between">
                   <div className={`h-10 w-10 rounded-lg ${item.color} flex items-center justify-center`}>
                     <Icon className="h-5 w-5" />
                   </div>
-                  <ChevronRight className="h-5 w-5 text-stone-300 group-hover:text-stone-500 transition-colors" />
+                  <ChevronRight className="h-5 w-5 text-stone-300 group-hover:text-text-tertiary transition-colors" />
                 </div>
-                <h3 className="mt-3 font-semibold text-stone-800">{item.label}</h3>
-                <p className="text-xs text-stone-500 mt-1">{item.desc}</p>
+                <h3 className="mt-3 font-semibold text-text-primary">{item.label}</h3>
+                <p className="text-xs text-text-tertiary mt-1">{item.desc}</p>
               </Link>
             );
           })}

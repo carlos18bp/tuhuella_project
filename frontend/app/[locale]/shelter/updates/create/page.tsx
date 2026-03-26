@@ -77,7 +77,7 @@ export default function ShelterUpdateCreatePage() {
     }
   };
 
-  const inputClasses = 'mt-1 w-full rounded-xl border border-stone-200 shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] p-3 text-sm text-stone-800 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/10 outline-none';
+  const inputClasses = 'mt-1 w-full rounded-xl border border-border-primary shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] p-3 text-sm text-text-primary focus:border-teal-500 focus:ring-2 focus:ring-teal-500/10 outline-none';
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-10">
@@ -86,30 +86,30 @@ export default function ShelterUpdateCreatePage() {
         {t('backToUpdates')}
       </Link>
 
-      <h1 className="text-2xl font-bold text-stone-800">{t('createTitle')}</h1>
-      <p className="mt-1 text-stone-500 text-sm">{t('createSubtitle')}</p>
+      <h1 className="text-2xl font-bold text-text-primary">{t('createTitle')}</h1>
+      <p className="mt-1 text-text-tertiary text-sm">{t('createSubtitle')}</p>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-6">
         <div>
-          <label className="block text-sm font-medium text-stone-700">{t('fieldTitleEs')} <span className="text-red-400">*</span></label>
+          <label className="block text-sm font-medium text-text-secondary">{t('fieldTitleEs')} <span className="text-red-400">*</span></label>
           <input type="text" value={titleEs} onChange={(e) => setTitleEs(e.target.value)} className={inputClasses} required />
         </div>
         <div>
-          <label className="block text-sm font-medium text-stone-700">{t('fieldTitleEn')}</label>
+          <label className="block text-sm font-medium text-text-secondary">{t('fieldTitleEn')}</label>
           <input type="text" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} className={inputClasses} placeholder={t('optionalFallback')} />
         </div>
         <div>
-          <label className="block text-sm font-medium text-stone-700">{t('fieldContentEs')} <span className="text-red-400">*</span></label>
+          <label className="block text-sm font-medium text-text-secondary">{t('fieldContentEs')} <span className="text-red-400">*</span></label>
           <textarea value={contentEs} onChange={(e) => setContentEs(e.target.value)} rows={5} className={inputClasses} required />
         </div>
         <div>
-          <label className="block text-sm font-medium text-stone-700">{t('fieldContentEn')}</label>
+          <label className="block text-sm font-medium text-text-secondary">{t('fieldContentEn')}</label>
           <textarea value={contentEn} onChange={(e) => setContentEn(e.target.value)} rows={5} className={inputClasses} placeholder={t('optionalFallback')} />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-stone-700">{t('fieldCampaign')}</label>
+            <label className="block text-sm font-medium text-text-secondary">{t('fieldCampaign')}</label>
             <select value={campaignId} onChange={(e) => setCampaignId(e.target.value)} className={inputClasses}>
               <option value="">{t('noCampaign')}</option>
               {campaigns.map((c) => (
@@ -118,7 +118,7 @@ export default function ShelterUpdateCreatePage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-stone-700">{t('fieldAnimal')}</label>
+            <label className="block text-sm font-medium text-text-secondary">{t('fieldAnimal')}</label>
             <select value={animalId} onChange={(e) => setAnimalId(e.target.value)} className={inputClasses}>
               <option value="">{t('noAnimal')}</option>
               {animals.map((a) => (

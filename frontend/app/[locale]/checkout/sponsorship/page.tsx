@@ -49,8 +49,8 @@ export default function CheckoutApadrinamientoPage() {
 
   return (
     <div className="mx-auto max-w-xl px-6 py-10">
-      <h1 className="text-3xl font-bold text-stone-800 heading-decorated">Apadrinar</h1>
-      <p className="mt-2 text-stone-500">Apadrina un animal y apoya su cuidado continuo</p>
+      <h1 className="text-3xl font-bold text-text-primary heading-decorated">Apadrinar</h1>
+      <p className="mt-2 text-text-tertiary">Apadrina un animal y apoya su cuidado continuo</p>
 
       <div className="mt-6 rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-700">
         Pagos en modo placeholder — la integración con Wompi aún no está activa.
@@ -58,17 +58,17 @@ export default function CheckoutApadrinamientoPage() {
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-6">
         <div>
-          <label className="block text-sm font-medium text-stone-700">Frecuencia</label>
+          <label className="block text-sm font-medium text-text-secondary">Frecuencia</label>
           <div className="mt-2 flex gap-2">
             <button type="button" onClick={() => setFrequency('monthly')}
               className={`px-4 py-2.5 rounded-full text-sm border font-medium btn-base ${
-                frequency === 'monthly' ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-offset-1' : 'border-stone-200 text-stone-600 hover:bg-stone-50'
+                frequency === 'monthly' ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-offset-1' : 'border-border-primary text-text-secondary hover:bg-surface-hover'
               }`}>
               Mensual
             </button>
             <button type="button" onClick={() => setFrequency('one_time')}
               className={`px-4 py-2.5 rounded-full text-sm border font-medium btn-base ${
-                frequency === 'one_time' ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-offset-1' : 'border-stone-200 text-stone-600 hover:bg-stone-50'
+                frequency === 'one_time' ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-offset-1' : 'border-border-primary text-text-secondary hover:bg-surface-hover'
               }`}>
               Pago único
             </button>
@@ -76,7 +76,7 @@ export default function CheckoutApadrinamientoPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-stone-700">Monto</label>
+          <label className="block text-sm font-medium text-text-secondary">Monto</label>
           <div className="mt-2 flex flex-wrap gap-2">
             {amountOptions.map((opt) => (
               <button key={opt.id} type="button"
@@ -84,7 +84,7 @@ export default function CheckoutApadrinamientoPage() {
                 className={`px-4 py-2.5 rounded-full text-sm border font-medium btn-base ${
                   amount === String(opt.amount)
                     ? 'bg-teal-600 text-white border-teal-600 shadow-sm scale-105 ring-2 ring-offset-1'
-                    : 'border-stone-200 text-stone-600 hover:bg-stone-50'
+                    : 'border-border-primary text-text-secondary hover:bg-surface-hover'
                 }`}>
                 ${opt.amount.toLocaleString()}{frequency === 'monthly' ? '/mes' : ''}
               </button>
@@ -93,7 +93,7 @@ export default function CheckoutApadrinamientoPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-stone-700">Método de pago</label>
+          <label className="block text-sm font-medium text-text-secondary">Método de pago</label>
           <div className="mt-2 space-y-2">
             {[
               { value: 'card', label: 'Tarjeta de crédito/débito', icon: CreditCard },
@@ -101,12 +101,12 @@ export default function CheckoutApadrinamientoPage() {
               { value: 'nequi', label: 'Nequi', icon: Smartphone },
             ].map((opt) => (
               <label key={opt.value} className={`flex items-center gap-3 rounded-xl border p-3.5 cursor-pointer transition-all duration-200 ${
-                method === opt.value ? 'border-teal-500 bg-teal-50 shadow-sm ring-1 ring-teal-500' : 'border-stone-200 hover:bg-stone-50'
+                method === opt.value ? 'border-teal-500 bg-teal-50 shadow-sm ring-1 ring-teal-500' : 'border-border-primary hover:bg-surface-hover'
               }`}>
                 <input type="radio" name="method" value={opt.value} checked={method === opt.value}
                   onChange={() => setMethod(opt.value)} className="accent-teal-600" />
-                <opt.icon className={`h-4 w-4 ${method === opt.value ? 'text-teal-600' : 'text-stone-400'}`} />
-                <span className="text-sm text-stone-700">{opt.label}</span>
+                <opt.icon className={`h-4 w-4 ${method === opt.value ? 'text-teal-600' : 'text-text-quaternary'}`} />
+                <span className="text-sm text-text-secondary">{opt.label}</span>
               </label>
             ))}
           </div>
@@ -119,7 +119,7 @@ export default function CheckoutApadrinamientoPage() {
       </form>
 
       {checkoutFaqs.length > 0 && (
-        <div className="mt-12 border-t border-stone-200 pt-2">
+        <div className="mt-12 border-t border-border-primary pt-2">
           <FAQAccordion
             items={checkoutFaqs}
             title="Preguntas frecuentes"

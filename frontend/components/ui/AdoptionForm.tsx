@@ -188,7 +188,7 @@ export default function AdoptionForm({ animalName, onSubmit, submitting = false,
     return String(val || '—');
   };
 
-  const inputClasses = 'mt-1 w-full rounded-xl border border-stone-200 shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] p-3 text-sm text-stone-800 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/10 outline-none';
+  const inputClasses = 'mt-1 w-full rounded-xl border border-border-primary shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] p-3 text-sm text-text-primary focus:border-teal-500 focus:ring-2 focus:ring-teal-500/10 outline-none';
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -196,16 +196,16 @@ export default function AdoptionForm({ animalName, onSubmit, submitting = false,
       <div className="flex items-center gap-2" role="list" aria-label={t('stepsLabel')}>
         {stepOrder.map((s, idx) => (
           <div key={s} className="flex items-center gap-2" role="listitem">
-            {idx > 0 && <div className={`w-8 h-0.5 rounded-full ${idx <= currentStepIdx ? 'bg-teal-500' : 'bg-stone-200'}`} />}
+            {idx > 0 && <div className={`w-8 h-0.5 rounded-full ${idx <= currentStepIdx ? 'bg-teal-500' : 'bg-border-primary'}`} />}
             <div className={`flex items-center gap-1.5 text-xs font-medium ${
-              idx < currentStepIdx ? 'text-emerald-600' : idx === currentStepIdx ? 'text-teal-700' : 'text-stone-400'
+              idx < currentStepIdx ? 'text-emerald-600' : idx === currentStepIdx ? 'text-teal-700' : 'text-text-quaternary'
             }`}>
               <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs border-2 ${
                 idx < currentStepIdx
                   ? 'bg-emerald-500 border-emerald-500 text-white'
                   : idx === currentStepIdx
                     ? 'border-teal-500 text-teal-700 shadow-sm'
-                    : 'border-stone-200 text-stone-400'
+                    : 'border-border-primary text-text-quaternary'
               }`}>
                 {idx < currentStepIdx ? '\u2713' : idx + 1}
               </span>
@@ -215,7 +215,7 @@ export default function AdoptionForm({ animalName, onSubmit, submitting = false,
         ))}
       </div>
 
-      <h3 className="text-lg font-semibold text-stone-800">
+      <h3 className="text-lg font-semibold text-text-primary">
         {t('title', { animalName })}
       </h3>
 
@@ -224,13 +224,13 @@ export default function AdoptionForm({ animalName, onSubmit, submitting = false,
         <div className="space-y-8">
           {SECTIONS.map((section) => (
             <fieldset key={section.titleKey} className="space-y-4">
-              <legend className="text-sm font-semibold text-teal-700 uppercase tracking-wide border-b border-stone-100 pb-2 w-full">
+              <legend className="text-sm font-semibold text-teal-700 uppercase tracking-wide border-b border-border-tertiary pb-2 w-full">
                 {t(section.titleKey)}
               </legend>
               <div className="space-y-4">
                 {section.fields.map((field) => (
                   <div key={field.key}>
-                    <label htmlFor={`adoption-${field.key}`} className="block text-sm font-medium tracking-[-0.01em] text-stone-700">
+                    <label htmlFor={`adoption-${field.key}`} className="block text-sm font-medium tracking-[-0.01em] text-text-secondary">
                       {t(`fields.${field.key}`)}
                       {field.required && <span className="text-red-400 ml-0.5">*</span>}
                     </label>
@@ -282,7 +282,7 @@ export default function AdoptionForm({ animalName, onSubmit, submitting = false,
                           onChange={(e) => updateField(field.key, e.target.checked)}
                           className="h-4 w-4 rounded border-stone-300 text-teal-600 focus:ring-teal-500"
                         />
-                        <span className="text-sm text-stone-600">{t(`checkboxLabels.${field.key}`)}</span>
+                        <span className="text-sm text-text-secondary">{t(`checkboxLabels.${field.key}`)}</span>
                       </label>
                     )}
                   </div>
@@ -296,15 +296,15 @@ export default function AdoptionForm({ animalName, onSubmit, submitting = false,
       {/* Step 2: Review */}
       {step === 'review' && (
         <div className="space-y-4">
-          <p className="text-sm text-stone-500">{t('reviewDescription')}</p>
+          <p className="text-sm text-text-tertiary">{t('reviewDescription')}</p>
           <div className="space-y-6">
             {SECTIONS.map((section) => (
-              <div key={section.titleKey} className="rounded-2xl border border-stone-200 bg-stone-50/50 p-5 space-y-3">
+              <div key={section.titleKey} className="rounded-2xl border border-border-primary bg-surface-secondary/50 p-5 space-y-3">
                 <h4 className="text-xs font-semibold text-teal-600 uppercase tracking-wide">{t(section.titleKey)}</h4>
                 {section.fields.map((field) => (
                   <div key={field.key}>
-                    <dt className="text-xs font-medium text-stone-400">{t(`fields.${field.key}`)}</dt>
-                    <dd className="text-sm text-stone-800 mt-0.5">{getDisplayValue(field)}</dd>
+                    <dt className="text-xs font-medium text-text-quaternary">{t(`fields.${field.key}`)}</dt>
+                    <dd className="text-sm text-text-primary mt-0.5">{getDisplayValue(field)}</dd>
                   </div>
                 ))}
               </div>
@@ -316,7 +316,7 @@ export default function AdoptionForm({ animalName, onSubmit, submitting = false,
       {/* Step 3: Notes + Submit */}
       {step === 'submit' && (
         <div className="space-y-4">
-          <p className="text-sm text-stone-500">{t('notesDescription')}</p>
+          <p className="text-sm text-text-tertiary">{t('notesDescription')}</p>
           <textarea
             id="adoption-notes"
             value={notes}
@@ -334,7 +334,7 @@ export default function AdoptionForm({ animalName, onSubmit, submitting = false,
           <button
             type="button"
             onClick={() => setStep(stepOrder[currentStepIdx - 1])}
-            className="rounded-full border border-stone-300 px-5 py-2.5 text-sm font-medium text-stone-600 hover:bg-stone-50 transition-colors"
+            className="rounded-full border border-border-secondary px-5 py-2.5 text-sm font-medium text-text-secondary hover:bg-surface-hover transition-colors"
           >
             {t('back')}
           </button>

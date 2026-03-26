@@ -75,17 +75,17 @@ function RenderSection({ section, index }: { section: Section; index: number }) 
   return (
     <div key={index} className="mb-10">
       {section.heading && (
-        <h2 className="text-2xl font-semibold text-stone-800 mb-4">{section.heading}</h2>
+        <h2 className="text-2xl font-semibold text-text-primary mb-4">{section.heading}</h2>
       )}
 
       {section.content && (
-        <p className="text-stone-600 leading-relaxed mb-4">{section.content}</p>
+        <p className="text-text-secondary leading-relaxed mb-4">{section.content}</p>
       )}
 
       {section.list && section.list.length > 0 && (
         <ul className="list-disc pl-6 space-y-2 mb-4">
           {section.list.map((item, i) => (
-            <li key={i} className="text-stone-600 leading-relaxed">{item}</li>
+            <li key={i} className="text-text-secondary leading-relaxed">{item}</li>
           ))}
         </ul>
       )}
@@ -94,8 +94,8 @@ function RenderSection({ section, index }: { section: Section; index: number }) 
         <div className="space-y-4 mb-4">
           {section.subsections.map((sub, i) => (
             <div key={i} className="pl-4 border-l-2 border-teal-200">
-              <h3 className="font-medium text-stone-800 mb-1">{sub.title}</h3>
-              <p className="text-stone-600 text-sm leading-relaxed">{sub.description}</p>
+              <h3 className="font-medium text-text-primary mb-1">{sub.title}</h3>
+              <p className="text-text-secondary text-sm leading-relaxed">{sub.description}</p>
             </div>
           ))}
         </div>
@@ -107,19 +107,19 @@ function RenderSection({ section, index }: { section: Section; index: number }) 
           {section.timeline.map((step, i) => (
             <div key={i} className="relative mb-6 last:mb-0">
               <div className="absolute -left-5 top-1 w-3 h-3 rounded-full bg-teal-500 ring-4 ring-teal-100" />
-              <h4 className="font-medium text-stone-800 mb-1">{step.step}</h4>
-              <p className="text-stone-600 text-sm leading-relaxed">{step.description}</p>
+              <h4 className="font-medium text-text-primary mb-1">{step.step}</h4>
+              <p className="text-text-secondary text-sm leading-relaxed">{step.description}</p>
             </div>
           ))}
         </div>
       )}
 
       {section.examples && section.examples.length > 0 && (
-        <div className="bg-stone-50 rounded-xl p-4 mb-4">
-          <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-2">Ejemplos</p>
+        <div className="bg-surface-secondary rounded-xl p-4 mb-4">
+          <p className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">Ejemplos</p>
           <ul className="space-y-2">
             {section.examples.map((ex, i) => (
-              <li key={i} className="flex gap-2 text-stone-600 text-sm">
+              <li key={i} className="flex gap-2 text-text-secondary text-sm">
                 <span className="text-teal-500 mt-0.5">→</span>
                 <span>{ex}</span>
               </li>
@@ -137,13 +137,13 @@ function RenderSection({ section, index }: { section: Section; index: number }) 
             loading="lazy"
           />
           {section.image.credit && (
-            <figcaption className="text-xs text-stone-400 mt-2 text-center">
+            <figcaption className="text-xs text-text-quaternary mt-2 text-center">
               {section.image.credit_url ? (
                 <a
                   href={section.image.credit_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-stone-600 transition-colors"
+                  className="hover:text-text-secondary transition-colors"
                 >
                   {section.image.credit}
                 </a>
@@ -157,11 +157,11 @@ function RenderSection({ section, index }: { section: Section; index: number }) 
 
       {section.quote && (
         <blockquote className="border-l-4 border-teal-400 pl-6 py-3 mb-4 bg-teal-50/50 rounded-r-lg">
-          <p className="text-stone-700 italic text-lg leading-relaxed">
+          <p className="text-text-secondary italic text-lg leading-relaxed">
             &ldquo;{section.quote.text}&rdquo;
           </p>
           {section.quote.author && (
-            <cite className="block mt-2 text-sm text-stone-500 not-italic">
+            <cite className="block mt-2 text-sm text-text-tertiary not-italic">
               — {section.quote.author}
             </cite>
           )}
@@ -174,9 +174,9 @@ function RenderSection({ section, index }: { section: Section; index: number }) 
             <CalloutIcon type={section.callout.type} />
             <div>
               {section.callout.title && (
-                <p className="font-semibold text-stone-800 mb-1">{section.callout.title}</p>
+                <p className="font-semibold text-text-primary mb-1">{section.callout.title}</p>
               )}
-              <p className="text-stone-600 text-sm leading-relaxed">{section.callout.text}</p>
+              <p className="text-text-secondary text-sm leading-relaxed">{section.callout.text}</p>
             </div>
           </div>
         </div>
@@ -216,11 +216,11 @@ function RenderSection({ section, index }: { section: Section; index: number }) 
       {section.faq && section.faq.length > 0 && (
         <div className="space-y-3 mb-4">
           {section.faq.map((item, i) => (
-            <details key={i} className="group bg-stone-50 rounded-xl overflow-hidden">
-              <summary className="px-5 py-4 cursor-pointer font-medium text-stone-800 hover:bg-stone-100 transition-colors flex items-center justify-between">
+            <details key={i} className="group bg-surface-secondary rounded-xl overflow-hidden">
+              <summary className="px-5 py-4 cursor-pointer font-medium text-text-primary hover:bg-surface-hover transition-colors flex items-center justify-between">
                 <span>{item.question}</span>
                 <svg
-                  className="w-5 h-5 text-stone-400 transition-transform group-open:rotate-180"
+                  className="w-5 h-5 text-text-quaternary transition-transform group-open:rotate-180"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -228,7 +228,7 @@ function RenderSection({ section, index }: { section: Section; index: number }) 
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <div className="px-5 pb-4 text-stone-600 text-sm leading-relaxed">
+              <div className="px-5 pb-4 text-text-secondary text-sm leading-relaxed">
                 {item.answer}
               </div>
             </details>
@@ -246,7 +246,7 @@ export default function BlogContentRenderer({ contentJson, contentHtml }: Props)
     return (
       <article className="prose-custom max-w-none">
         {json.intro && (
-          <p className="text-lg text-stone-600 leading-relaxed mb-8 font-light">
+          <p className="text-lg text-text-secondary leading-relaxed mb-8 font-light">
             {json.intro}
           </p>
         )}
@@ -256,8 +256,8 @@ export default function BlogContentRenderer({ contentJson, contentHtml }: Props)
         ))}
 
         {json.conclusion && (
-          <div className="mt-10 pt-8 border-t border-stone-200">
-            <p className="text-stone-600 leading-relaxed">{json.conclusion}</p>
+          <div className="mt-10 pt-8 border-t border-border-primary">
+            <p className="text-text-secondary leading-relaxed">{json.conclusion}</p>
           </div>
         )}
 
@@ -280,7 +280,7 @@ export default function BlogContentRenderer({ contentJson, contentHtml }: Props)
   }
 
   return (
-    <div className="text-stone-400 text-center py-12">
+    <div className="text-text-quaternary text-center py-12">
       No hay contenido disponible.
     </div>
   );

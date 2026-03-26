@@ -12,10 +12,10 @@ export default function EmptyState({ message, icon }: EmptyStateProps) {
         <span className="text-4xl mb-4 animate-float">{icon}</span>
       ) : (
         <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-stone-100 to-stone-50 shadow-sm flex items-center justify-center mb-4">
-          <SearchX className="h-7 w-7 text-stone-400 animate-float" />
+          <SearchX className="h-7 w-7 text-text-quaternary animate-float" />
         </div>
       )}
-      <p className="text-stone-400 text-lg max-w-sm">{message}</p>
+      <p className="text-text-quaternary text-lg max-w-sm">{message}</p>
     </div>
   );
 }

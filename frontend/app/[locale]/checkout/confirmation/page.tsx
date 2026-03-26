@@ -21,11 +21,11 @@ function ConfirmacionContent() {
         <CheckCircle2 className="w-8 h-8 text-emerald-600" />
       </div>
 
-      <h1 className="mt-6 text-3xl font-bold text-stone-800">
+      <h1 className="mt-6 text-3xl font-bold text-text-primary">
         {isSponsorship ? 'Apadrinamiento registrado' : 'Donación registrada'}
       </h1>
 
-      <p className="mt-3 text-stone-500 max-w-md mx-auto">
+      <p className="mt-3 text-text-tertiary max-w-md mx-auto">
         {isSponsorship
           ? 'Tu apadrinamiento ha sido registrado exitosamente. El animal que elegiste ahora cuenta con tu apoyo.'
           : 'Tu donación ha sido registrada exitosamente. Gracias por tu generosidad.'}
@@ -43,12 +43,12 @@ function ConfirmacionContent() {
           Explorar animales
         </Link>
         <Link href={isSponsorship ? ROUTES.MY_SPONSORSHIPS : ROUTES.MY_DONATIONS}
-          className="border border-stone-300 text-stone-600 rounded-full px-6 py-2.5 text-sm font-medium hover:bg-stone-50 btn-base">
+          className="border border-border-secondary text-text-secondary rounded-full px-6 py-2.5 text-sm font-medium hover:bg-surface-hover btn-base">
           {isSponsorship ? 'Ver mis apadrinamientos' : 'Ver mis donaciones'}
         </Link>
       </div>
 
-      <Link href={ROUTES.HOME} className="mt-6 inline-block text-sm text-stone-400 hover:text-stone-600 transition-colors">
+      <Link href={ROUTES.HOME} className="mt-6 inline-block text-sm text-text-quaternary hover:text-text-secondary transition-colors">
         Volver al inicio
       </Link>
     </div>
@@ -59,7 +59,7 @@ export default function CheckoutConfirmacionPage() {
   return (
     <Suspense fallback={
       <div className="mx-auto max-w-xl px-6 py-10 text-center">
-        <p className="text-stone-400">Cargando confirmación...</p>
+        <p className="text-text-quaternary">Cargando confirmación...</p>
       </div>
     }>
       <ConfirmacionContent />

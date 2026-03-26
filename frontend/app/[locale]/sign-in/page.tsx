@@ -102,23 +102,23 @@ export default function SignInPage() {
   return (
     <main className="relative min-h-[calc(100vh-72px)] flex items-center justify-center px-6 py-12 bg-gradient-to-b from-stone-50 to-stone-100/50">
       <div className="absolute top-1/4 right-1/4 w-64 h-64 rounded-full bg-teal-100/30 blur-3xl pointer-events-none" />
-      <div className="w-full max-w-md bg-white border border-stone-200 rounded-2xl p-8 shadow-lg ring-1 ring-black/[0.02]">
+      <div className="w-full max-w-md bg-surface-primary border border-border-primary rounded-2xl p-8 shadow-lg ring-1 ring-black/[0.02]">
         <div className="flex items-center gap-2 mb-6">
           <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-50 to-teal-100 shadow-sm flex items-center justify-center">
             <PawPrint className="h-5 w-5 text-teal-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-stone-900">Iniciar sesión</h1>
-            <p className="text-sm text-stone-500">Bienvenido de vuelta a Tu Huella</p>
+            <h1 className="text-2xl font-bold tracking-tight text-text-primary">Iniciar sesión</h1>
+            <p className="text-sm text-text-tertiary">Bienvenido de vuelta a Tu Huella</p>
           </div>
         </div>
 
         <form className="space-y-4" onSubmit={onSubmit}>
           <div>
-            <label htmlFor="signin-email" className="block text-sm font-medium text-stone-700 mb-1.5">Correo electrónico</label>
-            <input 
+            <label htmlFor="signin-email" className="block text-sm font-medium text-text-secondary mb-1.5">Correo electrónico</label>
+            <input
               id="signin-email"
-              className="border border-stone-200 rounded-xl px-3.5 py-2.5 w-full bg-white text-stone-800 placeholder:text-stone-400 shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] focus:outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-colors" 
+              className="border border-border-primary rounded-xl px-3.5 py-2.5 w-full bg-surface-primary text-text-primary placeholder:text-text-quaternary shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] focus:outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-colors" 
               placeholder="tu@email.com" 
               type="email"
               value={email} 
@@ -129,10 +129,10 @@ export default function SignInPage() {
           </div>
           
           <div>
-            <label htmlFor="signin-password" className="block text-sm font-medium text-stone-700 mb-1.5">Contraseña</label>
-            <input 
+            <label htmlFor="signin-password" className="block text-sm font-medium text-text-secondary mb-1.5">Contraseña</label>
+            <input
               id="signin-password"
-              className="border border-stone-200 rounded-xl px-3.5 py-2.5 w-full bg-white text-stone-800 placeholder:text-stone-400 shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] focus:outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-colors" 
+              className="border border-border-primary rounded-xl px-3.5 py-2.5 w-full bg-surface-primary text-text-primary placeholder:text-text-quaternary shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] focus:outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-colors" 
               placeholder="••••••••" 
               value={password} 
               onChange={(e) => setPassword(e.target.value)} 
@@ -165,7 +165,7 @@ export default function SignInPage() {
         </form>
 
         <div className="mt-4 text-center">
-          <Link href="/forgot-password" className="text-sm text-stone-500 hover:text-teal-600 transition-colors">
+          <Link href="/forgot-password" className="text-sm text-text-tertiary hover:text-teal-600 transition-colors">
             ¿Olvidaste tu contraseña?
           </Link>
         </div>
@@ -173,10 +173,10 @@ export default function SignInPage() {
         <div className="mt-6">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-stone-200"></div>
+              <div className="w-full border-t border-border-primary"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-3 bg-white text-stone-400">O continúa con</span>
+              <span className="px-3 bg-surface-primary text-text-quaternary">O continúa con</span>
             </div>
           </div>
 
@@ -196,14 +196,14 @@ export default function SignInPage() {
         </div>
 
         <div className="mt-6 text-center text-sm">
-          <span className="text-stone-500">¿No tienes cuenta? </span>
+          <span className="text-text-tertiary">¿No tienes cuenta? </span>
           <Link href="/sign-up" className="text-teal-600 font-medium hover:text-teal-700 transition-colors">
             Regístrate
           </Link>
         </div>
 
         {siteKey && (
-          <p className="mt-4 text-center text-[10px] text-stone-400 leading-relaxed">
+          <p className="mt-4 text-center text-[10px] text-text-quaternary leading-relaxed">
             Protegido por reCAPTCHA de Google.{' '}
             <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline">Privacidad</a>
             {' y '}
@@ -211,7 +211,7 @@ export default function SignInPage() {
           </p>
         )}
 
-        <p className="mt-4 text-center text-[10px] text-stone-400">
+        <p className="mt-4 text-center text-[10px] text-text-quaternary">
           Powered by{' '}
           <a href="https://projectapp.co" target="_blank" rel="noopener noreferrer" className="hover:text-teal-500 transition-colors">
             ProjectApp.co

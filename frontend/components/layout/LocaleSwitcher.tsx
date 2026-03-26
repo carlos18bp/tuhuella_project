@@ -15,7 +15,7 @@ export default function LocaleSwitcher() {
 
   return (
     <div
-      className="relative flex items-center rounded-full border border-stone-300 bg-stone-100 shadow-inner p-0.5 text-xs font-medium select-none"
+      className="relative flex items-center rounded-full border border-border-secondary bg-surface-tertiary shadow-inner p-0.5 text-xs font-medium select-none"
       role="radiogroup"
       aria-label="Select language"
     >
@@ -32,7 +32,7 @@ export default function LocaleSwitcher() {
         aria-checked={locale === 'es'}
         onClick={() => toggle('es')}
         className={`relative z-10 px-3 py-1 rounded-full cursor-pointer transition-colors duration-200 ${
-          locale === 'es' ? 'text-white' : 'text-stone-500 hover:text-stone-700'
+          locale === 'es' ? 'text-white' : 'text-text-tertiary hover:text-text-secondary'
         }`}
       >
         ES
@@ -43,7 +43,7 @@ export default function LocaleSwitcher() {
         aria-checked={locale === 'en'}
         onClick={() => toggle('en')}
         className={`relative z-10 px-3 py-1 rounded-full cursor-pointer transition-colors duration-200 ${
-          locale === 'en' ? 'text-white' : 'text-stone-500 hover:text-stone-700'
+          locale === 'en' ? 'text-white' : 'text-text-tertiary hover:text-text-secondary'
         }`}
       >
         EN

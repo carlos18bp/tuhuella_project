@@ -77,7 +77,7 @@ export default function CampaignDetailPage() {
 
       {/* Cover image */}
       {campaign.cover_image_url ? (
-        <div className="mt-6 rounded-2xl overflow-hidden border border-stone-200">
+        <div className="mt-6 rounded-2xl overflow-hidden border border-border-primary">
           <img
             src={campaign.cover_image_url}
             alt={campaign.title}
@@ -85,7 +85,7 @@ export default function CampaignDetailPage() {
           />
         </div>
       ) : (
-        <div className="mt-6 rounded-2xl overflow-hidden border border-stone-200 bg-gradient-to-br from-amber-50 to-amber-100 flex items-center justify-center aspect-[21/9]">
+        <div className="mt-6 rounded-2xl overflow-hidden border border-border-primary bg-gradient-to-br from-amber-50 to-amber-100 flex items-center justify-center aspect-[21/9]">
           <Megaphone className="h-16 w-16 text-amber-300" />
         </div>
       )}
@@ -94,10 +94,10 @@ export default function CampaignDetailPage() {
         {/* Content column */}
         <div className="lg:col-span-2">
           <p className="text-sm text-amber-600 font-medium">{campaign.shelter_name}</p>
-          <h1 className="text-3xl font-bold tracking-[-0.02em] text-stone-800 mt-2">{campaign.title}</h1>
+          <h1 className="text-3xl font-bold tracking-[-0.02em] text-text-primary mt-2">{campaign.title}</h1>
 
           {(startsAt || endsAt) && (
-            <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-stone-500">
+            <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-text-tertiary">
               {startsAt && (
                 <span className="flex items-center gap-1.5">
                   <Calendar className="h-4 w-4" />
@@ -114,30 +114,30 @@ export default function CampaignDetailPage() {
           )}
 
           {campaign.description && (
-            <p className="mt-6 text-stone-600 leading-relaxed whitespace-pre-line">{campaign.description}</p>
+            <p className="mt-6 text-text-secondary leading-relaxed whitespace-pre-line">{campaign.description}</p>
           )}
         </div>
 
         {/* Donation card */}
         <div className="lg:col-span-1">
-          <div className="sticky top-24 rounded-2xl border border-stone-200 bg-white p-6 shadow-lg ring-1 ring-stone-200/50">
-            <h3 className="text-lg font-semibold text-stone-800">{t('progress')}</h3>
+          <div className="sticky top-24 rounded-2xl border border-border-primary bg-surface-primary p-6 shadow-lg ring-1 ring-border-primary/50">
+            <h3 className="text-lg font-semibold text-text-primary">{t('progress')}</h3>
 
             <div className="mt-4">
-              <div className="flex justify-between text-sm text-stone-600 mb-2">
+              <div className="flex justify-between text-sm text-text-secondary mb-2">
                 <span>{campaign.progress_percentage}% {t('completed')}</span>
               </div>
-              <div className="w-full h-3 bg-stone-100 rounded-full overflow-hidden">
+              <div className="w-full h-3 bg-surface-tertiary rounded-full overflow-hidden">
                 <div
                   className="h-full bg-amber-500 rounded-full transition-all progress-shine"
                   style={{ width: `${Math.min(campaign.progress_percentage, 100)}%` }}
                 />
               </div>
               <div className="mt-2 flex justify-between text-sm">
-                <span className="font-semibold text-stone-800">
+                <span className="font-semibold text-text-primary">
                   ${Number(campaign.raised_amount).toLocaleString()}
                 </span>
-                <span className="text-stone-500">
+                <span className="text-text-tertiary">
                   {t('of')} ${Number(campaign.goal_amount).toLocaleString()}
                 </span>
               </div>
@@ -166,12 +166,12 @@ export default function CampaignDetailPage() {
 
       {/* Evidence Gallery (for completed campaigns) */}
       {campaign.status === 'completed' && campaign.evidence_gallery_urls && campaign.evidence_gallery_urls.length > 0 && (
-        <div className="mt-16 border-t border-stone-200 pt-10">
+        <div className="mt-16 border-t border-border-primary pt-10">
           <div className="flex items-center gap-2 mb-6">
             <Camera className="h-5 w-5 text-amber-600" />
             <div>
-              <h2 className="text-xl font-bold text-stone-800">{t('evidenceTitle')}</h2>
-              <p className="text-sm text-stone-500">{t('evidenceSubtitle')}</p>
+              <h2 className="text-xl font-bold text-text-primary">{t('evidenceTitle')}</h2>
+              <p className="text-sm text-text-tertiary">{t('evidenceSubtitle')}</p>
             </div>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -205,14 +205,14 @@ export default function CampaignDetailPage() {
 
       {/* Updates / Evidence feed */}
       {updates.length > 0 && (
-        <div className="mt-16 border-t border-stone-200 pt-10">
+        <div className="mt-16 border-t border-border-primary pt-10">
           <div className="flex items-center gap-2 mb-6">
             <FileText className="h-5 w-5 text-amber-600" />
-            <h2 className="text-xl font-bold text-stone-800">{tUpdates('feedTitle')}</h2>
+            <h2 className="text-xl font-bold text-text-primary">{tUpdates('feedTitle')}</h2>
           </div>
           <div className="space-y-4">
             {updates.map((update: any) => (
-              <div key={update.id} className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
+              <div key={update.id} className="rounded-2xl border border-border-primary bg-surface-primary p-5 shadow-sm">
                 <div className="flex gap-4">
                   {update.image_url && (
                     <img
@@ -222,8 +222,8 @@ export default function CampaignDetailPage() {
                     />
                   )}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-stone-800">{update.title}</h3>
-                    <p className="text-xs text-stone-400 mt-1">
+                    <h3 className="font-semibold text-text-primary">{update.title}</h3>
+                    <p className="text-xs text-text-quaternary mt-1">
                       {update.shelter_name} &middot;{' '}
                       {new Date(update.created_at).toLocaleDateString(locale === 'es' ? 'es-CO' : 'en-US', {
                         year: 'numeric', month: 'short', day: 'numeric',
@@ -239,7 +239,7 @@ export default function CampaignDetailPage() {
 
       {/* FAQ section */}
       {faqItems.length > 0 && (
-        <div className="mt-16 border-t border-stone-200 pt-2">
+        <div className="mt-16 border-t border-border-primary pt-2">
           <FAQAccordion
             items={faqItems}
             title={tCommon('faq')}

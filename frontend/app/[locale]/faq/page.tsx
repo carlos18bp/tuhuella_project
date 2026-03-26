@@ -8,8 +8,8 @@ export default function FaqPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <h1 className="text-3xl font-bold text-stone-800 heading-decorated-center">Preguntas Frecuentes</h1>
-      <p className="mt-2 text-stone-500">Resolvemos tus dudas sobre Tu Huella</p>
+      <h1 className="text-3xl font-bold text-text-primary heading-decorated-center">Preguntas Frecuentes</h1>
+      <p className="mt-2 text-text-tertiary">Resolvemos tus dudas sobre Tu Huella</p>
 
       {loading ? (
         <div className="mt-10 space-y-4">

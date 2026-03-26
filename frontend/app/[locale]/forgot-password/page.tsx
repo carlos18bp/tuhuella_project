@@ -68,18 +68,18 @@ export default function ForgotPasswordPage() {
     }
   };
 
-  const inputClasses = "border border-stone-200 rounded-xl px-3.5 py-2.5 w-full bg-white text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-colors";
+  const inputClasses = "border border-border-primary rounded-xl px-3.5 py-2.5 w-full bg-surface-primary text-text-primary placeholder:text-text-quaternary focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-colors";
 
   return (
     <main className="min-h-[calc(100vh-72px)] flex items-center justify-center px-6 py-12 bg-gradient-to-b from-stone-50 to-stone-100/50">
-      <div className="w-full max-w-md bg-white border border-stone-200 rounded-2xl p-8 shadow-sm">
+      <div className="w-full max-w-md bg-surface-primary border border-border-primary rounded-2xl p-8 shadow-sm">
         <div className="flex items-center gap-2 mb-6">
           <div className="h-10 w-10 rounded-xl bg-teal-50 flex items-center justify-center">
             <PawPrint className="h-5 w-5 text-teal-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-stone-900">Recuperar contraseña</h1>
-            <p className="text-sm text-stone-500">
+            <h1 className="text-2xl font-bold tracking-tight text-text-primary">Recuperar contraseña</h1>
+            <p className="text-sm text-text-tertiary">
               {step === 'email' ? 'Te enviaremos un código de verificación' : 'Ingresa el código y tu nueva contraseña'}
             </p>
           </div>
@@ -88,7 +88,7 @@ export default function ForgotPasswordPage() {
         {step === 'email' ? (
           <form className="space-y-4" onSubmit={onSendCode}>
             <div>
-              <label htmlFor="reset-email" className="block text-sm font-medium text-stone-700 mb-1.5">Correo electrónico</label>
+              <label htmlFor="reset-email" className="block text-sm font-medium text-text-secondary mb-1.5">Correo electrónico</label>
               <input 
                 id="reset-email"
                 className={inputClasses}
@@ -114,15 +114,15 @@ export default function ForgotPasswordPage() {
           </form>
         ) : (
           <form className="space-y-4" onSubmit={onResetPassword}>
-            <p className="text-sm text-stone-500">
-              Ingresa el código de 6 dígitos enviado a <strong className="text-stone-700">{email}</strong>
+            <p className="text-sm text-text-tertiary">
+              Ingresa el código de 6 dígitos enviado a <strong className="text-text-secondary">{email}</strong>
             </p>
             
             <div>
-              <label htmlFor="reset-code" className="block text-sm font-medium text-stone-700 mb-1.5">Código</label>
+              <label htmlFor="reset-code" className="block text-sm font-medium text-text-secondary mb-1.5">Código</label>
               <input 
                 id="reset-code"
-                className="border border-stone-200 rounded-xl px-3.5 py-3 w-full bg-white text-stone-800 text-center text-2xl tracking-widest placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-colors" 
+                className="border border-border-primary rounded-xl px-3.5 py-3 w-full bg-surface-primary text-text-primary text-center text-2xl tracking-widest placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-colors" 
                 placeholder="000000" 
                 type="text"
                 value={code} 
@@ -130,11 +130,11 @@ export default function ForgotPasswordPage() {
                 maxLength={6}
                 required
               />
-              <p className="text-xs text-stone-400 mt-1">Código de 6 dígitos del correo</p>
+              <p className="text-xs text-text-quaternary mt-1">Código de 6 dígitos del correo</p>
             </div>
             
             <div>
-              <label htmlFor="reset-newpw" className="block text-sm font-medium text-stone-700 mb-1.5">Nueva contraseña</label>
+              <label htmlFor="reset-newpw" className="block text-sm font-medium text-text-secondary mb-1.5">Nueva contraseña</label>
               <input 
                 id="reset-newpw"
                 className={inputClasses}
@@ -145,11 +145,11 @@ export default function ForgotPasswordPage() {
                 autoComplete="new-password"
                 required
               />
-              <p className="text-xs text-stone-400 mt-1">Mínimo 8 caracteres</p>
+              <p className="text-xs text-text-quaternary mt-1">Mínimo 8 caracteres</p>
             </div>
             
             <div>
-              <label htmlFor="reset-confirm" className="block text-sm font-medium text-stone-700 mb-1.5">Confirmar contraseña</label>
+              <label htmlFor="reset-confirm" className="block text-sm font-medium text-text-secondary mb-1.5">Confirmar contraseña</label>
               <input 
                 id="reset-confirm"
                 className={inputClasses}
@@ -176,7 +176,7 @@ export default function ForgotPasswordPage() {
             <button
               type="button"
               onClick={() => setStep('email')}
-              className="flex items-center justify-center gap-1 text-sm text-stone-500 hover:text-teal-600 transition-colors w-full"
+              className="flex items-center justify-center gap-1 text-sm text-text-tertiary hover:text-teal-600 transition-colors w-full"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Volver al correo
@@ -185,7 +185,7 @@ export default function ForgotPasswordPage() {
         )}
 
         <div className="mt-6 text-center text-sm">
-          <Link href="/sign-in" className="flex items-center justify-center gap-1 text-stone-500 hover:text-teal-600 transition-colors">
+          <Link href="/sign-in" className="flex items-center justify-center gap-1 text-text-tertiary hover:text-teal-600 transition-colors">
             <ArrowLeft className="h-3.5 w-3.5" />
             Volver a iniciar sesión
           </Link>

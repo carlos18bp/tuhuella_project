@@ -77,8 +77,8 @@ export default function AdoptPage() {
         <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mx-auto">
           <CheckCircle2 className="h-8 w-8 text-emerald-500" />
         </div>
-        <h1 className="mt-6 text-2xl font-bold text-stone-800 heading-decorated-center">{t('successTitle')}</h1>
-        <p className="mt-3 text-stone-500 max-w-md mx-auto">
+        <h1 className="mt-6 text-2xl font-bold text-text-primary heading-decorated-center">{t('successTitle')}</h1>
+        <p className="mt-3 text-text-tertiary max-w-md mx-auto">
           {t.rich('successMessage', {
             animalName: animal.name,
             shelterName: animal.shelter_name,
@@ -94,7 +94,7 @@ export default function AdoptPage() {
           </Link>
           <Link
             href={ROUTES.ANIMALS}
-            className="border border-stone-300 text-stone-700 rounded-full px-6 py-3 font-medium hover:bg-white btn-base"
+            className="border border-border-secondary text-text-secondary rounded-full px-6 py-3 font-medium hover:bg-surface-primary btn-base"
           >
             {t('exploreAnimals')}
           </Link>
@@ -113,7 +113,7 @@ export default function AdoptPage() {
         {t('backToAnimal', { animalName: animal.name })}
       </Link>
 
-      <div className="mt-6 rounded-2xl border border-stone-200 bg-white p-6 sm:p-8 shadow-sm">
+      <div className="mt-6 rounded-2xl border border-border-primary bg-surface-primary p-6 sm:p-8 shadow-sm">
         <AdoptionForm
           animalName={animal.name}
           onSubmit={handleSubmit}

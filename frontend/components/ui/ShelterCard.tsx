@@ -18,7 +18,7 @@ export default function ShelterCard({ shelter }: ShelterCardProps) {
   return (
     <Link
       href={ROUTES.SHELTER_DETAIL(shelter.id)}
-      className="group h-full flex flex-col rounded-2xl border border-stone-200/80 bg-white overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 hover:border-stone-300/80 transition-all duration-300 card-emerald"
+      className="group h-full flex flex-col rounded-2xl border border-border-primary/80 bg-surface-primary overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 hover:border-border-secondary/80 transition-all duration-300 card-emerald"
     >
       <div className="aspect-[16/9] bg-gradient-to-br from-teal-50 to-stone-100 relative overflow-hidden">
         {imageUrl ? (
@@ -36,7 +36,7 @@ export default function ShelterCard({ shelter }: ShelterCardProps) {
       </div>
       <div className="p-6 flex-1 flex flex-col">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-stone-800 group-hover:text-teal-700 transition-colors">{shelter.name}</h3>
+          <h3 className="font-semibold text-text-primary group-hover:text-teal-700 transition-colors">{shelter.name}</h3>
           {shelter.is_verified && (
             <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-medium shrink-0 ring-1 ring-emerald-200/60">
               <BadgeCheck className="h-3.5 w-3.5" />
@@ -44,12 +44,12 @@ export default function ShelterCard({ shelter }: ShelterCardProps) {
             </span>
           )}
         </div>
-        <div className="flex items-center gap-1 mt-2 text-sm text-stone-500">
-          <MapPin className="h-3.5 w-3.5 text-stone-400" />
+        <div className="flex items-center gap-1 mt-2 text-sm text-text-tertiary">
+          <MapPin className="h-3.5 w-3.5 text-text-quaternary" />
           {shelter.city}
         </div>
         {shelter.description && (
-          <p className="text-sm text-stone-400 mt-2 line-clamp-2 leading-relaxed">{shelter.description}</p>
+          <p className="text-sm text-text-quaternary mt-2 line-clamp-2 leading-relaxed">{shelter.description}</p>
         )}
       </div>
     </Link>

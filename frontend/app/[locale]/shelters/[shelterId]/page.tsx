@@ -32,7 +32,7 @@ export default function ShelterDetailPage() {
         <div className="h-4 animate-shimmer rounded w-1/2" />
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="rounded-xl border border-stone-200 p-4 h-20 animate-shimmer" />
+            <div key={i} className="rounded-xl border border-border-primary p-4 h-20 animate-shimmer" />
           ))}
         </div>
       </div>
@@ -60,41 +60,41 @@ export default function ShelterDetailPage() {
       )}
 
       <div className="mt-6">
-        <h1 className="text-3xl font-bold text-stone-800">{shelter.name}</h1>
+        <h1 className="text-3xl font-bold text-text-primary">{shelter.name}</h1>
         {shelter.city && (
-          <div className="flex items-center gap-1.5 mt-1 text-stone-500">
-            <MapPin className="h-4 w-4 text-stone-400" />
+          <div className="flex items-center gap-1.5 mt-1 text-text-tertiary">
+            <MapPin className="h-4 w-4 text-text-quaternary" />
             {shelter.city}
           </div>
         )}
         {shelter.description && (
-          <p className="mt-4 text-stone-600 leading-relaxed max-w-3xl">{shelter.description}</p>
+          <p className="mt-4 text-text-secondary leading-relaxed max-w-3xl">{shelter.description}</p>
         )}
 
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {shelter.phone && (
-            <div className="rounded-xl border border-stone-200 p-4 shadow-sm">
+            <div className="rounded-xl border border-border-primary p-4 shadow-sm">
               <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-stone-400" />
-                <p className="text-xs text-stone-500">{t('phone')}</p>
+                <Phone className="h-4 w-4 text-text-quaternary" />
+                <p className="text-xs text-text-tertiary">{t('phone')}</p>
               </div>
-              <p className="text-sm font-medium text-stone-700 mt-1.5">{shelter.phone}</p>
+              <p className="text-sm font-medium text-text-secondary mt-1.5">{shelter.phone}</p>
             </div>
           )}
           {shelter.email && (
-            <div className="rounded-xl border border-stone-200 p-4 shadow-sm">
+            <div className="rounded-xl border border-border-primary p-4 shadow-sm">
               <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-stone-400" />
-                <p className="text-xs text-stone-500">{t('email')}</p>
+                <Mail className="h-4 w-4 text-text-quaternary" />
+                <p className="text-xs text-text-tertiary">{t('email')}</p>
               </div>
-              <p className="text-sm font-medium text-stone-700 mt-1.5">{shelter.email}</p>
+              <p className="text-sm font-medium text-text-secondary mt-1.5">{shelter.email}</p>
             </div>
           )}
           {shelter.website && (
-            <div className="rounded-xl border border-stone-200 p-4 shadow-sm">
+            <div className="rounded-xl border border-border-primary p-4 shadow-sm">
               <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4 text-stone-400" />
-                <p className="text-xs text-stone-500">{t('website')}</p>
+                <Globe className="h-4 w-4 text-text-quaternary" />
+                <p className="text-xs text-text-tertiary">{t('website')}</p>
               </div>
               <a href={shelter.website} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-teal-600 mt-1.5 hover:underline block">
                 {shelter.website}
@@ -106,7 +106,7 @@ export default function ShelterDetailPage() {
         {/* Gallery */}
         {galleryUrls.length > 0 && (
           <div className="mt-10">
-            <h2 className="text-xl font-semibold text-stone-800 mb-4">{t('gallery')}</h2>
+            <h2 className="text-xl font-semibold text-text-primary mb-4">{t('gallery')}</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
               {galleryUrls.map((url, idx) => (
                 <button

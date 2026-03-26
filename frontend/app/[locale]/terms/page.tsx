@@ -20,16 +20,16 @@ export default function TermsPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">
-      <h1 className="text-3xl font-bold text-stone-800">{t('title')}</h1>
-      <p className="mt-2 text-sm text-stone-400">
+      <h1 className="text-3xl font-bold text-text-primary">{t('title')}</h1>
+      <p className="mt-2 text-sm text-text-quaternary">
         {t('lastUpdated')}: 2026-03-25
       </p>
 
       <div className="mt-10 space-y-8">
         {sections.map((section, idx) => (
           <div key={idx}>
-            <h2 className="text-lg font-semibold text-stone-800">{section.title}</h2>
-            <p className="mt-2 text-sm text-stone-600 leading-relaxed">{section.content}</p>
+            <h2 className="text-lg font-semibold text-text-primary">{section.title}</h2>
+            <p className="mt-2 text-sm text-text-secondary leading-relaxed">{section.content}</p>
           </div>
         ))}
       </div>

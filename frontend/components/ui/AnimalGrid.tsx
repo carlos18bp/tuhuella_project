@@ -20,11 +20,11 @@ export default function AnimalGrid({
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {Array.from({ length: skeletonCount }).map((_, i) => (
-          <div key={i} className="rounded-2xl border border-stone-200/60 bg-white overflow-hidden shadow-sm animate-pulse">
-            <div className="aspect-[4/3] bg-stone-100" />
+          <div key={i} className="rounded-2xl border border-border-primary/60 bg-surface-primary overflow-hidden shadow-sm animate-pulse">
+            <div className="aspect-[4/3] bg-surface-tertiary" />
             <div className="p-4 space-y-2">
-              <div className="h-4 bg-stone-100 rounded-lg w-2/3" />
-              <div className="h-3 bg-stone-100 rounded-lg w-1/2" />
+              <div className="h-4 bg-surface-tertiary rounded-lg w-2/3" />
+              <div className="h-3 bg-surface-tertiary rounded-lg w-1/2" />
             </div>
           </div>
         ))}
@@ -35,7 +35,7 @@ export default function AnimalGrid({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {animals.length === 0 ? (
-        <p className="text-stone-400 col-span-full">{emptyMessage}</p>
+        <p className="text-text-quaternary col-span-full">{emptyMessage}</p>
       ) : (
         animals.map((animal) => (
           <AnimalCard key={animal.id} animal={animal} />

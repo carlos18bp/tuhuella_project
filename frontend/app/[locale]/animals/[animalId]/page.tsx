@@ -70,15 +70,15 @@ export default function AnimalDetailPage() {
         <div>
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-[-0.02em] text-stone-800">{animal.name}</h1>
-              <p className="text-stone-500 mt-1">{animal.shelter_name} · {animal.shelter_city}</p>
+              <h1 className="text-3xl font-bold tracking-[-0.02em] text-text-primary">{animal.name}</h1>
+              <p className="text-text-tertiary mt-1">{animal.shelter_name} · {animal.shelter_city}</p>
             </div>
             {isAuthenticated && (
               <button
                 type="button"
                 onClick={() => toggleFavorite(animal.id)}
                 className={`p-2.5 rounded-full transition-all duration-200 shadow-sm ${
-                  isFavorited(animal.id) ? 'bg-red-50 text-red-500' : 'bg-stone-100 text-stone-400 hover:bg-stone-200'
+                  isFavorited(animal.id) ? 'bg-red-50 text-red-500' : 'bg-surface-tertiary text-text-quaternary hover:bg-surface-hover'
                 }`}
               >
                 <Heart className={`h-5 w-5 ${isFavorited(animal.id) ? 'fill-current' : ''}`} />
@@ -87,10 +87,10 @@ export default function AnimalDetailPage() {
           </div>
 
           <div className="mt-6 flex flex-wrap gap-2">
-            <span className="text-sm px-3 py-1 rounded-full bg-stone-100 text-stone-600 ring-1 ring-stone-200/60">{animal.breed}</span>
-            <span className="text-sm px-3 py-1 rounded-full bg-stone-100 text-stone-600 ring-1 ring-stone-200/60">{animal.age_range}</span>
-            <span className="text-sm px-3 py-1 rounded-full bg-stone-100 text-stone-600 ring-1 ring-stone-200/60">{animal.size}</span>
-            <span className="text-sm px-3 py-1 rounded-full bg-stone-100 text-stone-600 ring-1 ring-stone-200/60">
+            <span className="text-sm px-3 py-1 rounded-full bg-surface-tertiary text-text-secondary ring-1 ring-border-primary/60">{animal.breed}</span>
+            <span className="text-sm px-3 py-1 rounded-full bg-surface-tertiary text-text-secondary ring-1 ring-border-primary/60">{animal.age_range}</span>
+            <span className="text-sm px-3 py-1 rounded-full bg-surface-tertiary text-text-secondary ring-1 ring-border-primary/60">{animal.size}</span>
+            <span className="text-sm px-3 py-1 rounded-full bg-surface-tertiary text-text-secondary ring-1 ring-border-primary/60">
               {genderLabel}
             </span>
           </div>
@@ -105,7 +105,7 @@ export default function AnimalDetailPage() {
           </div>
 
           {animal.description && (
-            <p className="mt-6 text-stone-600 leading-relaxed">{animal.description}</p>
+            <p className="mt-6 text-text-secondary leading-relaxed">{animal.description}</p>
           )}
 
           {animal.special_needs && (
@@ -145,7 +145,7 @@ export default function AnimalDetailPage() {
 
       {/* FAQ section */}
       {adoptionFaqs.length > 0 && (
-        <div className="mt-16 border-t border-stone-200 pt-2">
+        <div className="mt-16 border-t border-border-primary pt-2">
           <FAQAccordion
             items={adoptionFaqs}
             title={tCommon('faq')}

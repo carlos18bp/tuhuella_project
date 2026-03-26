@@ -62,7 +62,7 @@ export default function ShelterDashboardPage() {
           <div className="h-4 animate-shimmer rounded w-1/2" />
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="rounded-2xl border border-stone-200 p-6 h-24 animate-shimmer" />
+              <div key={i} className="rounded-2xl border border-border-primary p-6 h-24 animate-shimmer" />
             ))}
           </div>
         </div>
@@ -73,8 +73,8 @@ export default function ShelterDashboardPage() {
   if (!shelter) {
     return (
       <div className="mx-auto max-w-[1400px] px-6 py-10 text-center py-20">
-        <h1 className="text-2xl font-bold text-stone-800">No tienes un refugio registrado</h1>
-        <p className="mt-2 text-stone-500">Registra tu refugio para comenzar a gestionar animales.</p>
+        <h1 className="text-2xl font-bold text-text-primary">No tienes un refugio registrado</h1>
+        <p className="mt-2 text-text-tertiary">Registra tu refugio para comenzar a gestionar animales.</p>
         <Link href={ROUTES.SHELTER_ONBOARDING}
           className="mt-6 inline-block bg-teal-600 text-white rounded-full px-6 py-2.5 text-sm font-medium hover:bg-teal-700 btn-base shadow-sm">
           Registrar refugio
@@ -124,9 +124,9 @@ export default function ShelterDashboardPage() {
             <LayoutDashboard className="h-5 w-5 text-teal-600" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-stone-800">{shelter.name}</h1>
-            <div className="flex items-center gap-1 mt-0.5 text-sm text-stone-500">
-              <MapPin className="h-3.5 w-3.5 text-stone-400" />
+            <h1 className="text-3xl font-bold text-text-primary">{shelter.name}</h1>
+            <div className="flex items-center gap-1 mt-0.5 text-sm text-text-tertiary">
+              <MapPin className="h-3.5 w-3.5 text-text-quaternary" />
               {shelter.city}
             </div>
           </div>
@@ -139,15 +139,15 @@ export default function ShelterDashboardPage() {
       {/* Metrics section */}
       {metrics && (
         <div className="mt-8">
-          <h2 className="text-sm font-semibold text-stone-500 uppercase tracking-wide mb-4">{t('shelterOverview')}</h2>
+          <h2 className="text-sm font-semibold text-text-tertiary uppercase tracking-wide mb-4">{t('shelterOverview')}</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {metricCards.map((card) => {
               const Icon = card.icon;
               return (
                 <div key={card.label} className={`rounded-2xl border p-4 ${card.color}`}>
                   <Icon className={`h-4 w-4 ${card.iconColor} mb-2`} />
-                  <p className="text-xl font-bold text-stone-800">{card.value}</p>
-                  <p className="text-xs text-stone-500 mt-0.5">{card.label}</p>
+                  <p className="text-xl font-bold text-text-primary">{card.value}</p>
+                  <p className="text-xs text-text-tertiary mt-0.5">{card.label}</p>
                 </div>
               );
             })}
@@ -158,12 +158,12 @@ export default function ShelterDashboardPage() {
       <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {navItems.map((item) => (
           <Link key={item.href} href={item.href}
-            className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
+            className="rounded-2xl border border-border-primary bg-surface-primary p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-stone-800 group-hover:text-teal-700 transition-colors">{item.label}</h3>
-              <ChevronRight className="h-4 w-4 text-stone-400 group-hover:text-teal-600 group-hover:translate-x-0.5 transition-all" />
+              <h3 className="font-semibold text-text-primary group-hover:text-teal-700 transition-colors">{item.label}</h3>
+              <ChevronRight className="h-4 w-4 text-text-quaternary group-hover:text-teal-600 group-hover:translate-x-0.5 transition-all" />
             </div>
-            <p className="text-sm text-stone-500 mt-1">{item.description}</p>
+            <p className="text-sm text-text-tertiary mt-1">{item.description}</p>
           </Link>
         ))}
       </div>

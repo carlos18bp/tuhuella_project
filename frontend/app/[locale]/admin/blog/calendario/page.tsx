@@ -73,19 +73,19 @@ export default function AdminBlogCalendarPage() {
   return (
     <div className="max-w-[1200px] mx-auto px-6 py-8">
       <div className="flex items-center gap-4 mb-8">
-        <Link href={ROUTES.ADMIN_BLOG} className="text-stone-400 hover:text-stone-600 transition-colors">
+        <Link href={ROUTES.ADMIN_BLOG} className="text-text-quaternary hover:text-text-secondary transition-colors">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
         </Link>
-        <h1 className="text-2xl font-bold text-stone-800">Calendario del Blog</h1>
+        <h1 className="text-2xl font-bold text-text-primary">Calendario del Blog</h1>
       </div>
 
       <div className="flex items-center justify-between mb-6">
-        <button type="button" onClick={prevMonth} className="px-3 py-2 rounded-lg border border-stone-200 text-sm hover:bg-stone-50 transition-colors">← Anterior</button>
-        <h2 className="text-lg font-semibold text-stone-800 capitalize">{formatMonth(year, month)}</h2>
-        <button type="button" onClick={nextMonth} className="px-3 py-2 rounded-lg border border-stone-200 text-sm hover:bg-stone-50 transition-colors">Siguiente →</button>
+        <button type="button" onClick={prevMonth} className="px-3 py-2 rounded-lg border border-border-primary text-sm hover:bg-surface-hover transition-colors">← Anterior</button>
+        <h2 className="text-lg font-semibold text-text-primary capitalize">{formatMonth(year, month)}</h2>
+        <button type="button" onClick={nextMonth} className="px-3 py-2 rounded-lg border border-border-primary text-sm hover:bg-surface-hover transition-colors">Siguiente →</button>
       </div>
 
-      <div className="flex items-center gap-4 mb-4 text-xs text-stone-500">
+      <div className="flex items-center gap-4 mb-4 text-xs text-text-tertiary">
         {Object.entries(STATUS_LABELS).map(([key, label]) => (
           <div key={key} className="flex items-center gap-1.5">
             <div className={`w-2.5 h-2.5 rounded-full ${STATUS_COLORS[key]}`} />
@@ -99,16 +99,16 @@ export default function AdminBlogCalendarPage() {
           <div className="w-6 h-6 border-2 border-teal-500/30 border-t-teal-500 rounded-full animate-spin" />
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
-          <div className="grid grid-cols-7 border-b border-stone-100">
+        <div className="bg-surface-primary rounded-xl border border-border-primary overflow-hidden">
+          <div className="grid grid-cols-7 border-b border-border-tertiary">
             {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map((day) => (
-              <div key={day} className="px-2 py-3 text-center text-xs font-medium text-stone-500 uppercase tracking-wider">{day}</div>
+              <div key={day} className="px-2 py-3 text-center text-xs font-medium text-text-tertiary uppercase tracking-wider">{day}</div>
             ))}
           </div>
 
           <div className="grid grid-cols-7">
             {Array.from({ length: firstDay }).map((_, i) => (
-              <div key={`empty-${i}`} className="min-h-[100px] border-b border-r border-stone-50 bg-stone-50/50" />
+              <div key={`empty-${i}`} className="min-h-[100px] border-b border-r border-border-tertiary bg-surface-secondary/50" />
             ))}
 
             {Array.from({ length: daysInMonth }).map((_, i) => {
@@ -118,8 +118,8 @@ export default function AdminBlogCalendarPage() {
               const isToday = dateStr === today;
 
               return (
-                <div key={day} className={`min-h-[100px] border-b border-r border-stone-50 p-2 ${isToday ? 'bg-teal-50/50' : ''}`}>
-                  <span className={`text-xs font-medium ${isToday ? 'text-teal-700 bg-teal-100 px-1.5 py-0.5 rounded-full' : 'text-stone-400'}`}>{day}</span>
+                <div key={day} className={`min-h-[100px] border-b border-r border-border-tertiary p-2 ${isToday ? 'bg-teal-50/50' : ''}`}>
+                  <span className={`text-xs font-medium ${isToday ? 'text-teal-700 bg-teal-100 px-1.5 py-0.5 rounded-full' : 'text-text-quaternary'}`}>{day}</span>
                   <div className="mt-1 space-y-1">
                     {dayPosts.map((post) => (
                       <Link

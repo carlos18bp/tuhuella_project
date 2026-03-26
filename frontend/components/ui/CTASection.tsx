@@ -23,8 +23,8 @@ export default function CTASection({
     <div className="mx-auto max-w-[1400px] px-6">
       <div className="flex items-end justify-between mb-8">
         <div>
-          <h2 className="text-2xl font-bold text-stone-800">{title}</h2>
-          {subtitle && <p className="mt-1 text-stone-500">{subtitle}</p>}
+          <h2 className="text-2xl font-bold text-text-primary">{title}</h2>
+          {subtitle && <p className="mt-1 text-text-tertiary">{subtitle}</p>}
         </div>
         <Link href={linkHref} className={`text-sm font-medium ${linkColor}`}>
           {linkLabel} &rarr;

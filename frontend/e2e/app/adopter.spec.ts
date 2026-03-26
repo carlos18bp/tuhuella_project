@@ -1,5 +1,5 @@
 import { test, expect } from '../test-with-coverage';
-import { waitForPageLoad } from '../fixtures';
+import { waitForPageLoad, loginAs, loginAndNavigate } from '../fixtures';
 import {
   FAVORITE_TOGGLE,
   FAVORITE_LIST,
@@ -8,6 +8,7 @@ import {
   ADOPTER_INTENT_CREATE,
   ADOPTER_INTENT_BROWSE,
   ADOPTER_PROFILE,
+  NOTIFICATION_PREFERENCES,
 } from '../helpers/flow-tags';
 
 test.describe('Adopter Pages — Protected Routes', () => {
@@ -53,6 +54,25 @@ test.describe('Adopter Pages — Public', () => {
     await waitForPageLoad(page);
 
     await expect(page).toHaveURL(/.*looking-to-adopt/);
+  });
+});
+
+test.describe.serial('Adopter Pages — Authenticated', () => {
+  test('should display notification preferences page', { tag: [...NOTIFICATION_PREFERENCES] }, async ({ page }) => {
+    await loginAndNavigate(page, 'adopter', '/my-profile/notifications');
+
+    // Verify the page loaded with the back link
+    await expect(page.getByRole('link', { name: /Volver a mi perfil/i })).toBeVisible();
+
+    // Verify heading
+    await expect(page.getByRole('heading', { name: /Preferencias de notificación/i })).toBeVisible();
+
+    // Verify toggle switches are visible (at least one per group)
+    const toggleButtons = page.locator('button[aria-label]');
+    await expect(toggleButtons.first()).toBeVisible({ timeout: 10_000 });
+
+    // Verify at least one event group heading is visible
+    await expect(page.getByText(/Adopción/i).first()).toBeVisible();
   });
 });
 

@@ -68,14 +68,14 @@ export default function AnimalesPage() {
         <button
           onClick={() => setPage(page - 1)}
           disabled={page <= 1}
-          className="p-2 rounded-lg border border-stone-200 text-stone-600 hover:bg-stone-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="p-2 rounded-lg border border-border-primary text-text-secondary hover:bg-surface-hover disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
         {start > 1 && (
           <>
-            <button onClick={() => setPage(1)} className="px-3 py-1.5 rounded-lg text-sm text-stone-600 hover:bg-stone-50 transition-colors">1</button>
-            {start > 2 && <span className="text-stone-400">...</span>}
+            <button onClick={() => setPage(1)} className="px-3 py-1.5 rounded-lg text-sm text-text-secondary hover:bg-surface-hover transition-colors">1</button>
+            {start > 2 && <span className="text-text-quaternary">...</span>}
           </>
         )}
         {pages.map((p) => (
@@ -85,7 +85,7 @@ export default function AnimalesPage() {
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               p === page
                 ? 'bg-teal-600 text-white'
-                : 'text-stone-600 hover:bg-stone-50'
+                : 'text-text-secondary hover:bg-surface-hover'
             }`}
           >
             {p}
@@ -93,14 +93,14 @@ export default function AnimalesPage() {
         ))}
         {end < totalPages && (
           <>
-            {end < totalPages - 1 && <span className="text-stone-400">...</span>}
-            <button onClick={() => setPage(totalPages)} className="px-3 py-1.5 rounded-lg text-sm text-stone-600 hover:bg-stone-50 transition-colors">{totalPages}</button>
+            {end < totalPages - 1 && <span className="text-text-quaternary">...</span>}
+            <button onClick={() => setPage(totalPages)} className="px-3 py-1.5 rounded-lg text-sm text-text-secondary hover:bg-surface-hover transition-colors">{totalPages}</button>
           </>
         )}
         <button
           onClick={() => setPage(page + 1)}
           disabled={page >= totalPages}
-          className="p-2 rounded-lg border border-stone-200 text-stone-600 hover:bg-stone-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="p-2 rounded-lg border border-border-primary text-text-secondary hover:bg-surface-hover disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
           <ChevronRight className="h-4 w-4" />
         </button>
@@ -110,11 +110,11 @@ export default function AnimalesPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <h1 className="text-3xl font-bold text-stone-800 heading-decorated">{t('title')}</h1>
-      <p className="mt-2 text-stone-500">{t('subtitle')}</p>
+      <h1 className="text-3xl font-bold text-text-primary heading-decorated">{t('title')}</h1>
+      <p className="mt-2 text-text-tertiary">{t('subtitle')}</p>
 
       {/* Filters */}
-      <div className="mt-8 flex flex-wrap gap-3 rounded-2xl bg-stone-50/80 border border-stone-200/60 p-4">
+      <div className="mt-8 flex flex-wrap gap-3 rounded-2xl bg-surface-secondary/80 border border-border-primary/60 p-4">
         <MultiSelectDropdown
           label={t('speciesFilter')}
           options={speciesOptions}
@@ -139,7 +139,7 @@ export default function AnimalesPage() {
       {loading ? (
         <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="rounded-2xl border border-stone-200 bg-white overflow-hidden">
+            <div key={i} className="rounded-2xl border border-border-primary bg-surface-primary overflow-hidden">
               <div className="aspect-[4/3] animate-shimmer" />
               <div className="p-4 space-y-2">
                 <div className="h-4 animate-shimmer rounded w-2/3" />

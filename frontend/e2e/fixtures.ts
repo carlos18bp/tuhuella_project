@@ -52,7 +52,53 @@ export async function waitForPageLoad(page: any) {
  * Wait for API response
  */
 export async function waitForApiResponse(page: any, url: string) {
-  return page.waitForResponse((response: any) => 
+  return page.waitForResponse((response: any) =>
     response.url().includes(url) && response.status() === 200
   );
+}
+
+/**
+ * Login as a specific role (adopter, shelter_admin, or admin).
+ * Disables reCAPTCHA and performs full browser login flow.
+ */
+export async function loginAs(page: any, role: 'adopter' | 'shelter_admin' | 'admin') {
+  const users = { adopter: testAdopter, shelter_admin: testShelterAdmin, admin: testPlatformAdmin };
+  const user = users[role];
+  await page.route('**/google-captcha/site-key/**', (route: any) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ site_key: '' }) }),
+  );
+  await page.goto('/sign-in');
+  await waitForPageLoad(page);
+  await page.getByLabel(/correo/i).fill(user.email);
+  await page.getByLabel(/contraseña/i).fill(user.password);
+  await page.getByRole('button', { name: /iniciar sesión/i }).click();
+  await page.waitForURL((url: URL) => !url.pathname.includes('sign-in'), { timeout: 10_000 });
+  await page.waitForLoadState('domcontentloaded');
+}
+
+/**
+ * Login via API and set auth cookies directly, then navigate to target page.
+ * This avoids the useRequireAuth race condition that occurs with full page reloads.
+ * Use this for pages that use useRequireAuth (shelter panel, adoption, checkout, etc.)
+ */
+export async function loginAndNavigate(page: any, role: 'adopter' | 'shelter_admin' | 'admin', targetUrl: string) {
+  const users = { adopter: testAdopter, shelter_admin: testShelterAdmin, admin: testPlatformAdmin };
+  const user = users[role];
+
+  // Call login API directly to get tokens
+  const response = await page.request.post('http://localhost:8000/api/auth/sign_in/', {
+    data: { email: user.email, password: user.password },
+  });
+  const data = await response.json();
+
+  // Set auth cookies in the browser context
+  await page.context().addCookies([
+    { name: 'access_token', value: data.access, domain: 'localhost', path: '/' },
+    { name: 'refresh_token', value: data.refresh, domain: 'localhost', path: '/' },
+  ]);
+
+  // Navigate with commit-level wait (avoids ERR_ABORTED from useRequireAuth redirect race)
+  await page.goto(targetUrl, { waitUntil: 'commit' });
+  // Wait for page to stabilize — may have initial redirect then settle
+  await page.waitForLoadState('domcontentloaded', { timeout: 15_000 });
 }

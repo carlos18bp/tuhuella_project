@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #FAFAF9;
   --foreground: #292524;
@@ -41,6 +43,26 @@
   --emerald-500: #10B981;
   --emerald-600: #059669;
 
+  /* ── Semantic surface tokens ── */
+  --surface-primary: #FFFFFF;
+  --surface-secondary: var(--stone-50);
+  --surface-tertiary: var(--stone-100);
+  --surface-elevated: #FFFFFF;
+  --surface-hover: var(--stone-100);
+  --surface-active: var(--stone-200);
+
+  /* ── Semantic text tokens ── */
+  --text-primary: var(--stone-800);
+  --text-secondary: var(--stone-600);
+  --text-tertiary: var(--stone-500);
+  --text-quaternary: var(--stone-400);
+  --text-inverted: #FFFFFF;
+
+  /* ── Semantic border tokens ── */
+  --border-primary: var(--stone-200);
+  --border-secondary: var(--stone-300);
+  --border-tertiary: var(--stone-100);
+
   /* Shadow system */
   --shadow-xs: 0 1px 2px 0 rgb(28 25 23 / 0.03);
   --shadow-sm: 0 1px 3px 0 rgb(28 25 23 / 0.04), 0 1px 2px -1px rgb(28 25 23 / 0.03);
@@ -56,6 +78,53 @@
   /* Transition tokens */
   --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-bounce: 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── Dark mode overrides ── */
+.dark {
+  --background: #1C1917;
+  --foreground: #FAFAF9;
+
+  /* Accent -50 shades → dark equivalents */
+  --teal-50: #042f2e;
+  --amber-50: #451a03;
+  --emerald-50: #022c22;
+
+  /* Semantic surfaces */
+  --surface-primary: #292524;
+  --surface-secondary: #1C1917;
+  --surface-tertiary: #292524;
+  --surface-elevated: #44403C;
+  --surface-hover: #44403C;
+  --surface-active: #57534E;
+
+  /* Semantic text */
+  --text-primary: #FAFAF9;
+  --text-secondary: #D6D3D1;
+  --text-tertiary: #A8A29E;
+  --text-quaternary: #78716C;
+  --text-inverted: #1C1917;
+
+  /* Semantic borders */
+  --border-primary: #44403C;
+  --border-secondary: #57534E;
+  --border-tertiary: #292524;
+
+  /* Shadows — more opacity for dark mode */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.1);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.15), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.2), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.25), 0 4px 6px -4px rgb(0 0 0 / 0.15);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.3), 0 8px 10px -6px rgb(0 0 0 / 0.15);
+
+  /* Colored glows — slightly more visible on dark */
+  --shadow-teal-glow: 0 4px 14px -3px rgb(13 148 136 / 0.25), 0 2px 4px -2px rgb(13 148 136 / 0.15);
+  --shadow-amber-glow: 0 4px 14px -3px rgb(217 119 6 / 0.25), 0 2px 4px -2px rgb(217 119 6 / 0.15);
+  --shadow-emerald-glow: 0 4px 14px -3px rgb(5 150 105 / 0.25), 0 2px 4px -2px rgb(5 150 105 / 0.15);
+}
+
+html.dark {
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -94,6 +163,24 @@
   --color-emerald-400: var(--emerald-400);
   --color-emerald-500: var(--emerald-500);
   --color-emerald-600: var(--emerald-600);
+
+  /* ── Semantic tokens for Tailwind ── */
+  --color-surface-primary: var(--surface-primary);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-surface-tertiary: var(--surface-tertiary);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-active: var(--surface-active);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-quaternary: var(--text-quaternary);
+  --color-text-inverted: var(--text-inverted);
+
+  --color-border-primary: var(--border-primary);
+  --color-border-secondary: var(--border-secondary);
+  --color-border-tertiary: var(--border-tertiary);
 
   --font-sans: var(--font-inter);
 }
@@ -197,7 +284,7 @@ textarea:focus-visible {
 }
 
 .animate-shimmer {
-  background: linear-gradient(110deg, var(--stone-100) 30%, var(--stone-50) 48%, var(--stone-100) 66%);
+  background: linear-gradient(110deg, var(--surface-tertiary) 30%, var(--surface-secondary) 48%, var(--surface-tertiary) 66%);
   background-size: 300% 100%;
   animation: shimmer 1.8s ease-in-out infinite;
 }
@@ -222,8 +309,8 @@ textarea:focus-visible {
 
 .card-base {
   border-radius: 1rem;
-  border: 1px solid var(--stone-200);
-  background: white;
+  border: 1px solid var(--border-primary);
+  background: var(--surface-primary);
   box-shadow: var(--shadow-sm);
   transition: box-shadow var(--transition-base),
               transform var(--transition-base),
@@ -233,7 +320,7 @@ textarea:focus-visible {
 .card-base:hover {
   box-shadow: var(--shadow-lg);
   transform: translateY(-2px);
-  border-color: var(--stone-300);
+  border-color: var(--border-secondary);
 }
 
 .card-teal:hover {
@@ -308,17 +395,17 @@ button,
   padding: 0.625rem 1.5rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--stone-700);
-  background: white;
-  border: 1px solid var(--stone-300);
+  color: var(--text-secondary);
+  background: var(--surface-primary);
+  border: 1px solid var(--border-secondary);
   box-shadow: var(--shadow-xs);
   transition: all var(--transition-base);
   cursor: pointer;
 }
 
 .btn-secondary:hover {
-  background: var(--stone-50);
-  border-color: var(--stone-400);
+  background: var(--surface-hover);
+  border-color: var(--border-secondary);
   box-shadow: var(--shadow-sm);
   transform: translateY(-1px);
 }
@@ -364,22 +451,22 @@ button,
 .input-base {
   width: 100%;
   border-radius: 0.75rem;
-  border: 1px solid var(--stone-200);
+  border: 1px solid var(--border-primary);
   padding: 0.625rem 0.875rem;
   font-size: 0.875rem;
-  color: var(--stone-800);
-  background: white;
+  color: var(--text-primary);
+  background: var(--surface-primary);
   box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.04);
   transition: all var(--transition-base);
   outline: none;
 }
 
 .input-base::placeholder {
-  color: var(--stone-400);
+  color: var(--text-quaternary);
 }
 
 .input-base:hover {
-  border-color: var(--stone-300);
+  border-color: var(--border-secondary);
 }
 
 .input-base:focus {
@@ -397,7 +484,7 @@ button,
 .section-heading {
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--stone-800);
+  color: var(--text-primary);
   letter-spacing: -0.025em;
   line-height: 1.2;
 }
@@ -405,7 +492,7 @@ button,
 .section-subheading {
   margin-top: 0.5rem;
   font-size: 1rem;
-  color: var(--stone-500);
+  color: var(--text-tertiary);
   line-height: 1.6;
 }
 
@@ -451,7 +538,7 @@ button,
   inset-inline: 0;
   top: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--stone-200), transparent);
+  background: linear-gradient(90deg, transparent, var(--border-primary), transparent);
 }
 
 /* ─── Progress bar shine ─── */
@@ -502,15 +589,15 @@ button,
 .swiper-button-prev {
   width: 40px !important;
   height: 40px !important;
-  background: white !important;
+  background: var(--surface-primary) !important;
   border-radius: 50% !important;
   box-shadow: var(--shadow-md) !important;
-  color: var(--stone-700) !important;
+  color: var(--text-secondary) !important;
   transition: box-shadow 0.2s ease, background-color 0.2s ease, transform 0.2s ease !important;
 }
 .swiper-button-next:hover,
 .swiper-button-prev:hover {
-  background: var(--stone-50) !important;
+  background: var(--surface-hover) !important;
   box-shadow: var(--shadow-lg) !important;
   transform: scale(1.05) !important;
 }

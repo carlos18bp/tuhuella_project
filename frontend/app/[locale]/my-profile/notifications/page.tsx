@@ -64,20 +64,20 @@ export default function NotificationPreferencesPage() {
           <Bell className="h-5 w-5 text-teal-600" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-stone-800">{t('preferencesTitle')}</h1>
-          <p className="text-sm text-stone-500">{t('preferencesSubtitle')}</p>
+          <h1 className="text-2xl font-bold text-text-primary">{t('preferencesTitle')}</h1>
+          <p className="text-sm text-text-tertiary">{t('preferencesSubtitle')}</p>
         </div>
       </div>
 
       <div className="space-y-8">
         {EVENT_GROUPS.map((group) => (
           <div key={group.titleKey}>
-            <h2 className="text-sm font-semibold text-stone-500 uppercase tracking-wide mb-3">
+            <h2 className="text-sm font-semibold text-text-tertiary uppercase tracking-wide mb-3">
               {t(group.titleKey)}
             </h2>
-            <div className="rounded-2xl border border-stone-200 bg-white overflow-hidden divide-y divide-stone-100">
+            <div className="rounded-2xl border border-border-primary bg-surface-primary overflow-hidden divide-y divide-border-tertiary">
               {/* Header row */}
-              <div className="grid grid-cols-[1fr_80px_80px] px-5 py-3 bg-stone-50 text-xs font-medium text-stone-400 uppercase">
+              <div className="grid grid-cols-[1fr_80px_80px] px-5 py-3 bg-surface-secondary text-xs font-medium text-text-quaternary uppercase">
                 <span>{t('event')}</span>
                 {CHANNELS.map((ch) => (
                   <span key={ch} className="text-center">{t(`channel_${ch}`)}</span>
@@ -85,7 +85,7 @@ export default function NotificationPreferencesPage() {
               </div>
               {group.events.map((eventKey) => (
                 <div key={eventKey} className="grid grid-cols-[1fr_80px_80px] px-5 py-3 items-center">
-                  <span className="text-sm text-stone-700">{t(`events.${eventKey}`)}</span>
+                  <span className="text-sm text-text-secondary">{t(`events.${eventKey}`)}</span>
                   {CHANNELS.map((ch) => {
                     const pref = getPref(eventKey, ch);
                     return (
@@ -98,7 +98,7 @@ export default function NotificationPreferencesPage() {
                           }`}
                           aria-label={`${t(`events.${eventKey}`)} ${t(`channel_${ch}`)}`}
                         >
-                          <span className={`block w-4 h-4 bg-white rounded-full shadow-sm absolute top-0.5 transition-transform ${
+                          <span className={`block w-4 h-4 bg-surface-primary rounded-full shadow-sm absolute top-0.5 transition-transform ${
                             pref?.enabled ? 'translate-x-5' : 'translate-x-0.5'
                           }`} />
                         </button>

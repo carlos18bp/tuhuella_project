@@ -36,7 +36,7 @@ export default function Sidebar({ title, items, accentColor = 'teal' }: SidebarP
           className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors border-l-2 ${
             isActive(item.href)
               ? accent.active
-              : `border-transparent text-stone-600 ${accent.hover}`
+              : `border-transparent text-text-secondary ${accent.hover}`
           }`}
           aria-current={isActive(item.href) ? 'page' : undefined}
         >
@@ -68,7 +68,7 @@ export default function Sidebar({ title, items, accentColor = 'teal' }: SidebarP
           {title}
         </button>
         {mobileOpen && (
-          <div className="mt-2 rounded-2xl border border-stone-200 bg-white p-3 shadow-lg">
+          <div className="mt-2 rounded-2xl border border-border-primary bg-surface-primary p-3 shadow-lg">
             {navContent}
           </div>
         )}
@@ -76,8 +76,8 @@ export default function Sidebar({ title, items, accentColor = 'teal' }: SidebarP
 
       {/* Desktop sidebar */}
       <aside className="hidden lg:block w-64 flex-shrink-0">
-        <div className="sticky top-24 rounded-2xl border border-stone-200 bg-white p-4">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-stone-400 px-4 mb-3">
+        <div className="sticky top-24 rounded-2xl border border-border-primary bg-surface-primary p-4">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-text-quaternary px-4 mb-3">
             {title}
           </h2>
           {navContent}

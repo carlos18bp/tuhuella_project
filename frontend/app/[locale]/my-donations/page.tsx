@@ -21,15 +21,15 @@ export default function MisDonacionesPage() {
           <HandCoins className="h-5 w-5 text-amber-600" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-stone-800">Mis Donaciones</h1>
-          <p className="text-sm text-stone-500">Historial de tus contribuciones</p>
+          <h1 className="text-3xl font-bold text-text-primary">Mis Donaciones</h1>
+          <p className="text-sm text-text-tertiary">Historial de tus contribuciones</p>
         </div>
       </div>
 
       {loading ? (
         <div className="mt-8 space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="rounded-xl border border-stone-200 p-5">
+            <div key={i} className="rounded-xl border border-border-primary p-5">
               <div className="h-5 animate-shimmer rounded w-1/3" />
               <div className="h-3 animate-shimmer rounded w-1/4 mt-2" />
             </div>
@@ -38,29 +38,29 @@ export default function MisDonacionesPage() {
       ) : donations.length === 0 ? (
         <div className="mt-10 text-center py-12">
           <HandCoins className="h-12 w-12 text-stone-300 mx-auto" />
-          <p className="mt-3 text-stone-400">No tienes donaciones registradas.</p>
+          <p className="mt-3 text-text-quaternary">No tienes donaciones registradas.</p>
         </div>
       ) : (
         <div className="mt-8 space-y-4">
           {donations.map((donation) => (
-            <div key={donation.id} className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
+            <div key={donation.id} className="rounded-xl border border-border-primary bg-surface-primary p-5 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-semibold text-stone-800">${Number(donation.amount).toLocaleString()}</p>
+                  <p className="font-semibold text-text-primary">${Number(donation.amount).toLocaleString()}</p>
                   {donation.campaign_title && (
                     <p className="text-sm text-amber-600 mt-0.5">{donation.campaign_title}</p>
                   )}
                   {donation.shelter_name && (
-                    <p className="text-sm text-stone-500 mt-0.5">{donation.shelter_name}</p>
+                    <p className="text-sm text-text-tertiary mt-0.5">{donation.shelter_name}</p>
                   )}
                 </div>
                 <span className={`text-xs px-2 py-0.5 rounded-full ${
-                  donation.status === 'paid' ? 'bg-emerald-50 text-emerald-700' : 'bg-stone-100 text-stone-600'
+                  donation.status === 'paid' ? 'bg-emerald-50 text-emerald-700' : 'bg-surface-tertiary text-text-secondary'
                 }`}>
                   {donation.status === 'paid' ? 'Pagada' : donation.status}
                 </span>
               </div>
-              <p className="text-xs text-stone-400 mt-2">{new Date(donation.created_at).toLocaleDateString('es')}</p>
+              <p className="text-xs text-text-quaternary mt-2">{new Date(donation.created_at).toLocaleDateString('es')}</p>
             </div>
           ))}
         </div>

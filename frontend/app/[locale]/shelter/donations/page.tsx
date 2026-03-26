@@ -21,7 +21,7 @@ export default function ShelterDonacionesPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <h1 className="text-3xl font-bold text-stone-800">Donaciones Recibidas</h1>
+      <h1 className="text-3xl font-bold text-text-primary">Donaciones Recibidas</h1>
 
       {!loading && donations.length > 0 && (
         <div className="mt-4 inline-block rounded-xl bg-amber-50 border border-amber-200 px-4 py-2">
@@ -34,35 +34,35 @@ export default function ShelterDonacionesPage() {
       {loading ? (
         <div className="mt-8 space-y-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="rounded-xl border border-stone-200 p-5 animate-pulse">
-              <div className="h-5 bg-stone-100 rounded w-1/3" />
+            <div key={i} className="rounded-xl border border-border-primary p-5 animate-pulse">
+              <div className="h-5 bg-surface-tertiary rounded w-1/3" />
             </div>
           ))}
         </div>
       ) : donations.length === 0 ? (
-        <p className="mt-8 text-stone-400">No has recibido donaciones aún.</p>
+        <p className="mt-8 text-text-quaternary">No has recibido donaciones aún.</p>
       ) : (
         <div className="mt-8 space-y-4">
           {donations.map((donation) => (
-            <div key={donation.id} className="rounded-xl border border-stone-200 bg-white p-5">
+            <div key={donation.id} className="rounded-xl border border-border-primary bg-surface-primary p-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-semibold text-stone-800">${Number(donation.amount).toLocaleString()}</p>
-                  <p className="text-sm text-stone-500 mt-0.5">{donation.user_email}</p>
+                  <p className="font-semibold text-text-primary">${Number(donation.amount).toLocaleString()}</p>
+                  <p className="text-sm text-text-tertiary mt-0.5">{donation.user_email}</p>
                   {donation.campaign_title && (
                     <p className="text-xs text-amber-600 mt-0.5">Campaña: {donation.campaign_title}</p>
                   )}
                   {donation.message && (
-                    <p className="text-sm text-stone-600 mt-2 bg-stone-50 rounded-lg p-2">&ldquo;{donation.message}&rdquo;</p>
+                    <p className="text-sm text-text-secondary mt-2 bg-surface-secondary rounded-lg p-2">&ldquo;{donation.message}&rdquo;</p>
                   )}
                 </div>
                 <div className="text-right">
                   <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    donation.status === 'paid' ? 'bg-emerald-50 text-emerald-700' : 'bg-stone-100 text-stone-600'
+                    donation.status === 'paid' ? 'bg-emerald-50 text-emerald-700' : 'bg-surface-tertiary text-text-secondary'
                   }`}>
                     {donation.status === 'paid' ? 'Pagada' : donation.status}
                   </span>
-                  <p className="text-xs text-stone-400 mt-1">{new Date(donation.created_at).toLocaleDateString('es')}</p>
+                  <p className="text-xs text-text-quaternary mt-1">{new Date(donation.created_at).toLocaleDateString('es')}</p>
                 </div>
               </div>
             </div>

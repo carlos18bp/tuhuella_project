@@ -51,37 +51,37 @@ export default function WorkWithUsPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <h1 className="text-3xl font-bold text-stone-800 heading-decorated">{t('title')}</h1>
-      <p className="mt-2 text-stone-500 max-w-2xl">{t('subtitle')}</p>
+      <h1 className="text-3xl font-bold text-text-primary heading-decorated">{t('title')}</h1>
+      <p className="mt-2 text-text-tertiary max-w-2xl">{t('subtitle')}</p>
 
       {/* Volunteer Positions */}
       <div className="mt-12">
-        <h2 className="text-xl font-semibold text-stone-800">{t('positionsTitle')}</h2>
-        <p className="text-sm text-stone-500 mt-1">{t('positionsSubtitle')}</p>
+        <h2 className="text-xl font-semibold text-text-primary">{t('positionsTitle')}</h2>
+        <p className="text-sm text-text-tertiary mt-1">{t('positionsSubtitle')}</p>
 
         {loading ? (
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="rounded-2xl border border-stone-200 p-6 h-48 animate-shimmer" />
+              <div key={i} className="rounded-2xl border border-border-primary p-6 h-48 animate-shimmer" />
             ))}
           </div>
         ) : positions.length === 0 ? (
-          <p className="mt-6 text-stone-500">{t('noPositions')}</p>
+          <p className="mt-6 text-text-tertiary">{t('noPositions')}</p>
         ) : (
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {positions.map((pos) => {
               const Icon = categoryIcons[pos.category] || Heart;
               return (
-                <div key={pos.id} className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div key={pos.id} className="rounded-2xl border border-border-primary bg-surface-primary p-6 shadow-sm hover:shadow-md transition-shadow">
                   <div className="h-10 w-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
                     <Icon className="h-5 w-5" />
                   </div>
-                  <h3 className="mt-3 font-semibold text-stone-800">{pos.title}</h3>
-                  <p className="mt-2 text-sm text-stone-500 line-clamp-3">{pos.description}</p>
+                  <h3 className="mt-3 font-semibold text-text-primary">{pos.title}</h3>
+                  <p className="mt-2 text-sm text-text-tertiary line-clamp-3">{pos.description}</p>
                   {pos.requirements && (
                     <div className="mt-3">
-                      <p className="text-xs font-medium text-stone-600">{t('requirements')}:</p>
-                      <p className="text-xs text-stone-400 mt-0.5 line-clamp-2">{pos.requirements}</p>
+                      <p className="text-xs font-medium text-text-secondary">{t('requirements')}:</p>
+                      <p className="text-xs text-text-quaternary mt-0.5 line-clamp-2">{pos.requirements}</p>
                     </div>
                   )}
                 </div>
@@ -93,11 +93,11 @@ export default function WorkWithUsPage() {
 
       {/* Strategic Allies Teaser */}
       {allies.length > 0 && (
-        <div className="mt-16 border-t border-stone-200 pt-10">
+        <div className="mt-16 border-t border-border-primary pt-10">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-xl font-semibold text-stone-800">{t('alliesTitle')}</h2>
-              <p className="text-sm text-stone-500 mt-1">{t('alliesSubtitle')}</p>
+              <h2 className="text-xl font-semibold text-text-primary">{t('alliesTitle')}</h2>
+              <p className="text-sm text-text-tertiary mt-1">{t('alliesSubtitle')}</p>
             </div>
             <Link
               href={ROUTES.STRATEGIC_ALLIES}
@@ -109,18 +109,18 @@ export default function WorkWithUsPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {allies.map((ally) => (
-              <div key={ally.id} className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm flex items-center gap-4">
+              <div key={ally.id} className="rounded-2xl border border-border-primary bg-surface-primary p-5 shadow-sm flex items-center gap-4">
                 {ally.logo_url ? (
                   <img src={ally.logo_url} alt={ally.name} className="h-12 w-12 rounded-lg object-cover flex-shrink-0" />
                 ) : (
-                  <div className="h-12 w-12 rounded-lg bg-stone-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-lg font-bold text-stone-400">{ally.name[0]}</span>
+                  <div className="h-12 w-12 rounded-lg bg-surface-tertiary flex items-center justify-center flex-shrink-0">
+                    <span className="text-lg font-bold text-text-quaternary">{ally.name[0]}</span>
                   </div>
                 )}
                 <div className="min-w-0">
-                  <h3 className="font-semibold text-stone-800 truncate">{ally.name}</h3>
+                  <h3 className="font-semibold text-text-primary truncate">{ally.name}</h3>
                   {ally.description && (
-                    <p className="text-xs text-stone-500 line-clamp-1">{ally.description}</p>
+                    <p className="text-xs text-text-tertiary line-clamp-1">{ally.description}</p>
                   )}
                 </div>
               </div>

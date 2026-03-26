@@ -39,10 +39,10 @@ function PostCard({ post }: { post: BlogPost }) {
   return (
     <Link
       href={ROUTES.BLOG_DETAIL(post.slug)}
-      className="group bg-white rounded-2xl border border-stone-200/60 overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col"
+      className="group bg-surface-primary rounded-2xl border border-border-primary/60 overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col"
     >
       {post.cover_image && (
-        <div className="relative aspect-[16/10] overflow-hidden bg-stone-100">
+        <div className="relative aspect-[16/10] overflow-hidden bg-surface-tertiary">
           <img
             src={post.cover_image}
             alt={post.title}
@@ -57,13 +57,13 @@ function PostCard({ post }: { post: BlogPost }) {
             {CATEGORIES.find((c) => c.slug === post.category)?.label || post.category}
           </span>
         )}
-        <h3 className="text-lg font-semibold text-stone-800 mb-2 group-hover:text-teal-700 transition-colors line-clamp-2">
+        <h3 className="text-lg font-semibold text-text-primary mb-2 group-hover:text-teal-700 transition-colors line-clamp-2">
           {post.title}
         </h3>
-        <p className="text-sm text-stone-500 leading-relaxed mb-4 line-clamp-2 flex-1">
+        <p className="text-sm text-text-tertiary leading-relaxed mb-4 line-clamp-2 flex-1">
           {post.excerpt}
         </p>
-        <div className="flex items-center justify-between text-xs text-stone-400">
+        <div className="flex items-center justify-between text-xs text-text-quaternary">
           <span>{author.name}</span>
           <div className="flex items-center gap-3">
             {post.read_time_minutes > 0 && <span>{post.read_time_minutes} min</span>}
@@ -80,10 +80,10 @@ function FeaturedPost({ post }: { post: BlogPost }) {
   return (
     <Link
       href={ROUTES.BLOG_DETAIL(post.slug)}
-      className="group relative bg-white rounded-2xl border border-stone-200/60 overflow-hidden hover:shadow-xl transition-all duration-300 grid md:grid-cols-2 gap-0"
+      className="group relative bg-surface-primary rounded-2xl border border-border-primary/60 overflow-hidden hover:shadow-xl transition-all duration-300 grid md:grid-cols-2 gap-0"
     >
       {post.cover_image && (
-        <div className="relative aspect-[16/10] md:aspect-auto overflow-hidden bg-stone-100">
+        <div className="relative aspect-[16/10] md:aspect-auto overflow-hidden bg-surface-tertiary">
           <img
             src={post.cover_image}
             alt={post.title}
@@ -96,11 +96,11 @@ function FeaturedPost({ post }: { post: BlogPost }) {
         <span className="text-xs font-medium text-teal-600 uppercase tracking-wider mb-3">
           ⭐ Destacado · {CATEGORIES.find((c) => c.slug === post.category)?.label || post.category}
         </span>
-        <h2 className="text-2xl md:text-3xl font-bold text-stone-800 mb-3 group-hover:text-teal-700 transition-colors">
+        <h2 className="text-2xl md:text-3xl font-bold text-text-primary mb-3 group-hover:text-teal-700 transition-colors">
           {post.title}
         </h2>
-        <p className="text-stone-500 leading-relaxed mb-6">{post.excerpt}</p>
-        <div className="flex items-center gap-4 text-sm text-stone-400">
+        <p className="text-text-tertiary leading-relaxed mb-6">{post.excerpt}</p>
+        <div className="flex items-center gap-4 text-sm text-text-quaternary">
           <span>{author.name}</span>
           {post.read_time_minutes > 0 && <span>{post.read_time_minutes} min de lectura</span>}
           <span>{formatDate(post.published_at)}</span>
@@ -138,14 +138,14 @@ export default function BlogListingPage() {
   });
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-surface-secondary">
       {/* Hero */}
       <section className="bg-gradient-to-b from-teal-50 to-stone-50 pt-16 pb-12">
         <div className="mx-auto max-w-[1200px] px-6 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-stone-800 mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-4">
             Blog Mi Huella
           </h1>
-          <p className="text-lg text-stone-500 max-w-2xl mx-auto">
+          <p className="text-lg text-text-tertiary max-w-2xl mx-auto">
             Artículos sobre adopción, cuidado animal, historias inspiradoras y mucho más.
           </p>
         </div>
@@ -155,7 +155,7 @@ export default function BlogListingPage() {
         {/* Filters */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8">
           <div className="relative flex-1 max-w-md">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-quaternary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
@@ -163,7 +163,7 @@ export default function BlogListingPage() {
               placeholder="Buscar artículos..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all bg-white"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border-primary text-sm focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all bg-surface-primary"
             />
           </div>
           <div className="flex flex-wrap gap-2">
@@ -175,7 +175,7 @@ export default function BlogListingPage() {
                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                   selectedCategory === cat.slug
                     ? 'bg-teal-600 text-white'
-                    : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-100'
+                    : 'bg-surface-primary border border-border-primary text-text-secondary hover:bg-surface-hover'
                 }`}
               >
                 {cat.label}
@@ -211,7 +211,7 @@ export default function BlogListingPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-16 text-stone-400">
+              <div className="text-center py-16 text-text-quaternary">
                 No se encontraron artículos.
               </div>
             )}
@@ -222,18 +222,18 @@ export default function BlogListingPage() {
                   type="button"
                   disabled={pagination.page <= 1}
                   onClick={() => loadPosts(pagination.page - 1)}
-                  className="px-4 py-2 rounded-lg text-sm font-medium border border-stone-200 hover:bg-stone-100 disabled:opacity-40 transition-colors"
+                  className="px-4 py-2 rounded-lg text-sm font-medium border border-border-primary hover:bg-surface-hover disabled:opacity-40 transition-colors"
                 >
                   ← Anterior
                 </button>
-                <span className="text-sm text-stone-500 px-3">
+                <span className="text-sm text-text-tertiary px-3">
                   Página {pagination.page} de {pagination.totalPages}
                 </span>
                 <button
                   type="button"
                   disabled={pagination.page >= pagination.totalPages}
                   onClick={() => loadPosts(pagination.page + 1)}
-                  className="px-4 py-2 rounded-lg text-sm font-medium border border-stone-200 hover:bg-stone-100 disabled:opacity-40 transition-colors"
+                  className="px-4 py-2 rounded-lg text-sm font-medium border border-border-primary hover:bg-surface-hover disabled:opacity-40 transition-colors"
                 >
                   Siguiente →
                 </button>

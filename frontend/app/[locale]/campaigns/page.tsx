@@ -24,17 +24,17 @@ export default function CampanasPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <h1 className="text-3xl font-bold text-stone-800 heading-decorated-amber">{t('title')}</h1>
-      <p className="mt-2 text-stone-500">{t('subtitle')}</p>
+      <h1 className="text-3xl font-bold text-text-primary heading-decorated-amber">{t('title')}</h1>
+      <p className="mt-2 text-text-tertiary">{t('subtitle')}</p>
 
       {/* Tabs */}
-      <div className="mt-8 flex gap-1 rounded-xl bg-stone-100 p-1 w-fit">
+      <div className="mt-8 flex gap-1 rounded-xl bg-surface-tertiary p-1 w-fit">
         <button
           onClick={() => setActiveTab('active')}
           className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors ${
             activeTab === 'active'
-              ? 'bg-white text-amber-700 shadow-sm'
-              : 'text-stone-500 hover:text-stone-700'
+              ? 'bg-surface-primary text-amber-700 shadow-sm'
+              : 'text-text-tertiary hover:text-text-secondary'
           }`}
         >
           {t('tabActive')}
@@ -43,8 +43,8 @@ export default function CampanasPage() {
           onClick={() => setActiveTab('completed')}
           className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors ${
             activeTab === 'completed'
-              ? 'bg-white text-amber-700 shadow-sm'
-              : 'text-stone-500 hover:text-stone-700'
+              ? 'bg-surface-primary text-amber-700 shadow-sm'
+              : 'text-text-tertiary hover:text-text-secondary'
           }`}
         >
           {t('tabCompleted')}
@@ -54,7 +54,7 @@ export default function CampanasPage() {
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading
           ? Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="rounded-2xl border border-stone-200/60 bg-white p-6 space-y-3 shadow-sm">
+              <div key={i} className="rounded-2xl border border-border-primary/60 bg-surface-primary p-6 space-y-3 shadow-sm">
                 <div className="h-4 animate-shimmer rounded w-1/3" />
                 <div className="h-5 animate-shimmer rounded w-2/3" />
                 <div className="h-2 animate-shimmer rounded w-full mt-4" />
