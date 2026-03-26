@@ -1,5 +1,5 @@
 import { test, expect } from '../test-with-coverage';
-import { waitForPageLoad, loginAs } from '../fixtures';
+import { waitForPageLoad, loginAs, loginAndNavigate } from '../fixtures';
 import {
   HOME_LOADS,
   HOME_TO_ANIMALS,
@@ -131,9 +131,15 @@ test.describe('Notification Bell (authenticated)', () => {
   test.describe.configure({ mode: 'serial' });
 
   test('should open notification dropdown when bell is clicked', { tag: [...NOTIFICATION_BELL] }, async ({ page }) => {
-    await loginAs(page, 'adopter');
+    // Mock notification API so the bell renders correctly
+    await page.route('**/api/notifications/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ results: [], unread_count: 0 }) }),
+    );
+    await page.route('**/api/notifications/unread-count/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ unread_count: 0 }) }),
+    );
 
-    await page.goto('/');
+    await loginAndNavigate(page, 'adopter', '/');
     await waitForPageLoad(page);
 
     // Click the notification bell button in the header

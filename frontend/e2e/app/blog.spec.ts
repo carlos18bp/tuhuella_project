@@ -1,5 +1,5 @@
 import { test, expect } from '../test-with-coverage';
-import { waitForPageLoad } from '../fixtures';
+import { waitForPageLoad, loginAndNavigate } from '../fixtures';
 import {
   BLOG_BROWSE,
   BLOG_DETAIL,
@@ -105,39 +105,18 @@ test.describe('Blog — Admin', () => {
   };
 
   test.beforeEach(async ({ page }) => {
-    // Disable reCAPTCHA in test environment so automated login can proceed
-    await page.route('**/google-captcha/site-key/**', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ site_key: '' }) }),
-    );
-    // Mock sign-in API to ensure admin login succeeds without real test users
-    await page.route('**/api/auth/sign_in/**', (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          access: 'e2e-mock-access-token',
-          refresh: 'e2e-mock-refresh-token',
-          user: { id: 1, email: 'admin@mihuella.com', first_name: 'Admin', last_name: 'Test', role: 'admin', is_staff: true, is_active: true },
-        }),
-      }),
-    );
-    // Mock admin blog API
+    // Mock admin blog API endpoints
     await page.route('**/api/blog/admin/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAdminBlogListResponse) }),
+    );
+    // Mock blog list API for calendar page
+    await page.route('**/api/blog/admin/calendar/**', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAdminBlogListResponse) }),
     );
   });
 
   test('should display admin blog list for staff users', { tag: [...BLOG_ADMIN_LIST] }, async ({ page }) => {
-    // Login as admin
-    await page.goto('/sign-in');
-    await waitForPageLoad(page);
-    await page.getByLabel(/correo/i).fill('admin@mihuella.com');
-    await page.getByLabel(/contraseña/i).fill('admin123456');
-    await page.getByRole('button', { name: /iniciar sesión/i }).click();
-    await page.waitForURL((url) => !url.pathname.includes('sign-in'), { timeout: 10_000 });
-
-    // Navigate to admin blog
-    await page.goto('/admin/blog');
+    await loginAndNavigate(page, 'admin', '/admin/blog');
     await waitForPageLoad(page);
 
     await expect(page.getByRole('heading', { name: /Blog Posts/i })).toBeVisible();
@@ -146,14 +125,7 @@ test.describe('Blog — Admin', () => {
   });
 
   test('should display admin blog create page', { tag: [...BLOG_ADMIN_CREATE] }, async ({ page }) => {
-    await page.goto('/sign-in');
-    await waitForPageLoad(page);
-    await page.getByLabel(/correo/i).fill('admin@mihuella.com');
-    await page.getByLabel(/contraseña/i).fill('admin123456');
-    await page.getByRole('button', { name: /iniciar sesión/i }).click();
-    await page.waitForURL((url) => !url.pathname.includes('sign-in'), { timeout: 10_000 });
-
-    await page.goto('/admin/blog/crear');
+    await loginAndNavigate(page, 'admin', '/admin/blog/crear');
     await waitForPageLoad(page);
 
     await expect(page.getByRole('heading', { name: /Nuevo Blog Post/i })).toBeVisible();
@@ -163,15 +135,7 @@ test.describe('Blog — Admin', () => {
   });
 
   test('should display admin blog edit page', { tag: [...BLOG_ADMIN_EDIT] }, async ({ page }) => {
-    await page.goto('/sign-in');
-    await waitForPageLoad(page);
-    await page.getByLabel(/correo/i).fill('admin@mihuella.com');
-    await page.getByLabel(/contraseña/i).fill('admin123456');
-    await page.getByRole('button', { name: /iniciar sesión/i }).click();
-    await page.waitForURL((url) => !url.pathname.includes('sign-in'), { timeout: 10_000 });
-
-    // Go to admin blog list first
-    await page.goto('/admin/blog');
+    await loginAndNavigate(page, 'admin', '/admin/blog');
     await waitForPageLoad(page);
 
     // Wait for posts to load
@@ -191,14 +155,7 @@ test.describe('Blog — Admin', () => {
   });
 
   test('should display admin blog calendar page', { tag: [...BLOG_ADMIN_CALENDAR] }, async ({ page }) => {
-    await page.goto('/sign-in');
-    await waitForPageLoad(page);
-    await page.getByLabel(/correo/i).fill('admin@mihuella.com');
-    await page.getByLabel(/contraseña/i).fill('admin123456');
-    await page.getByRole('button', { name: /iniciar sesión/i }).click();
-    await page.waitForURL((url) => !url.pathname.includes('sign-in'), { timeout: 10_000 });
-
-    await page.goto('/admin/blog/calendario');
+    await loginAndNavigate(page, 'admin', '/admin/blog/calendario');
     await waitForPageLoad(page);
 
     await expect(page.getByRole('heading', { name: /Calendario del Blog/i })).toBeVisible();
