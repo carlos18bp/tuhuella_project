@@ -18,7 +18,7 @@ test.describe('FAQ Page', () => {
 
     // Verify at least the first FAQ question is visible
     await expect(page.getByText(/¿Cómo funciona el proceso de adopción/i)).toBeVisible();
-    await expect(page.getByText(/¿Qué es apadrinar un animal/i)).toBeVisible();
+    await expect(page.getByText(/¿Puedo apadrinar en vez de adoptar/i)).toBeVisible();
     await expect(page.getByText(/¿Cómo sé si un refugio es confiable/i)).toBeVisible();
   });
 
@@ -28,6 +28,6 @@ test.describe('FAQ Page', () => {
 
     // Verify answers are displayed (not collapsed)
     await expect(page.getByText(/Explora los animales disponibles/i)).toBeVisible();
-    await expect(page.getByText(/Apadrinar significa apoyar económicamente/i)).toBeVisible();
+    await expect(page.getByText(/Tu aporte mensual o único/i)).toBeVisible();
   });
 });

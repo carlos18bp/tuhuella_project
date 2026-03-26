@@ -15,35 +15,35 @@ test.describe('Adopter Pages — Protected Routes', () => {
     await page.goto('/favorites');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|favoritos/);
+    await expect(page).toHaveURL(/sign-in|favorites/);
   });
 
   test('should redirect unauthenticated user from donation history', { tag: [...DONATION_HISTORY] }, async ({ page }) => {
     await page.goto('/my-donations');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|mis-donaciones/);
+    await expect(page).toHaveURL(/sign-in|my-donations/);
   });
 
   test('should redirect unauthenticated user from sponsorship history', { tag: [...SPONSORSHIP_HISTORY] }, async ({ page }) => {
     await page.goto('/my-sponsorships');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|mis-apadrinamientos/);
+    await expect(page).toHaveURL(/sign-in|my-sponsorships/);
   });
 
   test('should redirect unauthenticated user from adopter intent', { tag: [...ADOPTER_INTENT_CREATE] }, async ({ page }) => {
     await page.goto('/my-intent');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|mi-intencion/);
+    await expect(page).toHaveURL(/sign-in|my-intent/);
   });
 
   test('should redirect unauthenticated user from profile', { tag: [...ADOPTER_PROFILE] }, async ({ page }) => {
     await page.goto('/my-profile');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|mi-perfil/);
+    await expect(page).toHaveURL(/sign-in|my-profile/);
   });
 });
 
@@ -52,7 +52,7 @@ test.describe('Adopter Pages — Public', () => {
     await page.goto('/looking-to-adopt');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/.*busco-adoptar/);
+    await expect(page).toHaveURL(/.*looking-to-adopt/);
   });
 });
 
@@ -66,7 +66,7 @@ test.describe('Favorite Toggle', () => {
     const firstAnimalLink = page.locator('a[href*="/animals/"]').first();
     if (await firstAnimalLink.isVisible({ timeout: 5000 })) {
       await firstAnimalLink.click();
-      await page.waitForURL(/.*animales\/\d+/, { timeout: 10_000 });
+      await page.waitForURL(/.*animals\/\d+/, { timeout: 10_000 });
 
       // Favorite button should either be absent or prompt sign-in
       // quality: allow-fragile-selector (no stable testid on all favorite button variants)
@@ -76,8 +76,8 @@ test.describe('Favorite Toggle', () => {
       // If visible, clicking should redirect to sign-in (unauthenticated)
       if (hasFavorite) {
         await favoriteBtn.first().click();
-        await page.waitForURL(/sign-in|animales/, { timeout: 5_000 }).catch(() => {});
-        expect(page.url()).toMatch(/sign-in|animales/);
+        await page.waitForURL(/sign-in|animals/, { timeout: 5_000 }).catch(() => {});
+        expect(page.url()).toMatch(/sign-in|animals/);
       }
     }
   });

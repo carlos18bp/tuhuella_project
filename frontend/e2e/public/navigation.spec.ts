@@ -15,7 +15,7 @@ test.describe('Navigation', () => {
     await page.goto('/');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL('/');
+    await expect(page).toHaveURL(/\/(es\/?)?$/);
     await expect(page.getByRole('heading', { name: /Cada huella cuenta/i })).toBeVisible();
   });
 
@@ -24,9 +24,9 @@ test.describe('Navigation', () => {
     await waitForPageLoad(page);
 
     await page.getByRole('link', { name: 'Ver Animales' }).click();
-    await page.waitForURL(/.*animales/, { timeout: 10_000 });
+    await page.waitForURL(/.*animals/, { timeout: 10_000 });
 
-    await expect(page).toHaveURL(/.*animales/);
+    await expect(page).toHaveURL(/.*animals/);
     await expect(page.getByRole('heading', { name: /Animales en adopción/i })).toBeVisible();
   });
 
@@ -38,9 +38,9 @@ test.describe('Navigation', () => {
     const shelterSection = page.locator('section', { has: page.getByText('Refugios destacados') });
     await expect(shelterSection).toBeVisible({ timeout: 15_000 });
     await shelterSection.getByRole('link', { name: /Ver todos/i }).click();
-    await page.waitForURL(/.*refugios/, { timeout: 10_000 });
+    await page.waitForURL(/.*shelters/, { timeout: 10_000 });
 
-    await expect(page).toHaveURL(/.*refugios/);
+    await expect(page).toHaveURL(/.*shelters/);
   });
 
   test('should navigate from home to campanas', { tag: [...HOME_TO_CAMPAIGNS] }, async ({ page }) => {
@@ -48,9 +48,9 @@ test.describe('Navigation', () => {
     await waitForPageLoad(page);
 
     await page.getByRole('link', { name: 'Donar' }).click();
-    await page.waitForURL(/.*campanas/, { timeout: 10_000 });
+    await page.waitForURL(/.*campaigns/, { timeout: 10_000 });
 
-    await expect(page).toHaveURL(/.*campanas/);
+    await expect(page).toHaveURL(/.*campaigns/);
   });
 
   test('should have working header navigation', { tag: [...NAVIGATION_HEADER] }, async ({ page }) => {
@@ -75,21 +75,21 @@ test.describe('Navigation', () => {
 
   test('should maintain navigation across Tu Huella pages', { tag: [...NAVIGATION_BETWEEN_PAGES] }, async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
-    await expect(page).toHaveURL('/');
+    await expect(page).toHaveURL(/\/(es\/?)?$/);
 
     await page.goto('/animals', { waitUntil: 'domcontentloaded' });
-    await expect(page).toHaveURL(/.*animales/);
+    await expect(page).toHaveURL(/.*animals/);
 
     await page.goto('/shelters', { waitUntil: 'domcontentloaded' });
-    await expect(page).toHaveURL(/.*refugios/);
+    await expect(page).toHaveURL(/.*shelters/);
 
     await page.goto('/campaigns', { waitUntil: 'domcontentloaded' });
-    await expect(page).toHaveURL(/.*campanas/);
+    await expect(page).toHaveURL(/.*campaigns/);
 
     await page.goto('/sign-in', { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveURL(/.*sign-in/);
 
     await page.goto('/', { waitUntil: 'domcontentloaded' });
-    await expect(page).toHaveURL('/');
+    await expect(page).toHaveURL(/\/(es\/?)?$/);
   });
 });

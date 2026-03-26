@@ -7,7 +7,7 @@ test.describe('Checkout Flows', () => {
     await page.goto('/checkout/donation');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|donacion/);
+    await expect(page).toHaveURL(/sign-in|donation/);
   });
 
   test('should display donation checkout page when authenticated', { tag: [...DONATION_CHECKOUT] }, async ({ page }) => {
@@ -16,7 +16,7 @@ test.describe('Checkout Flows', () => {
     await waitForPageLoad(page);
 
     // If redirected, the flow requires authentication
-    if (page.url().includes('donacion')) {
+    if (new URL(page.url()).pathname.includes('donation')) {
       await expect(page.getByRole('heading', { name: /Donar/i })).toBeVisible();
       await expect(page.getByText(/Wompi/i)).toBeVisible();
 
@@ -35,13 +35,13 @@ test.describe('Checkout Flows', () => {
     await page.goto('/checkout/sponsorship');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|apadrinamiento/);
+    await expect(page).toHaveURL(/sign-in|sponsorship/);
   });
 
   test('should display payment confirmation page', { tag: [...PAYMENT_CONFIRMATION] }, async ({ page }) => {
     await page.goto('/checkout/confirmation?type=donation&status=placeholder');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/confirmacion/);
+    await expect(page).toHaveURL(/confirmation/);
   });
 });

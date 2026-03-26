@@ -5,7 +5,15 @@ import { routing } from './i18n/routing';
 
 const intlMiddleware = createIntlMiddleware(routing);
 
-const PROTECTED_PREFIXES = ['/backoffice', '/dashboard'];
+const PROTECTED_PREFIXES = [
+  '/admin',
+  '/backoffice',
+  '/checkout',
+  '/dashboard',
+  '/favorites',
+  '/my-',
+  '/shelter/',
+];
 const AUTH_ROUTES = ['/sign-in', '/sign-up', '/forgot-password'];
 const ACCESS_TOKEN_KEY = 'access_token';
 

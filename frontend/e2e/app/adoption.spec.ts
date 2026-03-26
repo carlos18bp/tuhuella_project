@@ -7,7 +7,7 @@ test.describe('Adoption Flows', () => {
     await page.goto('/my-applications');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|mis-solicitudes/);
+    await expect(page).toHaveURL(/sign-in|my-applications/);
   });
 
   test('should show adoption CTA on animal detail for unauthenticated user', { tag: [...ADOPTION_SUBMIT] }, async ({ page }) => {
@@ -17,16 +17,16 @@ test.describe('Adoption Flows', () => {
     const firstAnimalLink = page.locator('a[href*="/animals/"]').first();
     if (await firstAnimalLink.isVisible({ timeout: 5000 })) {
       await firstAnimalLink.click();
-      await page.waitForURL(/.*animales\/\d+/, { timeout: 10_000 });
+      await page.waitForURL(/.*animals\/\d+/, { timeout: 10_000 });
 
       await expect(page.getByRole('link', { name: /Inicia sesión para adoptar/i })).toBeVisible();
     }
   });
 
   test('should redirect unauthenticated user from shelter applications', { tag: [...ADOPTION_MANAGE] }, async ({ page }) => {
-    await page.goto('/shelter/solicitudes');
+    await page.goto('/shelter/applications');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|solicitudes/);
+    await expect(page).toHaveURL(/sign-in|applications/);
   });
 });

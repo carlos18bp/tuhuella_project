@@ -54,7 +54,7 @@ test.describe('Blog — Public', () => {
     await expect(page).toHaveURL(/\/blog\/.+/);
 
     // Should show back link and article heading
-    const backLink = page.getByRole('link', { name: 'Blog' });
+    const backLink = page.locator('main').getByRole('link', { name: 'Blog' }).first();
     await expect(backLink).toBeVisible();
   });
 });
@@ -63,6 +63,13 @@ test.describe('Blog — Admin', () => {
   // quality: allow-serial (admin blog tests require sequential auth context)
   test.describe.configure({ mode: 'serial' });
 
+  test.beforeEach(async ({ page }) => {
+    // Disable reCAPTCHA in test environment so automated login can proceed
+    await page.route('**/google-captcha/site-key/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ site_key: '' }) }),
+    );
+  });
+
   test('should display admin blog list for staff users', { tag: [...BLOG_ADMIN_LIST] }, async ({ page }) => {
     // Login as admin
     await page.goto('/sign-in');
@@ -70,7 +77,7 @@ test.describe('Blog — Admin', () => {
     await page.getByLabel(/correo/i).fill('admin@mihuella.com');
     await page.getByLabel(/contraseña/i).fill('admin123456');
     await page.getByRole('button', { name: /iniciar sesión/i }).click();
-    await page.waitForURL(/.*/, { timeout: 10_000 });
+    await page.waitForURL((url) => !url.pathname.includes('sign-in'), { timeout: 10_000 });
 
     // Navigate to admin blog
     await page.goto('/admin/blog');
@@ -87,7 +94,7 @@ test.describe('Blog — Admin', () => {
     await page.getByLabel(/correo/i).fill('admin@mihuella.com');
     await page.getByLabel(/contraseña/i).fill('admin123456');
     await page.getByRole('button', { name: /iniciar sesión/i }).click();
-    await page.waitForURL(/.*/, { timeout: 10_000 });
+    await page.waitForURL((url) => !url.pathname.includes('sign-in'), { timeout: 10_000 });
 
     await page.goto('/admin/blog/crear');
     await waitForPageLoad(page);
@@ -104,7 +111,7 @@ test.describe('Blog — Admin', () => {
     await page.getByLabel(/correo/i).fill('admin@mihuella.com');
     await page.getByLabel(/contraseña/i).fill('admin123456');
     await page.getByRole('button', { name: /iniciar sesión/i }).click();
-    await page.waitForURL(/.*/, { timeout: 10_000 });
+    await page.waitForURL((url) => !url.pathname.includes('sign-in'), { timeout: 10_000 });
 
     // Go to admin blog list first
     await page.goto('/admin/blog');
@@ -132,7 +139,7 @@ test.describe('Blog — Admin', () => {
     await page.getByLabel(/correo/i).fill('admin@mihuella.com');
     await page.getByLabel(/contraseña/i).fill('admin123456');
     await page.getByRole('button', { name: /iniciar sesión/i }).click();
-    await page.waitForURL(/.*/, { timeout: 10_000 });
+    await page.waitForURL((url) => !url.pathname.includes('sign-in'), { timeout: 10_000 });
 
     await page.goto('/admin/blog/calendario');
     await waitForPageLoad(page);
@@ -142,7 +149,7 @@ test.describe('Blog — Admin', () => {
     await expect(page.getByRole('button', { name: /Anterior/i })).toBeVisible();
     await expect(page.getByRole('button', { name: /Siguiente/i })).toBeVisible();
     // Day headers
-    await expect(page.getByText('Lun')).toBeVisible();
-    await expect(page.getByText('Vie')).toBeVisible();
+    await expect(page.getByText('Lun', { exact: true })).toBeVisible();
+    await expect(page.getByText('Vie', { exact: true })).toBeVisible();
   });
 });

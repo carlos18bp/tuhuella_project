@@ -16,7 +16,7 @@ test.describe('Shelter Public Pages', () => {
     await page.goto('/shelters');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/.*refugios/);
+    await expect(page).toHaveURL(/.*shelters/);
   });
 
   test('should navigate to shelter detail from listing', { tag: [...SHELTER_DETAIL] }, async ({ page }) => {
@@ -27,9 +27,9 @@ test.describe('Shelter Public Pages', () => {
     const shelterLink = page.locator('a[href*="/shelters/"]').first();
     if (await shelterLink.isVisible({ timeout: 5000 })) {
       await shelterLink.click();
-      await page.waitForURL(/.*refugios\/\d+/, { timeout: 10_000 });
+      await page.waitForURL(/.*shelters\/\d+/, { timeout: 10_000 });
 
-      await expect(page).toHaveURL(/.*refugios\/\d+/);
+      await expect(page).toHaveURL(/.*shelters\/\d+/);
     }
   });
 });
@@ -46,7 +46,7 @@ test.describe('Shelter Onboarding', () => {
     await page.goto('/shelter/onboarding');
     await waitForPageLoad(page);
 
-    if (page.url().includes('onboarding')) {
+    if (new URL(page.url()).pathname.includes('onboarding')) {
       await expect(page.getByRole('heading', { name: /Registrar Refugio/i })).toBeVisible();
       await expect(page.getByLabel(/Nombre del refugio/i)).toBeVisible();
       await expect(page.getByLabel(/Ciudad/i)).toBeVisible();
@@ -68,36 +68,37 @@ test.describe('Shelter Panel', () => {
     await waitForPageLoad(page);
 
     // Unauthenticated user is redirected to sign-in; authenticated sees dashboard heading
-    const isSignIn = page.url().includes('sign-in');
-    const isDashboard = page.url().includes('refugio/dashboard');
+    const pathname = new URL(page.url()).pathname;
+    const isSignIn = pathname.includes('sign-in');
+    const isDashboard = pathname.includes('shelter/dashboard');
     expect(isSignIn || isDashboard).toBe(true);
   });
 
   test('should redirect unauthenticated user from shelter animals', { tag: [...SHELTER_PANEL_ANIMALS] }, async ({ page }) => {
-    await page.goto('/shelter/animales');
+    await page.goto('/shelter/animals');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|animales/);
+    await expect(page).toHaveURL(/sign-in|animals/);
   });
 
   test('should redirect unauthenticated user from shelter campaigns', { tag: [...SHELTER_PANEL_CAMPAIGNS] }, async ({ page }) => {
-    await page.goto('/shelter/campanas');
+    await page.goto('/shelter/campaigns');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|campanas/);
+    await expect(page).toHaveURL(/sign-in|campaigns/);
   });
 
   test('should redirect unauthenticated user from shelter donations', { tag: [...SHELTER_PANEL_DONATIONS] }, async ({ page }) => {
-    await page.goto('/shelter/donaciones');
+    await page.goto('/shelter/donations');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|donaciones/);
+    await expect(page).toHaveURL(/sign-in|donations/);
   });
 
   test('should redirect unauthenticated user from shelter settings', { tag: [...SHELTER_PANEL_SETTINGS] }, async ({ page }) => {
-    await page.goto('/shelter/configuracion');
+    await page.goto('/shelter/settings');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|configuracion/);
+    await expect(page).toHaveURL(/sign-in|settings/);
   });
 });

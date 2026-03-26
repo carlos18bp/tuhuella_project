@@ -7,7 +7,7 @@ test.describe('Animal Browse & Detail', () => {
     await page.goto('/animals');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/.*animales/);
+    await expect(page).toHaveURL(/.*animals/);
     await expect(page.getByRole('heading', { name: /Animales en adopción/i })).toBeVisible();
     await expect(page.getByText(/Encuentra a tu próximo compañero/i)).toBeVisible();
   });
@@ -51,9 +51,9 @@ test.describe('Animal Browse & Detail', () => {
     const firstAnimalLink = page.locator('a[href*="/animals/"]').first();
     if (await firstAnimalLink.isVisible({ timeout: 5000 })) {
       await firstAnimalLink.click();
-      await page.waitForURL(/.*animales\/\d+/, { timeout: 10_000 });
+      await page.waitForURL(/.*animals\/\d+/, { timeout: 10_000 });
 
-      await expect(page).toHaveURL(/.*animales\/\d+/);
+      await expect(page).toHaveURL(/.*animals\/\d+/);
     }
   });
 
@@ -65,7 +65,7 @@ test.describe('Animal Browse & Detail', () => {
     const firstAnimalLink = page.locator('a[href*="/animals/"]').first();
     if (await firstAnimalLink.isVisible({ timeout: 5000 })) {
       await firstAnimalLink.click();
-      await page.waitForURL(/.*animales\/\d+/, { timeout: 10_000 });
+      await page.waitForURL(/.*animals\/\d+/, { timeout: 10_000 });
 
       await expect(page.getByRole('link', { name: /Volver a animales/i })).toBeVisible();
       await expect(page.locator('h1')).toBeVisible();
@@ -80,7 +80,7 @@ test.describe('Animal Browse & Detail', () => {
     const firstAnimalLink = page.locator('a[href*="/animals/"]').first();
     if (await firstAnimalLink.isVisible({ timeout: 5000 })) {
       await firstAnimalLink.click();
-      await page.waitForURL(/.*animales\/\d+/, { timeout: 10_000 });
+      await page.waitForURL(/.*animals\/\d+/, { timeout: 10_000 });
 
       await expect(page.getByRole('link', { name: /Inicia sesión para adoptar/i })).toBeVisible();
     }
@@ -94,7 +94,7 @@ test.describe('Animal Browse & Detail', () => {
     const firstAnimalLink = page.locator('a[href*="/animals/"]').first();
     if (await firstAnimalLink.isVisible({ timeout: 5000 })) {
       await firstAnimalLink.click();
-      await page.waitForURL(/.*animales\/\d+/, { timeout: 10_000 });
+      await page.waitForURL(/.*animals\/\d+/, { timeout: 10_000 });
 
       // Gallery component should be rendered in the detail page
       // quality: allow-fragile-selector (positional needed: gallery has no testid, first image is sufficient proof)

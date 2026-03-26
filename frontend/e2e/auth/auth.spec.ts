@@ -78,7 +78,7 @@ test.describe('Authentication', () => {
     await waitForPageLoad(page);
     
     // Dashboard link presence depends on auth state; verify home page loads successfully
-    await expect(page).toHaveURL('/');
+    await expect(page).toHaveURL(/\/(es\/?)?$/);
   });
 
   test('should navigate to dashboard page', { tag: [...AUTH_PROTECTED_REDIRECT] }, async ({ page }) => {
@@ -102,19 +102,19 @@ test.describe('Authentication', () => {
     await waitForPageLoad(page);
 
     await expect(page).toHaveURL(/.*sign-up/);
-    await expect(page.getByRole('heading', { name: 'Create account' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Crear cuenta/i })).toBeVisible();
   });
 
   test('should show all required sign-up form fields', { tag: [...AUTH_SIGN_UP_FORM] }, async ({ page }) => {
     await page.goto('/sign-up');
     await waitForPageLoad(page);
 
-    await expect(page.getByPlaceholder('First Name')).toBeVisible();
-    await expect(page.getByPlaceholder('Last Name')).toBeVisible();
-    await expect(page.getByPlaceholder('Email')).toBeVisible();
-    await expect(page.getByPlaceholder('Password', { exact: true })).toBeVisible();
-    await expect(page.getByPlaceholder('Confirm Password')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Create account' })).toBeVisible();
+    await expect(page.getByLabel(/^Nombre$/i)).toBeVisible();
+    await expect(page.getByLabel(/Apellido/i)).toBeVisible();
+    await expect(page.getByLabel(/Correo electrónico/i)).toBeVisible();
+    await expect(page.getByLabel('Contraseña', { exact: true })).toBeVisible();
+    await expect(page.getByLabel(/Confirmar contraseña/i)).toBeVisible();
+    await expect(page.getByRole('button', { name: /Crear cuenta/i })).toBeVisible();
   });
 
   test('should validate password mismatch on sign-up', { tag: [...AUTH_SIGN_UP_FORM] }, async ({ page }) => {
@@ -122,13 +122,13 @@ test.describe('Authentication', () => {
     await waitForPageLoad(page);
 
     // Fill form with mismatched passwords
-    await page.getByPlaceholder('First Name').fill('Test');
-    await page.getByPlaceholder('Last Name').fill('User');
-    await page.getByPlaceholder('Email').fill('test@example.com');
-    await page.getByPlaceholder('Password', { exact: true }).fill('password123');
-    await page.getByPlaceholder('Confirm Password').fill('different456');
+    await page.getByLabel(/^Nombre$/i).fill('Test');
+    await page.getByLabel(/Apellido/i).fill('User');
+    await page.getByLabel(/Correo electrónico/i).fill('test@example.com');
+    await page.getByLabel('Contraseña', { exact: true }).fill('password123');
+    await page.getByLabel(/Confirmar contraseña/i).fill('different456');
 
-    await page.getByRole('button', { name: 'Create account' }).click();
+    await page.getByRole('button', { name: /Crear cuenta/i }).click();
 
     // Should show password mismatch error and stay on sign-up page
     await expect(page.getByText('Passwords do not match')).toBeVisible();
@@ -140,14 +140,14 @@ test.describe('Authentication', () => {
     await waitForPageLoad(page);
 
     await expect(page).toHaveURL(/.*forgot-password/);
-    await expect(page.getByRole('heading', { name: 'Reset Password' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Recuperar contraseña/i })).toBeVisible();
 
     // Step A: email input and send code button
-    await expect(page.getByPlaceholder('Email')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Send verification code' })).toBeVisible();
+    await expect(page.getByLabel(/Correo electrónico/i)).toBeVisible();
+    await expect(page.getByRole('button', { name: /Enviar código de verificación/i })).toBeVisible();
 
     // Link back to sign-in
-    await expect(page.getByRole('link', { name: 'Back to sign in' })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Volver a iniciar sesión/i })).toBeVisible();
   });
 
   test('should navigate from sign-in to forgot password', { tag: [...AUTH_FORGOT_PASSWORD_FORM] }, async ({ page }) => {
@@ -155,13 +155,13 @@ test.describe('Authentication', () => {
     await waitForPageLoad(page);
 
     // Click forgot password link
-    const forgotLink = page.getByRole('link', { name: 'Forgot password?' });
+    const forgotLink = page.getByRole('link', { name: /Olvidaste tu contraseña/i });
     await expect(forgotLink).toBeVisible();
     await forgotLink.click();
     await page.waitForURL(/.*forgot-password/, { timeout: 10_000 });
 
     await expect(page).toHaveURL(/.*forgot-password/);
-    await expect(page.getByRole('heading', { name: 'Reset Password' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Recuperar contraseña/i })).toBeVisible();
   });
 
   test('should redirect adopter away from admin routes', { tag: [...AUTH_ROLE_REDIRECT] }, async ({ page }) => {
@@ -194,7 +194,7 @@ test.describe('Authentication', () => {
     // After visiting a protected route, user is redirected back (no session)
     await page.goto('/my-profile');
     await waitForPageLoad(page);
-    await expect(page).toHaveURL(/sign-in|mi-perfil/);
+    await expect(page).toHaveURL(/sign-in|my-profile/);
   });
 
   test('should not persist session across fresh navigation without cookies', { tag: [...AUTH_SESSION_PERSISTENCE] }, async ({ page, context }) => {
@@ -204,7 +204,7 @@ test.describe('Authentication', () => {
     await waitForPageLoad(page);
 
     // Without cookies, protected routes should redirect
-    await expect(page).toHaveURL(/sign-in|mi-perfil/);
+    await expect(page).toHaveURL(/sign-in|my-profile/);
   });
 
   test('should display Google sign-in option on login page', { tag: [...AUTH_GOOGLE_LOGIN] }, async ({ page }) => {
