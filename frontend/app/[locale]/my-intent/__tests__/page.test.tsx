@@ -45,8 +45,8 @@ describe('MiIntencionPage', () => {
   it('renders loading skeleton while fetching intent', () => {
     mockApi.get.mockReturnValueOnce(new Promise(() => {}));
     setupMock();
-    const { container } = render(<MiIntencionPage />);
-    expect(container.querySelector('.animate-shimmer')).toBeInTheDocument();
+    render(<MiIntencionPage />);
+    expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
   });
 
   it('renders form after loading when no intent exists', async () => {

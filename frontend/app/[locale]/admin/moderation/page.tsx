@@ -47,7 +47,7 @@ export default function AdminModeracionPage() {
       <p className="mt-1 text-text-tertiary">Revisa contenido publicado en la plataforma</p>
 
       {loading ? (
-        <div className="mt-8 space-y-4">
+        <div data-testid="loading-skeleton" className="mt-8 space-y-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="rounded-xl border border-border-primary p-5 animate-pulse">
               <div className="h-5 bg-surface-tertiary rounded w-1/3" />

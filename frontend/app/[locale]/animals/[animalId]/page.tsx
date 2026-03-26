@@ -40,7 +40,7 @@ export default function AnimalDetailPage() {
   if (loading || !animal) {
     return (
       <div className="mx-auto max-w-[1400px] px-6 py-10">
-        <div className="space-y-6">
+        <div data-testid="loading-skeleton" className="space-y-6">
           <div className="h-8 animate-shimmer rounded w-1/3" />
           <div className="aspect-video animate-shimmer rounded-2xl" />
           <div className="h-4 animate-shimmer rounded w-2/3" />
@@ -76,6 +76,7 @@ export default function AnimalDetailPage() {
             {isAuthenticated && (
               <button
                 type="button"
+                aria-label="favorite"
                 onClick={() => toggleFavorite(animal.id)}
                 className={`p-2.5 rounded-full transition-all duration-200 shadow-sm ${
                   isFavorited(animal.id) ? 'bg-red-50 text-red-500' : 'bg-surface-tertiary text-text-quaternary hover:bg-surface-hover'

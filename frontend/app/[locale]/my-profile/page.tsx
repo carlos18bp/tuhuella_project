@@ -12,7 +12,7 @@ export default function MiPerfilPage() {
 
   if (!user) {
     return (
-      <div className="mx-auto max-w-[1400px] px-6 py-10">
+      <div data-testid="loading-skeleton" className="mx-auto max-w-[1400px] px-6 py-10">
         <div className="h-8 animate-shimmer rounded w-1/4 mb-8" />
         <div className="max-w-lg space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (

@@ -26,8 +26,8 @@ describe('AdminModeracionPage', () => {
   it('renders loading skeleton initially', () => {
     mockApi.get.mockReturnValue(new Promise(() => {}));
     setupMock();
-    const { container } = render(<AdminModeracionPage />);
-    expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
+    render(<AdminModeracionPage />);
+    expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
   });
 
   it('renders access denied for non-admin', () => {

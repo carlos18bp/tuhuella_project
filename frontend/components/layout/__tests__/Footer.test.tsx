@@ -37,9 +37,11 @@ describe('Footer', () => {
   });
 
   it('renders copyright text with current year', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-01-15'));
     render(<Footer />);
-    const currentYear = new Date().getFullYear().toString();
-    expect(screen.getByText(new RegExp(`${currentYear}.*Tu Huella`))).toBeInTheDocument();
+    expect(screen.getByText(/2026.*Tu Huella/)).toBeInTheDocument();
+    jest.useRealTimers();
   });
 
   it('renders section headings', () => {

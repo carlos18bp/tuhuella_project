@@ -1,5 +1,5 @@
 import { test, expect } from '../test-with-coverage';
-import { waitForPageLoad, loginAs, loginAndNavigate } from '../fixtures';
+import { waitForPageLoad, loginAndNavigate } from '../fixtures';
 import {
   SHELTER_BROWSE,
   SHELTER_DETAIL,
@@ -69,12 +69,13 @@ test.describe('Shelter Public Pages', () => {
       await page.waitForURL(/.*shelters\/\d+/, { timeout: 10_000 });
 
       // Look for gallery images (rendered as buttons wrapping images)
-      const galleryButton = page.locator('button img[alt]').first();
+      const gallerySection = page.locator('section, div', { has: page.getByRole('heading', { name: /gallery|galería/i }) });
+      const galleryButton = gallerySection.getByRole('button').first();
       if (await galleryButton.isVisible({ timeout: 5000 })) {
         await galleryButton.click();
 
-        // Lightbox overlay: fixed div with bg-black/80
-        const lightbox = page.locator('.fixed.inset-0');
+        // Lightbox overlay dialog
+        const lightbox = page.getByRole('dialog', { name: /Lightbox/i });
         await expect(lightbox).toBeVisible({ timeout: 5000 });
       }
     }
@@ -160,9 +161,9 @@ test.describe('Shelter Panel — Authenticated', () => {
     await expect(page.getByRole('heading', { name: /Solicitudes de Adopción/i })).toBeVisible({ timeout: 15_000 });
 
     // Either application list items or empty state message
-    const hasApplications = page.locator('.rounded-xl.border.border-stone-200.bg-white').first();
+    const hasApplications = page.getByRole('article').first();
     const emptyState = page.getByText(/No hay solicitudes de adopción/i);
-    await expect(hasApplications.or(emptyState).first()).toBeVisible({ timeout: 10_000 });
+    await expect(hasApplications.or(emptyState)).toBeVisible({ timeout: 10_000 });
   });
 
   test('should display shelter updates page with heading', { tag: [...SHELTER_PANEL_UPDATES] }, async ({ page }) => {
@@ -172,9 +173,9 @@ test.describe('Shelter Panel — Authenticated', () => {
     await expect(page.getByRole('heading', { name: /Mis actualizaciones/i })).toBeVisible({ timeout: 15_000 });
 
     // Either updates list items or empty state
-    const hasUpdates = page.locator('.rounded-xl.border.border-stone-200.bg-white').first();
+    const hasUpdates = page.getByRole('article').first();
     const emptyState = page.getByText(/No has publicado actualizaciones/i);
-    await expect(hasUpdates.or(emptyState).first()).toBeVisible({ timeout: 10_000 });
+    await expect(hasUpdates.or(emptyState)).toBeVisible({ timeout: 10_000 });
   });
 
   test('should display shelter update create form with required fields', { tag: [...SHELTER_PANEL_UPDATE_CREATE] }, async ({ page }) => {

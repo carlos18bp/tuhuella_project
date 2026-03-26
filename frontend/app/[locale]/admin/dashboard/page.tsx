@@ -85,7 +85,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {loading ? (
-        <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div data-testid="loading-skeleton" className="mt-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="rounded-xl border border-border-primary p-5">
               <div className="h-8 animate-shimmer rounded w-1/2" />

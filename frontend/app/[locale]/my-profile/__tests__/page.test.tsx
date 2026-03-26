@@ -12,8 +12,8 @@ describe('MiPerfilPage', () => {
   });
 
   it('renders loading skeleton when user is null', () => {
-    const { container } = render(<MiPerfilPage />);
-    expect(container.querySelector('.animate-shimmer')).toBeInTheDocument();
+    render(<MiPerfilPage />);
+    expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
   });
 
   it('renders user profile when user is set', () => {

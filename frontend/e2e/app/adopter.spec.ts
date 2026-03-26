@@ -1,5 +1,5 @@
 import { test, expect } from '../test-with-coverage';
-import { waitForPageLoad, loginAs, loginAndNavigate } from '../fixtures';
+import { waitForPageLoad, loginAndNavigate } from '../fixtures';
 import {
   FAVORITE_TOGGLE,
   FAVORITE_LIST,
@@ -67,12 +67,11 @@ test.describe.serial('Adopter Pages — Authenticated', () => {
     // Verify heading
     await expect(page.getByRole('heading', { name: /Preferencias de notificación/i })).toBeVisible();
 
-    // Verify toggle switches are visible (at least one per group)
-    const toggleButtons = page.locator('button[aria-label]');
-    await expect(toggleButtons.first()).toBeVisible({ timeout: 10_000 });
+    // Verify toggle switches are visible (target a specific toggle by testid)
+    await expect(page.getByTestId('toggle-adoption_submitted-email')).toBeVisible({ timeout: 10_000 });
 
     // Verify at least one event group heading is visible
-    await expect(page.getByText(/Adopción/i).first()).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Adopción/i })).toBeVisible();
   });
 });
 
@@ -82,20 +81,18 @@ test.describe('Favorite Toggle', () => {
     await page.goto('/animals');
     await waitForPageLoad(page);
 
-    // quality: allow-fragile-selector (dynamic data: no testid on animal cards, first visible link needed)
-    const firstAnimalLink = page.locator('a[href*="/animals/"]').first();
+    const firstAnimalLink = page.getByRole('link').filter({ has: page.getByRole('heading', { level: 3 }) }).first();
     if (await firstAnimalLink.isVisible({ timeout: 5000 })) {
       await firstAnimalLink.click();
       await page.waitForURL(/.*animals\/\d+/, { timeout: 10_000 });
 
       // Favorite button should either be absent or prompt sign-in
-      // quality: allow-fragile-selector (no stable testid on all favorite button variants)
-      const favoriteBtn = page.locator('button:has-text("Favorito"), button:has-text("Guardar"), [data-testid="favorite-toggle"]');
-      const hasFavorite = await favoriteBtn.first().isVisible({ timeout: 3000 }).catch(() => false);
+      const favoriteBtn = page.getByRole('button', { name: 'favorite' });
+      const hasFavorite = await favoriteBtn.isVisible({ timeout: 3000 }).catch(() => false);
 
       // If visible, clicking should redirect to sign-in (unauthenticated)
       if (hasFavorite) {
-        await favoriteBtn.first().click();
+        await favoriteBtn.click();
         await page.waitForURL(/sign-in|animals/, { timeout: 5_000 }).catch(() => {});
         expect(page.url()).toMatch(/sign-in|animals/);
       }

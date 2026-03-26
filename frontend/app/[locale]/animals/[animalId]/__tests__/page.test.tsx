@@ -54,14 +54,14 @@ describe('AnimalDetailPage', () => {
 
   it('renders loading skeleton when loading', () => {
     setupMocks({ loading: true, animal: null });
-    const { container } = render(<AnimalDetailPage />);
-    expect(container.querySelector('.animate-shimmer')).toBeInTheDocument();
+    render(<AnimalDetailPage />);
+    expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
   });
 
   it('renders loading skeleton when animal is null', () => {
     setupMocks({ loading: false, animal: null });
-    const { container } = render(<AnimalDetailPage />);
-    expect(container.querySelector('.animate-shimmer')).toBeInTheDocument();
+    render(<AnimalDetailPage />);
+    expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
   });
 
   it('renders animal name when loaded', () => {
@@ -160,23 +160,20 @@ describe('AnimalDetailPage', () => {
 
   it('shows favorite button when authenticated', () => {
     setupMocks({ loading: false, animal: mockAnimal, isAuthenticated: true });
-    const { container } = render(<AnimalDetailPage />);
-    const heartBtn = container.querySelector('button svg.lucide-heart')?.closest('button');
-    expect(heartBtn).toBeInTheDocument();
+    render(<AnimalDetailPage />);
+    expect(screen.getByRole('button', { name: 'favorite' })).toBeInTheDocument();
   });
 
   it('hides favorite button when not authenticated', () => {
     setupMocks({ loading: false, animal: mockAnimal, isAuthenticated: false });
-    const { container } = render(<AnimalDetailPage />);
-    const heartBtn = container.querySelector('button svg.lucide-heart');
-    expect(heartBtn).not.toBeInTheDocument();
+    render(<AnimalDetailPage />);
+    expect(screen.queryByRole('button', { name: 'favorite' })).not.toBeInTheDocument();
   });
 
   it('calls toggleFavorite when favorite button clicked', async () => {
     const state = setupMocks({ loading: false, animal: mockAnimal, isAuthenticated: true });
-    const { container } = render(<AnimalDetailPage />);
-    const heartBtn = container.querySelector('button svg.lucide-heart')!.closest('button')!;
-    await userEvent.click(heartBtn);
+    render(<AnimalDetailPage />);
+    await userEvent.click(screen.getByRole('button', { name: 'favorite' }));
     expect(state.toggleFavorite).toHaveBeenCalledWith(1);
   });
 
@@ -187,9 +184,9 @@ describe('AnimalDetailPage', () => {
       isAuthenticated: true,
       isFavorited: jest.fn().mockReturnValue(true),
     });
-    const { container } = render(<AnimalDetailPage />);
-    const heartBtn = container.querySelector('button svg.lucide-heart')?.closest('button');
-    expect(heartBtn?.className).toContain('bg-red-50');
+    render(<AnimalDetailPage />);
+    const heartBtn = screen.getByRole('button', { name: 'favorite' });
+    expect(heartBtn.className).toContain('bg-red-50');
   });
 
   it('calls fetchAnimal on mount with id from params', () => {

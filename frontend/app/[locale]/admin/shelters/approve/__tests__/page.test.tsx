@@ -31,8 +31,8 @@ describe('AdminApproveSheltarsPage', () => {
   it('renders loading skeleton initially', () => {
     mockApi.get.mockReturnValueOnce(new Promise(() => {}));
     setupMock();
-    const { container } = render(<AdminApproveSheltarsPage />);
-    expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
+    render(<AdminApproveSheltarsPage />);
+    expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
   });
 
   it('renders access denied for non-admin', () => {

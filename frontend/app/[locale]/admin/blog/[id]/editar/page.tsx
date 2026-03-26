@@ -109,7 +109,7 @@ export default function AdminBlogEditPage() {
   if (loading && !adminPost) {
     return (
       <div className="flex justify-center py-20">
-        <div className="w-8 h-8 border-2 border-teal-500/30 border-t-teal-500 rounded-full animate-spin" />
+        <div role="status" aria-label="Cargando" className="w-8 h-8 border-2 border-teal-500/30 border-t-teal-500 rounded-full animate-spin" />
       </div>
     );
   }
@@ -150,7 +150,7 @@ export default function AdminBlogEditPage() {
             <fieldset className="border border-border-primary rounded-xl p-5 space-y-4">
               <legend className="text-sm font-medium text-text-secondary px-2">Imagen de portada</legend>
               {adminPost?.cover_image_display && <img src={adminPost.cover_image_display} alt="Cover" className="w-full max-h-48 object-cover rounded-xl mb-3" />}
-              <div><label className={labelClass}>Subir imagen</label><input type="file" accept="image/*" onChange={handleCoverUpload} className="text-sm text-text-secondary" /></div>
+              <div><label htmlFor="cover_upload" className={labelClass}>Subir imagen</label><input id="cover_upload" type="file" accept="image/*" onChange={handleCoverUpload} className="text-sm text-text-secondary" /></div>
               <div><label htmlFor="cover_url" className={labelClass}>O usar URL externa</label><input id="cover_url" type="url" value={form.cover_image_url || ''} onChange={(e) => handleChange('cover_image_url', e.target.value)} className={inputClass} placeholder="https://..." /></div>
               <div className="grid grid-cols-2 gap-4">
                 <div><label htmlFor="cover_credit" className={labelClass}>Crédito</label><input id="cover_credit" type="text" value={form.cover_image_credit || ''} onChange={(e) => handleChange('cover_image_credit', e.target.value)} className={inputClass} placeholder="Photo by..." /></div>

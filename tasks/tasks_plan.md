@@ -1,6 +1,6 @@
 # Mi Huella — Feature Task Plan
 
-> Last updated: 2026-03-21
+> Last updated: 2026-03-26
 
 ## Status Legend
 - ✅ Done
@@ -8,10 +8,10 @@
 - ⏳ Pending
 - ❌ Blocked
 
-## Phase 1 — Backend Models
+## Phase 1 — Backend Models (20 models)
 | Task | Status | Notes |
 |------|--------|-------|
-| User model (evolve from template) | ✅ | city field, adopter/shelter_admin/admin roles |
+| User model | ✅ | city field, adopter/shelter_admin/admin roles |
 | Shelter model | ✅ | logo, cover_image, verification_status |
 | Animal model | ✅ | GalleryField, species/age/gender/size enums |
 | AdoptionApplication model | ✅ | JSONField form_answers, unique_together |
@@ -24,23 +24,28 @@
 | ShelterInvite model | ✅ | unique_together shelter+intent |
 | Subscription model | ✅ | OneToOne with Sponsorship |
 | Favorite model | ✅ | through table |
-| NotificationPreference + Log | ✅ | |
+| Notification (Preference + Log) | ✅ | Split into two models |
 | PasswordCode model | ✅ | kept from template |
-| Migrations | ✅ | 0001_initial.py |
+| BlogPost model | ✅ | bilingual, JSON content, SEO, 10 categories |
+| AmountOption model | ✅ | predefined donation/sponsorship amounts |
+| FAQ model | ✅ | question/answer pairs |
+| StrategicAlly model | ✅ | partner organizations |
+| VolunteerPosition model | ✅ | volunteer opportunities |
 
-## Phase 2 — Backend Serializers
+## Phase 2 — Backend Serializers (40 files)
 | Task | Status | Notes |
 |------|--------|-------|
-| 34 serializer files | ✅ | list/detail/create_update pattern |
+| 40 serializer files | ✅ | list/detail/create_update pattern + blog + utils |
 
 ## Phase 3 — Backend Views, URLs, Admin, Commands
 | Task | Status | Notes |
 |------|--------|-------|
-| 13 view modules | ✅ | FBV pattern |
-| 13 URL modules | ✅ | |
-| Admin (MiHuellaAdminSite) | ✅ | 6 sections, all 16 models |
-| 12 management commands | ✅ | Including 4 new ones added in audit |
+| 19 view modules | ✅ | FBV pattern |
+| 18 URL modules | ✅ | Split under urls/ |
+| Admin (MiHuellaAdminSite, 21 classes) | ✅ | All 20 models registered |
+| 21 management commands | ✅ | Including seed_amount_options |
 | Payment placeholder views | ✅ | Wompi stub |
+| Services (email, notification) | ✅ | 3 service files |
 
 ## Phase 4 — Frontend Design System
 | Task | Status | Notes |
@@ -51,71 +56,78 @@
 | GSAP ScrollTrigger integration | ✅ | useScrollReveal hook |
 | Swiper gallery integration | ✅ | AnimalGallery component |
 | Framer Motion page transitions | ✅ | template.tsx |
+| Theme toggle (dark mode) | ✅ | ThemeProvider + ThemeToggle |
 
 ## Phase 5 — Frontend Types, Constants, Stores
 | Task | Status | Notes |
 |------|--------|-------|
-| types.ts (14 domain types) | ✅ | |
-| constants.ts (28 routes, API endpoints) | ✅ | |
-| 9 Zustand stores | ✅ | |
+| types.ts (34 exported types) | ✅ | |
+| constants.ts (routes + API endpoints) | ✅ | |
+| 10 Zustand stores | ✅ | Added blogStore, notificationStore |
 | next-intl setup (en/es) | ✅ | messages, config, LocaleSwitcher |
 
 ## Phase 6 — Frontend Pages & Components
 | Task | Status | Notes |
 |------|--------|-------|
-| 33 page.tsx files | ✅ | All routes covered |
-| Header + Footer | ✅ | Role-aware, mobile menu, locale switcher |
-| AnimalCard, ShelterCard, CampaignCard | ✅ | Shared components |
-| EmptyState, LoadingSpinner | ✅ | |
-| AnimalGallery (Swiper) | ✅ | |
-| ShelterSpotlight on home page | ✅ | |
-| Remaining components (AnimalFilters, Sidebar, etc.) | ⏳ | Extract as needed |
+| 47 page.tsx files | ✅ | All routes covered |
+| Header + Footer + Sidebar | ✅ | Role-aware, mobile menu, locale switcher, theme toggle |
+| 25 UI components | ✅ | All barrel-exported from components/ui/index.ts |
+| Blog components (2) | ✅ | BlogContentRenderer, ReadingProgressBar |
+| Provider components | ✅ | ThemeProvider |
 
 ## Phase 7 — E2E Flow Mapping
 | Task | Status | Notes |
 |------|--------|-------|
-| flow-definitions.json (43 flows) | ✅ | |
+| flow-definitions.json (75 flows) | ✅ | |
 | USER_FLOW_MAP.md | ✅ | |
-| E2E test implementation | ⏳ | 3 specs exist, 40 flows pending |
+| E2E test implementation (14 spec files) | 🔧 | Coverage expanding |
 
 ## Phase 8 — Cleanup
 | Task | Status | Notes |
 |------|--------|-------|
-| Delete tenndalux_project/ | ✅ | |
 | README.md rewrite | ✅ | |
 | Fix stale test files | ✅ | helpers.py, test_admin.py, test_urls.py, Role.CUSTOMER |
-| Sync docs/e2e-flow-definitions.json | ✅ | |
 
 ## Phase 9 — Blog Feature
 | Task | Status | Notes |
 |------|--------|-------|
-| BlogPost model (bilingual, JSON content, SEO, 10 categories, 2 authors) | ✅ | `base_feature_app/models/blog_post.py` |
-| Blog serializers (7: public list/detail, admin list/detail, create/update, JSON import, template) | ✅ | `serializers/blog.py` |
-| Blog views (14 endpoints: public + admin CRUD, duplicate, upload, calendar, JSON template) | ✅ | `views/blog.py` |
-| Blog URLs (public + admin) | ✅ | `urls/blog.py` |
-| BlogPostAdmin (Django admin, organized fieldsets) | ✅ | `admin.py` |
-| `create_blog_posts` management command (10 sample posts) | ✅ | |
-| Frontend types (BlogPost, BlogPostDetail, BlogPostAdmin) | ✅ | `lib/types.ts` |
-| Frontend constants (routes + API endpoints) | ✅ | `lib/constants.ts` |
-| blogStore (Zustand: CRUD, calendar, JSON import, cover upload) | ✅ | `lib/stores/blogStore.ts` |
-| BlogContentRenderer (JSON structured content) | ✅ | `components/blog/` |
-| ReadingProgressBar (scroll + time remaining) | ✅ | `components/blog/` |
-| Public blog listing page | ✅ | `[locale]/blog/page.tsx` |
-| Public blog detail page | ✅ | `[locale]/blog/[slug]/page.tsx` |
-| Admin blog list page | ✅ | `[locale]/admin/blog/page.tsx` |
-| Admin blog create page | ✅ | `[locale]/admin/blog/crear/page.tsx` |
-| Admin blog edit page | ✅ | `[locale]/admin/blog/[id]/editar/page.tsx` |
-| Admin blog calendar page | ✅ | `[locale]/admin/blog/calendario/page.tsx` |
-| i18n messages + Header/Footer nav links | ✅ | `messages/es.json`, `messages/en.json` |
-| Backend tests (8 model + 16 view, 88.8% view coverage) | ✅ | |
-| Frontend unit tests (blogStore 18, BlogContentRenderer 14, ReadingProgressBar 7, pages 15 = 54) | ✅ | |
-| E2E flow definitions (6 flows) + blog.spec.ts (7 tests) | ✅ | |
+| BlogPost model | ✅ | bilingual, JSON content, SEO, 10 categories, 2 authors |
+| Blog serializers (7) | ✅ | public + admin patterns |
+| Blog views (14 endpoints) | ✅ | public + admin CRUD + utilities |
+| Blog URLs | ✅ | public + admin |
+| BlogPostAdmin | ✅ | organized fieldsets |
+| create_blog_posts command | ✅ | 10 sample posts |
+| Frontend blog pages (6) | ✅ | listing, detail, admin list/create/edit/calendar |
+| Frontend blog components (2) | ✅ | BlogContentRenderer, ReadingProgressBar |
+| blogStore | ✅ | CRUD, calendar, JSON import, cover upload |
+| Blog i18n messages | ✅ | en.json, es.json |
+| Backend blog tests | ✅ | 8 model + 16 view tests |
+| Frontend blog unit tests | ✅ | 54 tests |
+| Blog E2E flows + spec | ✅ | 6 flows, blog.spec.ts |
 
-## Methodology Setup
+## Phase 10 — Test Coverage Expansion
 | Task | Status | Notes |
 |------|--------|-------|
-| docs/methodology/ (PRD, technical, architecture) | ✅ | |
+| Backend tests: 56 files | ✅ | Models, serializers, views, services, utils, commands |
+| Frontend unit tests: 100 files | ✅ | Pages, components, stores, hooks, services |
+| E2E specs: 14 files | 🔧 | Covers auth, public, app flows |
+| E2E flow definitions: 75 flows | ✅ | P1–P4 priority levels |
+
+## Methodology
+| Task | Status | Notes |
+|------|--------|-------|
+| docs/methodology/ (7 core files) | ✅ | Refreshed 2026-03-26 |
 | tasks/ directory | ✅ | |
-| .windsurf/rules/methodology/ | ✅ | |
-| error-documentation.md | ✅ | |
-| lessons-learned.md | ✅ | |
+| Claude Code skills | ✅ | 15+ skills configured |
+| Error documentation | ✅ | 4 resolved issues |
+| Lessons learned | ✅ | |
+
+## Phase 11 — Methodology Recommendations
+| Task | Status | Notes |
+|------|--------|-------|
+| S1: factory-boy factories (24 classes) | ✅ | factories.py + conftest.py + helpers.py refactored, all tests pass |
+| S2: P1 E2E flow coverage audit | ✅ | All 75/75 flows already have @flow: tags |
+| S3: Fix CLAUDE.md stale references | ✅ | Removed mirror refs, updated flow count to 75, fixed model/store counts |
+
+## Known Issues
+- Wompi payment SDK not integrated (placeholder only)

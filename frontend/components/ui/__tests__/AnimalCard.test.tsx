@@ -53,19 +53,19 @@ describe('AnimalCard', () => {
   });
 
   it('renders dog icon for dog species', () => {
-    const { container } = render(<AnimalCard animal={mockAnimals[0]} />);
-    expect(container.querySelector('svg.lucide-dog')).toBeInTheDocument();
+    render(<AnimalCard animal={mockAnimals[0]} />);
+    expect(screen.getByTestId('icon-dog')).toBeInTheDocument();
   });
 
   it('renders cat icon for cat species', () => {
-    const { container } = render(<AnimalCard animal={mockAnimals[1]} />);
-    expect(container.querySelector('svg.lucide-cat')).toBeInTheDocument();
+    render(<AnimalCard animal={mockAnimals[1]} />);
+    expect(screen.getByTestId('icon-cat')).toBeInTheDocument();
   });
 
   it('renders paw icon for other species', () => {
     const otherAnimal = { ...mockAnimals[0], species: 'rabbit' as never };
-    const { container } = render(<AnimalCard animal={otherAnimal} />);
-    expect(container.querySelector('svg.lucide-paw-print')).toBeInTheDocument();
+    render(<AnimalCard animal={otherAnimal} />);
+    expect(screen.getByTestId('icon-other')).toBeInTheDocument();
   });
 
   it('hides gender badge when gender is unknown', () => {

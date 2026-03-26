@@ -35,8 +35,8 @@ describe('ShelterDonationsPage', () => {
 
   it('renders loading skeleton when loading', () => {
     setupMock({ loading: true });
-    const { container } = render(<ShelterDonationsPage />);
-    expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
+    render(<ShelterDonationsPage />);
+    expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
   });
 
   it('renders empty message when no donations exist', () => {

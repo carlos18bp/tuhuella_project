@@ -65,7 +65,7 @@ export default function MiIntencionPage() {
       </p>
 
       {loading ? (
-        <div className="mt-8 max-w-lg space-y-4">
+        <div data-testid="loading-skeleton" className="mt-8 max-w-lg space-y-4">
           <div className="rounded-xl border border-border-primary p-6">
             <div className="h-5 animate-shimmer rounded w-2/3" />
             <div className="h-20 animate-shimmer rounded mt-4" />

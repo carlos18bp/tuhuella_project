@@ -37,10 +37,11 @@ test.describe('Animal Browse & Detail', () => {
     await speciesFilter.getByRole('button', { name: 'Perros' }).click();
 
     // Wait for the filtered API call
-    await page.waitForResponse(
+    const response = await page.waitForResponse(
       (resp) => resp.url().includes('/api/animals') && resp.url().includes('species=dog'),
       { timeout: 10_000 }
     );
+    expect(response.status()).toBe(200);
   });
 
   test('should navigate to animal detail from listing', { tag: [...ANIMAL_DETAIL] }, async ({ page }) => {

@@ -57,7 +57,7 @@ export default function ShelterDashboardPage() {
   if (loading) {
     return (
       <div className="mx-auto max-w-[1400px] px-6 py-10">
-        <div className="space-y-4">
+        <div data-testid="loading-skeleton" className="space-y-4">
           <div className="h-8 animate-shimmer rounded w-1/3" />
           <div className="h-4 animate-shimmer rounded w-1/2" />
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">

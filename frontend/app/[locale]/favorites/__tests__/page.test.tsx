@@ -44,4 +44,52 @@ describe('FavoritosPage', () => {
     expect(screen.getByText('Luna')).toBeInTheDocument();
     expect(screen.getByText(/Perro · Happy Paws/)).toBeInTheDocument();
   });
+
+  it('renders loading skeletons when loading is true', () => {
+    useFavoriteStore.setState({
+      favorites: [],
+      loading: true,
+      fetchFavorites: jest.fn(),
+    });
+
+    render(<FavoritosPage />);
+    const skeletons = document.querySelectorAll('.animate-shimmer');
+    expect(skeletons.length).toBeGreaterThan(0);
+  });
+
+  it('renders cat species label for cat favorite', () => {
+    useFavoriteStore.setState({
+      favorites: [
+        {
+          id: 2,
+          animal: 20,
+          animal_name: 'Michi',
+          animal_species: 'cat',
+          shelter_name: 'Cat Rescue',
+          created_at: '2026-01-05T00:00:00Z',
+        },
+      ],
+    });
+
+    render(<FavoritosPage />);
+    expect(screen.getByText(/Gato · Cat Rescue/)).toBeInTheDocument();
+  });
+
+  it('renders other species label for non-dog non-cat favorite', () => {
+    useFavoriteStore.setState({
+      favorites: [
+        {
+          id: 3,
+          animal: 30,
+          animal_name: 'Coney',
+          animal_species: 'rabbit',
+          shelter_name: 'Zoo Rescue',
+          created_at: '2026-01-10T00:00:00Z',
+        },
+      ],
+    });
+
+    render(<FavoritosPage />);
+    expect(screen.getByText(/Otro · Zoo Rescue/)).toBeInTheDocument();
+  });
 });

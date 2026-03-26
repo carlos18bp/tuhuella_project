@@ -47,4 +47,77 @@ describe('MisDonacionesPage', () => {
     expect(screen.getByText('Pagada')).toBeInTheDocument();
     expect(screen.getByText('Medical Fund')).toBeInTheDocument();
   });
+
+  it('renders loading skeletons when loading is true', () => {
+    useDonationStore.setState({
+      donations: [],
+      loading: true,
+      fetchDonations: jest.fn(),
+    });
+
+    render(<MisDonacionesPage />);
+    const skeletons = document.querySelectorAll('.animate-shimmer');
+    expect(skeletons.length).toBeGreaterThan(0);
+  });
+
+  it('renders pending status as raw value for non-paid donation', () => {
+    useDonationStore.setState({
+      donations: [
+        {
+          id: 2,
+          user: 1,
+          user_email: 'test@example.com',
+          amount: '20000.00',
+          status: 'pending',
+          created_at: '2026-02-01T00:00:00Z',
+          campaign_title: null,
+          shelter_name: null,
+        },
+      ],
+    });
+
+    render(<MisDonacionesPage />);
+    expect(screen.getByText('pending')).toBeInTheDocument();
+  });
+
+  it('renders donation without campaign title when campaign_title is null', () => {
+    useDonationStore.setState({
+      donations: [
+        {
+          id: 3,
+          user: 1,
+          user_email: 'test@example.com',
+          amount: '15000.00',
+          status: 'paid',
+          created_at: '2026-02-10T00:00:00Z',
+          campaign_title: null,
+          shelter_name: 'Hogar Animal',
+        },
+      ],
+    });
+
+    render(<MisDonacionesPage />);
+    expect(screen.getByText('Hogar Animal')).toBeInTheDocument();
+    expect(screen.queryByText(/null/)).not.toBeInTheDocument();
+  });
+
+  it('renders donation without shelter name when shelter_name is null', () => {
+    useDonationStore.setState({
+      donations: [
+        {
+          id: 4,
+          user: 1,
+          user_email: 'test@example.com',
+          amount: '10000.00',
+          status: 'paid',
+          created_at: '2026-03-01T00:00:00Z',
+          campaign_title: 'Vacunación',
+          shelter_name: null,
+        },
+      ],
+    });
+
+    render(<MisDonacionesPage />);
+    expect(screen.getByText('Vacunación')).toBeInTheDocument();
+  });
 });

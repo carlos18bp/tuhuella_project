@@ -41,9 +41,8 @@ describe('BlogListingPage', () => {
 
   it('renders loading spinner when loading', () => {
     setupMock({ loading: true });
-    const { container } = render(<BlogListingPage />);
-    const spinner = container.querySelector('.animate-spin');
-    expect(spinner).toBeInTheDocument();
+    render(<BlogListingPage />);
+    expect(screen.getByRole('status')).toBeInTheDocument();
   });
 
   it('renders error message when error occurs', () => {

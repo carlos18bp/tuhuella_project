@@ -79,7 +79,7 @@ export default function ShelterUpdatesPage() {
       </div>
 
       {loading ? (
-        <div className="mt-8 space-y-4">
+        <div role="status" aria-label="loading" className="mt-8 space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="rounded-xl border border-border-primary p-5 animate-pulse">
               <div className="h-5 bg-surface-tertiary rounded w-1/3" />
@@ -91,7 +91,7 @@ export default function ShelterUpdatesPage() {
       ) : (
         <div className="mt-8 space-y-4">
           {updates.map((update) => (
-            <div key={update.id} className="rounded-xl border border-border-primary bg-surface-primary p-5 shadow-sm">
+            <div key={update.id} role="article" className="rounded-xl border border-border-primary bg-surface-primary p-5 shadow-sm">
               <div className="flex gap-4">
                 {update.image_url && (
                   <img src={update.image_url} alt={update.title} className="w-20 h-20 rounded-xl object-cover flex-shrink-0" />

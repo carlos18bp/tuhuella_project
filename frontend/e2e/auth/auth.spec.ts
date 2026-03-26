@@ -213,8 +213,10 @@ test.describe('Authentication', () => {
     await waitForPageLoad(page);
 
     // The Google login button or OAuth container should be present
-    const googleElement = page.locator('[data-testid="google-login"], iframe[src*="accounts.google.com"], button:has-text("Google"), div[id*="google"]');
-    const hasGoogle = await googleElement.first().isVisible({ timeout: 5000 }).catch(() => false);
+    const googleByTestId = page.getByTestId('google-login');
+    const googleByRole = page.getByRole('button', { name: /Google/i });
+    const googleElement = googleByTestId.or(googleByRole);
+    const hasGoogle = await googleElement.isVisible({ timeout: 5000 }).catch(() => false);
 
     // Google OAuth may render as an iframe or button depending on SDK load
     // At minimum, verify the sign-in page loaded correctly

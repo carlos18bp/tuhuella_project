@@ -48,4 +48,79 @@ describe('MisApadrinamientosPage', () => {
     expect(screen.getByText('Activo')).toBeInTheDocument();
     expect(screen.getByText('Cat Haven')).toBeInTheDocument();
   });
+
+  it('renders loading skeletons when loading is true', () => {
+    useSponsorshipStore.setState({
+      sponsorships: [],
+      loading: true,
+      fetchSponsorships: jest.fn(),
+    });
+
+    render(<MisApadrinamientosPage />);
+    const skeletons = document.querySelectorAll('.animate-shimmer');
+    expect(skeletons.length).toBeGreaterThan(0);
+  });
+
+  it('renders one-time frequency label for non-monthly sponsorship', () => {
+    useSponsorshipStore.setState({
+      sponsorships: [
+        {
+          id: 2,
+          user: 1,
+          animal: 2,
+          animal_name: 'Rex',
+          shelter_name: 'Dog Rescue',
+          amount: '50000.00',
+          frequency: 'once',
+          status: 'active',
+          created_at: '2026-02-01T00:00:00Z',
+        },
+      ],
+    });
+
+    render(<MisApadrinamientosPage />);
+    expect(screen.getByText(/único/)).toBeInTheDocument();
+  });
+
+  it('renders inactive status label for non-active sponsorship', () => {
+    useSponsorshipStore.setState({
+      sponsorships: [
+        {
+          id: 3,
+          user: 1,
+          animal: 3,
+          animal_name: 'Luna',
+          shelter_name: null,
+          amount: '20000.00',
+          frequency: 'monthly',
+          status: 'cancelled',
+          created_at: '2026-03-01T00:00:00Z',
+        },
+      ],
+    });
+
+    render(<MisApadrinamientosPage />);
+    expect(screen.getByText('cancelled')).toBeInTheDocument();
+  });
+
+  it('does not render shelter name when shelter_name is null', () => {
+    useSponsorshipStore.setState({
+      sponsorships: [
+        {
+          id: 4,
+          user: 1,
+          animal: 4,
+          animal_name: 'Coco',
+          shelter_name: null,
+          amount: '10000.00',
+          frequency: 'monthly',
+          status: 'active',
+          created_at: '2026-03-01T00:00:00Z',
+        },
+      ],
+    });
+
+    render(<MisApadrinamientosPage />);
+    expect(screen.getByText('Coco')).toBeInTheDocument();
+  });
 });

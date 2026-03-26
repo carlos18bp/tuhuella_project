@@ -30,9 +30,9 @@ test.describe('Blog — Public', () => {
       { timeout: 10_000 },
     );
 
-    // Should render at least one post card or a featured post
-    const articles = page.locator('a[href*="/blog/"]');
-    await expect(articles.first()).toBeVisible({ timeout: 10_000 });
+    // Should render at least one post card
+    const postCount = await page.getByTestId('post-card').count();
+    expect(postCount).toBeGreaterThan(0);
   });
 
   test('should navigate to blog post detail page', { tag: [...BLOG_DETAIL] }, async ({ page }) => {
@@ -46,7 +46,7 @@ test.describe('Blog — Public', () => {
     );
 
     // Click on the first blog post link
-    const firstPostLink = page.locator('a[href*="/blog/"]').first();
+    const firstPostLink = page.getByTestId('post-card').first();
     await expect(firstPostLink).toBeVisible({ timeout: 10_000 });
     await firstPostLink.click();
 

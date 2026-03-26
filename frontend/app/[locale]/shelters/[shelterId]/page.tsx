@@ -26,7 +26,7 @@ export default function ShelterDetailPage() {
 
   if (loading || !shelter) {
     return (
-      <div className="mx-auto max-w-[1400px] px-6 py-10 space-y-4">
+      <div role="status" aria-label="loading" className="mx-auto max-w-[1400px] px-6 py-10 space-y-4">
         <div className="h-64 animate-shimmer rounded-2xl" />
         <div className="h-8 animate-shimmer rounded w-1/3" />
         <div className="h-4 animate-shimmer rounded w-1/2" />
@@ -133,7 +133,7 @@ export default function ShelterDetailPage() {
 
       {/* Lightbox */}
       {lightboxIndex !== null && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setLightboxIndex(null)}>
+        <div role="dialog" aria-label="Lightbox" className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setLightboxIndex(null)}>
           <button className="absolute top-4 right-4 text-white hover:text-stone-300" onClick={() => setLightboxIndex(null)}>
             <X className="h-8 w-8" />
           </button>

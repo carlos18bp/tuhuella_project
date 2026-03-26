@@ -39,6 +39,7 @@ function PostCard({ post }: { post: BlogPost }) {
   return (
     <Link
       href={ROUTES.BLOG_DETAIL(post.slug)}
+      data-testid="post-card"
       className="group bg-surface-primary rounded-2xl border border-border-primary/60 overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col"
     >
       {post.cover_image && (
@@ -186,7 +187,7 @@ export default function BlogListingPage() {
 
         {loading && (
           <div className="flex justify-center py-20">
-            <div className="w-8 h-8 border-2 border-teal-500/30 border-t-teal-500 rounded-full animate-spin" />
+            <div role="status" className="w-8 h-8 border-2 border-teal-500/30 border-t-teal-500 rounded-full animate-spin" />
           </div>
         )}
 

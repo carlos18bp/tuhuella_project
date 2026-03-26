@@ -25,7 +25,7 @@ Animal shelters in Colombia and Latin America lack centralized digital tools to:
 ### 1. Animal Discovery & Adoption
 - Browse animals with filters (species, size, age, gender)
 - View animal detail with gallery, medical info, special needs
-- Submit adoption application with structured form
+- Submit adoption application with structured form wizard
 - Track application status (pending → reviewing → approved/rejected)
 
 ### 2. Sponsorship & Donations
@@ -33,6 +33,7 @@ Animal shelters in Colombia and Latin America lack centralized digital tools to:
 - Donations to shelters or campaigns
 - Campaign progress tracking with goal/raised amounts
 - Payment integration (Wompi — placeholder)
+- Payment confirmation flow
 
 ### 3. Shelter Management
 - Shelter onboarding and verification flow
@@ -40,6 +41,8 @@ Animal shelters in Colombia and Latin America lack centralized digital tools to:
 - Adoption application review workflow
 - Campaign management
 - Donation tracking dashboard
+- Update posts (linked to campaigns/animals)
+- Shelter settings management
 
 ### 4. Adopter Intent ("Busco Adoptar")
 - Adopters publish their preferences (species, size, age)
@@ -49,22 +52,36 @@ Animal shelters in Colombia and Latin America lack centralized digital tools to:
 ### 5. Platform Administration
 - Shelter verification approval
 - Content moderation
-- Payment oversight
-- Platform metrics dashboard
+- Payment oversight and audit
+- Platform metrics dashboard (summary + detailed)
 
-### 6. Content & Notifications
+### 6. Blog System
+- Bilingual blog posts (Spanish/English) with JSON structured content
+- 10 animal-welfare categories, 2 authors
+- Public listing/detail pages with reading progress bar
+- Admin CRUD, duplicate, cover upload, calendar view, JSON template
+- SEO metadata support
+
+### 7. Content & Notifications
 - Shelter update posts (linked to campaigns/animals)
 - Notification preferences per user
-- Notification log history
+- Notification bell + log history
+
+### 8. Supporting Features
+- FAQ page with accordion
+- Strategic allies page
+- Volunteer positions
+- About, Terms, Work With Us pages
 
 ## Non-Functional Requirements
 
 - **i18n**: Spanish (default) and English via next-intl
 - **Auth**: JWT + Google OAuth
-- **Design**: Stone palette with teal/amber/emerald accents (Tenndalux-derived)
+- **Design**: Stone palette with teal/amber/emerald accents
 - **Performance**: GSAP scroll animations, Swiper galleries, Framer Motion transitions
 - **Mobile**: Fully responsive with mobile menu
 - **Security**: CSRF, input validation, no hardcoded secrets
+- **Dark mode**: Theme toggle support
 
 ## Success Metrics
 

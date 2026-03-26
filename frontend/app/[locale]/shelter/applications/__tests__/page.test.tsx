@@ -37,8 +37,8 @@ describe('ShelterApplicationsPage', () => {
 
   it('renders loading skeleton when loading', () => {
     setupMock({ loading: true });
-    const { container } = render(<ShelterApplicationsPage />);
-    expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
+    render(<ShelterApplicationsPage />);
+    expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
   });
 
   it('renders empty message when no applications exist', () => {

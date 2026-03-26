@@ -133,6 +133,7 @@ function RenderSection({ section, index }: { section: Section; index: number }) 
           <img
             src={section.image.url}
             alt={section.image.alt || ''}
+            data-testid="section-image"
             className="w-full rounded-xl object-cover max-h-[500px]"
             loading="lazy"
           />

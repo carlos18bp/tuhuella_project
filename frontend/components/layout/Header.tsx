@@ -192,7 +192,7 @@ export default function Header() {
                   )}
                 </button>
                 {bellOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-border-primary bg-surface-elevated shadow-xl z-50 overflow-hidden">
+                  <div data-testid="notification-dropdown" className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-border-primary bg-surface-elevated shadow-xl z-50 overflow-hidden">
                     <div className="flex items-center justify-between px-4 py-3 border-b border-border-tertiary">
                       <span className="text-sm font-semibold text-text-primary">{tNotif('bellTitle')}</span>
                       {unreadCount > 0 && (

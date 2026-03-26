@@ -39,7 +39,7 @@ export default function ShelterSolicitudesPage() {
       <p className="mt-1 text-text-tertiary">Revisa y gestiona las solicitudes recibidas</p>
 
       {loading ? (
-        <div className="mt-8 space-y-4">
+        <div data-testid="loading-skeleton" className="mt-8 space-y-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="rounded-xl border border-border-primary p-5 animate-pulse">
               <div className="h-5 bg-surface-tertiary rounded w-1/3" />
@@ -53,7 +53,7 @@ export default function ShelterSolicitudesPage() {
           {applications.map((app) => {
             const st = statusLabels[app.status] ?? { label: app.status, color: 'bg-surface-tertiary text-text-secondary' };
             return (
-              <div key={app.id} className="rounded-xl border border-border-primary bg-surface-primary p-5">
+              <div key={app.id} role="article" className="rounded-xl border border-border-primary bg-surface-primary p-5">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div>
                     <h3 className="font-semibold text-text-primary">{app.animal_name}</h3>

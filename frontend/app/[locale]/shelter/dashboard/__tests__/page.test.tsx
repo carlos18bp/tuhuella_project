@@ -33,8 +33,8 @@ describe('ShelterDashboardPage', () => {
   it('renders loading skeleton initially', () => {
     mockApi.get.mockReturnValueOnce(new Promise(() => {}));
     setupMock();
-    const { container } = render(<ShelterDashboardPage />);
-    expect(container.querySelector('.animate-shimmer')).toBeInTheDocument();
+    render(<ShelterDashboardPage />);
+    expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
   });
 
   it('renders registration prompt when no shelter found', async () => {
@@ -142,5 +142,71 @@ describe('ShelterDashboardPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Registrar refugio')).toBeInTheDocument();
     });
+  });
+
+  it('renders metrics cards when metrics API succeeds', async () => {
+    const mockMetrics = {
+      total_animals: 12,
+      published_animals: 8,
+      adopted_animals: 4,
+      total_applications: 20,
+      avg_applications_per_animal: 1.67,
+      donations: { total_amount: '500000', total_count: 10, avg_amount: '50000' },
+      sponsorships: { total_amount: '150000', total_count: 3 },
+      avg_adoption_time_days: 14,
+      update_posts_count: 5,
+      active_campaigns: 2,
+    };
+    mockApi.get
+      .mockResolvedValueOnce({ data: [mockShelter] })
+      .mockResolvedValueOnce({ data: mockMetrics });
+    setupMock();
+    render(<ShelterDashboardPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('12')).toBeInTheDocument();
+    });
+    expect(screen.getByText('4')).toBeInTheDocument();
+    expect(screen.getByText('20')).toBeInTheDocument();
+    expect(screen.getByText('14d')).toBeInTheDocument();
+  });
+
+  it('renders avg adoption days as "—" when null', async () => {
+    const mockMetrics = {
+      total_animals: 5,
+      published_animals: 3,
+      adopted_animals: 2,
+      total_applications: 8,
+      avg_applications_per_animal: 1.6,
+      donations: { total_amount: '100000', total_count: 2, avg_amount: '50000' },
+      sponsorships: { total_amount: '0', total_count: 0 },
+      avg_adoption_time_days: null,
+      update_posts_count: 1,
+      active_campaigns: 0,
+    };
+    mockApi.get
+      .mockResolvedValueOnce({ data: [mockShelter] })
+      .mockResolvedValueOnce({ data: mockMetrics });
+    setupMock();
+    render(<ShelterDashboardPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('5')).toBeInTheDocument();
+    });
+    expect(screen.getByText('—')).toBeInTheDocument();
+  });
+
+  it('does not render metrics section when metrics API fails', async () => {
+    mockApi.get
+      .mockResolvedValueOnce({ data: [mockShelter] })
+      .mockRejectedValueOnce(new Error('Metrics error'));
+    setupMock();
+    render(<ShelterDashboardPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Patitas Felices')).toBeInTheDocument();
+    });
+    // Metrics section heading should not be visible (no metrics data)
+    expect(screen.queryByText(/Shelter overview/i)).not.toBeInTheDocument();
   });
 });

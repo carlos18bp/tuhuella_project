@@ -12,7 +12,7 @@ describe('StatusBadge', () => {
 
   it('applies neutral variant styles by default', () => {
     render(<StatusBadge label="Default" />);
-    expect(screen.getByText('Default')).toHaveClass('bg-stone-100', 'text-stone-600');
+    expect(screen.getByText('Default')).toHaveClass('bg-surface-tertiary', 'text-text-secondary');
   });
 
   it('applies success variant styles', () => {

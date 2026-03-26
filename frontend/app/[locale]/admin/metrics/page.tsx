@@ -58,7 +58,7 @@ export default function AdminMetricasPage() {
       <p className="mt-1 text-text-tertiary">{t('adminSubtitle')}</p>
 
       {loading ? (
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div data-testid="loading-skeleton" className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 9 }).map((_, i) => (
             <div key={i} className="rounded-2xl border border-border-primary p-6 animate-pulse">
               <div className="h-10 bg-surface-tertiary rounded w-1/2" />

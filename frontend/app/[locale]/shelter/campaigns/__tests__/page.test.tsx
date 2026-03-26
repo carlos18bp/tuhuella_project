@@ -41,8 +41,8 @@ describe('ShelterCampaignsPage', () => {
 
   it('renders loading skeleton when loading', () => {
     setupMock({ loading: true });
-    const { container } = render(<ShelterCampaignsPage />);
-    expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
+    render(<ShelterCampaignsPage />);
+    expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
   });
 
   it('renders empty message when no campaigns exist', () => {

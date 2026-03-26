@@ -110,4 +110,46 @@ describe('CheckoutApadrinamientoPage', () => {
     const submitBtn = screen.getByRole('button', { name: /Apadrinar/ });
     expect(submitBtn.textContent).toContain('/mes');
   });
+
+  it('falls back to hardcoded amounts when API fails', async () => {
+    mockApi.get.mockRejectedValueOnce(new Error('API error'));
+    render(<CheckoutApadrinamientoPage />);
+    await waitFor(() => {
+      expect(screen.getByText('$15,000/mes')).toBeInTheDocument();
+    });
+    expect(screen.getByText('$30,000/mes')).toBeInTheDocument();
+    expect(screen.getByText('$50,000/mes')).toBeInTheDocument();
+    expect(screen.getByText('$75,000/mes')).toBeInTheDocument();
+    expect(screen.getByText('$200,000/mes')).toBeInTheDocument();
+  });
+
+  it('shows Procesando text while submitting and navigates to confirmation', async () => {
+    render(<CheckoutApadrinamientoPage />);
+    await waitFor(() => {
+      expect(screen.getByText('$30,000/mes')).toBeInTheDocument();
+    });
+    await userEvent.click(screen.getByText('$30,000/mes'));
+    const submitBtn = screen.getByRole('button', { name: /Apadrinar/ });
+    userEvent.click(submitBtn);
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Procesando/ })).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('type=sponsorship'));
+    }, { timeout: 3000 });
+  });
+
+  it('does not submit when amount is zero', async () => {
+    render(<CheckoutApadrinamientoPage />);
+    const form = screen.getByRole('button', { name: /Apadrinar/ }).closest('form') as HTMLFormElement;
+    form.dispatchEvent(new Event('submit', { bubbles: true }));
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it('allows changing payment method to nequi', async () => {
+    render(<CheckoutApadrinamientoPage />);
+    const nequiRadio = screen.getByDisplayValue('nequi');
+    await userEvent.click(nequiRadio);
+    expect(nequiRadio).toBeChecked();
+  });
 });

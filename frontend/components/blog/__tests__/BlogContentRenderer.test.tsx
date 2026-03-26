@@ -172,4 +172,152 @@ describe('BlogContentRenderer', () => {
     expect(screen.getByText('Un perro pequeño')).toBeInTheDocument();
     expect(screen.getByText('Un gato adulto')).toBeInTheDocument();
   });
+
+  it('renders info callout with correct icon and styling', () => {
+    const contentJson = {
+      intro: 'Intro',
+      sections: [
+        { callout: { type: 'info', title: 'Información', text: 'Este es un dato importante.' } },
+      ],
+    };
+    render(<BlogContentRenderer contentJson={contentJson} />);
+    expect(screen.getByText('Información')).toBeInTheDocument();
+    expect(screen.getByText('Este es un dato importante.')).toBeInTheDocument();
+  });
+
+  it('renders note callout with correct icon and styling', () => {
+    const contentJson = {
+      intro: 'Intro',
+      sections: [
+        { callout: { type: 'note', text: 'Una nota sobre el proceso.' } },
+      ],
+    };
+    render(<BlogContentRenderer contentJson={contentJson} />);
+    expect(screen.getByText('Una nota sobre el proceso.')).toBeInTheDocument();
+  });
+
+  it('renders default callout when type is undefined', () => {
+    const contentJson = {
+      intro: 'Intro',
+      sections: [
+        { callout: { text: 'Consejo general sin tipo.' } },
+      ],
+    };
+    render(<BlogContentRenderer contentJson={contentJson} />);
+    expect(screen.getByText('Consejo general sin tipo.')).toBeInTheDocument();
+  });
+
+  it('renders YouTube video embed for standard youtube.com URL', () => {
+    const contentJson = {
+      intro: 'Intro',
+      sections: [
+        { video: { url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', title: 'Video de ejemplo' } },
+      ],
+    };
+    render(<BlogContentRenderer contentJson={contentJson} />);
+    const iframe = screen.getByTitle('Video de ejemplo');
+    expect(iframe).toBeInTheDocument();
+    expect(iframe).toHaveAttribute('src', 'https://www.youtube.com/embed/dQw4w9WgXcQ');
+  });
+
+  it('renders YouTube video embed for youtu.be short URL', () => {
+    const contentJson = {
+      intro: 'Intro',
+      sections: [
+        { video: { url: 'https://youtu.be/dQw4w9WgXcQ', title: 'Video corto' } },
+      ],
+    };
+    render(<BlogContentRenderer contentJson={contentJson} />);
+    const iframe = screen.getByTitle('Video corto');
+    expect(iframe).toBeInTheDocument();
+    expect(iframe).toHaveAttribute('src', 'https://www.youtube.com/embed/dQw4w9WgXcQ');
+  });
+
+  it('does not render video iframe for invalid URL', () => {
+    const contentJson = {
+      intro: 'Intro',
+      sections: [
+        { video: { url: 'not-a-valid-url', title: 'Video inválido' } },
+      ],
+    };
+    render(<BlogContentRenderer contentJson={contentJson} />);
+    expect(screen.queryByTitle('Video inválido')).not.toBeInTheDocument();
+  });
+
+  it('does not render video iframe for youtube.com URL without v param', () => {
+    const contentJson = {
+      intro: 'Intro',
+      sections: [
+        { video: { url: 'https://www.youtube.com/watch', title: 'Video sin ID' } },
+      ],
+    };
+    render(<BlogContentRenderer contentJson={contentJson} />);
+    expect(screen.queryByTitle('Video sin ID')).not.toBeInTheDocument();
+  });
+
+  it('renders image credit as plain text when no credit_url provided', () => {
+    const contentJson = {
+      intro: 'Intro',
+      sections: [
+        { image: { url: 'http://example.com/img.jpg', alt: 'Un animal', credit: 'Foto de Juan' } },
+      ],
+    };
+    render(<BlogContentRenderer contentJson={contentJson} />);
+    expect(screen.getByText('Foto de Juan')).toBeInTheDocument();
+  });
+
+  it('renders image credit as link when credit_url is provided', () => {
+    const contentJson = {
+      intro: 'Intro',
+      sections: [
+        {
+          image: {
+            url: 'http://example.com/img.jpg',
+            alt: 'Un animal',
+            credit: 'Foto de Juan',
+            credit_url: 'https://example.com/juan',
+          },
+        },
+      ],
+    };
+    render(<BlogContentRenderer contentJson={contentJson} />);
+    const link = screen.getByRole('link', { name: 'Foto de Juan' });
+    expect(link).toHaveAttribute('href', 'https://example.com/juan');
+  });
+
+  it('renders quote without author when author is omitted', () => {
+    const contentJson = {
+      intro: 'Intro',
+      sections: [
+        { quote: { text: 'Frase sin autor.' } },
+      ],
+    };
+    render(<BlogContentRenderer contentJson={contentJson} />);
+    expect(screen.getByText(/Frase sin autor/)).toBeInTheDocument();
+    expect(screen.queryByText(/^—/)).not.toBeInTheDocument();
+  });
+
+  it('renders image with empty alt when alt is not provided', () => {
+    const contentJson = {
+      intro: 'Intro',
+      sections: [
+        { image: { url: 'http://example.com/no-alt.jpg' } },
+      ],
+    };
+    render(<BlogContentRenderer contentJson={contentJson} />);
+    const img = screen.getByTestId('section-image');
+    expect(img).toBeInTheDocument();
+    expect(img).toHaveAttribute('alt', '');
+  });
+
+  it('renders YouTube video with default "Video" title when no title provided', () => {
+    const contentJson = {
+      intro: 'Intro',
+      sections: [
+        { video: { url: 'https://www.youtube.com/watch?v=abc123' } },
+      ],
+    };
+    render(<BlogContentRenderer contentJson={contentJson} />);
+    expect(screen.getByTitle('Video')).toBeInTheDocument();
+  });
 });

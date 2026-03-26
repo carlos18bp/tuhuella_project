@@ -96,6 +96,7 @@ export default function NotificationPreferencesPage() {
                           className={`w-10 h-5 rounded-full transition-colors relative ${
                             pref?.enabled ? 'bg-teal-500' : 'bg-stone-200'
                           }`}
+                          data-testid={`toggle-${eventKey}-${ch}`}
                           aria-label={`${t(`events.${eventKey}`)} ${t(`channel_${ch}`)}`}
                         >
                           <span className={`block w-4 h-4 bg-surface-primary rounded-full shadow-sm absolute top-0.5 transition-transform ${

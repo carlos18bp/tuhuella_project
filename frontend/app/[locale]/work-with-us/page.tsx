@@ -60,7 +60,7 @@ export default function WorkWithUsPage() {
         <p className="text-sm text-text-tertiary mt-1">{t('positionsSubtitle')}</p>
 
         {loading ? (
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          <div role="status" aria-label="loading" className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="rounded-2xl border border-border-primary p-6 h-48 animate-shimmer" />
             ))}

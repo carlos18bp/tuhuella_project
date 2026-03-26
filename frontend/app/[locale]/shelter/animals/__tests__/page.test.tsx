@@ -48,8 +48,8 @@ describe('ShelterAnimalsPage', () => {
 
   it('renders loading skeleton when loading', () => {
     setupMock({ loading: true });
-    const { container } = render(<ShelterAnimalsPage />);
-    expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
+    render(<ShelterAnimalsPage />);
+    expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
   });
 
   it('renders empty message when no animals match filter', () => {

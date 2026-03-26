@@ -78,7 +78,7 @@ export default function BlogDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface-secondary">
-        <div className="w-8 h-8 border-2 border-teal-500/30 border-t-teal-500 rounded-full animate-spin" />
+        <div role="status" className="w-8 h-8 border-2 border-teal-500/30 border-t-teal-500 rounded-full animate-spin" />
       </div>
     );
   }

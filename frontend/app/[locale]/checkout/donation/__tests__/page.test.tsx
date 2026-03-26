@@ -98,4 +98,48 @@ describe('CheckoutDonacionPage', () => {
     await userEvent.click(pseRadio);
     expect(pseRadio).toBeChecked();
   });
+
+  it('falls back to hardcoded amounts when API fails', async () => {
+    mockApi.get.mockRejectedValueOnce(new Error('API error'));
+    render(<CheckoutDonacionPage />);
+    await waitFor(() => {
+      expect(screen.getByText('$10,000')).toBeInTheDocument();
+    });
+    expect(screen.getByText('$25,000')).toBeInTheDocument();
+    expect(screen.getByText('$50,000')).toBeInTheDocument();
+    expect(screen.getByText('$100,000')).toBeInTheDocument();
+    expect(screen.getByText('$200,000')).toBeInTheDocument();
+  });
+
+  it('shows Procesando text while submitting', async () => {
+    render(<CheckoutDonacionPage />);
+    await waitFor(() => {
+      expect(screen.getByText('$25,000')).toBeInTheDocument();
+    });
+    await userEvent.click(screen.getByText('$25,000'));
+    const submitBtn = screen.getByRole('button', { name: /Donar/ });
+    // Click submit — the button text changes to "Procesando..." immediately
+    userEvent.click(submitBtn);
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Procesando/ })).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('type=donation'));
+    }, { timeout: 3000 });
+  });
+
+  it('does not submit when amount is zero', async () => {
+    render(<CheckoutDonacionPage />);
+    const form = screen.getByRole('button', { name: /Donar/ }).closest('form') as HTMLFormElement;
+    form.dispatchEvent(new Event('submit', { bubbles: true }));
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it('allows typing a message in the textarea', async () => {
+    render(<CheckoutDonacionPage />);
+    const textarea = screen.getByLabelText(/Mensaje/);
+    await userEvent.type(textarea, 'Gracias por su trabajo');
+    expect(textarea).toHaveValue('Gracias por su trabajo');
+  });
+
 });

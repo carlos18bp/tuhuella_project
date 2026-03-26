@@ -28,7 +28,7 @@ export default function StrategicAlliesPage() {
       <p className="mt-2 text-text-tertiary max-w-2xl">{t('subtitle')}</p>
 
       {loading ? (
-        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div role="status" aria-label="loading" className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="rounded-2xl border border-border-primary p-6 h-40 animate-shimmer" />
           ))}

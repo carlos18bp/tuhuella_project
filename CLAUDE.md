@@ -322,20 +322,19 @@ flowchart TD
 
     Backend --> BApp[base_feature_app/ — Django app]
     Backend --> BProject[base_feature_project/ — Django project]
-    Backend --> BModels[base_feature_app/models/ — 16 models]
+    Backend --> BModels[base_feature_app/models/ — 20 models]
     Backend --> BServices[base_feature_app/services/]
     Backend --> BViews[base_feature_app/views/]
-    Backend --> BUrls[base_feature_app/urls/ — 13 sub-modules]
+    Backend --> BUrls[base_feature_app/urls/ — 18 sub-modules]
     Backend --> BMedia[media/]
 
     Frontend --> FApp[app/ — Next.js App Router]
     Frontend --> FComponents[components/]
-    Frontend --> FStores[lib/stores/ — 9 Zustand stores]
+    Frontend --> FStores[lib/stores/ — 10 Zustand stores]
     Frontend --> FServices[lib/services/ — http.ts Axios instance]
     Frontend --> FE2E[e2e/ — Playwright]
 
     Docs --> Methodology[methodology/]
-    Docs --> FlowDefs[e2e-flow-definitions.json — mirror]
     Tasks --> ActiveCtx[active_context.md]
     Tasks --> TasksPlan[tasks_plan.md]
 
@@ -429,10 +428,9 @@ source venv/bin/activate && <command>
 
 ### Testing Insights
 
-- 43 user flows defined in `frontend/e2e/flow-definitions.json`
-- Mirror copy in `docs/e2e-flow-definitions.json` — **keep both files in sync**
+- 75 user flows defined in `frontend/e2e/flow-definitions.json` (single source of truth)
 - Playwright E2E tests are sharded into 5 parallel CI jobs
-- Every E2E flow must be registered in both flow-definitions files
+- Every E2E flow must be registered in flow-definitions.json with a `@flow:<id>` tag
 
 ### Methodology Maintenance
 

@@ -71,7 +71,7 @@ export default function AdminBlogListPage() {
     <div className="max-w-[1200px] mx-auto px-6 py-8">
       {/* Confirm modal */}
       {confirmAction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+        <div role="dialog" aria-label={confirmAction.type === 'delete' ? 'Eliminar post' : 'Duplicar post'} className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <div className="bg-surface-primary rounded-2xl shadow-xl p-6 max-w-sm w-full mx-4">
             <h3 className="text-lg font-semibold text-text-primary mb-2">
               {confirmAction.type === 'delete' ? 'Eliminar post' : 'Duplicar post'}
@@ -113,7 +113,7 @@ export default function AdminBlogListPage() {
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <div className="w-6 h-6 border-2 border-teal-500/30 border-t-teal-500 rounded-full animate-spin" />
+          <div role="status" className="w-6 h-6 border-2 border-teal-500/30 border-t-teal-500 rounded-full animate-spin" />
         </div>
       ) : posts.length === 0 ? (
         <div className="bg-surface-primary rounded-xl shadow-sm border border-border-tertiary px-6 py-12 text-center text-text-quaternary text-sm">

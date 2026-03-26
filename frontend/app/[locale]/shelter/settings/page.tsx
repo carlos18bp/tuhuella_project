@@ -78,7 +78,7 @@ export default function ShelterConfiguracionPage() {
   if (loading) {
     return (
       <div className="mx-auto max-w-2xl px-6 py-10">
-        <div className="animate-pulse space-y-4">
+        <div data-testid="loading-skeleton" className="animate-pulse space-y-4">
           <div className="h-8 bg-surface-tertiary rounded w-1/3" />
           <div className="h-40 bg-surface-tertiary rounded" />
         </div>

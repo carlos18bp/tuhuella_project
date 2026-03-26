@@ -14,7 +14,7 @@ test.describe('Campaign Browse & Detail', () => {
     await page.goto('/campaigns');
     await waitForPageLoad(page);
 
-    const campaignLink = page.locator('a[href*="/campaigns/"]').first();
+    const campaignLink = page.getByRole('link').filter({ has: page.getByRole('heading') }).first();
     if (await campaignLink.isVisible({ timeout: 5000 })) {
       await campaignLink.click();
       await page.waitForURL(/.*campaigns\/\d+/, { timeout: 10_000 });
@@ -45,7 +45,7 @@ test.describe('Campaign Browse & Detail', () => {
     await page.goto('/campaigns');
     await waitForPageLoad(page);
 
-    const campaignLink = page.locator('a[href*="/campaigns/"]').first();
+    const campaignLink = page.getByRole('link').filter({ has: page.getByRole('heading') }).first();
     if (await campaignLink.isVisible({ timeout: 5000 })) {
       await campaignLink.click();
       await page.waitForURL(/.*campaigns\/\d+/, { timeout: 10_000 });

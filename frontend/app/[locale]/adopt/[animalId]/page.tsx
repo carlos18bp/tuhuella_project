@@ -61,7 +61,7 @@ export default function AdoptPage() {
 
   if (loading || !animal) {
     return (
-      <div className="mx-auto max-w-2xl px-6 py-10">
+      <div role="status" aria-label="loading" className="mx-auto max-w-2xl px-6 py-10">
         <div className="space-y-4">
           <div className="h-6 animate-shimmer rounded w-1/3" />
           <div className="h-4 animate-shimmer rounded w-2/3" />
@@ -122,7 +122,7 @@ export default function AdoptPage() {
         />
 
         {error && (
-          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <div role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
             {error}
           </div>
         )}

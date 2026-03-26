@@ -9,6 +9,12 @@ jest.mock('@react-oauth/google', () => ({
   ),
 }));
 
+jest.mock('@/components/providers/ThemeProvider', () => ({
+  ThemeProvider: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="theme-provider">{children}</div>
+  ),
+}));
+
 describe('Providers', () => {
   const originalEnv = process.env;
 

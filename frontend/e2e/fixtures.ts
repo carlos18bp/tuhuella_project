@@ -102,3 +102,45 @@ export async function loginAndNavigate(page: any, role: 'adopter' | 'shelter_adm
   // Wait for page to stabilize — may have initial redirect then settle
   await page.waitForLoadState('domcontentloaded', { timeout: 15_000 });
 }
+
+/**
+ * Fill the adoption form wizard fields with default test data.
+ * Expects the wizard to already be visible on the page.
+ */
+export async function fillAdoptionForm(page: any) {
+  // Section 1: Basic info — fill only if empty (may be pre-filled from user profile)
+  const fullNameInput = page.getByLabel(/Nombre completo/i);
+  if (!(await fullNameInput.inputValue())) await fullNameInput.fill('Carlos Pérez');
+  const phoneInput = page.getByLabel(/Teléfono/i);
+  if (!(await phoneInput.inputValue())) await phoneInput.fill('+57 300 123 4567');
+  const emailInput = page.getByLabel(/Correo electrónico/i);
+  if (!(await emailInput.inputValue())) await emailInput.fill('adopter-e2e@example.com');
+  const cityInput = page.getByLabel(/Ciudad/i);
+  if (!(await cityInput.inputValue())) await cityInput.fill('Bogotá');
+
+  // Section 2: Home & context
+  await page.getByLabel(/tipo de vivienda/i).selectOption('apartment');
+  await page.getByLabel(/patio o jardín/i).selectOption('no');
+  await page.getByLabel(/horas al día/i).selectOption('2to4');
+
+  // Section 3: Experience
+  await page.getByLabel(/mascotas anteriormente/i).selectOption('dogs');
+  await page.getByLabel(/mascotas actualmente/i).selectOption('none');
+  await page.getByLabel(/nivel de experiencia/i).selectOption('moderate');
+
+  // Section 4: Compatibility
+  await page.getByLabel(/niños en el hogar/i).selectOption('no');
+  await page.getByLabel(/gatos en el hogar/i).selectOption('no');
+  await page.getByLabel(/otros perros en el hogar/i).selectOption('no');
+
+  // Section 5: Commitment
+  await page.getByLabel(/vacunas del animal/i).check();
+  await page.getByLabel(/esterilizar al animal/i).check();
+  await page.getByLabel(/seguimiento post-adopción/i).check();
+
+  // Section 6: Logistics
+  await page.getByLabel(/recibir al animal/i).fill('Inmediatamente');
+  await page.getByLabel(/transporte para recoger/i).selectOption('yes');
+  await page.getByLabel(/Preferencia de entrega/i).selectOption('flexible');
+  await page.getByLabel(/deseas adoptar/i).fill('Quiero darle un hogar a este animal.');
+}

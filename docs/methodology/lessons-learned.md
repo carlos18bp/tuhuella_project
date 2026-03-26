@@ -5,6 +5,8 @@ description: Project intelligence and lessons learned. Reference for project-spe
 
 # Lessons Learned — Mi Huella
 
+> Last updated: 2026-03-26
+
 This file captures important patterns, preferences, and project intelligence that help work more effectively with this codebase. Updated as new insights are discovered.
 
 ---
@@ -12,10 +14,10 @@ This file captures important patterns, preferences, and project intelligence tha
 ## 1. Architecture Patterns
 
 ### Single Django App: `base_feature_app`
-- All 16 models, views, serializers, and services live in `base_feature_app`
+- All 20 models, views, serializers, and services live in `base_feature_app`
 - App name kept from template to avoid migration headaches
 - Models split into individual files under `base_feature_app/models/`
-- URLs split into 13 sub-modules under `base_feature_app/urls/`
+- URLs split into 18 sub-modules under `base_feature_app/urls/`
 
 ### Role-Based Access
 - Three roles: `adopter` (default), `shelter_admin`, `admin`
@@ -33,6 +35,11 @@ This file captures important patterns, preferences, and project intelligence tha
 - `Shelter.logo`, `Shelter.cover_image`, `Campaign.cover_image` use `SingleImageField`
 - `django-cleanup` auto-deletes orphaned files on model delete
 
+### Notification Model Split
+- Implementation uses `NotificationPreference` + `NotificationLog` (two models)
+- Separates user configuration from delivery records
+- Notification service + templates in separate service files
+
 ---
 
 ## 2. Code Style & Conventions
@@ -43,13 +50,13 @@ This file captures important patterns, preferences, and project intelligence tha
 - Each domain has its own view module: `views/animal.py`, `views/shelter.py`, etc.
 
 ### Frontend: Zustand Stores
-- **All** stores use Zustand with TypeScript types
-- 9 stores: `authStore`, `animalStore`, `shelterStore`, `campaignStore`, `donationStore`, `sponsorshipStore`, `favoriteStore`, `localeStore`, `notificationStore`
+- **10** stores use Zustand with TypeScript types
+- Stores: `authStore`, `animalStore`, `shelterStore`, `campaignStore`, `donationStore`, `sponsorshipStore`, `favoriteStore`, `adoptionStore`, `blogStore`, `notificationStore`
 - HTTP requests go through centralized `lib/services/http.ts` Axios instance
 - Token management via `lib/services/tokens.ts` + `js-cookie`
 
 ### i18n Pattern (next-intl)
-- Locale stored in Zustand `localeStore` with `persist` middleware (cookie)
+- Locale stored in Zustand with `persist` middleware (cookie)
 - `i18n/request.ts` reads locale from cookie on server side
 - Translation files: `messages/en.json`, `messages/es.json`
 - No URL prefix approach — single URL set for all locales
@@ -58,7 +65,7 @@ This file captures important patterns, preferences, and project intelligence tha
 - Backend: snake_case for everything (Python standard)
 - Frontend stores: camelCase file names (`animalStore.ts`)
 - Frontend components: PascalCase (`AnimalCard.tsx`, `ShelterCard.tsx`)
-- Frontend hooks: camelCase with `use` prefix (`useScrollReveal.ts`, `useRequireAuth.ts`)
+- Frontend hooks: camelCase with `use` prefix (`useScrollReveal.ts`, `useRequireAuth.ts`, `useFAQs.ts`)
 - Types: PascalCase in `lib/types.ts` (`Animal`, `Shelter`, `Campaign`)
 - Routes: SCREAMING_SNAKE in `lib/constants.ts` (`ROUTES.ANIMALS`, `ROUTES.SHELTER_DETAIL(id)`)
 
@@ -84,9 +91,10 @@ source venv/bin/activate && <command>
 - Max 20 tests or 3 commands per execution cycle
 
 ### Fake Data Commands
-- 12 management commands create realistic test data
+- 21 management commands create realistic test data (one per model + orchestrator + delete)
 - Run in dependency order via `python manage.py create_fake_data`
 - Delete all via `python manage.py delete_fake_data` (preserves superusers)
+- `seed_amount_options` seeds predefined donation/sponsorship amounts
 - Uses Faker for realistic names, descriptions, etc.
 
 ---
@@ -105,13 +113,15 @@ source venv/bin/activate && <command>
 - **Swiper**: Image carousels via `AnimalGallery` component
 - **Framer Motion**: Page transitions via `app/template.tsx`
 
-### Shared Components (`components/ui/`)
-- `AnimalCard` — animal grid card with species emoji, badges
-- `ShelterCard` — shelter card with verified badge
+### Shared Components (`components/ui/` — 25 components)
+- `AnimalCard`, `AnimalGrid`, `AnimalFilters`, `AnimalGallery` — animal browsing
+- `ShelterCard`, `ShelterProfile` — shelter display
 - `CampaignCard` — campaign card with progress bar
-- `AnimalGallery` — Swiper-based image gallery with fallback emoji
-- `EmptyState` — centered empty state with icon + message
-- `LoadingSpinner` — animated spinner with size variants
+- `AdoptionForm`, `ApplicationStatusBadge`, `ApplicationTimeline` — adoption workflow
+- `CheckoutForm`, `DonationForm`, `PaymentMethodSelector`, `PaymentConfirmation` — payment flow
+- `Hero`, `CTASection`, `HowItWorks`, `StatsCounter` — landing page sections
+- `FAQAccordion`, `MultiSelectDropdown`, `StatusBadge`, `VerifiedBadge`, `ProgressBar` — utility
+- `EmptyState`, `LoadingSpinner` — states
 
 ---
 
@@ -130,10 +140,10 @@ source venv/bin/activate && <command>
 - The `urls.py` file path changed to `urls/__init__.py` and the test was not updated
 
 ### E2E Flow Definitions
-- 43 flows defined in `frontend/e2e/flow-definitions.json`
-- Mirror copy in `docs/e2e-flow-definitions.json` (keep in sync)
+- 75 flows defined in `frontend/e2e/flow-definitions.json` (single source of truth)
 - Every E2E test must have `@flow:<flow-id>` tag
-- Flow definitions document includes priority (P1–P4) and role
+- Flow definitions include priority (P1–P4) and role
+- 14 spec files across auth/, public/, and app/ directories
 
 ### CI Pipeline
 - Playwright E2E tests sharded into 5 parallel jobs

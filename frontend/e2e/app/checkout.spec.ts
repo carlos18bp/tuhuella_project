@@ -1,5 +1,5 @@
 import { test, expect } from '../test-with-coverage';
-import { waitForPageLoad, loginAs, loginAndNavigate } from '../fixtures';
+import { waitForPageLoad, loginAndNavigate } from '../fixtures';
 import { DONATION_CHECKOUT, SPONSORSHIP_CHECKOUT, PAYMENT_CONFIRMATION, DONATION_CHECKOUT_SUBMIT, SPONSORSHIP_CHECKOUT_SUBMIT } from '../helpers/flow-tags';
 
 test.describe('Checkout Flows', () => {

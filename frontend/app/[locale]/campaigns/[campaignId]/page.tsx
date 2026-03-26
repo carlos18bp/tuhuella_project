@@ -56,7 +56,7 @@ export default function CampaignDetailPage() {
 
   if (loading || !campaign) {
     return (
-      <div className="mx-auto max-w-[1400px] px-6 py-10 space-y-4">
+      <div data-testid="loading-skeleton" className="mx-auto max-w-[1400px] px-6 py-10 space-y-4">
         <div className="h-8 animate-shimmer rounded w-1/3" />
         <div className="aspect-[21/9] animate-shimmer rounded-2xl" />
         <div className="h-4 animate-shimmer rounded w-2/3" />
@@ -129,6 +129,7 @@ export default function CampaignDetailPage() {
               </div>
               <div className="w-full h-3 bg-surface-tertiary rounded-full overflow-hidden">
                 <div
+                  data-testid="progress-bar"
                   className="h-full bg-amber-500 rounded-full transition-all progress-shine"
                   style={{ width: `${Math.min(campaign.progress_percentage, 100)}%` }}
                 />

@@ -35,14 +35,15 @@ export default function ReadingProgressBar({ readTimeMinutes = 0, lang = 'es' }:
 
   return (
     <>
-      <div className="fixed top-0 left-0 w-full z-[60] pointer-events-none">
+      <div data-testid="reading-progress-bar" className="fixed top-0 left-0 w-full z-[60] pointer-events-none">
         <div
+          data-testid="reading-progress-fill"
           className="h-[3px] bg-gradient-to-r from-teal-500 to-teal-400 transition-[width] duration-150 ease-out"
           style={{ width: `${progress}%` }}
         />
       </div>
       {showRemaining && (
-        <div className="fixed top-4 right-4 z-40 px-3 py-1.5 rounded-full bg-surface-primary/90 backdrop-blur-sm shadow-sm border border-border-primary/60 text-xs text-text-tertiary pointer-events-none transition-opacity duration-300">
+        <div data-testid="reading-progress-remaining" className="fixed top-4 right-4 z-40 px-3 py-1.5 rounded-full bg-surface-primary/90 backdrop-blur-sm shadow-sm border border-border-primary/60 text-xs text-text-tertiary pointer-events-none transition-opacity duration-300">
           ~{remainingMinutes} min {lang === 'en' ? 'remaining' : 'restantes'}
         </div>
       )}

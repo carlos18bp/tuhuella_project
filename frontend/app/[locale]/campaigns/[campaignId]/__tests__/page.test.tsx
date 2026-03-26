@@ -40,14 +40,14 @@ describe('CampaignDetailPage', () => {
 
   it('renders loading skeleton when loading', () => {
     setupMocks({ loading: true, campaign: null });
-    const { container } = render(<CampaignDetailPage />);
-    expect(container.querySelector('.animate-shimmer')).toBeInTheDocument();
+    render(<CampaignDetailPage />);
+    expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
   });
 
   it('renders loading skeleton when campaign is null', () => {
     setupMocks({ loading: false, campaign: null });
-    const { container } = render(<CampaignDetailPage />);
-    expect(container.querySelector('.animate-shimmer')).toBeInTheDocument();
+    render(<CampaignDetailPage />);
+    expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
   });
 
   it('renders campaign title when loaded', () => {
@@ -115,8 +115,8 @@ describe('CampaignDetailPage', () => {
   it('caps progress bar width at 100%', () => {
     const overCampaign = { ...mockCampaign, progress_percentage: 150 };
     setupMocks({ loading: false, campaign: overCampaign });
-    const { container } = render(<CampaignDetailPage />);
-    const bar = container.querySelector('[style*="width"]');
-    expect(bar?.getAttribute('style')).toContain('100%');
+    render(<CampaignDetailPage />);
+    const bar = screen.getByTestId('progress-bar');
+    expect(bar.getAttribute('style')).toContain('100%');
   });
 });

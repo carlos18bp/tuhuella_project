@@ -33,8 +33,8 @@ describe('ShelterConfigPage', () => {
 
   it('renders loading skeleton initially', () => {
     mockApi.get.mockReturnValueOnce(new Promise(() => {}));
-    const { container } = render(<ShelterConfigPage />);
-    expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
+    render(<ShelterConfigPage />);
+    expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
   });
 
   it('renders no-shelter message when no shelter found', async () => {

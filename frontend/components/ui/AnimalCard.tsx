@@ -22,10 +22,10 @@ export default function AnimalCard({ animal }: AnimalCardProps) {
       <div className="aspect-[4/3] bg-gradient-to-br from-stone-100 to-stone-50 relative">
         <div className="absolute inset-0 flex items-center justify-center text-stone-300">
           {animal.species === 'dog'
-            ? <Dog className="h-16 w-16" strokeWidth={1.2} />
+            ? <Dog data-testid="icon-dog" className="h-16 w-16" strokeWidth={1.2} />
             : animal.species === 'cat'
-              ? <Cat className="h-16 w-16" strokeWidth={1.2} />
-              : <PawPrint className="h-16 w-16" strokeWidth={1.2} />}
+              ? <Cat data-testid="icon-cat" className="h-16 w-16" strokeWidth={1.2} />
+              : <PawPrint data-testid="icon-other" className="h-16 w-16" strokeWidth={1.2} />}
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
         {animal.gender !== 'unknown' && (

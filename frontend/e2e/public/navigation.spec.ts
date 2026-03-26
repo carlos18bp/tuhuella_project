@@ -133,10 +133,10 @@ test.describe('Notification Bell (authenticated)', () => {
     await bellButton.click();
 
     // Verify the notification dropdown opens
-    const dropdown = page.locator('.absolute.right-0.top-full');
+    const dropdown = page.getByTestId('notification-dropdown');
     await expect(dropdown).toBeVisible({ timeout: 5000 });
 
     // Verify dropdown has the notifications title header
-    await expect(dropdown.locator('text=Notificaciones').first()).toBeVisible();
+    await expect(dropdown.getByText('Notificaciones', { exact: true })).toBeVisible();
   });
 });

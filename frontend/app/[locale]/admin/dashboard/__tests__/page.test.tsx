@@ -43,8 +43,8 @@ describe('AdminDashboardPage', () => {
   it('renders loading skeleton initially', () => {
     mockApi.get.mockReturnValueOnce(new Promise(() => {}));
     setupMock();
-    const { container } = render(<AdminDashboardPage />);
-    expect(container.querySelector('.animate-shimmer')).toBeInTheDocument();
+    render(<AdminDashboardPage />);
+    expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
   });
 
   it('renders access denied for non-admin users', () => {
