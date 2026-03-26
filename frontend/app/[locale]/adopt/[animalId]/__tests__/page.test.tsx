@@ -11,7 +11,7 @@ jest.mock('next/navigation', () => ({ useParams: () => ({ animalId: '5' }) }));
 jest.mock('next-intl', () => ({
   useTranslations: (namespace?: string) => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const esMessages = require('/home/dev-env/repos/tuhuella_project/frontend/messages/es.json');
+    const esMessages = require('../../../../../messages/es.json');
     const messages: Record<string, unknown> = namespace
       ? ((esMessages as Record<string, unknown>)[namespace] as Record<string, unknown>) || {}
       : (esMessages as Record<string, unknown>);

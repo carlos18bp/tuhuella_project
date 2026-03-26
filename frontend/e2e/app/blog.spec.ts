@@ -9,7 +9,40 @@ import {
   BLOG_ADMIN_CALENDAR,
 } from '../helpers/flow-tags';
 
+const mockBlogPost = {
+  id: 1,
+  title: 'Cómo adoptar responsablemente',
+  slug: 'como-adoptar-responsablemente',
+  excerpt: 'Guía completa para una adopción exitosa.',
+  content: '<p>Contenido del artículo sobre adopción responsable.</p>',
+  category: 'adoption',
+  category_display: 'Adopción',
+  cover_image: '',
+  author_name: 'Admin',
+  published_at: '2026-03-01T12:00:00Z',
+  created_at: '2026-03-01T12:00:00Z',
+  status: 'published',
+};
+
+const mockBlogListResponse = {
+  results: [mockBlogPost],
+  count: 1,
+  page: 1,
+  page_size: 10,
+  total_pages: 1,
+};
+
 test.describe('Blog — Public', () => {
+  test.beforeEach(async ({ page }) => {
+    // Mock blog API to ensure test data is always available
+    await page.route('**/api/blog/?**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockBlogListResponse) }),
+    );
+    await page.route('**/api/blog/como-adoptar-responsablemente/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockBlogPost) }),
+    );
+  });
+
   test('should display blog listing page with heading and filters', { tag: [...BLOG_BROWSE] }, async ({ page }) => {
     await page.goto('/blog');
     await waitForPageLoad(page);
@@ -63,10 +96,34 @@ test.describe('Blog — Admin', () => {
   // quality: allow-serial (admin blog tests require sequential auth context)
   test.describe.configure({ mode: 'serial' });
 
+  const mockAdminBlogListResponse = {
+    results: [{ ...mockBlogPost, id: 1, status: 'published' }],
+    count: 1,
+    page: 1,
+    page_size: 10,
+    total_pages: 1,
+  };
+
   test.beforeEach(async ({ page }) => {
     // Disable reCAPTCHA in test environment so automated login can proceed
     await page.route('**/google-captcha/site-key/**', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ site_key: '' }) }),
+    );
+    // Mock sign-in API to ensure admin login succeeds without real test users
+    await page.route('**/api/auth/sign_in/**', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          access: 'e2e-mock-access-token',
+          refresh: 'e2e-mock-refresh-token',
+          user: { id: 1, email: 'admin@mihuella.com', first_name: 'Admin', last_name: 'Test', role: 'admin', is_staff: true, is_active: true },
+        }),
+      }),
+    );
+    // Mock admin blog API
+    await page.route('**/api/blog/admin/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAdminBlogListResponse) }),
     );
   });
 

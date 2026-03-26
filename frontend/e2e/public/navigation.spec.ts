@@ -33,6 +33,15 @@ test.describe('Navigation', () => {
   });
 
   test('should navigate from home to refugios', { tag: [...HOME_TO_SHELTERS] }, async ({ page }) => {
+    // Mock shelters API to ensure the shelters section renders on home page
+    const mockShelter = {
+      id: 1, name: 'Patitas Felices', city: 'Bogotá', description: 'Refugio de animales',
+      logo_url: '', cover_image_url: '', animal_count: 10, is_verified: true,
+    };
+    await page.route('**/api/shelters/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([mockShelter]) }),
+    );
+
     await page.goto('/');
     await waitForPageLoad(page);
 
