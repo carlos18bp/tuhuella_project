@@ -105,7 +105,7 @@ export default function BlogDetailPage() {
       <ReadingProgressBar readTimeMinutes={post.read_time_minutes} lang="es" />
 
       {/* Header */}
-      <section className="bg-gradient-to-b from-teal-50 to-stone-50 pt-12 pb-8">
+      <section className="bg-gradient-to-b from-teal-50 to-background pt-12 pb-8">
         <div className="mx-auto max-w-[800px] px-6">
           <Link
             href={ROUTES.BLOG}

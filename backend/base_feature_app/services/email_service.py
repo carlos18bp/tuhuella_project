@@ -2,11 +2,12 @@
 Email service for handling all outbound email notifications.
 
 Centralizes email logic following the service layer pattern.
-Delegates to utility functions that wrap Django's send_mail.
+Delegates to utility functions in email_utils that wrap Django's send_mail.
 """
-from base_feature_app.utils.auth_utils import (
+from base_feature_app.utils.email_utils import (
     send_password_reset_code,
     send_verification_code,
+    send_volunteer_application_notification,
 )
 
 
@@ -45,3 +46,16 @@ class EmailService:
             bool: True if the email was sent successfully, False otherwise.
         """
         return send_verification_code(email, code)
+
+    @staticmethod
+    def send_volunteer_application_notification(application) -> bool:
+        """
+        Send notification to team when a volunteer application is received.
+
+        Args:
+            application: VolunteerApplication instance.
+
+        Returns:
+            bool: True if the email was sent successfully, False otherwise.
+        """
+        return send_volunteer_application_notification(application)

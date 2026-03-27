@@ -146,7 +146,7 @@ export default function CheckoutForm({
 
       {/* Summary + Submit */}
       {numericAmount > 0 && (
-        <div className="rounded-2xl border border-border-primary bg-gradient-to-r from-stone-50 to-white p-4 flex items-center justify-between">
+        <div className="rounded-2xl border border-border-primary bg-gradient-to-r from-surface-secondary to-surface-primary p-4 flex items-center justify-between">
           <span className="text-sm text-text-tertiary">Total</span>
           <span className="text-lg font-bold text-text-primary">${numericAmount.toLocaleString()}</span>
         </div>

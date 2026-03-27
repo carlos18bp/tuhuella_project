@@ -90,15 +90,63 @@ POSITIONS = [
         'icon': 'hand-coins',
         'order': 8,
     },
+    {
+        'category': 'educator',
+        'title_es': 'Educador / Tallerista',
+        'title_en': 'Educator / Workshop Leader',
+        'description_es': 'Dicta charlas y talleres sobre tenencia responsable, primeros auxilios para mascotas y bienestar animal en colegios y comunidades.',
+        'description_en': 'Lead talks and workshops on responsible pet ownership, pet first aid, and animal welfare in schools and communities.',
+        'requirements_es': 'Habilidades de comunicación y pedagogía. Conocimientos en bienestar animal.',
+        'requirements_en': 'Communication and teaching skills. Knowledge of animal welfare.',
+        'icon': 'graduation-cap',
+        'order': 9,
+    },
+    {
+        'category': 'designer',
+        'title_es': 'Diseñador Gráfico',
+        'title_en': 'Graphic Designer',
+        'description_es': 'Crea material visual para campañas, redes sociales y eventos del refugio. Tu creatividad ayuda a darle visibilidad a nuestra causa.',
+        'description_en': 'Create visual materials for campaigns, social media, and shelter events. Your creativity helps give visibility to our cause.',
+        'requirements_es': 'Manejo de herramientas de diseño (Canva, Figma, Adobe). Portfolio deseable.',
+        'requirements_en': 'Proficiency in design tools (Canva, Figma, Adobe). Portfolio desirable.',
+        'icon': 'palette',
+        'order': 10,
+    },
+    {
+        'category': 'translator',
+        'title_es': 'Traductor',
+        'title_en': 'Translator',
+        'description_es': 'Ayuda a traducir contenido de la plataforma, perfiles de animales y comunicaciones para llegar a más personas.',
+        'description_en': 'Help translate platform content, animal profiles, and communications to reach more people.',
+        'requirements_es': 'Dominio del español e inglés. Experiencia en traducción es un plus.',
+        'requirements_en': 'Fluent in Spanish and English. Translation experience is a plus.',
+        'icon': 'languages',
+        'order': 11,
+    },
+    {
+        'category': 'dog_walker',
+        'title_es': 'Paseador de Perros',
+        'title_en': 'Dog Walker',
+        'description_es': 'Saca a pasear a los perros del refugio para que hagan ejercicio y socialicen. Los paseos son esenciales para su bienestar.',
+        'description_en': 'Walk shelter dogs so they get exercise and socialize. Walks are essential for their well-being.',
+        'requirements_es': 'Buena condición física. Experiencia con perros de diferentes tamaños. Disponibilidad entre semana.',
+        'requirements_en': 'Good physical condition. Experience with dogs of different sizes. Weekday availability.',
+        'icon': 'footprints',
+        'order': 12,
+    },
 ]
 
 
 class Command(BaseCommand):
     help = 'Create VolunteerPosition records for Tu Huella'
 
+    def add_arguments(self, parser):
+        parser.add_argument('--count', type=int, default=12, help='Number of positions to create')
+
     def handle(self, *args, **options):
+        count = min(options['count'], len(POSITIONS))
         created = 0
-        for pos_data in POSITIONS:
+        for pos_data in POSITIONS[:count]:
             _, was_created = VolunteerPosition.objects.get_or_create(
                 category=pos_data['category'],
                 defaults=pos_data,

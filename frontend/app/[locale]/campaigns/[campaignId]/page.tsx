@@ -4,7 +4,8 @@ import { Link } from '@/i18n/navigation';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import { ArrowLeft, Calendar, Megaphone, FileText, Camera, X } from 'lucide-react';
+import { ArrowLeft, Calendar, Megaphone, FileText, Camera, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import Image from 'next/image';
 
 import { useCampaignStore } from '@/lib/stores/campaignStore';
 import { useAuthStore } from '@/lib/stores/authStore';
@@ -29,13 +30,14 @@ export default function CampaignDetailPage() {
   const [updates, setUpdates] = useState<any[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
+  // Only fetch updates for completed campaigns
   useEffect(() => {
-    if (campaignId) {
+    if (campaignId && campaign?.status === 'completed') {
       api.get(API_ENDPOINTS.UPDATES, { params: { campaign: campaignId, lang: locale } })
         .then((res) => setUpdates(res.data))
         .catch(() => {});
     }
-  }, [campaignId, locale]);
+  }, [campaignId, locale, campaign?.status]);
 
   const { items: campaignFaqs } = useFAQsByTopic(`campaign-${campaignId}`);
   const { items: generalFaqs } = useFAQsByTopic('campaigns');
@@ -77,11 +79,14 @@ export default function CampaignDetailPage() {
 
       {/* Cover image */}
       {campaign.cover_image_url ? (
-        <div className="mt-6 rounded-2xl overflow-hidden border border-border-primary">
-          <img
+        <div className="relative mt-6 rounded-2xl overflow-hidden border border-border-primary aspect-[21/9]">
+          <Image
             src={campaign.cover_image_url}
             alt={campaign.title}
-            className="w-full aspect-[21/9] object-cover"
+            fill
+            sizes="100vw"
+            className="object-cover"
+            priority
           />
         </div>
       ) : (
@@ -180,32 +185,70 @@ export default function CampaignDetailPage() {
               <button
                 key={idx}
                 onClick={() => setLightboxIndex(idx)}
-                className="rounded-xl overflow-hidden aspect-square hover:opacity-90 transition-opacity"
+                className="relative rounded-xl overflow-hidden aspect-square hover:opacity-90 transition-opacity"
               >
-                <img src={url} alt={`${t('evidenceTitle')} ${idx + 1}`} className="w-full h-full object-cover" />
+                <Image src={url} alt={`${t('evidenceTitle')} ${idx + 1}`} fill sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" className="object-cover" />
               </button>
             ))}
           </div>
         </div>
       )}
 
-      {/* Lightbox */}
+      {/* Lightbox with navigation */}
       {lightboxIndex !== null && campaign.evidence_gallery_urls && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setLightboxIndex(null)}>
-          <button className="absolute top-4 right-4 text-white hover:text-stone-300" onClick={() => setLightboxIndex(null)}>
-            <X className="h-8 w-8" />
+        <div
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setLightboxIndex(null)}
+        >
+          <button
+            className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+            onClick={() => setLightboxIndex(null)}
+          >
+            <X className="h-6 w-6" />
           </button>
+
+          {/* Counter */}
+          <span className="absolute top-5 left-1/2 -translate-x-1/2 text-sm text-white/70 font-medium">
+            {lightboxIndex + 1} / {campaign.evidence_gallery_urls.length}
+          </span>
+
+          {/* Previous */}
+          {campaign.evidence_gallery_urls.length > 1 && (
+            <button
+              className="absolute left-3 md:left-6 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightboxIndex((lightboxIndex - 1 + campaign.evidence_gallery_urls!.length) % campaign.evidence_gallery_urls!.length);
+              }}
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+          )}
+
           <img
             src={campaign.evidence_gallery_urls[lightboxIndex]}
-            alt=""
-            className="max-w-full max-h-[90vh] rounded-lg object-contain"
+            alt={`${t('evidenceTitle')} ${lightboxIndex + 1}`}
+            className="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           />
+
+          {/* Next */}
+          {campaign.evidence_gallery_urls.length > 1 && (
+            <button
+              className="absolute right-3 md:right-6 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightboxIndex((lightboxIndex + 1) % campaign.evidence_gallery_urls!.length);
+              }}
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+          )}
         </div>
       )}
 
-      {/* Updates / Evidence feed */}
-      {updates.length > 0 && (
+      {/* Updates / Evidence feed — only for completed campaigns */}
+      {campaign.status === 'completed' && updates.length > 0 && (
         <div className="mt-16 border-t border-border-primary pt-10">
           <div className="flex items-center gap-2 mb-6">
             <FileText className="h-5 w-5 text-amber-600" />

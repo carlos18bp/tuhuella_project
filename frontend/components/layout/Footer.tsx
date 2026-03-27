@@ -8,6 +8,7 @@ import { useAuthStore } from '@/lib/stores/authStore';
 
 export default function Footer() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const isAuthReady = useAuthStore((s) => s.isAuthReady);
   const t = useTranslations('footer');
   const tNav = useTranslations('nav');
 
@@ -45,7 +46,7 @@ export default function Footer() {
     ],
   };
 
-  const footerLinks = isAuthenticated ? [publicLinks[0], accountLinks, publicLinks[1]] : publicLinks;
+  const footerLinks = (isAuthReady && isAuthenticated) ? [publicLinks[0], accountLinks, publicLinks[1]] : publicLinks;
 
   return (
     <footer className="relative bg-stone-950 mt-16">

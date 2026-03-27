@@ -23,5 +23,6 @@ urlpatterns = [
     path('donation-amounts/', amount_views.donation_amount_list, name='donation-amount-list'),
     path('sponsorship-amounts/', amount_views.sponsorship_amount_list, name='sponsorship-amount-list'),
     path('volunteer-positions/', include('base_feature_app.urls.volunteer_position')),
+    path('volunteer-applications/', include('base_feature_app.urls.volunteer_application')),
     path('strategic-allies/', include('base_feature_app.urls.strategic_ally')),
 ]

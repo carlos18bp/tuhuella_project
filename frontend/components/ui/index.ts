@@ -19,6 +19,7 @@ export { default as PaymentConfirmation } from './PaymentConfirmation';
 export { default as PaymentMethodSelector } from './PaymentMethodSelector';
 export { default as ProgressBar } from './ProgressBar';
 export { default as ShelterCard } from './ShelterCard';
+export { default as ShelterGallery } from './ShelterGallery';
 export { default as ShelterProfile } from './ShelterProfile';
 export { default as StatsCounter } from './StatsCounter';
 export { default as StatusBadge } from './StatusBadge';

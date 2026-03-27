@@ -2,6 +2,7 @@ import copy as _copy
 import logging
 import math
 
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_date
 from rest_framework import status
@@ -39,6 +40,17 @@ def list_blog_posts(request):
     Returns {results, count, page, page_size, total_pages}.
     """
     qs = BlogPost.objects.filter(is_published=True)
+
+    category = request.query_params.get('category', '').strip()
+    search = request.query_params.get('search', '').strip()
+
+    if category:
+        qs = qs.filter(category=category)
+    if search:
+        qs = qs.filter(
+            Q(title_es__icontains=search) | Q(title_en__icontains=search)
+            | Q(excerpt_es__icontains=search) | Q(excerpt_en__icontains=search)
+        )
 
     try:
         page = max(1, int(request.query_params.get('page', 1)))

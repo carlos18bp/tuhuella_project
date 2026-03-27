@@ -16,6 +16,7 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const isAuthReady = useAuthStore((s) => s.isAuthReady);
   const user = useAuthStore((s) => s.user);
   const signOut = useAuthStore((s) => s.signOut);
   const t = useTranslations('nav');
@@ -149,7 +150,12 @@ export default function Header() {
           <LocaleSwitcher />
           <ThemeToggle />
           <div className="w-px h-5 bg-gradient-to-b from-transparent via-border-secondary to-transparent mx-1" />
-          {isAuthenticated ? (
+          {!isAuthReady ? (
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-20 rounded-full bg-surface-hover animate-pulse" />
+              <div className="h-8 w-24 rounded-full bg-surface-hover animate-pulse" />
+            </div>
+          ) : isAuthenticated ? (
             <>
               {user?.role === 'shelter_admin' && (
                 <Link
@@ -322,7 +328,12 @@ export default function Header() {
               <ThemeToggle />
             </div>
             <hr className="my-2 border-border-primary" />
-            {isAuthenticated ? (
+            {!isAuthReady ? (
+              <div className="flex flex-col gap-2 px-3">
+                <div className="h-10 rounded-lg bg-surface-hover animate-pulse" />
+                <div className="h-10 rounded-lg bg-surface-hover animate-pulse" />
+              </div>
+            ) : isAuthenticated ? (
               <>
                 <Link href={ROUTES.FAVORITES} className="px-3 py-3 rounded-lg hover:bg-surface-hover" onClick={() => setMobileOpen(false)}>
                   {t('favorites')}

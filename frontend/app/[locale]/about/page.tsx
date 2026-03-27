@@ -8,7 +8,7 @@ export default function AboutPage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border-primary bg-gradient-to-b from-stone-50 via-teal-50/20 to-stone-50">
+      <section className="relative overflow-hidden border-b border-border-primary bg-gradient-to-b from-surface-secondary via-teal-50/20 to-surface-secondary">
         <div className="mx-auto max-w-[1400px] px-6 py-20 md:py-28 text-center">
           <p className="inline-flex items-center text-xs font-medium text-teal-700 bg-teal-50 border border-teal-200 rounded-full px-3 py-1">
             Nosotros
@@ -190,7 +190,7 @@ export default function AboutPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 bg-gradient-to-b from-teal-50/40 to-stone-50 border-t border-border-primary">
+      <section className="py-16 bg-gradient-to-b from-teal-50/40 to-background border-t border-border-primary">
         <div className="mx-auto max-w-[1400px] px-6 text-center">
           <div className="w-14 h-14 rounded-2xl bg-teal-100 flex items-center justify-center mx-auto">
             <PawPrint className="h-7 w-7 text-teal-600" />

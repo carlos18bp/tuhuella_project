@@ -17,4 +17,5 @@ from .blog_post import BlogPost
 from .faq import FAQTopic, FAQItem
 from .amount_option import DonationAmountOption, SponsorshipAmountOption
 from .volunteer_position import VolunteerPosition
+from .volunteer_application import VolunteerApplication
 from .strategic_ally import StrategicAlly

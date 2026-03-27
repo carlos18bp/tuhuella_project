@@ -24,8 +24,8 @@ export default function AnimalDetailPage() {
   const loading = useAnimalStore((s) => s.loading);
   const fetchAnimal = useAnimalStore((s) => s.fetchAnimal);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const favorites = useFavoriteStore((s) => s.favorites);
   const toggleFavorite = useFavoriteStore((s) => s.toggleFavorite);
-  const isFavorited = useFavoriteStore((s) => s.isFavorited);
   const fetchFavorites = useFavoriteStore((s) => s.fetchFavorites);
   const { items: adoptionFaqs } = useFAQsByTopic('adoption');
 
@@ -73,18 +73,21 @@ export default function AnimalDetailPage() {
               <h1 className="text-3xl font-bold tracking-[-0.02em] text-text-primary">{animal.name}</h1>
               <p className="text-text-tertiary mt-1">{animal.shelter_name} · {animal.shelter_city}</p>
             </div>
-            {isAuthenticated && (
-              <button
-                type="button"
-                aria-label="favorite"
-                onClick={() => toggleFavorite(animal.id)}
-                className={`p-2.5 rounded-full transition-all duration-200 shadow-sm ${
-                  isFavorited(animal.id) ? 'bg-red-50 text-red-500' : 'bg-surface-tertiary text-text-quaternary hover:bg-surface-hover'
-                }`}
-              >
-                <Heart className={`h-5 w-5 ${isFavorited(animal.id) ? 'fill-current' : ''}`} />
-              </button>
-            )}
+            {isAuthenticated && (() => {
+              const favorited = favorites.some((f) => f.animal === animal.id);
+              return (
+                <button
+                  type="button"
+                  aria-label="favorite"
+                  onClick={() => toggleFavorite(animal.id)}
+                  className={`p-2.5 rounded-full transition-all duration-200 shadow-sm ${
+                    favorited ? 'bg-red-50 text-red-500' : 'bg-surface-tertiary text-text-quaternary hover:bg-surface-hover'
+                  }`}
+                >
+                  <Heart className={`h-5 w-5 ${favorited ? 'fill-current' : ''}`} />
+                </button>
+              );
+            })()}
           </div>
 
           <div className="mt-6 flex flex-wrap gap-2">

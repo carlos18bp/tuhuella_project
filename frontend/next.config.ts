@@ -21,7 +21,6 @@ try {
 const nextConfig: NextConfig = {
   skipTrailingSlashRedirect: true,
   images: {
-    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'http',
@@ -48,6 +47,16 @@ const nextConfig: NextConfig = {
         pathname: '/media/**',
       },
       ...(backendRemotePattern ? [backendRemotePattern] : []),
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'fastly.picsum.photos',
+        pathname: '/**',
+      },
     ],
   },
   async rewrites() {

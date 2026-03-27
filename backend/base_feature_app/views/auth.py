@@ -415,6 +415,8 @@ def validate_token(request):
             'email': user.email,
             'first_name': user.first_name,
             'last_name': user.last_name,
+            'phone': user.phone,
+            'city': user.city,
             'role': user.role,
             'is_staff': user.is_staff,
         }

@@ -24,7 +24,7 @@ const ctaStyles: Record<string, string> = {
 
 export default function Hero({ badge, title, subtitle, ctas = [], children }: HeroProps) {
   return (
-    <section className="relative overflow-hidden border-b border-border-primary bg-gradient-to-b from-stone-50 via-teal-50/30 to-stone-50">
+    <section className="relative overflow-hidden border-b border-border-primary bg-gradient-to-b from-surface-secondary via-teal-50/30 to-surface-secondary">
       <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-teal-200/20 blur-3xl pointer-events-none" />
       <div className="absolute -bottom-10 -left-10 w-48 h-48 rounded-full bg-amber-200/15 blur-3xl pointer-events-none" />
       <div className="mx-auto max-w-[1400px] px-6 py-20 md:py-28">

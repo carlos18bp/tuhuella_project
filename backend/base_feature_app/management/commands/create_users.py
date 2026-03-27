@@ -28,7 +28,8 @@ class Command(BaseCommand):
         created = 0
         for i in range(count):
             email = fake.unique.email()
-            role = roles[i % len(roles)]
+            # ~2:1 ratio of adopters to shelter_admins
+            role = roles[0] if i % 3 != 0 else roles[1]
             User.objects.create_user(
                 email=email,
                 password='testpass123',

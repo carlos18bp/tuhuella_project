@@ -71,7 +71,7 @@ export default function ForgotPasswordPage() {
   const inputClasses = "border border-border-primary rounded-xl px-3.5 py-2.5 w-full bg-surface-primary text-text-primary placeholder:text-text-quaternary focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-colors";
 
   return (
-    <main className="min-h-[calc(100vh-72px)] flex items-center justify-center px-6 py-12 bg-gradient-to-b from-stone-50 to-stone-100/50">
+    <main className="min-h-[calc(100vh-72px)] flex items-center justify-center px-6 py-12 bg-gradient-to-b from-surface-secondary to-surface-tertiary/50">
       <div className="w-full max-w-md bg-surface-primary border border-border-primary rounded-2xl p-8 shadow-sm">
         <div className="flex items-center gap-2 mb-6">
           <div className="h-10 w-10 rounded-xl bg-teal-50 flex items-center justify-center">

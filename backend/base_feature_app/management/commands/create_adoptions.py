@@ -23,8 +23,13 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING('Need adopter users and published animals.'))
             return
 
+        # Pre-load existing pairs to avoid unique constraint violations
+        existing = set(
+            AdoptionApplication.objects.values_list('user_id', 'animal_id')
+        )
+
         created = 0
-        seen = set()
+        seen = set(existing)
         for _ in range(count):
             user = random.choice(adopters)
             animal = random.choice(animals)

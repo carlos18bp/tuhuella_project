@@ -25,8 +25,13 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING('Need verified shelters and public active intents.'))
             return
 
+        # Pre-load existing pairs to avoid unique constraint violations
+        existing_pairs = set(
+            ShelterInvite.objects.values_list('shelter_id', 'adopter_intent_id')
+        )
+
         created = 0
-        seen_pairs = set()
+        seen_pairs = set(existing_pairs)
         attempts = 0
         while created < count and attempts < count * 3:
             attempts += 1

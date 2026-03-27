@@ -11,6 +11,10 @@ class VolunteerPosition(models.Model):
         EVENT_COORDINATOR = 'event_coordinator', 'Event Coordinator'
         FOSTER_HOME = 'foster_home', 'Foster Home'
         FUNDRAISER = 'fundraiser', 'Fundraiser'
+        EDUCATOR = 'educator', 'Educator'
+        DESIGNER = 'designer', 'Graphic Designer'
+        TRANSLATOR = 'translator', 'Translator'
+        DOG_WALKER = 'dog_walker', 'Dog Walker'
 
     title_es = models.CharField(max_length=200)
     title_en = models.CharField(max_length=200, blank=True)

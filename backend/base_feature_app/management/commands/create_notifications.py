@@ -63,5 +63,5 @@ class Command(BaseCommand):
             logs_created += 1
 
         self.stdout.write(self.style.SUCCESS(
-            f'Created {prefs_created} notification preferences and {logs_created} notification logs'
+            f'Created {prefs_created} prefs and {logs_created} logs'
         ))

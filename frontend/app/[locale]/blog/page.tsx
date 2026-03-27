@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Link } from '@/i18n/navigation';
 import { useBlogStore } from '@/lib/stores/blogStore';
 import { ROUTES } from '@/lib/constants';
@@ -76,31 +76,36 @@ function PostCard({ post }: { post: BlogPost }) {
   );
 }
 
-function FeaturedPost({ post }: { post: BlogPost }) {
+function HeroPost({ post }: { post: BlogPost }) {
   const author = AUTHORS[post.author] || AUTHORS['tuhuella-team'];
+  const categoryLabel = CATEGORIES.find((c) => c.slug === post.category)?.label || post.category;
   return (
     <Link
       href={ROUTES.BLOG_DETAIL(post.slug)}
       className="group relative bg-surface-primary rounded-2xl border border-border-primary/60 overflow-hidden hover:shadow-xl transition-all duration-300 grid md:grid-cols-2 gap-0"
     >
-      {post.cover_image && (
-        <div className="relative aspect-[16/10] md:aspect-auto overflow-hidden bg-surface-tertiary">
+      <div className="relative aspect-[16/10] md:aspect-auto md:min-h-[280px] overflow-hidden bg-surface-tertiary">
+        {post.cover_image ? (
           <img
             src={post.cover_image}
             alt={post.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
           />
-        </div>
-      )}
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-teal-100 to-teal-50 flex items-center justify-center">
+            <span className="text-6xl opacity-30">📝</span>
+          </div>
+        )}
+      </div>
       <div className="p-8 flex flex-col justify-center">
         <span className="text-xs font-medium text-teal-600 uppercase tracking-wider mb-3">
-          ⭐ Destacado · {CATEGORIES.find((c) => c.slug === post.category)?.label || post.category}
+          {post.is_featured ? '⭐ ' : ''}{categoryLabel}
         </span>
         <h2 className="text-2xl md:text-3xl font-bold text-text-primary mb-3 group-hover:text-teal-700 transition-colors">
           {post.title}
         </h2>
-        <p className="text-text-tertiary leading-relaxed mb-6">{post.excerpt}</p>
+        <p className="text-text-tertiary leading-relaxed mb-6 line-clamp-3">{post.excerpt}</p>
         <div className="flex items-center gap-4 text-sm text-text-quaternary">
           <span>{author.name}</span>
           {post.read_time_minutes > 0 && <span>{post.read_time_minutes} min de lectura</span>}
@@ -115,33 +120,48 @@ export default function BlogListingPage() {
   const { posts, pagination, loading, error, fetchPosts } = useBlogStore();
   const [selectedCategory, setSelectedCategory] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const loadPosts = useCallback(
-    (page = 1) => {
-      fetchPosts({ page, page_size: 6, lang: 'es' });
+    (page = 1, category = '', search = '') => {
+      fetchPosts({
+        page,
+        page_size: 7,
+        lang: 'es',
+        ...(category && { category }),
+        ...(search && { search }),
+      });
     },
     [fetchPosts],
   );
 
+  // Initial load
   useEffect(() => {
-    loadPosts();
-  }, [loadPosts]);
+    loadPosts(1, selectedCategory, searchQuery);
+  }, [selectedCategory]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const featuredPost = posts.find((p) => p.is_featured);
-  const filteredPosts = posts.filter((p) => {
-    if (featuredPost && p.id === featuredPost.id) return false;
-    if (selectedCategory && p.category !== selectedCategory) return false;
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      return p.title.toLowerCase().includes(q) || p.excerpt.toLowerCase().includes(q);
-    }
-    return true;
-  });
+  // Debounced search
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      loadPosts(1, selectedCategory, searchQuery);
+    }, 300);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [searchQuery]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Determine the hero post: is_featured when showing all, first post when filtering
+  const heroPost = !searchQuery && posts.length > 0
+    ? (selectedCategory ? posts[0] : posts.find((p) => p.is_featured) || posts[0])
+    : null;
+
+  const gridPosts = heroPost
+    ? posts.filter((p) => p.id !== heroPost.id)
+    : posts;
 
   return (
     <div className="min-h-screen bg-surface-secondary">
       {/* Hero */}
-      <section className="bg-gradient-to-b from-teal-50 to-stone-50 pt-16 pb-12">
+      <section className="bg-gradient-to-b from-teal-50 to-background pt-16 pb-12">
         <div className="mx-auto max-w-[1200px] px-6 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-4">
             Blog Mi Huella
@@ -154,9 +174,9 @@ export default function BlogListingPage() {
 
       <div className="mx-auto max-w-[1200px] px-6 pb-20">
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8">
-          <div className="relative flex-1 max-w-md">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-quaternary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="flex flex-col gap-4 mb-8">
+          <div className="relative w-full max-w-xl">
+            <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-quaternary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
@@ -199,30 +219,30 @@ export default function BlogListingPage() {
 
         {!loading && !error && (
           <>
-            {featuredPost && !selectedCategory && !searchQuery && (
+            {heroPost && (
               <div className="mb-10">
-                <FeaturedPost post={featuredPost} />
+                <HeroPost post={heroPost} />
               </div>
             )}
 
-            {filteredPosts.length > 0 ? (
+            {gridPosts.length > 0 ? (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-                {filteredPosts.map((post) => (
+                {gridPosts.map((post) => (
                   <PostCard key={post.id} post={post} />
                 ))}
               </div>
-            ) : (
+            ) : !heroPost ? (
               <div className="text-center py-16 text-text-quaternary">
                 No se encontraron artículos.
               </div>
-            )}
+            ) : null}
 
             {pagination.totalPages > 1 && (
               <div className="flex items-center justify-center gap-2">
                 <button
                   type="button"
                   disabled={pagination.page <= 1}
-                  onClick={() => loadPosts(pagination.page - 1)}
+                  onClick={() => loadPosts(pagination.page - 1, selectedCategory, searchQuery)}
                   className="px-4 py-2 rounded-lg text-sm font-medium border border-border-primary hover:bg-surface-hover disabled:opacity-40 transition-colors"
                 >
                   ← Anterior
@@ -233,7 +253,7 @@ export default function BlogListingPage() {
                 <button
                   type="button"
                   disabled={pagination.page >= pagination.totalPages}
-                  onClick={() => loadPosts(pagination.page + 1)}
+                  onClick={() => loadPosts(pagination.page + 1, selectedCategory, searchQuery)}
                   className="px-4 py-2 rounded-lg text-sm font-medium border border-border-primary hover:bg-surface-hover disabled:opacity-40 transition-colors"
                 >
                   Siguiente →

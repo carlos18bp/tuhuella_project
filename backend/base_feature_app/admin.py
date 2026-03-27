@@ -9,7 +9,7 @@ from .models import (
     AdopterIntent, ShelterInvite, Subscription, Favorite,
     NotificationPreference, NotificationLog, BlogPost,
     FAQTopic, FAQItem, DonationAmountOption, SponsorshipAmountOption,
-    VolunteerPosition, StrategicAlly,
+    VolunteerPosition, VolunteerApplication, StrategicAlly,
 )
 
 
@@ -319,7 +319,7 @@ class MiHuellaAdminSite(admin.AdminSite):
                 'app_label': 'volunteers',
                 'models': [
                     m for m in base_app_models
-                    if m['object_name'] in ['VolunteerPosition', 'StrategicAlly']
+                    if m['object_name'] in ['VolunteerPosition', 'VolunteerApplication', 'StrategicAlly']
                 ],
             },
         ]
@@ -340,6 +340,19 @@ class VolunteerPositionAdmin(admin.ModelAdmin):
         (_('Spanish'), {'fields': ('title_es', 'description_es', 'requirements_es')}),
         (_('English'), {'fields': ('title_en', 'description_en', 'requirements_en')}),
         (_('Settings'), {'fields': ('category', 'icon', 'is_active', 'order')}),
+    )
+
+
+class VolunteerApplicationAdmin(admin.ModelAdmin):
+    list_display = ('first_name', 'last_name', 'email', 'position', 'city', 'country', 'status', 'created_at')
+    list_filter = ('status', 'position', 'country')
+    search_fields = ('first_name', 'last_name', 'email', 'city')
+    readonly_fields = ('created_at', 'updated_at')
+    fieldsets = (
+        (_('Applicant'), {'fields': ('user', 'first_name', 'last_name', 'email', 'phone')}),
+        (_('Location'), {'fields': ('city', 'country')}),
+        (_('Application'), {'fields': ('position', 'motivation', 'status')}),
+        (_('Timestamps'), {'fields': ('created_at', 'updated_at')}),
     )
 
 
@@ -390,4 +403,5 @@ admin_site.register(FAQTopic, FAQTopicAdmin)
 admin_site.register(DonationAmountOption)
 admin_site.register(SponsorshipAmountOption)
 admin_site.register(VolunteerPosition, VolunteerPositionAdmin)
+admin_site.register(VolunteerApplication, VolunteerApplicationAdmin)
 admin_site.register(StrategicAlly, StrategicAllyAdmin)

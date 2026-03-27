@@ -35,7 +35,7 @@ type BlogState = {
   loading: boolean;
   error: string | null;
 
-  fetchPosts: (params?: { page?: number; page_size?: number; lang?: string }) => Promise<void>;
+  fetchPosts: (params?: { page?: number; page_size?: number; lang?: string; category?: string; search?: string }) => Promise<void>;
   fetchPost: (slug: string, lang?: string) => Promise<void>;
   fetchAdminPosts: (page?: number, pageSize?: number) => Promise<void>;
   fetchAdminPost: (id: number) => Promise<void>;

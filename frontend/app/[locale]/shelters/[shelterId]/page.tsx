@@ -1,12 +1,14 @@
 'use client';
 
 import { Link } from '@/i18n/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { ArrowLeft, MapPin, Phone, Mail, Globe, X } from 'lucide-react';
+import Image from 'next/image';
+import { ArrowLeft, MapPin, Phone, Mail, Globe } from 'lucide-react';
 
 import { useShelterStore } from '@/lib/stores/shelterStore';
+import { ShelterGallery } from '@/components/ui';
 import { ROUTES } from '@/lib/constants';
 
 export default function ShelterDetailPage() {
@@ -17,8 +19,6 @@ export default function ShelterDetailPage() {
   const shelter = useShelterStore((s) => s.shelter);
   const loading = useShelterStore((s) => s.loading);
   const fetchShelter = useShelterStore((s) => s.fetchShelter);
-
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (shelterId) void fetchShelter(shelterId);
@@ -48,18 +48,38 @@ export default function ShelterDetailPage() {
         {t('backToShelters')}
       </Link>
 
-      {/* Cover Photo */}
-      {shelter.cover_image_url && (
-        <div className="mt-4 rounded-2xl overflow-hidden">
-          <img
-            src={shelter.cover_image_url}
-            alt={shelter.name}
-            className="w-full h-64 md:h-80 object-cover"
-          />
-        </div>
-      )}
+      {/* Cover Photo + Logo Overlay */}
+      <div className="mt-4 relative">
+        {shelter.cover_image_url ? (
+          <div className="relative rounded-2xl overflow-hidden h-64 md:h-80">
+            <Image
+              src={shelter.cover_image_url}
+              alt={shelter.name}
+              fill
+              sizes="100vw"
+              className="object-cover"
+              priority
+            />
+          </div>
+        ) : (
+          <div className="rounded-2xl h-64 md:h-80 bg-gradient-to-br from-teal-500 to-teal-600" />
+        )}
 
-      <div className="mt-6">
+        {/* Logo as profile avatar */}
+        <div className="absolute -bottom-12 left-6">
+          <div className="relative h-24 w-24 rounded-full bg-surface-primary border-4 border-surface-primary shadow-lg flex items-center justify-center overflow-hidden">
+            {shelter.logo_url ? (
+              <Image src={shelter.logo_url} alt={`${shelter.name} logo`} fill sizes="96px" className="object-cover" />
+            ) : (
+              <span className="text-2xl font-bold text-teal-700">
+                {shelter.name?.[0]?.toUpperCase()}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-16">
         <h1 className="text-3xl font-bold text-text-primary">{shelter.name}</h1>
         {shelter.city && (
           <div className="flex items-center gap-1.5 mt-1 text-text-tertiary">
@@ -103,21 +123,11 @@ export default function ShelterDetailPage() {
           )}
         </div>
 
-        {/* Gallery */}
+        {/* Gallery Carousel */}
         {galleryUrls.length > 0 && (
           <div className="mt-10">
             <h2 className="text-xl font-semibold text-text-primary mb-4">{t('gallery')}</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              {galleryUrls.map((url, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setLightboxIndex(idx)}
-                  className="rounded-xl overflow-hidden aspect-square hover:opacity-90 transition-opacity"
-                >
-                  <img src={url} alt={`${shelter.name} ${idx + 1}`} className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
+            <ShelterGallery images={galleryUrls} shelterName={shelter.name} />
           </div>
         )}
 
@@ -131,20 +141,6 @@ export default function ShelterDetailPage() {
         </div>
       </div>
 
-      {/* Lightbox */}
-      {lightboxIndex !== null && (
-        <div role="dialog" aria-label="Lightbox" className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setLightboxIndex(null)}>
-          <button className="absolute top-4 right-4 text-white hover:text-stone-300" onClick={() => setLightboxIndex(null)}>
-            <X className="h-8 w-8" />
-          </button>
-          <img
-            src={galleryUrls[lightboxIndex]}
-            alt=""
-            className="max-w-full max-h-[90vh] rounded-lg object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
-      )}
     </div>
   );
 }

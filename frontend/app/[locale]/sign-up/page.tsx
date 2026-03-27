@@ -136,9 +136,9 @@ export default function SignUpPage() {
   const inputClasses = "border border-border-primary rounded-xl px-3.5 py-2.5 w-full bg-surface-primary text-text-primary placeholder:text-text-quaternary shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] focus:outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-colors";
 
   return (
-    <main className="relative min-h-[calc(100vh-72px)] flex items-center justify-center px-6 py-12 bg-gradient-to-b from-stone-50 to-stone-100/50">
+    <main className="relative min-h-[calc(100vh-72px)] flex items-center justify-center px-6 py-12 bg-gradient-to-b from-surface-secondary to-surface-tertiary/50">
       <div className="absolute top-1/4 right-1/4 w-64 h-64 rounded-full bg-teal-100/30 blur-3xl pointer-events-none" />
-      <div className="w-full max-w-md bg-surface-primary border border-border-primary rounded-2xl p-8 shadow-lg ring-1 ring-black/[0.02]">
+      <div className="w-full max-w-md bg-surface-primary border border-border-primary rounded-2xl p-8 shadow-lg ring-1 ring-border-tertiary">
         <div className="flex items-center gap-2 mb-6">
           <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-50 to-teal-100 shadow-sm flex items-center justify-center">
             <PawPrint className="h-5 w-5 text-teal-600" />

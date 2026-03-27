@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import {
   Camera, Heart, Truck, Stethoscope, Share2,
   CalendarCheck, Home, HandCoins, ArrowRight,
+  GraduationCap, Palette, Languages, Dog,
 } from 'lucide-react';
 
 import { api } from '@/lib/services/http';
@@ -21,6 +22,10 @@ const categoryIcons: Record<string, React.ComponentType<{ className?: string }>>
   event_coordinator: CalendarCheck,
   foster_home: Home,
   fundraiser: HandCoins,
+  educator: GraduationCap,
+  designer: Palette,
+  translator: Languages,
+  dog_walker: Dog,
 };
 
 export default function WorkWithUsPage() {
@@ -84,6 +89,13 @@ export default function WorkWithUsPage() {
                       <p className="text-xs text-text-quaternary mt-0.5 line-clamp-2">{pos.requirements}</p>
                     </div>
                   )}
+                  <Link
+                    href={ROUTES.VOLUNTEER_APPLY(pos.id)}
+                    className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-teal-600 hover:text-teal-700 transition-colors"
+                  >
+                    {t('apply')}
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
                 </div>
               );
             })}

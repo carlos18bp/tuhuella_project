@@ -116,6 +116,22 @@ export type VolunteerPosition = {
   order: number;
 };
 
+export type VolunteerApplicationStatus = 'pending' | 'reviewed' | 'accepted' | 'rejected';
+
+export type VolunteerApplication = {
+  id: number;
+  position: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  city: string;
+  country: string;
+  motivation: string;
+  status: VolunteerApplicationStatus;
+  created_at: string;
+};
+
 export type StrategicAlly = {
   id: number;
   name: string;

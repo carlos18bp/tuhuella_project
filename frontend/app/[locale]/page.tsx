@@ -48,7 +48,7 @@ export default function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border-primary bg-gradient-to-b from-stone-50 via-teal-50/30 to-stone-50">
+      <section className="relative overflow-hidden border-b border-border-primary bg-gradient-to-b from-surface-secondary via-teal-50/30 to-surface-secondary">
         <div className="mx-auto max-w-[1400px] px-6 py-20 md:py-28">
           <div className="max-w-3xl">
             <p className="inline-flex items-center text-xs font-medium text-teal-700 bg-teal-50 border border-teal-200 rounded-full px-3 py-1">

@@ -188,6 +188,99 @@ FAQ_DATA = {
                 'answer_es': 'No. Puedes adoptar directamente desde la página de animales. Este formulario es una alternativa para que los refugios te encuentren a ti.',
                 'answer_en': 'No. You can adopt directly from the animals page. This form is an alternative for shelters to find you.',
             },
+            {
+                'question_es': '¿Puedo cambiar mis preferencias después de enviar el formulario?',
+                'question_en': 'Can I change my preferences after submitting the form?',
+                'answer_es': 'Sí. Puedes actualizar tus preferencias en cualquier momento desde la sección "Busco Adoptar" en tu perfil.',
+                'answer_en': 'Yes. You can update your preferences at any time from the "Looking to Adopt" section in your profile.',
+            },
+        ],
+    },
+    'account': {
+        'display_name_es': 'Cuenta y perfil',
+        'display_name_en': 'Account & Profile',
+        'order': 7,
+        'items': [
+            {
+                'question_es': '¿Cómo creo una cuenta?',
+                'question_en': 'How do I create an account?',
+                'answer_es': 'Haz clic en "Registrarse", ingresa tu correo electrónico y crea una contraseña. Recibirás un correo de verificación para activar tu cuenta.',
+                'answer_en': 'Click "Sign Up", enter your email address and create a password. You will receive a verification email to activate your account.',
+            },
+            {
+                'question_es': '¿Cómo recupero mi contraseña?',
+                'question_en': 'How do I recover my password?',
+                'answer_es': 'En la página de inicio de sesión, haz clic en "¿Olvidaste tu contraseña?". Te enviaremos un código a tu correo para restablecerla.',
+                'answer_en': 'On the login page, click "Forgot your password?". We will send you a code to your email to reset it.',
+            },
+            {
+                'question_es': '¿Puedo cambiar mi correo electrónico?',
+                'question_en': 'Can I change my email address?',
+                'answer_es': 'Actualmente no es posible cambiar el correo electrónico asociado a tu cuenta. Si necesitas usar otro correo, puedes crear una nueva cuenta.',
+                'answer_en': 'Currently it is not possible to change the email address associated with your account. If you need to use a different email, you can create a new account.',
+            },
+            {
+                'question_es': '¿Cómo elimino mi cuenta?',
+                'question_en': 'How do I delete my account?',
+                'answer_es': 'Puedes solicitar la eliminación de tu cuenta escribiéndonos a soporte. Tus datos serán eliminados de acuerdo con nuestra política de privacidad.',
+                'answer_en': 'You can request account deletion by contacting our support team. Your data will be deleted in accordance with our privacy policy.',
+            },
+        ],
+    },
+    'sponsorships': {
+        'display_name_es': 'Apadrinamientos',
+        'display_name_en': 'Sponsorships',
+        'order': 8,
+        'items': [
+            {
+                'question_es': '¿Qué es un apadrinamiento?',
+                'question_en': 'What is a sponsorship?',
+                'answer_es': 'Un apadrinamiento es un aporte económico (único o mensual) para cubrir los gastos de cuidado de un animal específico en un refugio: alimentación, veterinario y alojamiento.',
+                'answer_en': 'A sponsorship is a financial contribution (one-time or monthly) to cover the care costs of a specific animal at a shelter: food, veterinary care, and housing.',
+            },
+            {
+                'question_es': '¿Puedo conocer al animal que apadrino?',
+                'question_en': 'Can I meet the animal I sponsor?',
+                'answer_es': 'Sí. Puedes coordinar una visita con el refugio para conocer al animal. Además, recibirás actualizaciones periódicas sobre su estado.',
+                'answer_en': 'Yes. You can arrange a visit with the shelter to meet the animal. Additionally, you will receive periodic updates on their condition.',
+            },
+            {
+                'question_es': '¿Qué pasa si el animal que apadrino es adoptado?',
+                'question_en': 'What happens if the animal I sponsor gets adopted?',
+                'answer_es': 'Te notificaremos y podrás elegir apadrinar a otro animal o cancelar tu apadrinamiento. La adopción es siempre la mejor noticia.',
+                'answer_en': 'We will notify you and you can choose to sponsor another animal or cancel your sponsorship. Adoption is always the best news.',
+            },
+            {
+                'question_es': '¿Puedo apadrinar más de un animal?',
+                'question_en': 'Can I sponsor more than one animal?',
+                'answer_es': 'Sí, puedes apadrinar tantos animales como desees. Cada apadrinamiento se gestiona de forma independiente.',
+                'answer_en': 'Yes, you can sponsor as many animals as you wish. Each sponsorship is managed independently.',
+            },
+        ],
+    },
+    'blog': {
+        'display_name_es': 'Blog y contenido',
+        'display_name_en': 'Blog & Content',
+        'order': 9,
+        'items': [
+            {
+                'question_es': '¿Quién escribe los artículos del blog?',
+                'question_en': 'Who writes the blog articles?',
+                'answer_es': 'Los artículos son escritos por nuestro equipo editorial y colaboradores invitados: veterinarios, entrenadores y voluntarios con experiencia en bienestar animal.',
+                'answer_en': 'Articles are written by our editorial team and guest contributors: veterinarians, trainers, and volunteers with experience in animal welfare.',
+            },
+            {
+                'question_es': '¿Puedo sugerir un tema para el blog?',
+                'question_en': 'Can I suggest a blog topic?',
+                'answer_es': 'Sí. Nos encanta recibir sugerencias de nuestra comunidad. Puedes enviarnos tus ideas a través de nuestras redes sociales o correo de contacto.',
+                'answer_en': 'Yes. We love receiving suggestions from our community. You can send us your ideas through our social media or contact email.',
+            },
+            {
+                'question_es': '¿Con qué frecuencia publican contenido nuevo?',
+                'question_en': 'How often do you publish new content?',
+                'answer_es': 'Publicamos entre 2 y 4 artículos por mes, cubriendo temas de adopción, cuidado animal, historias de éxito y consejos para dueños de mascotas.',
+                'answer_en': 'We publish between 2 and 4 articles per month, covering topics on adoption, animal care, success stories, and tips for pet owners.',
+            },
         ],
     },
 }
@@ -196,10 +289,21 @@ FAQ_DATA = {
 class Command(BaseCommand):
     help = 'Create FAQ topics and items'
 
-    def handle(self, *args, **options):
-        self.stdout.write(self.style.NOTICE('Creating FAQ data...'))
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--count', type=int, default=10,
+            help='Number of FAQ topics to create',
+        )
 
-        for slug, data in FAQ_DATA.items():
+    def handle(self, *args, **options):
+        count = options['count']
+        topics_created = 0
+        items_created = 0
+
+        for idx, (slug, data) in enumerate(FAQ_DATA.items()):
+            if idx >= count:
+                break
+
             topic, created = FAQTopic.objects.get_or_create(
                 slug=slug,
                 defaults={
@@ -208,10 +312,10 @@ class Command(BaseCommand):
                     'order': data['order'],
                 },
             )
-            action = 'Created' if created else 'Found existing'
-            self.stdout.write(f'  {action} topic: {topic.display_name_es}')
+            if created:
+                topics_created += 1
 
-            for idx, item_data in enumerate(data['items']):
+            for item_idx, item_data in enumerate(data['items']):
                 _, item_created = FAQItem.objects.get_or_create(
                     topic=topic,
                     question_es=item_data['question_es'],
@@ -219,10 +323,12 @@ class Command(BaseCommand):
                         'question_en': item_data['question_en'],
                         'answer_es': item_data['answer_es'],
                         'answer_en': item_data['answer_en'],
-                        'order': idx,
+                        'order': item_idx,
                     },
                 )
                 if item_created:
-                    self.stdout.write(f'    Created item: {item_data["question_es"][:50]}...')
+                    items_created += 1
 
-        self.stdout.write(self.style.SUCCESS('FAQ data created successfully!'))
+        self.stdout.write(self.style.SUCCESS(
+            f'Created {topics_created} FAQ topics and {items_created} items'
+        ))

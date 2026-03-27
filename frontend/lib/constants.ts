@@ -21,6 +21,7 @@ export const ROUTES = {
 
   ABOUT: '/about',
   WORK_WITH_US: '/work-with-us',
+  VOLUNTEER_APPLY: (positionId: number | string) => `/work-with-us/apply/${positionId}`,
   STRATEGIC_ALLIES: '/strategic-allies',
   TERMS: '/terms',
   ADOPT: (id: number | string) => `/adopt/${id}`,
@@ -148,6 +149,7 @@ export const API_ENDPOINTS = {
   SPONSORSHIP_AMOUNTS: '/sponsorship-amounts/',
 
   VOLUNTEER_POSITIONS: '/volunteer-positions/',
+  VOLUNTEER_APPLICATIONS: '/volunteer-applications/',
   STRATEGIC_ALLIES: '/strategic-allies/',
 } as const;
 

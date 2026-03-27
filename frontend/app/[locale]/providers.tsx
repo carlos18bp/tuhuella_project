@@ -2,6 +2,7 @@
 
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
+import { AuthSyncProvider } from '@/components/providers/AuthSyncProvider';
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -18,5 +19,9 @@ export default function Providers({ children }: ProvidersProps) {
     <>{children}</>
   );
 
-  return <ThemeProvider>{content}</ThemeProvider>;
+  return (
+    <ThemeProvider>
+      <AuthSyncProvider>{content}</AuthSyncProvider>
+    </ThemeProvider>
+  );
 }

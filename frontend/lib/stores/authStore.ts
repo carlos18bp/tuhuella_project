@@ -24,25 +24,42 @@ type AuthState = {
   refreshToken: string | null;
   user: User | null;
   isAuthenticated: boolean;
+  isAuthReady: boolean;
   signIn: (args: { email: string; password: string; captcha_token?: string }) => Promise<void>;
   signUp: (args: { email: string; password: string; first_name?: string; last_name?: string; captcha_token?: string }) => Promise<void>;
   googleLogin: (args: { credential?: string; email?: string; given_name?: string; family_name?: string; picture?: string }) => Promise<void>;
   signOut: () => void;
   syncFromCookies: () => void;
+  fetchMe: () => Promise<void>;
   sendPasswordResetCode: (email: string) => Promise<void>;
   resetPassword: (args: { email: string; code: string; new_password: string }) => Promise<void>;
 };
 
 export const useAuthStore = create<AuthState>((set, get) => ({
-  accessToken: getAccessToken(),
-  refreshToken: getRefreshToken(),
+  accessToken: null,
+  refreshToken: null,
   user: null,
-  isAuthenticated: Boolean(getAccessToken()),
-  
+  isAuthenticated: false,
+  isAuthReady: false,
+
   syncFromCookies: () => {
     const accessToken = getAccessToken();
     const refreshToken = getRefreshToken();
-    set({ accessToken, refreshToken, isAuthenticated: Boolean(accessToken) });
+    set({ accessToken, refreshToken, isAuthenticated: Boolean(accessToken), isAuthReady: true });
+    if (accessToken && !get().user) {
+      get().fetchMe();
+    }
+  },
+
+  fetchMe: async () => {
+    try {
+      const response = await api.get(API_ENDPOINTS.VALIDATE_TOKEN);
+      if (response.data?.user) {
+        set({ user: response.data.user });
+      }
+    } catch {
+      get().signOut();
+    }
   },
   
   signIn: async ({ email, password, captcha_token }) => {

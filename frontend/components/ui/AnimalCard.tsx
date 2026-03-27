@@ -19,7 +19,7 @@ export default function AnimalCard({ animal }: AnimalCardProps) {
       href={ROUTES.ANIMAL_DETAIL(animal.id)}
       className="group h-full flex flex-col rounded-2xl border border-border-primary/80 bg-surface-primary overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 hover:border-border-secondary/80 transition-all duration-300 card-teal"
     >
-      <div className="aspect-[4/3] bg-gradient-to-br from-stone-100 to-stone-50 relative">
+      <div className="aspect-[4/3] bg-gradient-to-br from-surface-tertiary to-surface-secondary relative">
         <div className="absolute inset-0 flex items-center justify-center text-stone-300">
           {animal.species === 'dog'
             ? <Dog data-testid="icon-dog" className="h-16 w-16" strokeWidth={1.2} />
