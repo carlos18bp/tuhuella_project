@@ -25,4 +25,5 @@ urlpatterns = [
     path('volunteer-positions/', include('base_feature_app.urls.volunteer_position')),
     path('volunteer-applications/', include('base_feature_app.urls.volunteer_application')),
     path('strategic-allies/', include('base_feature_app.urls.strategic_ally')),
+    path('user/', include('base_feature_app.urls.profile')),
 ]

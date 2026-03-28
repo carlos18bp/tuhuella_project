@@ -68,68 +68,23 @@ export default function AdminMetricasPage() {
         </div>
       ) : metrics ? (
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
-            <p className="text-3xl font-bold text-amber-700">
-              ${Number(metrics.donations.total_amount).toLocaleString()}
-            </p>
-            <p className="text-sm text-amber-600 mt-1">{t('totalDonationsRaised')}</p>
-            <p className="text-xs text-amber-500 mt-2">{metrics.donations.total_count} {t('paidDonations')}</p>
-          </div>
-
-          <div className="rounded-2xl border border-teal-200 bg-teal-50 p-6">
-            <p className="text-3xl font-bold text-teal-700">
-              ${Number(metrics.sponsorships.total_amount).toLocaleString()}
-            </p>
-            <p className="text-sm text-teal-600 mt-1">{t('totalSponsorships')}</p>
-            <p className="text-xs text-teal-500 mt-2">{metrics.sponsorships.total_count} {t('activeSponsorships')}</p>
-          </div>
-
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6">
-            <p className="text-3xl font-bold text-emerald-700">{adoptionRate}%</p>
-            <p className="text-sm text-emerald-600 mt-1">{t('adoptionRate')}</p>
-            <p className="text-xs text-emerald-500 mt-2">
-              {metrics.adoption_rate.total_adopted} / {metrics.adoption_rate.total_published}
-            </p>
-          </div>
-
-          {/* New enhanced metrics */}
-          <div className="rounded-2xl border border-orange-200 bg-orange-50 p-6">
-            <p className="text-3xl font-bold text-orange-700">
-              ${Number(metrics.donations.avg_amount).toLocaleString()}
-            </p>
-            <p className="text-sm text-orange-600 mt-1">{t('avgDonation')}</p>
-          </div>
-
-          <div className="rounded-2xl border border-cyan-200 bg-cyan-50 p-6">
-            <p className="text-3xl font-bold text-cyan-700">
-              ${Number(metrics.sponsorships.avg_amount).toLocaleString()}
-            </p>
-            <p className="text-sm text-cyan-600 mt-1">{t('avgSponsorship')}</p>
-          </div>
-
-          <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-6">
-            <p className="text-3xl font-bold text-indigo-700">{metrics.avg_applications_per_animal}</p>
-            <p className="text-sm text-indigo-600 mt-1">{t('avgAppsPerAnimal')}</p>
-          </div>
-
-          <div className="rounded-2xl border border-purple-200 bg-purple-50 p-6">
-            <p className="text-3xl font-bold text-purple-700">
-              {metrics.avg_adoption_time_days != null ? `${metrics.avg_adoption_time_days}d` : '—'}
-            </p>
-            <p className="text-sm text-purple-600 mt-1">{t('avgAdoptionDays')}</p>
-          </div>
-
-          <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6">
-            <p className="text-3xl font-bold text-rose-700">{metrics.user_retention_30d}%</p>
-            <p className="text-sm text-rose-600 mt-1">{t('retention30d')}</p>
-          </div>
-
-          <div className="rounded-2xl border border-border-primary bg-surface-primary p-6">
-            <p className="text-3xl font-bold text-text-primary">
-              ${(Number(metrics.donations.total_amount) + Number(metrics.sponsorships.total_amount)).toLocaleString()}
-            </p>
-            <p className="text-sm text-text-tertiary mt-1">{t('totalFinancialImpact')}</p>
-          </div>
+          {[
+            { value: `$${Number(metrics.donations.total_amount).toLocaleString()}`, label: t('totalDonationsRaised'), detail: `${metrics.donations.total_count} ${t('paidDonations')}`, card: 'border-amber-200 bg-amber-50', value_c: 'text-amber-700', label_c: 'text-amber-600', detail_c: 'text-amber-500' },
+            { value: `$${Number(metrics.sponsorships.total_amount).toLocaleString()}`, label: t('totalSponsorships'), detail: `${metrics.sponsorships.total_count} ${t('activeSponsorships')}`, card: 'border-teal-200 bg-teal-50', value_c: 'text-teal-700', label_c: 'text-teal-600', detail_c: 'text-teal-500' },
+            { value: `${adoptionRate}%`, label: t('adoptionRate'), detail: `${metrics.adoption_rate.total_adopted} / ${metrics.adoption_rate.total_published}`, card: 'border-emerald-200 bg-emerald-50', value_c: 'text-emerald-700', label_c: 'text-emerald-600', detail_c: 'text-emerald-500' },
+            { value: `$${Number(metrics.donations.avg_amount).toLocaleString()}`, label: t('avgDonation'), card: 'border-orange-200 bg-orange-50 dark:bg-surface-tertiary dark:border-orange-500/20', value_c: 'text-orange-700 dark:text-orange-400', label_c: 'text-orange-600 dark:text-orange-400/70' },
+            { value: `$${Number(metrics.sponsorships.avg_amount).toLocaleString()}`, label: t('avgSponsorship'), card: 'border-cyan-200 bg-cyan-50 dark:bg-surface-tertiary dark:border-cyan-500/20', value_c: 'text-cyan-700 dark:text-cyan-400', label_c: 'text-cyan-600 dark:text-cyan-400/70' },
+            { value: `${metrics.avg_applications_per_animal}`, label: t('avgAppsPerAnimal'), card: 'border-indigo-200 bg-indigo-50 dark:bg-surface-tertiary dark:border-indigo-500/20', value_c: 'text-indigo-700 dark:text-indigo-400', label_c: 'text-indigo-600 dark:text-indigo-400/70' },
+            { value: metrics.avg_adoption_time_days != null ? `${metrics.avg_adoption_time_days}d` : '—', label: t('avgAdoptionDays'), card: 'border-purple-200 bg-purple-50 dark:bg-surface-tertiary dark:border-purple-500/20', value_c: 'text-purple-700 dark:text-purple-400', label_c: 'text-purple-600 dark:text-purple-400/70' },
+            { value: `${metrics.user_retention_30d}%`, label: t('retention30d'), card: 'border-rose-200 bg-rose-50 dark:bg-surface-tertiary dark:border-rose-500/20', value_c: 'text-rose-700 dark:text-rose-400', label_c: 'text-rose-600 dark:text-rose-400/70' },
+            { value: `$${(Number(metrics.donations.total_amount) + Number(metrics.sponsorships.total_amount)).toLocaleString()}`, label: t('totalFinancialImpact'), card: 'border-border-primary bg-surface-primary', value_c: 'text-text-primary', label_c: 'text-text-tertiary' },
+          ].map((m) => (
+            <div key={m.label} className={`rounded-2xl border p-6 ${m.card}`}>
+              <p className={`text-3xl font-bold ${m.value_c}`}>{m.value}</p>
+              <p className={`text-sm mt-1 ${m.label_c}`}>{m.label}</p>
+              {m.detail && <p className={`text-xs mt-2 ${m.detail_c}`}>{m.detail}</p>}
+            </div>
+          ))}
         </div>
       ) : (
         <p className="mt-8 text-text-quaternary">{t('loadError')}</p>

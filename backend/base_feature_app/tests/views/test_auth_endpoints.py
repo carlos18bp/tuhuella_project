@@ -40,7 +40,7 @@ def test_sign_up_rejects_existing_email(mock_captcha, api_client):
 
     response = api_client.post(
         reverse('sign_up'),
-        {'email': 'existing@example.com', 'password': 'pass1234'},
+        {'email': 'existing@example.com', 'password': 'pass1234', 'terms_accepted': True},
         format='json',
     )
 
@@ -59,6 +59,7 @@ def test_sign_up_creates_user(mock_captcha, api_client):
             'password': 'pass1234',
             'first_name': 'New',
             'last_name': 'User',
+            'terms_accepted': True,
         },
         format='json',
     )
@@ -69,6 +70,26 @@ def test_sign_up_creates_user(mock_captcha, api_client):
     User = get_user_model()
     user = User.objects.get(email='new@example.com')
     assert user.first_name == 'New'
+    assert user.terms_accepted_at is not None
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.views.auth.verify_recaptcha', return_value=True)
+def test_sign_up_rejects_without_terms_accepted(mock_captcha, api_client):
+    """sign_up returns 400 when terms_accepted is not provided."""
+    response = api_client.post(
+        reverse('sign_up'),
+        {
+            'email': 'noterms@example.com',
+            'password': 'pass1234',
+            'first_name': 'No',
+            'last_name': 'Terms',
+        },
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert 'terms' in response.json()['error'].lower()
 
 
 @pytest.mark.django_db

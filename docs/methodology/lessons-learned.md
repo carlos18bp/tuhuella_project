@@ -5,7 +5,7 @@ description: Project intelligence and lessons learned. Reference for project-spe
 
 # Lessons Learned — Mi Huella
 
-> Last updated: 2026-03-26
+> Last updated: 2026-03-27
 
 This file captures important patterns, preferences, and project intelligence that help work more effectively with this codebase. Updated as new insights are discovered.
 
@@ -14,10 +14,10 @@ This file captures important patterns, preferences, and project intelligence tha
 ## 1. Architecture Patterns
 
 ### Single Django App: `base_feature_app`
-- All 20 models, views, serializers, and services live in `base_feature_app`
+- All 21 models, views, serializers, and services live in `base_feature_app`
 - App name kept from template to avoid migration headaches
 - Models split into individual files under `base_feature_app/models/`
-- URLs split into 18 sub-modules under `base_feature_app/urls/`
+- URLs split into 19 sub-modules under `base_feature_app/urls/`
 
 ### Role-Based Access
 - Three roles: `adopter` (default), `shelter_admin`, `admin`
@@ -33,7 +33,16 @@ This file captures important patterns, preferences, and project intelligence tha
 - `django-attachments` provides `SingleImageField` and `GalleryField`
 - `Animal.gallery` uses `GalleryField` → serialized as `gallery_urls: string[]`
 - `Shelter.logo`, `Shelter.cover_image`, `Campaign.cover_image` use `SingleImageField`
+- `Campaign.evidence_gallery` uses `GalleryField` for completed campaign evidence photos
 - `django-cleanup` auto-deletes orphaned files on model delete
+
+### Email Architecture
+- All email functions centralized in `utils/email_utils.py` (single source of truth)
+- `services/email_service.py` provides `EmailService` class that delegates to `email_utils`
+- `utils/auth_utils.py` has backwards-compatible re-exports (`from email_utils import ...`)
+- All emails use branded HTML templates (table-based for email client compatibility) + plain text fallback
+- Templates use Django template inheritance: `emails/base_email.html` → specific templates
+- Team notifications go to `TEAM_EMAIL = 'team@proyectapps.co'`
 
 ### Notification Model Split
 - Implementation uses `NotificationPreference` + `NotificationLog` (two models)
@@ -110,12 +119,12 @@ source venv/bin/activate && <command>
 
 ### Animation Libraries
 - **GSAP + ScrollTrigger**: Scroll-reveal animations via `useScrollReveal` hook (dynamic import to avoid SSR issues)
-- **Swiper**: Image carousels via `AnimalGallery` component
+- **Swiper**: Image carousels via `AnimalGallery` and `ShelterGallery` components
 - **Framer Motion**: Page transitions via `app/template.tsx`
 
-### Shared Components (`components/ui/` — 25 components)
+### Shared Components (`components/ui/` — 26 components)
 - `AnimalCard`, `AnimalGrid`, `AnimalFilters`, `AnimalGallery` — animal browsing
-- `ShelterCard`, `ShelterProfile` — shelter display
+- `ShelterCard`, `ShelterProfile`, `ShelterGallery` — shelter display
 - `CampaignCard` — campaign card with progress bar
 - `AdoptionForm`, `ApplicationStatusBadge`, `ApplicationTimeline` — adoption workflow
 - `CheckoutForm`, `DonationForm`, `PaymentMethodSelector`, `PaymentConfirmation` — payment flow
@@ -132,6 +141,12 @@ source venv/bin/activate && <command>
 - `api_client` fixture provides unauthenticated DRF APIClient
 - `authenticated_user` and `admin_user` fixtures for auth tests
 - Coverage hooks auto-generate top-10 uncovered files report
+
+### syncFromCookies Must Fetch User Data (Lesson Learned)
+- `syncFromCookies()` initially only read tokens from cookies and set `isAuthenticated`
+- On page reload, `user` object stayed null causing pages like my-profile to show skeleton forever
+- Fix: added `fetchMe()` that calls `GET /auth/validate_token/` when tokens exist but user is null
+- Validate_token endpoint must return all user fields the frontend needs (including phone, city)
 
 ### Stale Template References (Lesson Learned)
 - When transforming from a template project, **ALL** test files must be audited

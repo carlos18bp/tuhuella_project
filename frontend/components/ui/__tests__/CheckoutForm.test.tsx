@@ -5,12 +5,19 @@ import userEvent from '@testing-library/user-event';
 
 import CheckoutForm from '../CheckoutForm';
 
+jest.mock('../TermsModal', () => function MockTermsModal() { return null; });
+
 describe('CheckoutForm', () => {
   const mockOnSubmit = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
+  const acceptTerms = async () => {
+    const termsCheckbox = screen.getByRole('checkbox');
+    await userEvent.click(termsCheckbox);
+  };
 
   it('renders recipient name for donation type', () => {
     render(<CheckoutForm type="donation" recipientName="Refugio Esperanza" onSubmit={mockOnSubmit} />);
@@ -80,6 +87,7 @@ describe('CheckoutForm', () => {
 
     await userEvent.type(screen.getByPlaceholderText('Otro monto'), '15000');
     await userEvent.type(screen.getByPlaceholderText('Un mensaje para el refugio...'), 'Gracias!');
+    await acceptTerms();
 
     const buttons = screen.getAllByRole('button');
     const submitBtn = buttons.find((btn) => btn.getAttribute('type') === 'submit')!;
@@ -97,6 +105,7 @@ describe('CheckoutForm', () => {
 
     await userEvent.type(screen.getByPlaceholderText('Otro monto'), '30000');
     await userEvent.click(screen.getByRole('radio', { name: 'Nequi' }));
+    await acceptTerms();
 
     const buttons = screen.getAllByRole('button');
     const submitBtn = buttons.find((btn) => btn.getAttribute('type') === 'submit')!;
@@ -121,11 +130,44 @@ describe('CheckoutForm', () => {
     render(<CheckoutForm type="donation" recipientName="Test" onSubmit={mockOnSubmit} />);
 
     await userEvent.type(screen.getByPlaceholderText('Otro monto'), '0');
+    await acceptTerms();
 
     const buttons = screen.getAllByRole('button');
     const submitBtn = buttons.find((btn) => btn.getAttribute('type') === 'submit')!;
     await userEvent.click(submitBtn);
 
     expect(mockOnSubmit).not.toHaveBeenCalled();
+  });
+
+  // New terms-specific tests
+
+  it('renders terms acceptance checkbox', () => {
+    render(<CheckoutForm type="donation" recipientName="Test" onSubmit={mockOnSubmit} />);
+    expect(screen.getByRole('checkbox')).toBeInTheDocument();
+    expect(screen.getByText(/acepto los/i)).toBeInTheDocument();
+  });
+
+  it('disables submit when terms not accepted even with valid amount', async () => {
+    render(<CheckoutForm type="donation" recipientName="Test" onSubmit={mockOnSubmit} />);
+    await userEvent.click(screen.getByRole('button', { name: /25,000/ }));
+
+    const buttons = screen.getAllByRole('button');
+    const submitBtn = buttons.find((btn) => btn.getAttribute('type') === 'submit');
+    expect(submitBtn).toBeDisabled();
+  });
+
+  it('enables submit when terms accepted and amount is valid', async () => {
+    render(<CheckoutForm type="donation" recipientName="Test" onSubmit={mockOnSubmit} />);
+    await userEvent.click(screen.getByRole('button', { name: /25,000/ }));
+    await acceptTerms();
+
+    const buttons = screen.getAllByRole('button');
+    const submitBtn = buttons.find((btn) => btn.getAttribute('type') === 'submit');
+    expect(submitBtn).not.toBeDisabled();
+  });
+
+  it('renders terms link button', () => {
+    render(<CheckoutForm type="donation" recipientName="Test" onSubmit={mockOnSubmit} />);
+    expect(screen.getByText('Términos y Condiciones')).toBeInTheDocument();
   });
 });

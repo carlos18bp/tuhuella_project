@@ -9,6 +9,7 @@ import { useRequireAuth } from '@/lib/hooks/useRequireAuth';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { api } from '@/lib/services/http';
 import { API_ENDPOINTS, ROUTES } from '@/lib/constants';
+import MetricCard from '@/components/ui/MetricCard';
 import type { Shelter } from '@/lib/types';
 
 type ShelterMetrics = {
@@ -107,13 +108,13 @@ export default function ShelterDashboardPage() {
   const metricCards = metrics ? [
     { label: t('totalAnimals'), value: metrics.total_animals, icon: PawPrint, color: 'border-teal-200 bg-teal-50/50', iconColor: 'text-teal-600' },
     { label: t('adoptedAnimals'), value: metrics.adopted_animals, icon: PawPrint, color: 'border-emerald-200 bg-emerald-50/50', iconColor: 'text-emerald-600' },
-    { label: t('totalApplications'), value: metrics.total_applications, icon: Users, color: 'border-blue-200 bg-blue-50/50', iconColor: 'text-blue-600' },
-    { label: t('avgAppsPerAnimal'), value: metrics.avg_applications_per_animal, icon: Users, color: 'border-indigo-200 bg-indigo-50/50', iconColor: 'text-indigo-600' },
-    { label: t('totalDonations'), value: `$${Number(metrics.donations.total_amount).toLocaleString()}`, icon: DollarSign, color: 'border-amber-200 bg-amber-50/50', iconColor: 'text-amber-600' },
-    { label: t('avgDonation'), value: `$${Number(metrics.donations.avg_amount).toLocaleString()}`, icon: DollarSign, color: 'border-orange-200 bg-orange-50/50', iconColor: 'text-orange-600' },
-    { label: t('avgAdoptionDays'), value: metrics.avg_adoption_time_days != null ? `${metrics.avg_adoption_time_days}d` : '—', icon: Clock, color: 'border-purple-200 bg-purple-50/50', iconColor: 'text-purple-600' },
-    { label: t('updatePosts'), value: metrics.update_posts_count, icon: FileText, color: 'border-cyan-200 bg-cyan-50/50', iconColor: 'text-cyan-600' },
-    { label: t('activeCampaigns'), value: metrics.active_campaigns, icon: Megaphone, color: 'border-rose-200 bg-rose-50/50', iconColor: 'text-rose-600' },
+    { label: t('totalApplications'), value: metrics.total_applications, icon: Users, color: 'border-blue-200 bg-blue-50/50 dark:bg-surface-tertiary dark:border-blue-500/20', iconColor: 'text-blue-600 dark:text-blue-400' },
+    { label: t('avgAppsPerAnimal'), value: metrics.avg_applications_per_animal, icon: Users, color: 'border-indigo-200 bg-indigo-50/50 dark:bg-surface-tertiary dark:border-indigo-500/20', iconColor: 'text-indigo-600 dark:text-indigo-400' },
+    { label: t('totalDonations'), value: `$${Number(metrics.donations.total_amount).toLocaleString()}`, icon: DollarSign, color: 'border-amber-200 bg-amber-50/50 dark:bg-surface-tertiary dark:border-amber-500/20', iconColor: 'text-amber-600 dark:text-amber-400' },
+    { label: t('avgDonation'), value: `$${Number(metrics.donations.avg_amount).toLocaleString()}`, icon: DollarSign, color: 'border-orange-200 bg-orange-50/50 dark:bg-surface-tertiary dark:border-orange-500/20', iconColor: 'text-orange-600 dark:text-orange-400' },
+    { label: t('avgAdoptionDays'), value: metrics.avg_adoption_time_days != null ? `${metrics.avg_adoption_time_days}d` : '—', icon: Clock, color: 'border-purple-200 bg-purple-50/50 dark:bg-surface-tertiary dark:border-purple-500/20', iconColor: 'text-purple-600 dark:text-purple-400' },
+    { label: t('updatePosts'), value: metrics.update_posts_count, icon: FileText, color: 'border-cyan-200 bg-cyan-50/50 dark:bg-surface-tertiary dark:border-cyan-500/20', iconColor: 'text-cyan-600 dark:text-cyan-400' },
+    { label: t('activeCampaigns'), value: metrics.active_campaigns, icon: Megaphone, color: 'border-rose-200 bg-rose-50/50 dark:bg-surface-tertiary dark:border-rose-500/20', iconColor: 'text-rose-600 dark:text-rose-400' },
   ] : [];
 
   return (
@@ -141,16 +142,9 @@ export default function ShelterDashboardPage() {
         <div className="mt-8">
           <h2 className="text-sm font-semibold text-text-tertiary uppercase tracking-wide mb-4">{t('shelterOverview')}</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            {metricCards.map((card) => {
-              const Icon = card.icon;
-              return (
-                <div key={card.label} className={`rounded-2xl border p-4 ${card.color}`}>
-                  <Icon className={`h-4 w-4 ${card.iconColor} mb-2`} />
-                  <p className="text-xl font-bold text-text-primary">{card.value}</p>
-                  <p className="text-xs text-text-tertiary mt-0.5">{card.label}</p>
-                </div>
-              );
-            })}
+            {metricCards.map((card) => (
+              <MetricCard key={card.label} {...card} />
+            ))}
           </div>
         </div>
       )}

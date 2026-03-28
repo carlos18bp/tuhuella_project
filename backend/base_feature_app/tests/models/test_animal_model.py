@@ -52,3 +52,69 @@ def test_animal_boolean_fields(animal):
     """Boolean fields are stored correctly."""
     assert animal.is_vaccinated is True
     assert animal.is_sterilized is False
+
+
+@pytest.mark.django_db
+def test_animal_new_fields_defaults(shelter):
+    """New fields have correct defaults."""
+    a = Animal.objects.create(
+        shelter=shelter,
+        name='Defaults',
+        species=Animal.Species.DOG,
+    )
+
+    assert a.weight is None
+    assert a.is_house_trained is False
+    assert a.good_with_kids == 'unknown'
+    assert a.good_with_dogs == 'unknown'
+    assert a.good_with_cats == 'unknown'
+    assert a.energy_level == 'medium'
+    assert a.coat_color == ''
+    assert a.intake_date is None
+    assert a.microchip_id == ''
+
+
+@pytest.mark.django_db
+def test_animal_compatibility_choices():
+    """Compatibility contains expected values."""
+    values = {c.value for c in Animal.Compatibility}
+    assert values == {'yes', 'no', 'unknown'}
+
+
+@pytest.mark.django_db
+def test_animal_energy_level_choices():
+    """EnergyLevel contains expected values."""
+    values = {c.value for c in Animal.EnergyLevel}
+    assert values == {'low', 'medium', 'high'}
+
+
+@pytest.mark.django_db
+def test_animal_new_fields_stored(shelter):
+    """New fields are stored and retrieved correctly."""
+    from datetime import date
+    from decimal import Decimal
+
+    a = Animal.objects.create(
+        shelter=shelter,
+        name='Buddy',
+        species=Animal.Species.DOG,
+        weight=Decimal('12.50'),
+        is_house_trained=True,
+        good_with_kids='yes',
+        good_with_dogs='no',
+        good_with_cats='unknown',
+        energy_level='high',
+        coat_color='Brown',
+        intake_date=date(2025, 6, 15),
+        microchip_id='MC-123',
+    )
+
+    a.refresh_from_db()
+    assert a.weight == Decimal('12.50')
+    assert a.is_house_trained is True
+    assert a.good_with_kids == 'yes'
+    assert a.good_with_dogs == 'no'
+    assert a.energy_level == 'high'
+    assert a.coat_color == 'Brown'
+    assert a.intake_date == date(2025, 6, 15)
+    assert a.microchip_id == 'MC-123'

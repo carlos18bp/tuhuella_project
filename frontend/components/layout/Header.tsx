@@ -85,11 +85,16 @@ export default function Header() {
     { label: t('strategicAllies'), href: ROUTES.STRATEGIC_ALLIES },
   ];
 
-  const isActive = (href: string) => pathname === href;
+  // Strip locale prefix (e.g. /es/animals → /animals) for route matching
+  const pathnameWithoutLocale = (pathname ?? '/').replace(/^\/[a-z]{2}(?=\/|$)/, '') || '/';
+  const isActive = (href: string) =>
+    href === '/'
+      ? pathnameWithoutLocale === '/'
+      : pathnameWithoutLocale === href || pathnameWithoutLocale.startsWith(href + '/');
   const isAboutActive = aboutSubLinks.some((link) => isActive(link.href));
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border-primary/60 bg-surface-secondary/80 backdrop-blur-lg shadow-[0_1px_3px_0_rgb(0,0,0,0.03)]">
+    <header className="sticky top-0 z-50 border-b border-border-primary/60 bg-surface-secondary/80 backdrop-blur-xl shadow-[0_1px_3px_0_rgb(0,0,0,0.03)] dark:bg-surface-secondary/75 dark:border-border-primary dark:shadow-[0_1px_0_0_rgba(255,255,255,0.03)]">
       <div className="mx-auto max-w-[1400px] px-6 py-3.5 flex items-center justify-between gap-4">
         <Link href={ROUTES.HOME} className="group flex items-center gap-2 text-xl font-bold tracking-tight text-text-primary hover:text-teal-700 transition-colors">
           <PawPrint className="h-6 w-6 text-teal-600 group-hover:rotate-[-8deg] transition-transform duration-300" />
@@ -102,13 +107,15 @@ export default function Header() {
             <Link
               key={item.href}
               href={item.href}
-              className={`relative px-3 py-2 rounded-lg transition-colors hover:bg-surface-hover hover:text-text-primary ${
-                isActive(item.href) ? 'text-teal-700 bg-teal-50/60' : ''
+              className={`relative px-3 py-2 rounded-lg transition-colors duration-200 hover:bg-surface-hover hover:text-text-primary ${
+                isActive(item.href)
+                  ? 'text-teal-700 dark:text-teal-300 font-semibold'
+                  : ''
               }`}
             >
               {item.label}
               {isActive(item.href) && (
-                <span className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full bg-gradient-to-r from-teal-600 to-teal-400" />
+                <span className="absolute bottom-0 left-3 right-3 h-[2px] rounded-full bg-gradient-to-r from-teal-600 to-teal-400 dark:from-teal-400 dark:to-teal-300" />
               )}
             </Link>
           ))}
@@ -117,18 +124,20 @@ export default function Header() {
             <button
               type="button"
               onClick={() => setAboutOpen((prev) => !prev)}
-              className={`relative flex items-center gap-1 px-3 py-2 rounded-lg transition-colors hover:bg-surface-hover hover:text-text-primary ${
-                isAboutActive ? 'text-teal-700 bg-teal-50/60' : ''
+              className={`relative flex items-center gap-1 px-3 py-2 rounded-lg transition-colors duration-200 hover:bg-surface-hover hover:text-text-primary ${
+                isAboutActive
+                  ? 'text-teal-700 dark:text-teal-300 font-semibold'
+                  : ''
               }`}
             >
               {t('about')}
               <ChevronDown className={`h-3.5 w-3.5 transition-transform ${aboutOpen ? 'rotate-180' : ''}`} />
               {isAboutActive && (
-                <span className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full bg-gradient-to-r from-teal-600 to-teal-400" />
+                <span className="absolute bottom-0 left-3 right-3 h-[2px] rounded-full bg-gradient-to-r from-teal-600 to-teal-400 dark:from-teal-400 dark:to-teal-300" />
               )}
             </button>
             {aboutOpen && (
-              <div className="absolute left-0 top-full mt-1 w-52 rounded-xl border border-border-primary bg-surface-elevated shadow-lg z-50 overflow-hidden py-1">
+              <div className="absolute left-0 top-full mt-1 w-52 rounded-xl border border-border-primary bg-surface-elevated dark:bg-surface-elevated/95 dark:backdrop-blur-xl dark:border-border-secondary shadow-lg z-50 overflow-hidden py-1">
                 {aboutSubLinks.map((link) => (
                   <Link
                     key={link.href}
@@ -198,7 +207,7 @@ export default function Header() {
                   )}
                 </button>
                 {bellOpen && (
-                  <div data-testid="notification-dropdown" className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-border-primary bg-surface-elevated shadow-xl z-50 overflow-hidden">
+                  <div data-testid="notification-dropdown" className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-border-primary bg-surface-elevated dark:bg-surface-elevated/95 dark:backdrop-blur-xl dark:border-border-secondary shadow-xl z-50 overflow-hidden">
                     <div className="flex items-center justify-between px-4 py-3 border-b border-border-tertiary">
                       <span className="text-sm font-semibold text-text-primary">{tNotif('bellTitle')}</span>
                       {unreadCount > 0 && (
@@ -296,14 +305,16 @@ export default function Header() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-border-primary bg-surface-secondary/95 backdrop-blur-lg animate-scale-in shadow-lg">
+        <div className="md:hidden border-t border-border-primary bg-surface-secondary/95 backdrop-blur-xl animate-scale-in shadow-lg dark:bg-surface-secondary/90 dark:border-border-secondary">
           <nav className="flex flex-col px-6 py-4 gap-1 text-sm font-medium text-text-secondary">
             {publicNav.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`px-3 py-3 rounded-lg hover:bg-surface-hover transition-colors ${
-                  isActive(item.href) ? 'text-teal-700 bg-teal-50/60 font-semibold' : ''
+                className={`px-3 py-3 rounded-lg transition-colors ${
+                  isActive(item.href)
+                    ? 'text-teal-700 dark:text-teal-300 font-semibold'
+                    : 'hover:bg-surface-hover'
                 }`}
                 onClick={() => setMobileOpen(false)}
               >
@@ -315,8 +326,10 @@ export default function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`px-3 py-3 pl-6 rounded-lg hover:bg-surface-hover transition-colors ${
-                  isActive(link.href) ? 'text-teal-700 bg-teal-50/60 font-semibold' : ''
+                className={`px-3 py-3 pl-6 rounded-lg transition-colors ${
+                  isActive(link.href)
+                    ? 'text-teal-700 dark:text-teal-300 font-semibold'
+                    : 'hover:bg-surface-hover'
                 }`}
                 onClick={() => setMobileOpen(false)}
               >

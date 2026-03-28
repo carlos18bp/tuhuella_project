@@ -131,6 +131,14 @@ test.describe('Notification Bell (authenticated)', () => {
   test.describe.configure({ mode: 'serial' });
 
   test('should open notification dropdown when bell is clicked', { tag: [...NOTIFICATION_BELL] }, async ({ page }) => {
+    // Mock validate_token so fetchMe succeeds
+    await page.route('**/api/auth/validate_token/**', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ user: { id: 1, email: 'adopter-e2e@example.com', first_name: 'Carlos', last_name: 'Pérez', role: 'adopter', is_staff: false, is_active: true } }),
+      }),
+    );
     // Mock notification API so the bell renders correctly
     await page.route('**/api/notifications/**', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ results: [], unread_count: 0 }) }),
@@ -142,9 +150,11 @@ test.describe('Notification Bell (authenticated)', () => {
     await loginAndNavigate(page, 'adopter', '/');
     await waitForPageLoad(page);
 
-    // Click the notification bell button in the header
+    // Wait for the bell button to stabilize after auth state settles
     const bellButton = page.getByRole('button', { name: /Notificaciones/i });
-    await expect(bellButton).toBeVisible();
+    await expect(bellButton).toBeVisible({ timeout: 10_000 });
+    // Small delay to let React re-renders settle after auth hydration
+    await page.waitForTimeout(500);
     await bellButton.click();
 
     // Verify the notification dropdown opens

@@ -39,7 +39,7 @@ export default function ApplicationTimeline({ status, className = '' }: Applicat
             lineColor = 'bg-emerald-500';
             labelColor = 'text-emerald-700';
           } else if (isCurrent) {
-            dotColor = 'bg-teal-500 border-teal-500 ring-4 ring-teal-100';
+            dotColor = 'bg-teal-500 border-teal-500 ring-4 ring-teal-50';
             labelColor = 'text-teal-700 font-semibold';
           }
 

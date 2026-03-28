@@ -21,6 +21,17 @@ def test_animal_list_serializer_fields(animal):
 
 
 @pytest.mark.django_db
+def test_animal_list_serializer_includes_new_filter_fields(animal):
+    """List serializer includes energy_level and compatibility fields."""
+    data = AnimalListSerializer(animal).data
+
+    assert 'energy_level' in data
+    assert 'good_with_kids' in data
+    assert 'good_with_dogs' in data
+    assert 'good_with_cats' in data
+
+
+@pytest.mark.django_db
 def test_animal_detail_serializer_fields(animal):
     """Detail serializer returns all fields including shelter info."""
     data = AnimalDetailSerializer(animal).data
@@ -30,6 +41,18 @@ def test_animal_detail_serializer_fields(animal):
     assert data['shelter_name'] == 'Happy Paws'
     assert data['shelter_city'] == 'Bogotá'
     assert 'updated_at' in data
+
+
+@pytest.mark.django_db
+def test_animal_detail_serializer_includes_new_fields(animal):
+    """Detail serializer returns all new animal fields."""
+    data = AnimalDetailSerializer(animal).data
+
+    for field in [
+        'weight', 'is_house_trained', 'good_with_kids', 'good_with_dogs',
+        'good_with_cats', 'energy_level', 'coat_color', 'intake_date', 'microchip_id',
+    ]:
+        assert field in data, f'Missing field: {field}'
 
 
 @pytest.mark.django_db

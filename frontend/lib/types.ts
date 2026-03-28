@@ -10,6 +10,39 @@ export type User = {
   role: UserRole;
   is_staff: boolean;
   is_active: boolean;
+  date_joined: string;
+};
+
+export type ProfileStats = {
+  applications: {
+    total: number;
+    by_status: Record<string, number>;
+  };
+  sponsorships: {
+    active_count: number;
+    total_count: number;
+  };
+  donations: {
+    total_amount: string;
+    count: number;
+  };
+  favorites: {
+    count: number;
+    preview: { id: number; name: string; species: string; thumbnail_url: string | null }[];
+  };
+  adopter_intent: { status: string; visibility: string } | null;
+  shelter_invites: {
+    pending_count: number;
+  };
+};
+
+export type ActivityEvent = {
+  type: 'application' | 'donation' | 'sponsorship' | 'favorite';
+  animal_name?: string;
+  shelter_name?: string;
+  status?: string;
+  amount?: string;
+  date: string;
 };
 
 export type Shelter = {
@@ -38,6 +71,8 @@ export type AnimalAgeRange = 'puppy' | 'young' | 'adult' | 'senior';
 export type AnimalGender = 'male' | 'female' | 'unknown';
 export type AnimalSize = 'small' | 'medium' | 'large';
 export type AnimalStatus = 'draft' | 'published' | 'in_process' | 'adopted' | 'archived';
+export type AnimalCompatibility = 'yes' | 'no' | 'unknown';
+export type AnimalEnergyLevel = 'low' | 'medium' | 'high';
 
 export type Animal = {
   id: number;
@@ -52,6 +87,15 @@ export type Animal = {
   status: AnimalStatus;
   is_vaccinated: boolean;
   is_sterilized: boolean;
+  weight?: number;
+  is_house_trained: boolean;
+  good_with_kids: AnimalCompatibility;
+  good_with_dogs: AnimalCompatibility;
+  good_with_cats: AnimalCompatibility;
+  energy_level: AnimalEnergyLevel;
+  coat_color?: string;
+  intake_date?: string;
+  microchip_id?: string;
   shelter: number;
   shelter_name: string;
   shelter_city?: string;
@@ -67,7 +111,10 @@ export type AdoptionApplication = {
   id: number;
   animal: number;
   animal_name: string;
+  animal_species?: AnimalSpecies;
   shelter_name?: string;
+  shelter_city?: string;
+  thumbnail_url?: string | null;
   user: number;
   user_email: string;
   status: AdoptionApplicationStatus;
@@ -150,6 +197,7 @@ export type Donation = {
   user_email: string;
   shelter?: number | null;
   shelter_name?: string | null;
+  shelter_city?: string | null;
   campaign?: number | null;
   campaign_title?: string | null;
   amount: string;
@@ -169,7 +217,10 @@ export type Sponsorship = {
   user_email?: string;
   animal: number;
   animal_name: string;
+  animal_species?: AnimalSpecies;
   shelter_name?: string;
+  shelter_city?: string;
+  thumbnail_url?: string | null;
   amount: string;
   frequency: SponsorshipFrequency;
   status: SponsorshipStatus;
@@ -249,7 +300,17 @@ export type Favorite = {
   animal: number;
   animal_name: string;
   animal_species: AnimalSpecies;
+  breed: string;
+  age_range: AnimalAgeRange;
+  size: AnimalSize;
+  gender: AnimalGender;
+  is_vaccinated: boolean;
+  is_sterilized: boolean;
+  status: AnimalStatus;
   shelter_name: string;
+  shelter_city: string;
+  thumbnail_url: string | null;
+  note: string;
   created_at: string;
 };
 

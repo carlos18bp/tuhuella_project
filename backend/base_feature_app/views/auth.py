@@ -40,6 +40,8 @@ User = get_user_model()
 
 logger = logging.getLogger(__name__)
 
+CURRENT_TERMS_VERSION = '2026-03-25'
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -82,14 +84,24 @@ def sign_up(request):
             {'error': 'User with this email already exists'},
             status=status.HTTP_400_BAD_REQUEST
         )
-    
+
+    terms_accepted = request.data.get('terms_accepted', False)
+    if not terms_accepted:
+        return Response(
+            {'error': 'You must accept the terms and conditions'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
     # Create user
+    from django.utils import timezone as tz
     user = User.objects.create(
         email=email,
         first_name=first_name,
         last_name=last_name,
         password=make_password(password),
-        is_active=True
+        is_active=True,
+        terms_accepted_at=tz.now(),
+        terms_version=CURRENT_TERMS_VERSION,
     )
     
     # Generate tokens
@@ -223,12 +235,15 @@ def google_login(request):
         )
     
     # Get or create user
+    from django.utils import timezone as tz
     user, created = User.objects.get_or_create(
         email=email,
         defaults={
             'first_name': given_name,
             'last_name': family_name,
             'is_active': True,
+            'terms_accepted_at': tz.now(),
+            'terms_version': CURRENT_TERMS_VERSION,
         }
     )
 
@@ -419,5 +434,8 @@ def validate_token(request):
             'city': user.city,
             'role': user.role,
             'is_staff': user.is_staff,
+            'date_joined': user.date_joined.isoformat(),
+            'terms_version': user.terms_version or '',
+            'current_terms_version': CURRENT_TERMS_VERSION,
         }
     }, status=status.HTTP_200_OK)

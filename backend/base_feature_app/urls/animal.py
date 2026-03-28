@@ -6,5 +6,6 @@ urlpatterns = [
     path('<int:pk>/', animal.animal_detail, name='animal-detail'),
     path('create/', animal.animal_create, name='animal-create'),
     path('<int:pk>/update/', animal.animal_update, name='animal-update'),
+    path('<int:pk>/similar/', animal.animal_similar, name='animal-similar'),
     path('<int:pk>/delete/', animal.animal_delete, name='animal-delete'),
 ]

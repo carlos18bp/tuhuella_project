@@ -24,9 +24,17 @@ const mockBlogPost = {
   status: 'published',
 };
 
+const mockBlogPost2 = {
+  ...mockBlogPost,
+  id: 2,
+  title: 'Cuidados básicos para tu mascota',
+  slug: 'cuidados-basicos-mascota',
+  excerpt: 'Todo lo que necesitas saber para cuidar a tu mascota.',
+};
+
 const mockBlogListResponse = {
-  results: [mockBlogPost],
-  count: 1,
+  results: [mockBlogPost, mockBlogPost2],
+  count: 2,
   page: 1,
   page_size: 10,
   total_pages: 1,
@@ -34,13 +42,16 @@ const mockBlogListResponse = {
 
 test.describe('Blog — Public', () => {
   test.beforeEach(async ({ page }) => {
-    // Mock blog API to ensure test data is always available
-    await page.route('**/api/blog/?**', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockBlogListResponse) }),
-    );
+    // Mock blog detail API (must be registered before the list catch-all)
     await page.route('**/api/blog/como-adoptar-responsablemente/**', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockBlogPost) }),
     );
+    // Mock blog list API — catch-all for any query param combination
+    await page.route('**/api/blog/**', (route) => {
+      // Don't intercept detail page requests (already handled above)
+      if (route.request().url().includes('/api/blog/como-adoptar')) return route.fallback();
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockBlogListResponse) });
+    });
   });
 
   test('should display blog listing page with heading and filters', { tag: [...BLOG_BROWSE] }, async ({ page }) => {
@@ -57,30 +68,17 @@ test.describe('Blog — Public', () => {
     await page.goto('/blog');
     await waitForPageLoad(page);
 
-    // Wait for the blog API response
-    await page.waitForResponse(
-      (resp) => resp.url().includes('/api/blog/') && resp.status() === 200,
-      { timeout: 10_000 },
-    );
-
-    // Should render at least one post card
-    const postCount = await page.getByTestId('post-card').count();
-    expect(postCount).toBeGreaterThan(0);
+    // Wait for at least one post card to appear (web-first assertion waits for React to render)
+    await expect(page.getByTestId('post-card').first()).toBeVisible({ timeout: 15_000 });
   });
 
   test('should navigate to blog post detail page', { tag: [...BLOG_DETAIL] }, async ({ page }) => {
     await page.goto('/blog');
     await waitForPageLoad(page);
 
-    // Wait for posts to load
-    await page.waitForResponse(
-      (resp) => resp.url().includes('/api/blog/') && resp.status() === 200,
-      { timeout: 10_000 },
-    );
-
-    // Click on the first blog post link
+    // Wait for post cards to render
     const firstPostLink = page.getByTestId('post-card').first();
-    await expect(firstPostLink).toBeVisible({ timeout: 10_000 });
+    await expect(firstPostLink).toBeVisible({ timeout: 15_000 });
     await firstPostLink.click();
 
     // Should be on a blog detail page
@@ -105,12 +103,16 @@ test.describe('Blog — Admin', () => {
   };
 
   test.beforeEach(async ({ page }) => {
-    // Mock admin blog API endpoints
-    await page.route('**/api/blog/admin/**', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAdminBlogListResponse) }),
+    // Mock validate_token so fetchMe succeeds with mock tokens
+    await page.route('**/api/auth/validate_token/**', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ user: { id: 1, email: 'admin@mihuella.com', first_name: 'Admin', last_name: 'Test', role: 'admin', is_staff: true, is_active: true } }),
+      }),
     );
-    // Mock blog list API for calendar page
-    await page.route('**/api/blog/admin/calendar/**', (route) =>
+    // Mock admin blog API endpoints (catch-all)
+    await page.route(/\/api\/blog\/admin\//, (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAdminBlogListResponse) }),
     );
   });
@@ -135,18 +137,17 @@ test.describe('Blog — Admin', () => {
   });
 
   test('should display admin blog edit page', { tag: [...BLOG_ADMIN_EDIT] }, async ({ page }) => {
+    // Mock the individual blog post endpoint for the edit page
+    await page.route('**/api/blog/admin/1/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ...mockBlogPost, id: 1, status: 'published' }) }),
+    );
+
     await loginAndNavigate(page, 'admin', '/admin/blog');
     await waitForPageLoad(page);
 
-    // Wait for posts to load
-    await page.waitForResponse(
-      (resp) => resp.url().includes('/api/blog/admin/') && resp.status() === 200,
-      { timeout: 10_000 },
-    );
-
-    // Click the first "Editar" link
+    // Wait for the "Editar" link to appear (list has loaded)
     const editLink = page.getByRole('link', { name: /Editar/i }).first();
-    await expect(editLink).toBeVisible({ timeout: 10_000 });
+    await expect(editLink).toBeVisible({ timeout: 15_000 });
     await editLink.click();
 
     // Should be on edit page

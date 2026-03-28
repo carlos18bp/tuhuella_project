@@ -56,7 +56,7 @@ export default function MultiSelectDropdown({
         onClick={() => setOpen(!open)}
         className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${
           selected.length > 0
-            ? 'border-teal-400 bg-teal-50 text-teal-700 ring-1 ring-teal-200/50'
+            ? 'border-teal-400 bg-teal-50 text-teal-700 ring-1 ring-teal-200/50 dark:border-teal-500/40 dark:ring-teal-500/20'
             : 'border-border-secondary bg-surface-primary text-text-secondary hover:border-stone-400 hover:shadow-sm'
         }`}
       >

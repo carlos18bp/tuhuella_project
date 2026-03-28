@@ -1,6 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+
+import TermsModal from './TermsModal';
 
 export type CheckoutType = 'donation' | 'sponsorship';
 
@@ -52,16 +55,20 @@ export default function CheckoutForm({
   onSubmit,
   submitting = false,
 }: CheckoutFormProps) {
+  const tTerms = useTranslations('termsAcceptance');
+
   const [amount, setAmount] = useState('');
   const [method, setMethod] = useState('card');
   const [message, setMessage] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
 
   const config = typeConfig[type];
   const numericAmount = Number(amount) || 0;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (numericAmount <= 0) return;
+    if (numericAmount <= 0 || !termsAccepted) return;
     void onSubmit({ amount: numericAmount, method, message });
   };
 
@@ -152,13 +159,44 @@ export default function CheckoutForm({
         </div>
       )}
 
+      {/* Terms acceptance */}
+      <div className="flex items-start gap-2.5">
+        <input
+          id="checkout-terms"
+          type="checkbox"
+          checked={termsAccepted}
+          onChange={(e) => setTermsAccepted(e.target.checked)}
+          className="mt-0.5 h-4 w-4 rounded border-border-primary text-teal-600 accent-teal-600 cursor-pointer"
+        />
+        <label htmlFor="checkout-terms" className="text-xs text-text-tertiary leading-snug cursor-pointer">
+          {tTerms('checkoutLabel')}{' '}
+          <button
+            type="button"
+            onClick={() => setShowTermsModal(true)}
+            className="text-teal-600 font-medium hover:text-teal-700 underline underline-offset-2 transition-colors"
+          >
+            {tTerms('termsLink')}
+          </button>
+        </label>
+      </div>
+
       <button
         type="submit"
-        disabled={submitting || numericAmount <= 0}
+        disabled={submitting || numericAmount <= 0 || !termsAccepted}
         className={`w-full ${config.accent} text-white rounded-full py-3 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed`}
       >
         {submitting ? 'Procesando...' : config.submitLabel(numericAmount)}
       </button>
+
+      <TermsModal
+        open={showTermsModal}
+        onAccept={() => {
+          setTermsAccepted(true);
+          setShowTermsModal(false);
+        }}
+        onClose={() => setShowTermsModal(false)}
+        showActions={true}
+      />
     </form>
   );
 }

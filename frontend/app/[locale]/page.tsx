@@ -85,15 +85,15 @@ export default function HomePage() {
             </div>
 
             <div className="mt-10 grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <div className="rounded-2xl bg-white/80 border border-border-primary p-4 shadow-sm hover:shadow-md transition-shadow">
+              <div className="rounded-2xl bg-surface-primary/80 border border-border-primary p-4 shadow-sm hover:shadow-md transition-shadow">
                 <p className="text-xs text-text-tertiary">{t('statAdoptionLabel')}</p>
                 <p className="mt-1 text-sm font-semibold text-text-primary">{t('statAdoption')}</p>
               </div>
-              <div className="rounded-2xl bg-white/80 border border-border-primary p-4 shadow-sm hover:shadow-md transition-shadow">
+              <div className="rounded-2xl bg-surface-primary/80 border border-border-primary p-4 shadow-sm hover:shadow-md transition-shadow">
                 <p className="text-xs text-text-tertiary">{t('statSponsorshipLabel')}</p>
                 <p className="mt-1 text-sm font-semibold text-text-primary">{t('statSponsorship')}</p>
               </div>
-              <div className="rounded-2xl bg-white/80 border border-border-primary p-4 shadow-sm hover:shadow-md transition-shadow">
+              <div className="rounded-2xl bg-surface-primary/80 border border-border-primary p-4 shadow-sm hover:shadow-md transition-shadow">
                 <p className="text-xs text-text-tertiary">{t('statSheltersLabel')}</p>
                 <p className="mt-1 text-sm font-semibold text-text-primary">{t('statShelters')}</p>
               </div>

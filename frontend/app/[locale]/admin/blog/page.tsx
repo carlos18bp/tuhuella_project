@@ -26,7 +26,7 @@ function statusLabel(post: { is_published: boolean; published_at: string | null 
 
 function statusBadgeClass(post: { is_published: boolean; published_at: string | null }) {
   if (post.is_published) return 'bg-teal-50 text-teal-700';
-  if (isScheduled(post)) return 'bg-blue-50 text-blue-700';
+  if (isScheduled(post)) return 'bg-amber-50 text-amber-700';
   return 'bg-surface-tertiary text-text-secondary';
 }
 

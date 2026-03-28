@@ -1,6 +1,6 @@
 # Mi Huella — Architecture Overview
 
-> Last updated: 2026-03-26
+> Last updated: 2026-03-27
 
 ## System Diagram
 
@@ -77,19 +77,20 @@ erDiagram
     AmountOption }o--o| Campaign : linked_to
     FAQ ||--|| FAQ : standalone
     StrategicAlly ||--|| StrategicAlly : standalone
-    VolunteerPosition ||--|| VolunteerPosition : standalone
+    VolunteerPosition ||--o{ VolunteerApplication : receives
+    VolunteerApplication }o--|| User : submitted_by
     PasswordCode }o--|| User : belongs_to
 ```
 
-## Models (20)
+## Models (21)
 
 | # | Model | Key Fields |
 |---|-------|------------|
-| 1 | User | email, role (adopter/shelter_admin/admin), city |
+| 1 | User | email, role, city, avatar, bio, housing_type, has_yard, has_other_pets, experience_level |
 | 2 | Shelter | name, logo, cover_image, verification_status |
 | 3 | Animal | species, age, gender, size, GalleryField |
 | 4 | Adoption (AdoptionApplication) | form_answers (JSON), status |
-| 5 | Campaign | goal_amount, raised_amount, progress_percentage |
+| 5 | Campaign | goal_amount, raised_amount, progress_percentage, evidence_gallery |
 | 6 | Donation | amount, shelter FK, campaign FK (both nullable) |
 | 7 | Sponsorship | frequency (monthly/one_time), animal FK |
 | 8 | Payment | amount, donation/sponsorship FK (both nullable) |
@@ -105,6 +106,7 @@ erDiagram
 | 18 | FAQ | question/answer pairs |
 | 19 | StrategicAlly | partner organizations |
 | 20 | VolunteerPosition | volunteer opportunities |
+| 21 | VolunteerApplication | position FK, user FK, motivation, status (pending/reviewed/accepted/rejected) |
 
 ## Request Flow
 
@@ -132,14 +134,16 @@ sequenceDiagram
 tuhuella_project/
 ├── backend/
 │   ├── base_feature_app/
-│   │   ├── models/          # 20 model files
-│   │   ├── serializers/     # 40 serializer files
-│   │   ├── views/           # 19 view modules
-│   │   ├── urls/            # 18 URL modules
+│   │   ├── models/          # 21 model files
+│   │   ├── serializers/     # 41 serializer files
+│   │   ├── views/           # 20 view modules
+│   │   ├── urls/            # 19 URL modules
 │   │   ├── management/commands/  # 21 commands
 │   │   ├── services/        # email_service, notification_service, notification_templates
+│   │   ├── utils/           # auth_utils, email_utils, recaptcha
+│   │   ├── templates/emails/ # Branded HTML email templates (base + 3 specific)
 │   │   ├── tests/           # 56 test files (models, serializers, views, services, utils, commands)
-│   │   └── admin.py         # MiHuellaAdminSite (21 admin classes)
+│   │   └── admin.py         # MiHuellaAdminSite (22 admin classes)
 │   ├── base_feature_project/
 │   │   ├── settings.py      # Base settings
 │   │   ├── settings_prod.py # Production overrides
@@ -147,7 +151,7 @@ tuhuella_project/
 │   ├── django_attachments/  # Custom image handling
 │   └── conftest.py          # Root pytest config
 ├── frontend/
-│   ├── app/[locale]/        # 47 page.tsx files
+│   ├── app/[locale]/        # 48 page.tsx files
 │   │   ├── page.tsx         # Home
 │   │   ├── template.tsx     # Framer Motion transitions
 │   │   ├── layout.tsx       # Root layout (Inter, Header, Footer)
@@ -155,7 +159,7 @@ tuhuella_project/
 │   ├── components/
 │   │   ├── layout/          # Header, Footer, Sidebar, PageTransition, LocaleSwitcher, ThemeToggle
 │   │   ├── blog/            # BlogContentRenderer, ReadingProgressBar
-│   │   ├── ui/              # 25 shared components
+│   │   ├── ui/              # 26 shared components
 │   │   └── providers/       # ThemeProvider
 │   ├── lib/
 │   │   ├── stores/          # 10 Zustand stores

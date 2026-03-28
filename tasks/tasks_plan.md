@@ -129,5 +129,53 @@
 | S2: P1 E2E flow coverage audit | ✅ | All 75/75 flows already have @flow: tags |
 | S3: Fix CLAUDE.md stale references | ✅ | Removed mirror refs, updated flow count to 75, fixed model/store counts |
 
+## Phase 12 — Shelter, Volunteer, Emails & Bug Fixes
+| Task | Status | Notes |
+|------|--------|-------|
+| Bug fix: my-profile not loading (fetchMe in authStore) | ✅ | syncFromCookies + fetchMe + phone/city in validate_token |
+| Shelter detail: logo overlay + Swiper gallery | ✅ | ShelterGallery component, cover+logo layout |
+| Volunteer application model + migration | ✅ | FK to VolunteerPosition + User, status choices |
+| Volunteer application serializer | ✅ | Validates active position, motivation >= 20 chars |
+| Volunteer application view + URL | ✅ | POST with IsAuthenticated + reCAPTCHA |
+| Volunteer application Django admin | ✅ | In "Voluntariado y Aliados" section |
+| Volunteer application frontend form | ✅ | Auto-fill, character counter, success state |
+| Volunteer "Postularme" button on cards | ✅ | Link to /work-with-us/apply/[positionId] |
+| Volunteer i18n (es + en) | ✅ | 22 new translation keys |
+| Branded HTML email base template | ✅ | Teal header, Stone bg, table-based layout |
+| Password reset code email template | ✅ | Extends base, code in teal box |
+| Verification code email template | ✅ | Extends base, welcome + code |
+| Volunteer notification email template | ✅ | Extends base, striped detail table |
+| Centralized email_utils.py | ✅ | All email functions + EmailService class |
+| Campaign evidence fake data | ✅ | picsum.photos images for completed campaigns |
+| S1: reCAPTCHA on volunteer form | ✅ | Same pattern as sign-in/sign-up |
+| S2: next/image optimization | ✅ | Shelter detail + campaign detail pages |
+| S3: Email function centralization | ✅ | email_utils.py + backwards-compat re-exports |
+
+## Phase 13 — Enriched My-Profile Dashboard
+| Task | Status | Notes |
+|------|--------|-------|
+| Step 1: User model — 6 new fields + migration | ⏳ | avatar, bio, housing_type, has_yard, has_other_pets, experience_level |
+| Step 2a: validate_token — add date_joined + new fields | ⏳ | Also update generate_auth_tokens |
+| Step 2b: GET /user/profile-stats/ endpoint | ⏳ | Aggregated stats from 6 models |
+| Step 2c: GET /user/activity/ endpoint | ⏳ | Combined timeline from 4 models |
+| Step 2d: PATCH /user/profile/ endpoint | ⏳ | New UserProfileUpdateSerializer |
+| Step 2e: POST /user/profile/avatar/ endpoint | ⏳ | MultiPartParser, same as blog cover |
+| Step 2f: Register URLs in urls/profile.py | ⏳ | Under /user/ prefix |
+| Step 3: Admin — new fieldsets for User | ⏳ | Housing, Experience, Avatar sections |
+| Step 4a: Frontend types — User, ProfileStats, ActivityEvent | ⏳ | |
+| Step 4b: Frontend constants — API endpoints | ⏳ | |
+| Step 4c: Auth store — new actions + state | ⏳ | fetchProfileStats, fetchActivity, updateProfile, uploadAvatar |
+| Step 5a: Profile card — avatar, bio, housing, completeness | ⏳ | |
+| Step 5b: Activity cards with stats counters | ⏳ | |
+| Step 5c: Shelter invites banner | ⏳ | |
+| Step 5d: Edit profile modal | ⏳ | Zod validation, multi-section form |
+| Step 5e: Activity timeline component | ⏳ | |
+| Step 5f: Profile completeness bar | ⏳ | Frontend-only calculation |
+| Step 6a: Translations (es + en) | ⏳ | ~50 new keys |
+| Step 6b: Backend tests | ⏳ | profile-stats, activity, update-profile |
+| Step 6c: Frontend unit tests | ⏳ | page, modal, timeline, store |
+| Step 6d: E2E flow updates | ⏳ | Edit profile flow |
+
 ## Known Issues
 - Wompi payment SDK not integrated (placeholder only)
+- Blog posts fake data command fails with `'category'` error (pre-existing, unrelated to Phase 12)

@@ -8,22 +8,25 @@ import type { Favorite } from '@/lib/types';
 type FavoriteState = {
   favorites: Favorite[];
   loading: boolean;
+  error: string | null;
   fetchFavorites: () => Promise<void>;
   toggleFavorite: (animalId: number) => Promise<{ status: 'added' | 'removed' }>;
   isFavorited: (animalId: number) => boolean;
+  updateFavoriteNote: (favoriteId: number, note: string) => Promise<void>;
 };
 
 export const useFavoriteStore = create<FavoriteState>((set, get) => ({
   favorites: [],
   loading: false,
+  error: null,
 
   fetchFavorites: async () => {
-    set({ loading: true });
+    set({ loading: true, error: null });
     try {
       const response = await api.get(API_ENDPOINTS.FAVORITES);
       set({ favorites: response.data, loading: false });
     } catch {
-      set({ loading: false });
+      set({ loading: false, error: 'Failed to load favorites' });
     }
   },
 
@@ -34,19 +37,19 @@ export const useFavoriteStore = create<FavoriteState>((set, get) => ({
     // Optimistic update
     if (alreadyFav) {
       set({ favorites: prev.filter((f) => f.animal !== animalId) });
-    } else {
-      set({
-        favorites: [
-          ...prev,
-          { id: -1, animal: animalId, animal_name: '', animal_species: 'dog', shelter_name: '', created_at: '' } as Favorite,
-        ],
-      });
     }
 
     try {
       const response = await api.post(API_ENDPOINTS.FAVORITE_TOGGLE, { animal_id: animalId });
-      await get().fetchFavorites();
-      return response.data;
+      const { status: toggleStatus } = response.data;
+
+      if (toggleStatus === 'added' && response.data.favorite) {
+        // Use the full favorite object from the response instead of refetching
+        set({ favorites: [response.data.favorite, ...prev] });
+      }
+      // If removed, the optimistic update already handled it
+
+      return { status: toggleStatus };
     } catch (err) {
       set({ favorites: prev });
       throw err;
@@ -55,5 +58,18 @@ export const useFavoriteStore = create<FavoriteState>((set, get) => ({
 
   isFavorited: (animalId: number) => {
     return get().favorites.some((f) => f.animal === animalId);
+  },
+
+  updateFavoriteNote: async (favoriteId: number, note: string) => {
+    try {
+      const response = await api.patch(API_ENDPOINTS.FAVORITE_UPDATE(favoriteId), { note });
+      set({
+        favorites: get().favorites.map((f) =>
+          f.id === favoriteId ? response.data : f,
+        ),
+      });
+    } catch {
+      // Silent fail for note updates — non-critical
+    }
   },
 }));

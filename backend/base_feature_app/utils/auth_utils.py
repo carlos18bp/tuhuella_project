@@ -31,5 +31,6 @@ def generate_auth_tokens(user):
             'city': user.city,
             'role': user.role,
             'is_staff': user.is_staff,
+            'date_joined': user.date_joined.isoformat(),
         }
     }

@@ -15,9 +15,9 @@ def application_list(request):
     user = request.user
     if user.role == 'shelter_admin':
         shelters = user.shelters.all()
-        queryset = AdoptionApplication.objects.filter(animal__shelter__in=shelters)
+        queryset = AdoptionApplication.objects.filter(animal__shelter__in=shelters).select_related('animal', 'animal__shelter', 'user')
     else:
-        queryset = AdoptionApplication.objects.filter(user=user)
+        queryset = AdoptionApplication.objects.filter(user=user).select_related('animal', 'animal__shelter', 'user')
 
     serializer = AdoptionListSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data)

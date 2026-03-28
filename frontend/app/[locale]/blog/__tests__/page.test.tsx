@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 
 import BlogListingPage from '../page';
 import { useBlogStore } from '@/lib/stores/blogStore';
@@ -69,10 +69,12 @@ describe('BlogListingPage', () => {
     expect(screen.getByText(/Guía de adopción responsable/)).toBeInTheDocument();
   });
 
-  it('calls fetchPosts on mount', () => {
+  it('calls fetchPosts on mount', async () => {
     const state = setupMock();
     render(<BlogListingPage />);
-    expect(state.fetchPosts).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(state.fetchPosts).toHaveBeenCalled();
+    });
   });
 
   it('renders category filter buttons', () => {

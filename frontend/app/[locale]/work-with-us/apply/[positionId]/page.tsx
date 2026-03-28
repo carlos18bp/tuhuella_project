@@ -10,6 +10,7 @@ import { Link } from '@/i18n/navigation';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { api } from '@/lib/services/http';
 import { API_ENDPOINTS, ROUTES } from '@/lib/constants';
+import { TermsModal } from '@/components/ui';
 import type { VolunteerPosition } from '@/lib/types';
 
 type FormData = {
@@ -31,6 +32,7 @@ export default function VolunteerApplyPage() {
   const t = useTranslations('workWithUs');
   const positionId = Number(params.positionId);
 
+  const tTerms = useTranslations('termsAcceptance');
   const user = useAuthStore((s) => s.user);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const isAuthReady = useAuthStore((s) => s.isAuthReady);
@@ -44,6 +46,9 @@ export default function VolunteerApplyPage() {
   const [siteKey, setSiteKey] = useState('');
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const captchaRef = useRef<ReCAPTCHA>(null);
+
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
 
   const [form, setForm] = useState<FormData>({
     first_name: '',
@@ -123,6 +128,10 @@ export default function VolunteerApplyPage() {
     if (!form.country.trim()) errors.country = [t('fieldRequired')];
     if (!form.motivation.trim()) errors.motivation = [t('fieldRequired')];
     else if (form.motivation.trim().length < 20) errors.motivation = [t('motivationMinLength')];
+
+    if (!termsAccepted) {
+      errors.terms = [tTerms('required')];
+    }
 
     if (siteKey && !captchaToken) {
       errors.captcha = [t('captchaRequired')];
@@ -332,6 +341,35 @@ export default function VolunteerApplyPage() {
           </div>
         )}
 
+        {/* Terms acceptance */}
+        <div>
+          <div className="flex items-start gap-2.5">
+            <input
+              id="volunteer-terms"
+              type="checkbox"
+              checked={termsAccepted}
+              onChange={(e) => {
+                setTermsAccepted(e.target.checked);
+                setFieldErrors((prev) => ({ ...prev, terms: [] }));
+              }}
+              className="mt-0.5 h-4 w-4 rounded border-border-primary text-teal-600 accent-teal-600 cursor-pointer"
+            />
+            <label htmlFor="volunteer-terms" className="text-sm text-text-secondary leading-snug cursor-pointer">
+              {tTerms('checkboxLabel')}{' '}
+              <button
+                type="button"
+                onClick={() => setShowTermsModal(true)}
+                className="text-teal-600 font-medium hover:text-teal-700 underline underline-offset-2 transition-colors"
+              >
+                {tTerms('termsLink')}
+              </button>
+            </label>
+          </div>
+          {fieldErrors.terms?.length > 0 && (
+            <p className="text-xs text-red-600 mt-1">{fieldErrors.terms[0]}</p>
+          )}
+        </div>
+
         <button
           type="submit"
           disabled={submitting || (Boolean(siteKey) && !captchaToken)}
@@ -341,6 +379,20 @@ export default function VolunteerApplyPage() {
           {submitting ? t('submitting') : t('submitApplication')}
         </button>
       </form>
+
+      <TermsModal
+        open={showTermsModal}
+        onAccept={() => {
+          setTermsAccepted(true);
+          setShowTermsModal(false);
+          setFieldErrors((prev) => ({ ...prev, terms: [] }));
+        }}
+        onDecline={() => {
+          setTermsAccepted(false);
+          setShowTermsModal(false);
+        }}
+        onClose={() => setShowTermsModal(false)}
+      />
     </div>
   );
 }

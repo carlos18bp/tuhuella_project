@@ -14,7 +14,10 @@ class AnimalDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'species', 'breed', 'age_range', 'gender', 'size',
             'description', 'special_needs', 'status', 'is_vaccinated',
-            'is_sterilized', 'shelter', 'shelter_name', 'shelter_city',
+            'is_sterilized', 'weight', 'is_house_trained',
+            'good_with_kids', 'good_with_dogs', 'good_with_cats',
+            'energy_level', 'coat_color', 'intake_date', 'microchip_id',
+            'shelter', 'shelter_name', 'shelter_city',
             'created_at', 'updated_at',
         ]
 

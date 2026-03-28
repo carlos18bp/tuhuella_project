@@ -7,10 +7,12 @@ import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { PawPrint } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { useAuthStore } from '@/lib/stores/authStore';
 import { api } from '@/lib/services/http';
 import { ROUTES } from '@/lib/constants';
+import { TermsModal } from '@/components/ui';
 
 type GoogleUser = {
   email: string;
@@ -22,6 +24,8 @@ type GoogleUser = {
 export default function SignUpPage() {
   const router = useRouter();
   const { signUp, googleLogin } = useAuthStore();
+  const tAuth = useTranslations('auth');
+  const tTerms = useTranslations('termsAcceptance');
 
   const hasGoogleClientId = Boolean(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
 
@@ -37,6 +41,9 @@ export default function SignUpPage() {
   const [siteKey, setSiteKey] = useState<string>('');
   const recaptchaRef = useRef<ReCAPTCHA>(null);
 
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+
   useEffect(() => {
     setMounted(true);
     api.get('google-captcha/site-key/')
@@ -49,16 +56,20 @@ export default function SignUpPage() {
     setLoading(true);
     setError('');
 
-    // Validate passwords match
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       setLoading(false);
       return;
     }
 
-    // Validate password strength
     if (password.length < 8) {
       setError('Password must be at least 8 characters');
+      setLoading(false);
+      return;
+    }
+
+    if (!termsAccepted) {
+      setError(tTerms('required'));
       setLoading(false);
       return;
     }
@@ -70,12 +81,13 @@ export default function SignUpPage() {
     }
 
     try {
-      await signUp({ 
-        email, 
-        password, 
+      await signUp({
+        email,
+        password,
         first_name: firstName,
         last_name: lastName,
         captcha_token: captchaToken ?? undefined,
+        terms_accepted: true,
       });
       router.replace(ROUTES.HOME);
     } catch (err: any) {
@@ -120,7 +132,7 @@ export default function SignUpPage() {
         family_name: decoded?.family_name,
         picture: decoded?.picture,
       });
-      
+
       router.replace(ROUTES.HOME);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Google registration failed');
@@ -144,7 +156,7 @@ export default function SignUpPage() {
             <PawPrint className="h-5 w-5 text-teal-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-text-primary">Crear cuenta</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-text-primary">{tAuth('signUpTitle')}</h1>
             <p className="text-sm text-text-tertiary">Únete a la comunidad Tu Huella</p>
           </div>
         </div>
@@ -152,72 +164,93 @@ export default function SignUpPage() {
         <form className="space-y-4" onSubmit={onSubmit}>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label htmlFor="signup-firstname" className="block text-sm font-medium text-text-secondary mb-1.5">Nombre</label>
-              <input 
+              <label htmlFor="signup-firstname" className="block text-sm font-medium text-text-secondary mb-1.5">{tAuth('firstName')}</label>
+              <input
                 id="signup-firstname"
                 className={inputClasses}
-                placeholder="Juan" 
+                placeholder="Juan"
                 type="text"
-                value={firstName} 
-                onChange={(e) => setFirstName(e.target.value)} 
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
                 autoComplete="given-name"
               />
             </div>
             <div>
-              <label htmlFor="signup-lastname" className="block text-sm font-medium text-text-secondary mb-1.5">Apellido</label>
-              <input 
+              <label htmlFor="signup-lastname" className="block text-sm font-medium text-text-secondary mb-1.5">{tAuth('lastName')}</label>
+              <input
                 id="signup-lastname"
                 className={inputClasses}
-                placeholder="Pérez" 
+                placeholder="Pérez"
                 type="text"
-                value={lastName} 
-                onChange={(e) => setLastName(e.target.value)} 
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
                 autoComplete="family-name"
               />
             </div>
           </div>
-          
+
           <div>
-            <label htmlFor="signup-email" className="block text-sm font-medium text-text-secondary mb-1.5">Correo electrónico</label>
-            <input 
+            <label htmlFor="signup-email" className="block text-sm font-medium text-text-secondary mb-1.5">{tAuth('email')}</label>
+            <input
               id="signup-email"
               className={inputClasses}
-              placeholder="tu@email.com" 
+              placeholder="tu@email.com"
               type="email"
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
               required
             />
           </div>
-          
+
           <div>
-            <label htmlFor="signup-password" className="block text-sm font-medium text-text-secondary mb-1.5">Contraseña</label>
-            <input 
+            <label htmlFor="signup-password" className="block text-sm font-medium text-text-secondary mb-1.5">{tAuth('password')}</label>
+            <input
               id="signup-password"
               className={inputClasses}
-              placeholder="••••••••" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              type="password" 
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              type="password"
               autoComplete="new-password"
               required
             />
             <p className="text-xs text-text-quaternary mt-1">Mínimo 8 caracteres</p>
           </div>
-          
+
           <div>
-            <label htmlFor="signup-confirm" className="block text-sm font-medium text-text-secondary mb-1.5">Confirmar contraseña</label>
-            <input 
+            <label htmlFor="signup-confirm" className="block text-sm font-medium text-text-secondary mb-1.5">{tAuth('confirmPassword')}</label>
+            <input
               id="signup-confirm"
               className={inputClasses}
-              placeholder="••••••••" 
-              value={confirmPassword} 
-              onChange={(e) => setConfirmPassword(e.target.value)} 
-              type="password" 
+              placeholder="••••••••"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              type="password"
               autoComplete="new-password"
               required
             />
+          </div>
+
+          {/* Terms and Conditions checkbox */}
+          <div className="flex items-start gap-2.5">
+            <input
+              id="terms-checkbox"
+              type="checkbox"
+              checked={termsAccepted}
+              onChange={(e) => setTermsAccepted(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-border-primary text-teal-600 accent-teal-600 cursor-pointer"
+            />
+            <label htmlFor="terms-checkbox" className="text-sm text-text-secondary leading-snug cursor-pointer">
+              {tTerms('signupLabel')}{' '}
+              <button
+                type="button"
+                onClick={() => setShowTermsModal(true)}
+                className="text-teal-600 font-medium hover:text-teal-700 underline underline-offset-2 transition-colors"
+              >
+                {tTerms('termsLink')}
+              </button>
+            </label>
           </div>
 
           {siteKey && (
@@ -231,12 +264,12 @@ export default function SignUpPage() {
             </div>
           )}
 
-          <button 
-            className="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600 text-white rounded-full px-5 py-3 w-full font-medium disabled:opacity-50 btn-base shadow-sm hover:shadow-md" 
-            type="submit" 
+          <button
+            className="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600 text-white rounded-full px-5 py-3 w-full font-medium disabled:opacity-50 btn-base shadow-sm hover:shadow-md"
+            type="submit"
             disabled={loading}
           >
-            {loading ? 'Creando cuenta...' : 'Crear cuenta'}
+            {loading ? 'Creando cuenta...' : tAuth('signUpTitle')}
           </button>
 
           {error ? <p className="text-red-600 text-sm bg-red-50 border border-red-200/60 rounded-lg px-3 py-2">{error}</p> : null}
@@ -248,7 +281,7 @@ export default function SignUpPage() {
               <div className="w-full border-t border-border-primary"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-3 bg-surface-primary text-text-quaternary">O continúa con</span>
+              <span className="px-3 bg-surface-primary text-text-quaternary">{tAuth('orContinueWith')}</span>
             </div>
           </div>
 
@@ -268,9 +301,9 @@ export default function SignUpPage() {
         </div>
 
         <div className="mt-6 text-center text-sm">
-          <span className="text-text-tertiary">¿Ya tienes cuenta? </span>
+          <span className="text-text-tertiary">{tAuth('hasAccount')} </span>
           <Link href="/sign-in" className="text-teal-600 font-medium hover:text-teal-700 transition-colors">
-            Iniciar sesión
+            {tAuth('signInTitle')}
           </Link>
         </div>
 
@@ -290,6 +323,20 @@ export default function SignUpPage() {
           </a>
         </p>
       </div>
+
+      {/* Terms Modal */}
+      <TermsModal
+        open={showTermsModal}
+        onAccept={() => {
+          setTermsAccepted(true);
+          setShowTermsModal(false);
+        }}
+        onDecline={() => {
+          setTermsAccepted(false);
+          setShowTermsModal(false);
+        }}
+        onClose={() => setShowTermsModal(false)}
+      />
     </main>
   );
 }

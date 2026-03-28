@@ -15,9 +15,26 @@ jest.mock('@/lib/stores/authStore', () => ({
   useAuthStore: jest.fn(),
 }));
 
+jest.mock('@/lib/stores/notificationStore', () => ({
+  useNotificationStore: jest.fn((selector: (s: Record<string, unknown>) => unknown) =>
+    selector({
+      unreadCount: 0,
+      notifications: [],
+      fetchUnreadCount: jest.fn(),
+      fetchNotifications: jest.fn(),
+      markAllAsRead: jest.fn(),
+    }),
+  ),
+}));
+
 jest.mock('../LocaleSwitcher', () => ({
   __esModule: true,
   default: () => React.createElement('div', { 'data-testid': 'locale-switcher' }),
+}));
+
+jest.mock('../ThemeToggle', () => ({
+  __esModule: true,
+  default: () => React.createElement('div', { 'data-testid': 'theme-toggle' }),
 }));
 
 const mockUseAuthStore = useAuthStore as unknown as jest.Mock;
@@ -25,6 +42,7 @@ const mockUseAuthStore = useAuthStore as unknown as jest.Mock;
 const setupMock = (overrides: Record<string, unknown> = {}) => {
   const defaults: Record<string, unknown> = {
     isAuthenticated: false,
+    isAuthReady: true,
     user: null,
     signOut: jest.fn(),
   };

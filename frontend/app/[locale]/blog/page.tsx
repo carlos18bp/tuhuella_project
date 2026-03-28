@@ -135,19 +135,14 @@ export default function BlogListingPage() {
     [fetchPosts],
   );
 
-  // Initial load
-  useEffect(() => {
-    loadPosts(1, selectedCategory, searchQuery);
-  }, [selectedCategory]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Debounced search
+  // Fetch posts on category or search change (debounced for search)
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       loadPosts(1, selectedCategory, searchQuery);
-    }, 300);
+    }, searchQuery ? 300 : 0);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [searchQuery]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedCategory, searchQuery, loadPosts]);
 
   // Determine the hero post: is_featured when showing all, first post when filtering
   const heroPost = !searchQuery && posts.length > 0

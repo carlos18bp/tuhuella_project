@@ -50,6 +50,7 @@ def list_blog_posts(request):
         qs = qs.filter(
             Q(title_es__icontains=search) | Q(title_en__icontains=search)
             | Q(excerpt_es__icontains=search) | Q(excerpt_en__icontains=search)
+            | Q(content_es__icontains=search) | Q(content_en__icontains=search)
         )
 
     try:

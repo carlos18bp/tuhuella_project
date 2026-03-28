@@ -27,6 +27,7 @@ export const ROUTES = {
   ADOPT: (id: number | string) => `/adopt/${id}`,
 
   MY_PROFILE: '/my-profile',
+  MY_PROFILE_EDIT: '/my-profile/edit',
   FAVORITES: '/favorites',
   MY_INTENT: '/my-intent',
   MY_APPLICATIONS: '/my-applications',
@@ -65,6 +66,10 @@ export const API_ENDPOINTS = {
   UPDATE_PASSWORD: '/auth/update_password/',
   VALIDATE_TOKEN: '/auth/validate_token/',
 
+  PROFILE_STATS: '/user/profile-stats/',
+  USER_ACTIVITY: '/user/activity/',
+  UPDATE_PROFILE: '/user/profile/',
+
   SHELTERS: '/shelters/',
   SHELTER_DETAIL: (id: number) => `/shelters/${id}/`,
   SHELTER_CREATE: '/shelters/create/',
@@ -74,6 +79,7 @@ export const API_ENDPOINTS = {
   ANIMAL_DETAIL: (id: number) => `/animals/${id}/`,
   ANIMAL_CREATE: '/animals/create/',
   ANIMAL_UPDATE: (id: number) => `/animals/${id}/update/`,
+  ANIMAL_SIMILAR: (id: number) => `/animals/${id}/similar/`,
   ANIMAL_DELETE: (id: number) => `/animals/${id}/delete/`,
 
   ADOPTIONS: '/adoptions/',
@@ -120,6 +126,7 @@ export const API_ENDPOINTS = {
 
   FAVORITES: '/favorites/',
   FAVORITE_TOGGLE: '/favorites/toggle/',
+  FAVORITE_UPDATE: (id: number) => `/favorites/${id}/`,
 
   BLOG_LIST: '/blog/',
   BLOG_DETAIL: (slug: string) => `/blog/${slug}/`,

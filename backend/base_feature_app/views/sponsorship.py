@@ -12,7 +12,7 @@ from base_feature_app.serializers.sponsorship_create_update import SponsorshipCr
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def sponsorship_list(request):
-    queryset = Sponsorship.objects.filter(user=request.user)
+    queryset = Sponsorship.objects.filter(user=request.user).select_related('animal', 'animal__shelter')
     serializer = SponsorshipListSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data)
 

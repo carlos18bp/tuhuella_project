@@ -67,7 +67,17 @@ Animal shelters in Colombia and Latin America lack centralized digital tools to:
 - Notification preferences per user
 - Notification bell + log history
 
-### 8. Supporting Features
+### 8. User Profile Dashboard
+- Profile card with avatar, bio, housing info, experience level
+- Profile completeness indicator with progress bar
+- Inline profile editing via modal (personal info, housing, experience, avatar)
+- Activity dashboard with stats counters (applications, donations, sponsorships, favorites, intent)
+- Favorites preview with circular animal thumbnails
+- Shelter invite notification banner
+- Activity timeline showing recent actions across all user activities
+- "Member since" date display
+
+### 9. Supporting Features
 - FAQ page with accordion
 - Strategic allies page
 - Volunteer positions

@@ -20,6 +20,8 @@ jest.mock('@/components/ui', () => ({
   AnimalGallery: ({ name }: any) =>
     React.createElement('div', { 'data-testid': 'gallery' }, name),
   FAQAccordion: () => null,
+  SimilarAnimals: () =>
+    React.createElement('div', { 'data-testid': 'similar-animals' }),
 }));
 jest.mock('@/lib/hooks/useFAQs', () => ({
   useFAQsByTopic: () => ({ items: [], loading: false }),
@@ -35,6 +37,7 @@ const setupMocks = (overrides: Record<string, unknown> = {}) => {
     loading: true,
     fetchAnimal: jest.fn(),
     isAuthenticated: false,
+    favorites: [],
     toggleFavorite: jest.fn(),
     isFavorited: jest.fn().mockReturnValue(false),
     fetchFavorites: jest.fn(),
@@ -182,7 +185,7 @@ describe('AnimalDetailPage', () => {
       loading: false,
       animal: mockAnimal,
       isAuthenticated: true,
-      isFavorited: jest.fn().mockReturnValue(true),
+      favorites: [{ animal: mockAnimal.id }],
     });
     render(<AnimalDetailPage />);
     const heartBtn = screen.getByRole('button', { name: 'favorite' });
@@ -193,5 +196,104 @@ describe('AnimalDetailPage', () => {
     const state = setupMocks();
     render(<AnimalDetailPage />);
     expect(state.fetchAnimal).toHaveBeenCalledWith(1, 'es');
+  });
+
+  // ── New field tests ──────────────────────────────────────────────────────
+
+  it('renders details section with weight', () => {
+    setupMocks({ loading: false, animal: mockAnimal });
+    render(<AnimalDetailPage />);
+    expect(screen.getByTestId('details-section')).toBeInTheDocument();
+    expect(screen.getByText('18.5 kg')).toBeInTheDocument();
+  });
+
+  it('renders energy level in details section', () => {
+    setupMocks({ loading: false, animal: mockAnimal });
+    render(<AnimalDetailPage />);
+    expect(screen.getByText('Nivel de energía')).toBeInTheDocument();
+    expect(screen.getByText('Medio')).toBeInTheDocument();
+  });
+
+  it('renders coat color when provided', () => {
+    setupMocks({ loading: false, animal: mockAnimal });
+    render(<AnimalDetailPage />);
+    expect(screen.getByText('Golden')).toBeInTheDocument();
+  });
+
+  it('renders house trained badge when true', () => {
+    setupMocks({ loading: false, animal: mockAnimal });
+    render(<AnimalDetailPage />);
+    expect(screen.getByText('Entrenado para casa')).toBeInTheDocument();
+  });
+
+  it('renders microchip ID when provided', () => {
+    setupMocks({ loading: false, animal: mockAnimal });
+    render(<AnimalDetailPage />);
+    expect(screen.getByText('MC-001-LUNA')).toBeInTheDocument();
+  });
+
+  it('renders compatibility section when not all unknown', () => {
+    setupMocks({ loading: false, animal: mockAnimal });
+    render(<AnimalDetailPage />);
+    expect(screen.getByTestId('compatibility-section')).toBeInTheDocument();
+    expect(screen.getByText(/Niños/)).toBeInTheDocument();
+  });
+
+  it('hides compatibility section when all unknown', () => {
+    const allUnknown = {
+      ...mockAnimal,
+      good_with_kids: 'unknown',
+      good_with_dogs: 'unknown',
+      good_with_cats: 'unknown',
+    };
+    setupMocks({ loading: false, animal: allUnknown });
+    render(<AnimalDetailPage />);
+    expect(screen.queryByTestId('compatibility-section')).not.toBeInTheDocument();
+  });
+
+  it('renders adoption in progress badge for in_process status', () => {
+    const inProcess = { ...mockAnimal, status: 'in_process' };
+    setupMocks({ loading: false, animal: inProcess });
+    render(<AnimalDetailPage />);
+    expect(screen.getByTestId('status-badge')).toHaveTextContent('En proceso de adopción');
+  });
+
+  it('does not render status badge for published status', () => {
+    setupMocks({ loading: false, animal: mockAnimal });
+    render(<AnimalDetailPage />);
+    expect(screen.queryByTestId('status-badge')).not.toBeInTheDocument();
+  });
+
+  it('renders published ago text', () => {
+    setupMocks({ loading: false, animal: mockAnimal });
+    render(<AnimalDetailPage />);
+    expect(screen.getByText(/Publicado hace/)).toBeInTheDocument();
+  });
+
+  it('renders intake date when provided', () => {
+    setupMocks({ loading: false, animal: mockAnimal });
+    render(<AnimalDetailPage />);
+    expect(screen.getByTestId('intake-date')).toBeInTheDocument();
+    expect(screen.getByText(/En el refugio hace/)).toBeInTheDocument();
+  });
+
+  it('hides intake date when not provided', () => {
+    const noIntake = { ...mockAnimal, intake_date: undefined };
+    setupMocks({ loading: false, animal: noIntake });
+    render(<AnimalDetailPage />);
+    expect(screen.queryByTestId('intake-date')).not.toBeInTheDocument();
+  });
+
+  it('renders similar animals component', () => {
+    setupMocks({ loading: false, animal: mockAnimal });
+    render(<AnimalDetailPage />);
+    expect(screen.getByTestId('similar-animals')).toBeInTheDocument();
+  });
+
+  it('renders shelter name as a link', () => {
+    setupMocks({ loading: false, animal: mockAnimal });
+    render(<AnimalDetailPage />);
+    const shelterLink = screen.getByText('Patitas Felices');
+    expect(shelterLink.closest('a')).toHaveAttribute('href', '/shelter/1');
   });
 });

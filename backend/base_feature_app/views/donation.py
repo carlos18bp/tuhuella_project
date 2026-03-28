@@ -15,9 +15,9 @@ def donation_list(request):
     user = request.user
     if user.role == 'shelter_admin':
         shelters = user.shelters.all()
-        queryset = Donation.objects.filter(shelter__in=shelters)
+        queryset = Donation.objects.filter(shelter__in=shelters).select_related('user', 'shelter', 'campaign')
     else:
-        queryset = Donation.objects.filter(user=user)
+        queryset = Donation.objects.filter(user=user).select_related('user', 'shelter', 'campaign')
     serializer = DonationListSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data)
 

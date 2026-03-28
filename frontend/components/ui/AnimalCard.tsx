@@ -29,7 +29,7 @@ export default function AnimalCard({ animal }: AnimalCardProps) {
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
         {animal.gender !== 'unknown' && (
-          <span className="absolute top-3 right-3 text-xs px-2.5 py-1 rounded-full bg-white/95 backdrop-blur-md ring-1 ring-black/5 text-teal-700 font-medium shadow-sm">
+          <span className="absolute top-3 right-3 text-xs px-2.5 py-1 rounded-full bg-surface-elevated/95 backdrop-blur-md ring-1 ring-border-primary text-teal-700 font-medium shadow-sm">
             {animal.gender === 'male' ? t('male') : t('female')}
           </span>
         )}

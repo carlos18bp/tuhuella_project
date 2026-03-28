@@ -8,6 +8,7 @@ import { clearTokens, getAccessToken, getRefreshToken, setTokens } from '../../s
 jest.mock('../../services/http', () => ({
   api: {
     post: jest.fn(),
+    get: jest.fn(),
   },
 }));
 
@@ -18,7 +19,7 @@ jest.mock('../../services/tokens', () => ({
   clearTokens: jest.fn(),
 }));
 
-const mockApi = api as jest.Mocked<typeof api>;
+const mockApi = api as jest.Mocked<typeof api> & { get: jest.Mock };
 const mockGetAccessToken = getAccessToken as jest.Mock;
 const mockGetRefreshToken = getRefreshToken as jest.Mock;
 const mockSetTokens = setTokens as jest.Mock;
@@ -30,6 +31,7 @@ const resetAuthState = () => {
     refreshToken: null,
     user: null,
     isAuthenticated: false,
+    isAuthReady: false,
   });
 };
 
@@ -44,6 +46,7 @@ describe('authStore', () => {
   it('syncs tokens from cookies', () => {
     mockGetAccessToken.mockReturnValue('access');
     mockGetRefreshToken.mockReturnValue('refresh');
+    mockApi.get.mockResolvedValue({ data: { user: null } });
 
     act(() => {
       useAuthStore.getState().syncFromCookies();

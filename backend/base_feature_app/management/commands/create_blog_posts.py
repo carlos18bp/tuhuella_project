@@ -741,13 +741,13 @@ class Command(BaseCommand):
             for cat in ALL_CATEGORIES:
                 pool = POSTS_BY_CATEGORY[cat]
                 sample_count = min(per_cat, len(pool))
-                posts_to_create.extend(random.sample(pool, sample_count))
+                posts_to_create.extend({**p, 'category': cat} for p in random.sample(pool, sample_count))
         else:
             # Default: 3-10 random posts per category
             for cat in ALL_CATEGORIES:
                 pool = POSTS_BY_CATEGORY[cat]
                 sample_count = random.randint(3, min(10, len(pool)))
-                posts_to_create.extend(random.sample(pool, sample_count))
+                posts_to_create.extend({**p, 'category': cat} for p in random.sample(pool, sample_count))
 
         random.shuffle(posts_to_create)
 

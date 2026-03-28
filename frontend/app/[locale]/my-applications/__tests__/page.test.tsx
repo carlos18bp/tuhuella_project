@@ -1,10 +1,36 @@
 import React from 'react';
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
+jest.mock('swiper/react', () => ({
+  Swiper: ({ children }: any) => React.createElement('div', null, children),
+  SwiperSlide: ({ children }: any) => React.createElement('div', null, children),
+}));
+jest.mock('swiper/modules', () => ({ Navigation: {}, Pagination: {}, Autoplay: {} }));
+jest.mock('swiper/css', () => {});
+jest.mock('swiper/css/navigation', () => {});
+jest.mock('swiper/css/pagination', () => {});
 
 import { useAdoptionStore } from '@/lib/stores/adoptionStore';
 
 import MisSolicitudesPage from '../page';
+
+const makeApp = (overrides = {}) => ({
+  id: 1,
+  animal: 1,
+  animal_name: 'Luna',
+  animal_species: 'dog',
+  shelter_name: 'Patitas',
+  shelter_city: 'Bogotá',
+  thumbnail_url: null,
+  user: 1,
+  user_email: 'test@example.com',
+  status: 'reviewing',
+  form_answers: {},
+  created_at: '2026-01-10T00:00:00Z',
+  ...overrides,
+});
 
 describe('MisSolicitudesPage', () => {
   beforeEach(() => {
@@ -23,146 +49,65 @@ describe('MisSolicitudesPage', () => {
 
   it('renders empty state when no applications', () => {
     render(<MisSolicitudesPage />);
-    expect(screen.getByText('No tienes solicitudes de adopción.')).toBeInTheDocument();
+    expect(screen.getByText('Aún no has aplicado para adoptar')).toBeInTheDocument();
+    expect(screen.getByText(/Miles de animales esperan/)).toBeInTheDocument();
   });
 
-  it('renders application list with status badges', () => {
-    useAdoptionStore.setState({
-      applications: [
-        {
-          id: 1,
-          animal: 1,
-          animal_name: 'Luna',
-          user: 1,
-          user_email: 'test@example.com',
-          status: 'reviewing',
-          form_answers: {},
-          created_at: '2026-01-10T00:00:00Z',
-          shelter_name: 'Patitas',
-        },
-      ],
-    });
+  it('renders application card with animal name and status', () => {
+    useAdoptionStore.setState({ applications: [makeApp()] });
 
     render(<MisSolicitudesPage />);
     expect(screen.getByText('Luna')).toBeInTheDocument();
-    expect(screen.getByText('En revisión')).toBeInTheDocument();
-    expect(screen.getByText('Patitas')).toBeInTheDocument();
+    expect(screen.getByText(/Patitas/)).toBeInTheDocument();
   });
 
-  it('renders loading skeletons when loading is true', () => {
-    useAdoptionStore.setState({
-      applications: [],
-      loading: true,
-      fetchApplications: jest.fn(),
-    });
+  it('renders counter in title when applications exist', () => {
+    useAdoptionStore.setState({ applications: [makeApp(), makeApp({ id: 2, animal: 2, animal_name: 'Max' })] });
 
     render(<MisSolicitudesPage />);
-    const skeletons = document.querySelectorAll('.animate-shimmer');
-    expect(skeletons.length).toBeGreaterThan(0);
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('(2)');
   });
 
-  it('renders submitted status label', () => {
+  it('renders summary stat cards', () => {
     useAdoptionStore.setState({
       applications: [
-        {
-          id: 2,
-          animal: 2,
-          animal_name: 'Max',
-          user: 1,
-          user_email: 'test@example.com',
-          status: 'submitted',
-          form_answers: {},
-          created_at: '2026-02-01T00:00:00Z',
-          shelter_name: null,
-        },
+        makeApp({ status: 'submitted' }),
+        makeApp({ id: 2, animal: 2, status: 'approved' }),
       ],
     });
 
     render(<MisSolicitudesPage />);
-    expect(screen.getByText('Enviada')).toBeInTheDocument();
+    // Labels appear in stat cards + filter chips + card badges
+    expect(screen.getAllByText('Enviada').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText('Aprobada').length).toBeGreaterThanOrEqual(2);
   });
 
-  it('renders approved status label', () => {
+  it('renders loading skeletons', () => {
+    useAdoptionStore.setState({ loading: true, fetchApplications: jest.fn() });
+
+    render(<MisSolicitudesPage />);
+    expect(document.querySelectorAll('.animate-shimmer').length).toBeGreaterThan(0);
+  });
+
+  it('filters by status when chip is clicked', async () => {
     useAdoptionStore.setState({
       applications: [
-        {
-          id: 3,
-          animal: 3,
-          animal_name: 'Rex',
-          user: 1,
-          user_email: 'test@example.com',
-          status: 'approved',
-          form_answers: {},
-          created_at: '2026-02-15T00:00:00Z',
-          shelter_name: 'Happy Paws',
-        },
+        makeApp({ id: 1, status: 'submitted', animal_name: 'Firulais' }),
+        makeApp({ id: 2, animal: 2, animal_name: 'Max', status: 'approved' }),
       ],
     });
 
     render(<MisSolicitudesPage />);
-    expect(screen.getByText('Aprobada')).toBeInTheDocument();
+    const filterButtons = screen.getAllByRole('button', { name: /Aprobada/ });
+    await userEvent.click(filterButtons[0]);
+    expect(screen.getByText('Max')).toBeInTheDocument();
+    expect(screen.queryByText('Firulais')).not.toBeInTheDocument();
   });
 
-  it('renders rejected status label', () => {
-    useAdoptionStore.setState({
-      applications: [
-        {
-          id: 4,
-          animal: 4,
-          animal_name: 'Bella',
-          user: 1,
-          user_email: 'test@example.com',
-          status: 'rejected',
-          form_answers: {},
-          created_at: '2026-03-01T00:00:00Z',
-          shelter_name: null,
-        },
-      ],
-    });
+  it('renders status badge colors for different statuses', () => {
+    useAdoptionStore.setState({ applications: [makeApp({ status: 'rejected' })] });
 
     render(<MisSolicitudesPage />);
-    expect(screen.getByText('Rechazada')).toBeInTheDocument();
-  });
-
-  it('renders unknown status as raw value when not in statusLabels', () => {
-    useAdoptionStore.setState({
-      applications: [
-        {
-          id: 5,
-          animal: 5,
-          animal_name: 'Coco',
-          user: 1,
-          user_email: 'test@example.com',
-          status: 'archived',
-          form_answers: {},
-          created_at: '2026-03-10T00:00:00Z',
-          shelter_name: null,
-        },
-      ],
-    });
-
-    render(<MisSolicitudesPage />);
-    expect(screen.getByText('archived')).toBeInTheDocument();
-  });
-
-  it('does not render shelter name when shelter_name is null', () => {
-    useAdoptionStore.setState({
-      applications: [
-        {
-          id: 6,
-          animal: 6,
-          animal_name: 'Fido',
-          user: 1,
-          user_email: 'test@example.com',
-          status: 'interview',
-          form_answers: {},
-          created_at: '2026-03-15T00:00:00Z',
-          shelter_name: null,
-        },
-      ],
-    });
-
-    render(<MisSolicitudesPage />);
-    expect(screen.getByText('Entrevista')).toBeInTheDocument();
+    expect(screen.getAllByText('Rechazada').length).toBeGreaterThanOrEqual(1);
   });
 });

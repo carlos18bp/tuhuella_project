@@ -35,6 +35,19 @@ def animal_list(request):
     if gender:
         values = [v.strip() for v in gender.split(',') if v.strip()]
         queryset = queryset.filter(gender__in=values) if len(values) > 1 else queryset.filter(gender=values[0])
+    energy_level = request.query_params.get('energy_level')
+    if energy_level:
+        values = [v.strip() for v in energy_level.split(',') if v.strip()]
+        queryset = queryset.filter(energy_level__in=values) if len(values) > 1 else queryset.filter(energy_level=values[0])
+    good_with_kids = request.query_params.get('good_with_kids')
+    if good_with_kids:
+        queryset = queryset.filter(good_with_kids=good_with_kids.strip())
+    good_with_dogs = request.query_params.get('good_with_dogs')
+    if good_with_dogs:
+        queryset = queryset.filter(good_with_dogs=good_with_dogs.strip())
+    good_with_cats = request.query_params.get('good_with_cats')
+    if good_with_cats:
+        queryset = queryset.filter(good_with_cats=good_with_cats.strip())
 
     page = int(request.query_params.get('page', 1))
     page_size = int(request.query_params.get('page_size', 20))
@@ -95,6 +108,43 @@ def animal_update(request, pk):
         serializer.save()
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def animal_similar(request, pk):
+    from django.core.cache import cache
+
+    cache_key = f'animal_similar_{pk}'
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return Response(cached)
+
+    try:
+        animal = Animal.objects.get(pk=pk)
+    except Animal.DoesNotExist:
+        return Response({'error': 'Animal not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    similar = Animal.objects.filter(
+        species=animal.species,
+        size=animal.size,
+        status=Animal.Status.PUBLISHED,
+    ).exclude(pk=pk).select_related('shelter')
+
+    # Prioritize same shelter by ordering: same shelter first, then by created_at
+    from django.db.models import Case, When, Value, IntegerField
+    similar = similar.annotate(
+        same_shelter=Case(
+            When(shelter=animal.shelter, then=Value(0)),
+            default=Value(1),
+            output_field=IntegerField(),
+        )
+    ).order_by('same_shelter', '-created_at')[:4]
+
+    serializer = AnimalListSerializer(similar, many=True, context={'request': request})
+    data = serializer.data
+    cache.set(cache_key, data, timeout=300)  # 5 minutes
+    return Response(data)
 
 
 @api_view(['DELETE'])

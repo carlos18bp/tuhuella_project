@@ -1,8 +1,14 @@
 import React from 'react';
 import { describe, it, expect } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import TermsPage from '../page';
+
+jest.mock('@/components/ui', () => ({
+  TermsModal: ({ open }: any) =>
+    open ? React.createElement('div', { 'data-testid': 'terms-modal' }) : null,
+}));
 
 describe('TermsPage', () => {
   it('renders page title', () => {
@@ -50,5 +56,18 @@ describe('TermsPage', () => {
     render(<TermsPage />);
     const headings = screen.getAllByRole('heading', { level: 2 });
     expect(headings).toHaveLength(10);
+  });
+
+  it('renders interactive read button', () => {
+    render(<TermsPage />);
+    expect(screen.getByRole('button', { name: /Términos y Condiciones/ })).toBeInTheDocument();
+  });
+
+  it('opens modal when button is clicked', async () => {
+    render(<TermsPage />);
+    expect(screen.queryByTestId('terms-modal')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /Términos y Condiciones/ }));
+    expect(screen.getByTestId('terms-modal')).toBeInTheDocument();
   });
 });

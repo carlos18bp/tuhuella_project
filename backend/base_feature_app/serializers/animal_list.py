@@ -10,5 +10,6 @@ class AnimalListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'species', 'breed', 'age_range', 'gender',
             'size', 'status', 'is_vaccinated', 'is_sterilized',
+            'energy_level', 'good_with_kids', 'good_with_dogs', 'good_with_cats',
             'shelter', 'shelter_name', 'created_at',
         ]

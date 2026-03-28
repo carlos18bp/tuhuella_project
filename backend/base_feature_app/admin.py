@@ -30,7 +30,7 @@ class MiHuellaUserAdmin(UserAdmin):
             _('Permissions'),
             {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')},
         ),
-        (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
+        (_('Important dates'), {'fields': ('last_login', 'date_joined', 'terms_accepted_at', 'terms_version')}),
     )
     add_fieldsets = (
         (
@@ -41,7 +41,7 @@ class MiHuellaUserAdmin(UserAdmin):
             },
         ),
     )
-    readonly_fields = ('date_joined',)
+    readonly_fields = ('date_joined', 'terms_accepted_at')
     filter_horizontal = ('groups', 'user_permissions')
 
 
@@ -75,10 +75,34 @@ class ShelterAdmin(AttachmentsAdminMixin, admin.ModelAdmin):
 # ============================================================================
 
 class AnimalAdmin(AttachmentsAdminMixin, admin.ModelAdmin):
-    list_display = ('name', 'species', 'breed', 'age_range', 'size', 'status', 'shelter')
-    search_fields = ('name', 'breed', 'shelter__name')
-    list_filter = ('species', 'age_range', 'size', 'status', 'gender', 'is_vaccinated', 'is_sterilized')
+    list_display = ('name', 'species', 'breed', 'age_range', 'size', 'status', 'energy_level', 'shelter')
+    search_fields = ('name', 'breed', 'shelter__name', 'microchip_id')
+    list_filter = (
+        'species', 'age_range', 'size', 'status', 'gender',
+        'is_vaccinated', 'is_sterilized', 'is_house_trained',
+        'energy_level', 'good_with_kids', 'good_with_dogs', 'good_with_cats',
+    )
     readonly_fields = ('created_at', 'updated_at')
+    fieldsets = (
+        (None, {
+            'fields': ('shelter', 'name', 'species', 'breed', 'age_range', 'gender', 'size', 'status'),
+        }),
+        (_('Descriptions'), {
+            'fields': ('description_es', 'description_en', 'special_needs_es', 'special_needs_en'),
+        }),
+        (_('Health & traits'), {
+            'fields': (
+                'is_vaccinated', 'is_sterilized', 'weight', 'is_house_trained',
+                'energy_level', 'coat_color', 'microchip_id',
+            ),
+        }),
+        (_('Compatibility'), {
+            'fields': ('good_with_kids', 'good_with_dogs', 'good_with_cats'),
+        }),
+        (_('Dates'), {
+            'fields': ('intake_date', 'created_at', 'updated_at'),
+        }),
+    )
 
     def delete_queryset(self, request, queryset):
         for obj in queryset:

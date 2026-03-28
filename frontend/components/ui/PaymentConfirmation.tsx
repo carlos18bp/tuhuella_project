@@ -13,7 +13,7 @@ export default function PaymentConfirmation({ type, isPlaceholder = true }: Paym
 
   return (
     <div className="text-center">
-      <div className="mx-auto w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
+      <div className="mx-auto w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center">
         <svg className="w-8 h-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
         </svg>

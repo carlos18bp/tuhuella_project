@@ -63,7 +63,7 @@ function calloutBorder(type?: string) {
     case 'warning':
       return 'border-amber-400 bg-amber-50';
     case 'info':
-      return 'border-blue-400 bg-blue-50';
+      return 'border-teal-400 bg-teal-50';
     case 'note':
       return 'border-border-secondary bg-surface-tertiary';
     default:

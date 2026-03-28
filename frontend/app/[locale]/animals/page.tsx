@@ -25,6 +25,8 @@ export default function AnimalesPage() {
   const [species, setSpecies] = useState<string[]>([]);
   const [size, setSize] = useState<string[]>([]);
   const [ageRange, setAgeRange] = useState<string[]>([]);
+  const [energyLevel, setEnergyLevel] = useState<string[]>([]);
+  const [goodWith, setGoodWith] = useState<string[]>([]);
 
   const speciesOptions: MultiSelectOption[] = [
     { value: 'dog', label: t('dogs') },
@@ -45,14 +47,33 @@ export default function AnimalesPage() {
     { value: 'senior', label: t('senior') },
   ];
 
+  const energyOptions: MultiSelectOption[] = [
+    { value: 'low', label: t('energyLow') },
+    { value: 'medium', label: t('energyMedium') },
+    { value: 'high', label: t('energyHigh') },
+  ];
+
+  const goodWithOptions: MultiSelectOption[] = [
+    { value: 'kids', label: t('goodWithKids') },
+    { value: 'dogs', label: t('goodWithDogs') },
+    { value: 'cats', label: t('goodWithCats') },
+  ];
+
   useEffect(() => {
     const filters: Record<string, string> = {};
     if (species.length > 0) filters.species = species.join(',');
     if (size.length > 0) filters.size = size.join(',');
     if (ageRange.length > 0) filters.age_range = ageRange.join(',');
+    if (energyLevel.length > 0) filters.energy_level = energyLevel.join(',');
+    // Good-with filters: each selected value maps to a separate query param with value 'yes'
+    for (const gw of goodWith) {
+      if (gw === 'kids') filters.good_with_kids = 'yes';
+      if (gw === 'dogs') filters.good_with_dogs = 'yes';
+      if (gw === 'cats') filters.good_with_cats = 'yes';
+    }
     setFilters(filters);
     void fetchAnimals(filters, locale, 1);
-  }, [species, size, ageRange, fetchAnimals, setFilters, locale]);
+  }, [species, size, ageRange, energyLevel, goodWith, fetchAnimals, setFilters, locale]);
 
   const renderPagination = () => {
     if (!pagination || pagination.totalPages <= 1) return null;
@@ -132,6 +153,18 @@ export default function AnimalesPage() {
           options={ageOptions}
           selected={ageRange}
           onChange={setAgeRange}
+        />
+        <MultiSelectDropdown
+          label={t('energyFilter')}
+          options={energyOptions}
+          selected={energyLevel}
+          onChange={setEnergyLevel}
+        />
+        <MultiSelectDropdown
+          label={t('compatibilityFilter')}
+          options={goodWithOptions}
+          selected={goodWith}
+          onChange={setGoodWith}
         />
       </div>
 

@@ -48,7 +48,35 @@ test.describe('Checkout Flows', () => {
 
 test.describe.serial('Checkout Flows — Authenticated', () => {
   test('should submit donation checkout with PSE', { tag: [...DONATION_CHECKOUT_SUBMIT] }, async ({ page }) => {
-    await loginAndNavigate(page, 'adopter', '/checkout/donation');
+    // Mock donation amounts API
+    await page.route('**/api/donation-amounts/**', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          { id: 1, amount: 10000, label: '' },
+          { id: 2, amount: 25000, label: '' },
+          { id: 3, amount: 50000, label: '' },
+          { id: 4, amount: 100000, label: '' },
+        ]),
+      }),
+    );
+    // Mock FAQs API to prevent pending requests
+    await page.route('**/api/faqs/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
+    );
+    // Mock notification unread count to prevent polling
+    await page.route('**/api/notifications/unread-count/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ unread_count: 0 }) }),
+    );
+
+    // Navigate to home first to let auth state sync, then to checkout
+    // This avoids the useRequireAuth race condition where redirect fires before syncFromCookies
+    await loginAndNavigate(page, 'adopter', '/');
+    await waitForPageLoad(page);
+    // Auth is now synced — navigate to checkout
+    await page.goto('/checkout/donation');
+    await waitForPageLoad(page);
 
     // Verify heading
     await expect(page.getByRole('heading', { name: /Donar/i })).toBeVisible();
@@ -61,8 +89,8 @@ test.describe.serial('Checkout Flows — Authenticated', () => {
     // Fill optional message
     await page.getByLabel(/Mensaje/i).fill('Gracias por cuidar a los animales');
 
-    // Select PSE payment method
-    await page.getByRole('radio', { name: /PSE/i }).check();
+    // Select PSE payment method — click the label to avoid detachment from re-renders
+    await page.getByText(/PSE.*transferencia/i).click();
 
     // Submit the form
     await page.getByRole('button', { name: /Donar/i }).click();

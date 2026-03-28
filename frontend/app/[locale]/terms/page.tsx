@@ -1,9 +1,15 @@
 'use client';
 
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { BookOpen } from 'lucide-react';
+
+import { TermsModal } from '@/components/ui';
 
 export default function TermsPage() {
   const t = useTranslations('terms');
+  const tModal = useTranslations('termsModal');
+  const [showModal, setShowModal] = useState(false);
 
   const sections = [
     { title: t('generalTitle'), content: t('generalContent') },
@@ -20,10 +26,22 @@ export default function TermsPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">
-      <h1 className="text-3xl font-bold text-text-primary">{t('title')}</h1>
-      <p className="mt-2 text-sm text-text-quaternary">
-        {t('lastUpdated')}: 2026-03-25
-      </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-text-primary">{t('title')}</h1>
+          <p className="mt-2 text-sm text-text-quaternary">
+            {t('lastUpdated')}: 2026-03-25
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowModal(true)}
+          className="shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200/60 transition-colors"
+        >
+          <BookOpen className="h-4 w-4" />
+          {tModal('title')}
+        </button>
+      </div>
 
       <div className="mt-10 space-y-8">
         {sections.map((section, idx) => (
@@ -33,6 +51,12 @@ export default function TermsPage() {
           </div>
         ))}
       </div>
+
+      <TermsModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        showActions={false}
+      />
     </div>
   );
 }

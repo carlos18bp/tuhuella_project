@@ -32,6 +32,16 @@ class Animal(models.Model):
         ADOPTED = 'adopted', 'Adopted'
         ARCHIVED = 'archived', 'Archived'
 
+    class Compatibility(models.TextChoices):
+        YES = 'yes', 'Yes'
+        NO = 'no', 'No'
+        UNKNOWN = 'unknown', 'Unknown'
+
+    class EnergyLevel(models.TextChoices):
+        LOW = 'low', 'Low'
+        MEDIUM = 'medium', 'Medium'
+        HIGH = 'high', 'High'
+
     shelter = models.ForeignKey(
         'base_feature_app.Shelter',
         on_delete=models.CASCADE,
@@ -53,6 +63,24 @@ class Animal(models.Model):
     is_vaccinated = models.BooleanField(default=False)
     is_sterilized = models.BooleanField(default=False)
 
+    weight = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    is_house_trained = models.BooleanField(default=False)
+    good_with_kids = models.CharField(
+        max_length=10, choices=Compatibility.choices, default=Compatibility.UNKNOWN,
+    )
+    good_with_dogs = models.CharField(
+        max_length=10, choices=Compatibility.choices, default=Compatibility.UNKNOWN,
+    )
+    good_with_cats = models.CharField(
+        max_length=10, choices=Compatibility.choices, default=Compatibility.UNKNOWN,
+    )
+    energy_level = models.CharField(
+        max_length=10, choices=EnergyLevel.choices, default=EnergyLevel.MEDIUM,
+    )
+    coat_color = models.CharField(max_length=100, blank=True)
+    intake_date = models.DateField(null=True, blank=True)
+    microchip_id = models.CharField(max_length=50, blank=True)
+
     gallery = GalleryField(
         related_name='animal_gallery',
         on_delete=models.SET_NULL,
@@ -65,6 +93,10 @@ class Animal(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['species', 'size', 'status'], name='animal_species_size_status'),
+            models.Index(fields=['status', 'created_at'], name='animal_status_created'),
+        ]
 
     def __str__(self):
         return f'{self.name} ({self.get_species_display()})'

@@ -49,7 +49,7 @@ export default function Footer() {
   const footerLinks = (isAuthReady && isAuthenticated) ? [publicLinks[0], accountLinks, publicLinks[1]] : publicLinks;
 
   return (
-    <footer className="relative bg-stone-950 mt-16">
+    <footer className="relative bg-stone-950 dark:bg-[#080A0C] mt-16">
       {/* Gradient fade top */}
       <div className="absolute inset-x-0 -top-px h-[2px] bg-gradient-to-r from-transparent via-teal-500/40 to-transparent" />
       <div className="mx-auto max-w-[1400px] px-6 py-14">

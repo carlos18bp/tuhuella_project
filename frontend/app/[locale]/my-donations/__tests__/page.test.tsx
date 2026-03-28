@@ -2,9 +2,31 @@ import React from 'react';
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 
+jest.mock('swiper/react', () => ({
+  Swiper: ({ children }: any) => React.createElement('div', null, children),
+  SwiperSlide: ({ children }: any) => React.createElement('div', null, children),
+}));
+jest.mock('swiper/modules', () => ({ Navigation: {}, Pagination: {}, Autoplay: {} }));
+jest.mock('swiper/css', () => {});
+jest.mock('swiper/css/navigation', () => {});
+jest.mock('swiper/css/pagination', () => {});
+
 import { useDonationStore } from '@/lib/stores/donationStore';
 
 import MisDonacionesPage from '../page';
+
+const makeDonation = (overrides = {}) => ({
+  id: 1,
+  user: 1,
+  user_email: 'test@example.com',
+  amount: '50000.00',
+  status: 'paid',
+  created_at: '2026-01-15T00:00:00Z',
+  campaign_title: 'Medical Fund',
+  shelter_name: 'Patitas',
+  shelter_city: 'Bogotá',
+  ...overrides,
+});
 
 describe('MisDonacionesPage', () => {
   beforeEach(() => {
@@ -23,101 +45,59 @@ describe('MisDonacionesPage', () => {
 
   it('renders empty state when no donations', () => {
     render(<MisDonacionesPage />);
-    expect(screen.getByText('No tienes donaciones registradas.')).toBeInTheDocument();
+    expect(screen.getByText('Aún no has hecho ninguna donación')).toBeInTheDocument();
+    expect(screen.getByText(/Tu aporte hace la diferencia/)).toBeInTheDocument();
   });
 
-  it('renders donation list when donations exist', () => {
-    useDonationStore.setState({
-      donations: [
-        {
-          id: 1,
-          user: 1,
-          user_email: 'test@example.com',
-          amount: '50000.00',
-          status: 'paid',
-          created_at: '2026-01-15T00:00:00Z',
-          campaign_title: 'Medical Fund',
-          shelter_name: 'Patitas',
-        },
-      ],
-    });
+  it('renders donation with amount and campaign', () => {
+    useDonationStore.setState({ donations: [makeDonation()] });
 
     render(<MisDonacionesPage />);
-    expect(screen.getByText(/50,000/)).toBeInTheDocument();
-    expect(screen.getByText('Pagada')).toBeInTheDocument();
+    expect(screen.getAllByText(/50,000/).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('Medical Fund')).toBeInTheDocument();
+    // "Pagada" appears in filter + card badge
+    expect(screen.getAllByText('Pagada').length).toBeGreaterThanOrEqual(1);
   });
 
-  it('renders loading skeletons when loading is true', () => {
-    useDonationStore.setState({
-      donations: [],
-      loading: true,
-      fetchDonations: jest.fn(),
-    });
+  it('renders total donated summary card', () => {
+    useDonationStore.setState({ donations: [makeDonation()] });
 
     render(<MisDonacionesPage />);
-    const skeletons = document.querySelectorAll('.animate-shimmer');
-    expect(skeletons.length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/\$50,000/).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText(/donados en 1 donaciones/)).toBeInTheDocument();
   });
 
-  it('renders pending status as raw value for non-paid donation', () => {
-    useDonationStore.setState({
-      donations: [
-        {
-          id: 2,
-          user: 1,
-          user_email: 'test@example.com',
-          amount: '20000.00',
-          status: 'pending',
-          created_at: '2026-02-01T00:00:00Z',
-          campaign_title: null,
-          shelter_name: null,
-        },
-      ],
-    });
+  it('renders loading skeletons', () => {
+    useDonationStore.setState({ loading: true, fetchDonations: jest.fn() });
 
     render(<MisDonacionesPage />);
-    expect(screen.getByText('pending')).toBeInTheDocument();
+    expect(document.querySelectorAll('.animate-shimmer').length).toBeGreaterThan(0);
   });
 
-  it('renders donation without campaign title when campaign_title is null', () => {
-    useDonationStore.setState({
-      donations: [
-        {
-          id: 3,
-          user: 1,
-          user_email: 'test@example.com',
-          amount: '15000.00',
-          status: 'paid',
-          created_at: '2026-02-10T00:00:00Z',
-          campaign_title: null,
-          shelter_name: 'Hogar Animal',
-        },
-      ],
-    });
+  it('renders pending status with translated label', () => {
+    useDonationStore.setState({ donations: [makeDonation({ status: 'pending' })] });
 
     render(<MisDonacionesPage />);
-    expect(screen.getByText('Hogar Animal')).toBeInTheDocument();
-    expect(screen.queryByText(/null/)).not.toBeInTheDocument();
+    // Appears in filter chip + card badge
+    expect(screen.getAllByText('Pendiente').length).toBeGreaterThanOrEqual(1);
   });
 
-  it('renders donation without shelter name when shelter_name is null', () => {
-    useDonationStore.setState({
-      donations: [
-        {
-          id: 4,
-          user: 1,
-          user_email: 'test@example.com',
-          amount: '10000.00',
-          status: 'paid',
-          created_at: '2026-03-01T00:00:00Z',
-          campaign_title: 'Vacunación',
-          shelter_name: null,
-        },
-      ],
-    });
+  it('renders shelter info', () => {
+    useDonationStore.setState({ donations: [makeDonation()] });
 
     render(<MisDonacionesPage />);
-    expect(screen.getByText('Vacunación')).toBeInTheDocument();
+    expect(screen.getByText(/Patitas/)).toBeInTheDocument();
+  });
+
+  it('renders campaign link on empty state', () => {
+    render(<MisDonacionesPage />);
+    expect(screen.getByRole('link', { name: /Explorar campañas/ })).toHaveAttribute('href', '/campaigns');
+  });
+
+  it('renders counter in title when donations exist', () => {
+    useDonationStore.setState({ donations: [makeDonation()] });
+
+    render(<MisDonacionesPage />);
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('(1)');
   });
 });
