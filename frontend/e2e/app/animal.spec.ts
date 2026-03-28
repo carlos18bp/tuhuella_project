@@ -72,9 +72,7 @@ test.describe('Animal Browse & Detail', () => {
       await expect(page.locator('h1')).toBeVisible();
 
       // Verify new sections render when data is present
-      const detailsSection = page.getByTestId('details-section');
-      const compatibilitySection = page.getByTestId('compatibility-section');
-      // These sections are conditional — just verify the page loaded correctly
+      // Details and compatibility sections are conditional — just verify the page loaded correctly
       await expect(page.getByText(/Publicado hace/i)).toBeVisible();
     }
   });

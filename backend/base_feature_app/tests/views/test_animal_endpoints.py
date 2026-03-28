@@ -239,15 +239,15 @@ def clear_cache():
 @pytest.mark.django_db
 def test_animal_similar_returns_same_species_and_size(clear_cache, api_client, shelter, animal):
     """Similar endpoint returns animals with same species and size."""
-    same = Animal.objects.create(
+    Animal.objects.create(
         shelter=shelter, name='Similar', species='dog', size='medium',
         status=Animal.Status.PUBLISHED,
     )
-    diff_species = Animal.objects.create(
+    Animal.objects.create(
         shelter=shelter, name='DiffSpecies', species='cat', size='medium',
         status=Animal.Status.PUBLISHED,
     )
-    diff_size = Animal.objects.create(
+    Animal.objects.create(
         shelter=shelter, name='DiffSize', species='dog', size='large',
         status=Animal.Status.PUBLISHED,
     )

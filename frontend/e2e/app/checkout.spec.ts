@@ -47,6 +47,17 @@ test.describe('Checkout Flows', () => {
 });
 
 test.describe.serial('Checkout Flows — Authenticated', () => {
+  test.beforeEach(async ({ page }) => {
+    // Mock FAQs API to prevent pending requests
+    await page.route('**/api/faqs/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
+    );
+    // Mock notification unread count to prevent polling
+    await page.route('**/api/notifications/unread-count/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ unread_count: 0 }) }),
+    );
+  });
+
   test('should submit donation checkout with PSE', { tag: [...DONATION_CHECKOUT_SUBMIT] }, async ({ page }) => {
     // Mock donation amounts API
     await page.route('**/api/donation-amounts/**', (route) =>
@@ -60,14 +71,6 @@ test.describe.serial('Checkout Flows — Authenticated', () => {
           { id: 4, amount: 100000, label: '' },
         ]),
       }),
-    );
-    // Mock FAQs API to prevent pending requests
-    await page.route('**/api/faqs/**', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
-    );
-    // Mock notification unread count to prevent polling
-    await page.route('**/api/notifications/unread-count/**', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ unread_count: 0 }) }),
     );
 
     // Navigate to home first to let auth state sync, then to checkout
@@ -117,14 +120,6 @@ test.describe.serial('Checkout Flows — Authenticated', () => {
         ]),
       }),
     );
-    // Mock FAQs API to prevent pending requests
-    await page.route('**/api/faqs/**', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
-    );
-    // Mock notification unread count to prevent polling
-    await page.route('**/api/notifications/unread-count/**', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ unread_count: 0 }) }),
-    );
 
     await loginAndNavigate(page, 'adopter', '/');
     await waitForPageLoad(page);
@@ -144,8 +139,8 @@ test.describe.serial('Checkout Flows — Authenticated', () => {
     // Select amount
     await amountButton.click();
 
-    // Select Nequi payment method via input to avoid detachment from late re-renders
-    await page.locator('input[name="method"][value="nequi"]').check({ force: true });
+    // Select Nequi payment method via label click (avoids detachment from late re-renders)
+    await page.getByText(/Nequi/i).click();
 
     // Submit the form
     await page.getByRole('button', { name: /Apadrinar/i }).click();

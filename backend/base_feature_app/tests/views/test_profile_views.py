@@ -2,15 +2,7 @@ import pytest
 from django.urls import reverse
 from rest_framework import status
 
-from base_feature_app.models import (
-    AdoptionApplication,
-    Donation,
-    Sponsorship,
-    Favorite,
-    AdopterIntent,
-    ShelterInvite,
-)
-
+from base_feature_app.models import AdoptionApplication, Favorite
 
 # ---------------------------------------------------------------------------
 # profile-stats

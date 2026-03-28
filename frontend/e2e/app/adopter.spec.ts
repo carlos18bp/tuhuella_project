@@ -193,8 +193,9 @@ test.describe('Favorites — Authenticated', () => {
     const checkboxes = page.getByRole('checkbox');
     const checkboxCount = await checkboxes.count();
     if (checkboxCount >= 2) {
+      // quality: allow-fragile-selector (positional: selecting Nth favorite for comparison is the intended behavior)
       await checkboxes.nth(0).check();
-      await checkboxes.nth(1).check();
+      await checkboxes.nth(1).check(); // quality: allow-fragile-selector (positional: selecting Nth favorite for comparison)
 
       // Click compare button (should appear in floating bar)
       const compareBtn = page.getByRole('button', { name: /Comparar|Compare/i });
@@ -225,16 +226,16 @@ test.describe('Favorites Compare — Boundary', () => {
     const checkboxes = page.getByRole('checkbox');
     const checkboxCount = await checkboxes.count();
     if (checkboxCount >= 4) {
-      // Select 3 animals (the maximum)
+      // quality: allow-fragile-selector (positional: selecting Nth favorite for comparison is the intended behavior)
       await checkboxes.nth(0).check();
-      await checkboxes.nth(1).check();
-      await checkboxes.nth(2).check();
+      await checkboxes.nth(1).check(); // quality: allow-fragile-selector (positional: selecting Nth favorite for comparison)
+      await checkboxes.nth(2).check(); // quality: allow-fragile-selector (positional: selecting Nth favorite for comparison)
 
       // The compare button should be visible with 3 selected
       const compareBtn = page.getByRole('button', { name: /Comparar|Compare/i });
       await expect(compareBtn).toBeVisible({ timeout: 5_000 });
 
-      // 4th checkbox should be disabled or checking it should have no effect
+      // quality: allow-fragile-selector (positional: testing 4th checkbox disabled state requires nth access)
       const fourthCheckbox = checkboxes.nth(3);
       const isDisabled = await fourthCheckbox.isDisabled().catch(() => false);
       if (!isDisabled) {
@@ -259,7 +260,7 @@ test.describe('Favorites Compare — Boundary', () => {
     const checkboxes = page.getByRole('checkbox');
     const checkboxCount = await checkboxes.count();
     if (checkboxCount >= 1) {
-      // Select only 1 animal
+      // quality: allow-fragile-selector (positional: selecting first favorite for single-selection boundary test)
       await checkboxes.nth(0).check();
 
       // The compare button should either not appear or be disabled
@@ -267,8 +268,7 @@ test.describe('Favorites Compare — Boundary', () => {
       const isVisible = await compareBtn.isVisible({ timeout: 3_000 }).catch(() => false);
 
       if (isVisible) {
-        const isDisabled = await compareBtn.isDisabled();
-        expect(isDisabled).toBe(true);
+        await expect(compareBtn).toBeDisabled();
       }
       // If not visible, that's also valid (button only appears with 2+ selected)
     }

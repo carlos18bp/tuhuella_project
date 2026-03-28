@@ -1,8 +1,7 @@
 import pytest
 from django.contrib.auth import get_user_model
 
-from base_feature_app.utils import auth_utils
-from base_feature_app.utils import email_utils
+from base_feature_app.utils import auth_utils, email_utils
 
 
 @pytest.mark.django_db

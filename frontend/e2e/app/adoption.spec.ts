@@ -81,6 +81,21 @@ test.describe('Adoption Flows', () => {
   });
 });
 
+async function setupAdoptionFormExtraMocks(page: import('@playwright/test').Page) {
+  await page.route('**/api/animals/*/similar/**', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
+  );
+  await page.route('**/api/notifications/unread-count/**', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ unread_count: 0 }) }),
+  );
+  await page.route('**/api/favorites/**', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
+  );
+  await page.route('**/api/faqs/**', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
+  );
+}
+
 test.describe.serial('Adoption Flows — Authenticated', () => {
   test.beforeEach(async ({ page }) => {
     // Mock animals API for authenticated flows
@@ -118,20 +133,7 @@ test.describe.serial('Adoption Flows — Authenticated', () => {
   });
 
   test('should load adoption form wizard and navigate through steps', { tag: [...ADOPTION_FORM_WIZARD] }, async ({ page }) => {
-    // Mock similar animals endpoint explicitly (must be before the catch-all animals mock)
-    await page.route('**/api/animals/*/similar/**', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
-    );
-    // Mock notification and favorites APIs to prevent background request noise
-    await page.route('**/api/notifications/unread-count/**', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ unread_count: 0 }) }),
-    );
-    await page.route('**/api/favorites/**', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
-    );
-    await page.route('**/api/faqs/**', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
-    );
+    await setupAdoptionFormExtraMocks(page);
 
     // Use loginAndNavigate (cookie-based) for reliable auth on animal detail page
     // Navigate to home first to let auth state sync, then use client-side navigation
