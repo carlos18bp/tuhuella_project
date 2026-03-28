@@ -87,8 +87,8 @@ def test_favorite_toggle_returns_404_for_missing_animal(authenticated_client):
 
 
 @pytest.mark.django_db
-def test_favorite_list_returns_enriched_fields(authenticated_client, favorite):
-    """Enriched serializer returns breed, size, status, shelter_city, etc."""
+def test_favorite_list_returns_animal_attributes(authenticated_client, favorite):
+    """Enriched serializer returns animal attribute fields."""
     response = authenticated_client.get(reverse('favorite-list'))
 
     assert response.status_code == status.HTTP_200_OK
@@ -97,9 +97,18 @@ def test_favorite_list_returns_enriched_fields(authenticated_client, favorite):
     assert 'age_range' in data
     assert 'size' in data
     assert 'gender' in data
+    assert 'status' in data
+
+
+@pytest.mark.django_db
+def test_favorite_list_returns_metadata_fields(authenticated_client, favorite):
+    """Enriched serializer returns health, shelter, and user metadata."""
+    response = authenticated_client.get(reverse('favorite-list'))
+
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()[0]
     assert 'is_vaccinated' in data
     assert 'is_sterilized' in data
-    assert 'status' in data
     assert 'shelter_city' in data
     assert 'thumbnail_url' in data
     assert 'note' in data

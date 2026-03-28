@@ -153,8 +153,7 @@ test.describe('Notification Bell (authenticated)', () => {
     // Wait for the bell button to stabilize after auth state settles
     const bellButton = page.getByRole('button', { name: /Notificaciones/i });
     await expect(bellButton).toBeVisible({ timeout: 10_000 });
-    // Small delay to let React re-renders settle after auth hydration
-    await page.waitForTimeout(500);
+    await expect(bellButton).toBeEnabled();
     await bellButton.click();
 
     // Verify the notification dropdown opens

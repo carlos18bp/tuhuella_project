@@ -55,8 +55,24 @@ def test_animal_boolean_fields(animal):
 
 
 @pytest.mark.django_db
-def test_animal_new_fields_defaults(shelter):
-    """New fields have correct defaults."""
+def test_animal_boolean_and_compatibility_defaults(shelter):
+    """Boolean and compatibility fields default correctly."""
+    a = Animal.objects.create(
+        shelter=shelter,
+        name='Defaults',
+        species=Animal.Species.DOG,
+    )
+
+    assert a.is_house_trained is False
+    assert a.good_with_kids == 'unknown'
+    assert a.good_with_dogs == 'unknown'
+    assert a.good_with_cats == 'unknown'
+    assert a.energy_level == 'medium'
+
+
+@pytest.mark.django_db
+def test_animal_optional_value_defaults(shelter):
+    """Optional value fields default to None or empty."""
     a = Animal.objects.create(
         shelter=shelter,
         name='Defaults',
@@ -64,11 +80,6 @@ def test_animal_new_fields_defaults(shelter):
     )
 
     assert a.weight is None
-    assert a.is_house_trained is False
-    assert a.good_with_kids == 'unknown'
-    assert a.good_with_dogs == 'unknown'
-    assert a.good_with_cats == 'unknown'
-    assert a.energy_level == 'medium'
     assert a.coat_color == ''
     assert a.intake_date is None
     assert a.microchip_id == ''
@@ -89,8 +100,29 @@ def test_animal_energy_level_choices():
 
 
 @pytest.mark.django_db
-def test_animal_new_fields_stored(shelter):
-    """New fields are stored and retrieved correctly."""
+def test_animal_boolean_and_compatibility_stored(shelter):
+    """Boolean and compatibility fields are stored correctly."""
+    a = Animal.objects.create(
+        shelter=shelter,
+        name='Buddy',
+        species=Animal.Species.DOG,
+        is_house_trained=True,
+        good_with_kids='yes',
+        good_with_dogs='no',
+        good_with_cats='unknown',
+        energy_level='high',
+    )
+
+    a.refresh_from_db()
+    assert a.is_house_trained is True
+    assert a.good_with_kids == 'yes'
+    assert a.good_with_dogs == 'no'
+    assert a.energy_level == 'high'
+
+
+@pytest.mark.django_db
+def test_animal_optional_value_fields_stored(shelter):
+    """Optional value fields are stored and retrieved correctly."""
     from datetime import date
     from decimal import Decimal
 
@@ -99,11 +131,6 @@ def test_animal_new_fields_stored(shelter):
         name='Buddy',
         species=Animal.Species.DOG,
         weight=Decimal('12.50'),
-        is_house_trained=True,
-        good_with_kids='yes',
-        good_with_dogs='no',
-        good_with_cats='unknown',
-        energy_level='high',
         coat_color='Brown',
         intake_date=date(2025, 6, 15),
         microchip_id='MC-123',
@@ -111,10 +138,6 @@ def test_animal_new_fields_stored(shelter):
 
     a.refresh_from_db()
     assert a.weight == Decimal('12.50')
-    assert a.is_house_trained is True
-    assert a.good_with_kids == 'yes'
-    assert a.good_with_dogs == 'no'
-    assert a.energy_level == 'high'
     assert a.coat_color == 'Brown'
     assert a.intake_date == date(2025, 6, 15)
     assert a.microchip_id == 'MC-123'

@@ -36,7 +36,7 @@ test.describe('Adoption Flows', () => {
     await page.route('**/api/animals/**', (route) => {
       const url = route.request().url();
       const isSimilar = url.includes('/similar');
-      const isDetail = !isSimilar && /\/api\/animals\/\d+/.test(url);
+      const isDetail = !isSimilar && /\/api\/animals\/\d+/.exec(url);
       let body;
       if (isSimilar) {
         body = [];

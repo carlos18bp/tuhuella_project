@@ -104,6 +104,9 @@ describe('MiPerfilPage', () => {
   });
 
   it('renders activity timeline events', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-03-28T12:00:00Z'));
+
     useAuthStore.setState({
       user: mockUser,
       activity: [
@@ -115,6 +118,8 @@ describe('MiPerfilPage', () => {
     render(<MiPerfilPage />);
     expect(screen.getByText(/Aplicaste para adoptar a Luna/)).toBeInTheDocument();
     expect(screen.getByText(/Agregaste a Max a favoritos/)).toBeInTheDocument();
+
+    jest.useRealTimers();
   });
 
   it('renders edit profile link', () => {
