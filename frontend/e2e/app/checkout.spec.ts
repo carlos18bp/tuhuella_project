@@ -104,21 +104,48 @@ test.describe.serial('Checkout Flows — Authenticated', () => {
   });
 
   test('should submit sponsorship checkout with Nequi', { tag: [...SPONSORSHIP_CHECKOUT_SUBMIT] }, async ({ page }) => {
-    await loginAndNavigate(page, 'adopter', '/checkout/sponsorship');
+    // Mock sponsorship amounts API
+    await page.route('**/api/sponsorship-amounts/**', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          { id: 1, amount: 15000, label: '' },
+          { id: 2, amount: 30000, label: '' },
+          { id: 3, amount: 50000, label: '' },
+          { id: 4, amount: 75000, label: '' },
+        ]),
+      }),
+    );
+    // Mock FAQs API to prevent pending requests
+    await page.route('**/api/faqs/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
+    );
+    // Mock notification unread count to prevent polling
+    await page.route('**/api/notifications/unread-count/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ unread_count: 0 }) }),
+    );
+
+    await loginAndNavigate(page, 'adopter', '/');
+    await waitForPageLoad(page);
+    await page.goto('/checkout/sponsorship');
+    await waitForPageLoad(page);
 
     // Verify heading
     await expect(page.getByRole('heading', { name: /Apadrinar/i })).toBeVisible();
 
+    // Wait for amount buttons to load — indicates component is fully rendered
+    const amountButton = page.getByRole('button', { name: /\$.*15,000|15.000/i }).first();
+    await expect(amountButton).toBeVisible({ timeout: 10_000 });
+
     // Click monthly frequency button (should be default, but click to be explicit)
     await page.getByRole('button', { name: 'Mensual', exact: true }).click();
 
-    // Wait for amount buttons to load and select one
-    const amountButton = page.getByRole('button', { name: /\$.*15,000|15.000/i }).first();
-    await expect(amountButton).toBeVisible({ timeout: 10_000 });
+    // Select amount
     await amountButton.click();
 
-    // Select Nequi payment method
-    await page.getByRole('radio', { name: /Nequi/i }).check();
+    // Select Nequi payment method via input to avoid detachment from late re-renders
+    await page.locator('input[name="method"][value="nequi"]').check({ force: true });
 
     // Submit the form
     await page.getByRole('button', { name: /Apadrinar/i }).click();

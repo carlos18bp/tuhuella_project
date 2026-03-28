@@ -132,3 +132,12 @@ export const PUBLIC_ABOUT = ['@flow:public-about', '@module:public', '@priority:
 export const PUBLIC_TERMS = ['@flow:public-terms', '@module:public', '@priority:P4'];
 export const PUBLIC_WORK_WITH_US = ['@flow:public-work-with-us', '@module:public', '@priority:P4'];
 export const PUBLIC_STRATEGIC_ALLIES = ['@flow:public-strategic-allies', '@module:public', '@priority:P4'];
+
+// ── Volunteer ──
+export const VOLUNTEER_APPLY = ['@flow:volunteer-apply', '@module:volunteer', '@priority:P2'];
+
+// ── Adopter (profile edit) ──
+export const PROFILE_EDIT = ['@flow:profile-edit', '@module:adopter', '@priority:P2'];
+
+// ── Favorite (compare) ──
+export const FAVORITES_COMPARE = ['@flow:favorites-compare', '@module:favorite', '@priority:P3'];

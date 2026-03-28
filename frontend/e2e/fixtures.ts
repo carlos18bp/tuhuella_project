@@ -107,11 +107,19 @@ export async function loginAs(page: any, role: 'adopter' | 'shelter_admin' | 'ad
       body: JSON.stringify({ access: 'e2e-mock-access-token', refresh: 'e2e-mock-refresh-token' }),
     }),
   );
+  // Mock validate_token so fetchMe doesn't sign out when using mock tokens
+  await page.route('**/api/auth/validate_token/**', (route: any) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ user: mockUserForRole(role) }),
+    }),
+  );
   await page.goto('/sign-in');
   await waitForPageLoad(page);
   await page.getByLabel(/correo/i).fill(user.email);
   await page.getByLabel(/contraseña/i).fill(user.password);
-  await page.getByRole('button', { name: /iniciar sesión/i }).click();
+  await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click();
   await page.waitForURL((url: URL) => !url.pathname.includes('sign-in'), { timeout: 10_000 });
   await page.waitForLoadState('domcontentloaded');
   // Dismiss Next.js dev-mode hydration error overlay if present
@@ -160,6 +168,14 @@ export async function loginAndNavigate(page: any, role: 'adopter' | 'shelter_adm
       body: JSON.stringify({ access: accessToken, refresh: refreshToken }),
     }),
   );
+  // Mock validate_token so fetchMe doesn't sign out when using mock tokens
+  await page.route('**/api/auth/validate_token/**', (route: any) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ user: mockUserForRole(role) }),
+    }),
+  );
 
   // Navigate with commit-level wait (avoids ERR_ABORTED from useRequireAuth redirect race)
   await page.goto(targetUrl, { waitUntil: 'commit' });
@@ -180,6 +196,25 @@ export async function dismissErrorOverlay(page: any) {
     await page.keyboard.press('Escape');
     await dialog.waitFor({ state: 'hidden', timeout: 2_000 }).catch(() => {});
   }
+}
+
+/**
+ * Fill the volunteer application form fields with default test data.
+ * Checks if each field is empty before filling to avoid overwriting pre-filled values.
+ */
+export async function fillVolunteerForm(page: any) {
+  const firstNameInput = page.getByLabel(/Nombre/i).first();
+  if (!(await firstNameInput.inputValue())) await firstNameInput.fill('Carlos');
+  const lastNameInput = page.getByLabel(/Apellido/i);
+  if (!(await lastNameInput.inputValue())) await lastNameInput.fill('Pérez');
+  const emailInput = page.getByLabel(/Email/i);
+  if (!(await emailInput.inputValue())) await emailInput.fill('adopter-e2e@example.com');
+  const phoneInput = page.getByLabel(/Teléfono/i);
+  if (!(await phoneInput.inputValue())) await phoneInput.fill('+57 300 123 4567');
+  const cityInput = page.getByLabel(/Ciudad/i);
+  if (!(await cityInput.inputValue())) await cityInput.fill('Bogotá');
+  const countryInput = page.getByLabel(/País/i);
+  if (!(await countryInput.inputValue())) await countryInput.fill('Colombia');
 }
 
 /**

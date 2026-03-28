@@ -6,8 +6,8 @@ Use this document to understand each flow's steps, branching conditions, role re
 
 > **Flow IDs in this document match `e2e/flow-definitions.json` and `e2e/helpers/flow-tags.ts` exactly.**
 
-**Version:** 4.0.0
-**Last Updated:** 2026-03-25
+**Version:** 5.0.0
+**Last Updated:** 2026-03-28
 
 ---
 
@@ -31,7 +31,8 @@ Use this document to understand each flow's steps, branching conditions, role re
 16. [Public Module](#public-module)
 17. [Blog Module](#blog-module)
 18. [Blog Admin Module](#blog-admin-module)
-19. [Cross-Reference](#cross-reference)
+19. [Volunteer Module](#volunteer-module)
+20. [Cross-Reference](#cross-reference)
 
 ---
 
@@ -114,6 +115,9 @@ Use this document to understand each flow's steps, branching conditions, role re
 | `blog-admin-create` | Admin blog create | blog-admin | P2 | admin | `/admin/blog/crear` |
 | `blog-admin-edit` | Admin blog edit | blog-admin | P2 | admin | `/admin/blog/[id]/editar` |
 | `blog-admin-calendar` | Admin blog calendar | blog-admin | P3 | admin | `/admin/blog/calendario` |
+| `volunteer-apply` | Submit volunteer application | volunteer | P2 | shared | `/work-with-us/apply/[positionId]` |
+| `profile-edit` | Edit user profile | adopter | P2 | adopter | `/my-profile/edit` |
+| `favorites-compare` | Compare favorited animals | favorite | P3 | adopter | `/favorites` |
 
 ---
 
@@ -1914,6 +1918,93 @@ Use this document to understand each flow's steps, branching conditions, role re
 
 ---
 
+## Volunteer Module
+
+### volunteer-apply
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | shared |
+| **Frontend route** | `/work-with-us/apply/[positionId]` |
+| **API endpoints** | `GET /api/volunteer-positions/`, `POST /api/volunteer-applications/` |
+
+**Preconditions:** User navigated from `/work-with-us` page. Volunteer position with given ID exists and is active.
+
+**Steps:**
+
+1. User navigates to `/work-with-us` and sees available volunteer positions.
+2. User clicks **Apply** on a position card.
+3. Browser navigates to `/work-with-us/apply/[positionId]`.
+4. Application form renders with fields: name, email, phone, motivation, availability.
+5. User fills out the form and completes reCAPTCHA verification.
+6. User clicks **Submit**.
+7. Frontend sends `POST /api/volunteer-applications/` with form data.
+8. On success: confirmation message displayed, email notification sent to admin.
+9. On validation error: field-level errors displayed inline.
+
+**Branching:**
+
+- If position is no longer active → show "position unavailable" message.
+- If reCAPTCHA fails → submit button remains disabled.
+
+---
+
+### profile-edit
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | adopter |
+| **Frontend route** | `/my-profile/edit` |
+| **API endpoints** | `GET /api/user/profile/`, `PATCH /api/user/profile/` |
+
+**Preconditions:** User is authenticated.
+
+**Steps:**
+
+1. User navigates to `/my-profile` and clicks **Edit Profile** button.
+2. Browser navigates to `/my-profile/edit`.
+3. Form loads with current profile data (name, phone, city, bio, avatar).
+4. User modifies fields.
+5. User clicks **Save**.
+6. Frontend sends `PATCH /api/user/profile/` with updated fields.
+7. On success: redirected to `/my-profile` with updated data visible.
+8. On validation error: field-level errors displayed inline.
+
+**Branching:**
+
+- If user navigates directly to `/my-profile/edit` without auth → redirected to `/sign-in`.
+
+---
+
+### favorites-compare
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P3 |
+| **Roles** | adopter |
+| **Frontend route** | `/favorites` |
+| **API endpoints** | `GET /api/favorites/`, `GET /api/animals/<id>/` |
+
+**Preconditions:** User is authenticated and has at least 2 favorited animals.
+
+**Steps:**
+
+1. User navigates to `/favorites`.
+2. Favorites list renders with animal cards showing enriched data.
+3. User selects 2+ animals using comparison checkboxes.
+4. User clicks **Compare** button.
+5. Comparison modal/panel opens showing side-by-side attributes (species, size, age, energy level, behavioral traits).
+6. User reviews differences and closes comparison.
+
+**Branching:**
+
+- If fewer than 2 animals selected → Compare button disabled.
+- If no favorites exist → empty state with CTA to browse animals.
+
+---
+
 ## Cross-Reference
 
 | Artifact | Path | Purpose |
@@ -1924,6 +2015,9 @@ Use this document to understand each flow's steps, branching conditions, role re
 | Flow Coverage Report | `e2e-results/flow-coverage.json` | Auto-generated coverage status per flow |
 | Architecture Standard | `docs/DJANGO_REACT_ARCHITECTURE_STANDARD.md` | Sections 3.7.5–3.7.10 define the flow methodology |
 | E2E Flow Coverage Standard | `docs/E2E_FLOW_COVERAGE_REPORT_STANDARD.md` | Reporter implementation and JSON schema |
+| Contract Schemas | `e2e/helpers/contract-schemas.ts` | Backend serializer field definitions for mock validation |
+| Contract Validator | `e2e/helpers/contract-validate.ts` | Utility to detect mock/backend schema drift |
+| Contract Tests | `e2e/contracts/mock-contract.spec.ts` | CI-runnable contract validation suite |
 
 ### Maintenance Rules
 

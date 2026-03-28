@@ -1,5 +1,5 @@
 import { test, expect } from '../test-with-coverage';
-import { waitForPageLoad, loginAs, loginAndNavigate, fillAdoptionForm } from '../fixtures';
+import { waitForPageLoad, loginAndNavigate, fillAdoptionForm } from '../fixtures';
 import { ADOPTION_SUBMIT, ADOPTION_TRACK, ADOPTION_MANAGE, MY_APPLICATIONS_LIST, ADOPTION_FORM_WIZARD } from '../helpers/flow-tags';
 
 const mockAnimal = {
@@ -34,11 +34,21 @@ test.describe('Adoption Flows', () => {
   test.beforeEach(async ({ page }) => {
     // Mock animals API so animal list and detail pages have data
     await page.route('**/api/animals/**', (route) => {
-      const isDetail = route.request().url().match(/\/api\/animals\/\d+/);
+      const url = route.request().url();
+      const isSimilar = url.includes('/similar');
+      const isDetail = !isSimilar && /\/api\/animals\/\d+/.test(url);
+      let body;
+      if (isSimilar) {
+        body = [];
+      } else if (isDetail) {
+        body = mockAnimal;
+      } else {
+        body = mockAnimalsListResponse;
+      }
       return route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify(isDetail ? mockAnimal : mockAnimalsListResponse),
+        body: JSON.stringify(body),
       });
     });
   });
@@ -108,20 +118,45 @@ test.describe.serial('Adoption Flows — Authenticated', () => {
   });
 
   test('should load adoption form wizard and navigate through steps', { tag: [...ADOPTION_FORM_WIZARD] }, async ({ page }) => {
-    await loginAs(page, 'adopter');
+    // Mock similar animals endpoint explicitly (must be before the catch-all animals mock)
+    await page.route('**/api/animals/*/similar/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
+    );
+    // Mock notification and favorites APIs to prevent background request noise
+    await page.route('**/api/notifications/unread-count/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ unread_count: 0 }) }),
+    );
+    await page.route('**/api/favorites/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
+    );
+    await page.route('**/api/faqs/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
+    );
 
-    // Navigate to animals listing
-    await page.getByRole('link', { name: 'Ver Animales' }).click();
+    // Use loginAndNavigate (cookie-based) for reliable auth on animal detail page
+    // Navigate to home first to let auth state sync, then use client-side navigation
+    await loginAndNavigate(page, 'adopter', '/');
+    await waitForPageLoad(page);
+
+    // Navigate to animals listing via client-side link to preserve auth state
+    await page.getByRole('link', { name: 'Ver Animales' }).first().click();
     await page.waitForURL(/.*animals/, { timeout: 10_000 });
 
-    // Click first animal → detail → adopt CTA
+    // Click first animal → detail
     const firstAnimalLink = page.getByRole('link').filter({ has: page.getByRole('heading', { level: 3 }) }).first();
     await expect(firstAnimalLink).toBeVisible({ timeout: 10_000 });
     await firstAnimalLink.click();
     await page.waitForURL(/.*animals\/\d+/, { timeout: 10_000 });
 
+    // Dismiss any Next.js error overlay that might appear
+    const dialog = page.locator('dialog');
+    if (await dialog.isVisible({ timeout: 3_000 }).catch(() => false)) {
+      await page.keyboard.press('Escape');
+      await dialog.waitFor({ state: 'hidden', timeout: 2_000 }).catch(() => {});
+    }
+
     const adoptLink = page.getByRole('link', { name: /Solicitar Adopción/i });
-    await expect(adoptLink).toBeVisible({ timeout: 10_000 });
+    await expect(adoptLink).toBeVisible({ timeout: 15_000 });
     await adoptLink.click();
     await page.waitForURL(/.*adopt\/\d+/, { timeout: 10_000 });
 

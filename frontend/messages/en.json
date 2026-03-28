@@ -579,9 +579,11 @@
     "roleAdmin": "Administrator",
     "noShelterRegistered": "You don't have a registered shelter",
     "noShelterDescription": "Register your shelter to publish animals and manage adoptions.",
-    "verificationStatus.verified": "Verified",
-    "verificationStatus.pending": "Pending verification",
-    "verificationStatus.rejected": "Rejected",
+    "verificationStatus": {
+      "verified": "Verified",
+      "pending": "Pending verification",
+      "rejected": "Rejected"
+    },
     "statsAnimals": "Published animals",
     "statsPendingApplications": "Pending applications",
     "statsActiveCampaigns": "Active campaigns",

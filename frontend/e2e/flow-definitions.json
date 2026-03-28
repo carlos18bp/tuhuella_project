@@ -1,6 +1,6 @@
 {
-  "version": "3.0.0",
-  "lastUpdated": "2026-03-25",
+  "version": "4.0.0",
+  "lastUpdated": "2026-03-28",
   "flows": {
     "home-loads": {
       "name": "Home page loads",
@@ -600,6 +600,30 @@
       "roles": ["adopter"],
       "priority": "P2",
       "description": "Authenticated adopter views submitted applications at /my-applications with status badges and application details",
+      "expectedSpecs": 1
+    },
+    "volunteer-apply": {
+      "name": "Submit volunteer application",
+      "module": "volunteer",
+      "roles": ["shared"],
+      "priority": "P2",
+      "description": "User fills out and submits volunteer application form at /work-with-us/apply/[positionId] with reCAPTCHA verification",
+      "expectedSpecs": 1
+    },
+    "profile-edit": {
+      "name": "Edit user profile",
+      "module": "adopter",
+      "roles": ["adopter"],
+      "priority": "P2",
+      "description": "Authenticated user edits profile fields (name, phone, city, bio, avatar) at /my-profile/edit and saves changes",
+      "expectedSpecs": 1
+    },
+    "favorites-compare": {
+      "name": "Compare favorited animals",
+      "module": "favorite",
+      "roles": ["adopter"],
+      "priority": "P3",
+      "description": "Authenticated user selects 2+ favorited animals and views side-by-side attribute comparison",
       "expectedSpecs": 1
     }
   }

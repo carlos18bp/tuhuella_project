@@ -15,6 +15,12 @@ import {
   SHELTER_PANEL_UPDATES,
   SHELTER_PANEL_UPDATE_CREATE,
 } from '../helpers/flow-tags';
+import {
+  mockShelterAnimals,
+  mockShelterCampaigns,
+  mockShelterDonations,
+  mockShelterData,
+} from '../helpers/mock-data';
 
 test.describe('Shelter Public Pages', () => {
   test('should display shelters listing page', { tag: [...SHELTER_BROWSE] }, async ({ page }) => {
@@ -48,12 +54,10 @@ test.describe('Shelter Public Pages', () => {
       await shelterLink.click();
       await page.waitForURL(/.*shelters\/\d+/, { timeout: 10_000 });
 
-      // The shelter detail page has a "Ver animales de este refugio" link
       const viewAnimalsLink = page.getByRole('link', { name: /ver animales/i });
       await expect(viewAnimalsLink).toBeVisible({ timeout: 10_000 });
       await viewAnimalsLink.click();
 
-      // Should navigate to animals page filtered by shelter
       await expect(page).toHaveURL(/.*animals.*shelter=\d+/);
     }
   });
@@ -68,13 +72,11 @@ test.describe('Shelter Public Pages', () => {
       await shelterLink.click();
       await page.waitForURL(/.*shelters\/\d+/, { timeout: 10_000 });
 
-      // Look for gallery images (rendered as buttons wrapping images)
       const gallerySection = page.locator('section, div', { has: page.getByRole('heading', { name: /gallery|galería/i }) });
       const galleryButton = gallerySection.getByRole('button').first();
       if (await galleryButton.isVisible({ timeout: 5000 })) {
         await galleryButton.click();
 
-        // Lightbox overlay dialog
         const lightbox = page.getByRole('dialog', { name: /Lightbox/i });
         await expect(lightbox).toBeVisible({ timeout: 5000 });
       }
@@ -101,6 +103,41 @@ test.describe('Shelter Onboarding', () => {
       await expect(page.getByRole('button', { name: /Registrar refugio/i })).toBeVisible();
     }
   });
+
+  test('should fill and submit shelter registration form', { tag: [...SHELTER_ONBOARDING] }, async ({ page }) => {
+    await page.route('**/api/shelters/create/**', (route: any) =>
+      route.fulfill({
+        status: 201,
+        contentType: 'application/json',
+        body: JSON.stringify({ id: 99, name: 'Nuevo Refugio', verification_status: 'pending' }),
+      }),
+    );
+
+    await loginAndNavigate(page, 'adopter', '/shelter/onboarding');
+
+    await expect(page.getByRole('heading', { name: /Registrar Refugio/i })).toBeVisible({ timeout: 15_000 });
+
+    await page.getByLabel(/Nombre del refugio/i).fill('Nuevo Refugio Test');
+    await page.getByLabel(/Ciudad/i).fill('Bogotá');
+
+    const descriptionField = page.getByLabel(/Descripción/i);
+    if (await descriptionField.isVisible({ timeout: 2_000 }).catch(() => false)) {
+      await descriptionField.fill('Refugio dedicado al rescate de animales.');
+    }
+    const phoneField = page.getByLabel(/Teléfono/i);
+    if (await phoneField.isVisible({ timeout: 2_000 }).catch(() => false)) {
+      await phoneField.fill('+57 300 123 4567');
+    }
+
+    await page.getByRole('button', { name: /Registrar refugio/i }).click();
+
+    await page.waitForURL(/shelter\/dashboard|onboarding/, { timeout: 10_000 }).catch(() => {});
+    const url = page.url();
+    const successMsg = page.getByText(/registrado|creado|éxito/i);
+    const isDashboard = url.includes('shelter/dashboard');
+    const hasSuccess = await successMsg.isVisible({ timeout: 5_000 }).catch(() => false);
+    expect(isDashboard || hasSuccess).toBe(true);
+  });
 });
 
 test.describe('Shelter Panel', () => {
@@ -115,7 +152,6 @@ test.describe('Shelter Panel', () => {
     await page.goto('/shelter/dashboard');
     await waitForPageLoad(page);
 
-    // Unauthenticated user is redirected to sign-in; authenticated sees dashboard heading
     const pathname = new URL(page.url()).pathname;
     const isSignIn = pathname.includes('sign-in');
     const isDashboard = pathname.includes('shelter/dashboard');
@@ -154,13 +190,91 @@ test.describe('Shelter Panel', () => {
 test.describe('Shelter Panel — Authenticated', () => {
   test.describe.configure({ mode: 'serial' });
 
+  test('should display shelter animals with filter tabs', { tag: [...SHELTER_PANEL_ANIMALS] }, async ({ page }) => {
+    await page.route('**/api/animals/**', (route: any) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(mockShelterAnimals),
+      }),
+    );
+
+    await loginAndNavigate(page, 'shelter_admin', '/shelter/animals');
+
+    await expect(page.getByRole('heading', { name: /Gestión de Animales/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('Luna')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText('Milo')).toBeVisible();
+    await expect(page.getByText(/3 animales registrados/i)).toBeVisible();
+
+    const publishedFilter = page.getByRole('button', { name: /published|publicado/i });
+    if (await publishedFilter.isVisible({ timeout: 3_000 }).catch(() => false)) {
+      await publishedFilter.click();
+    }
+  });
+
+  test('should display shelter campaigns with progress', { tag: [...SHELTER_PANEL_CAMPAIGNS] }, async ({ page }) => {
+    await page.route('**/api/campaigns/**', (route: any) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(mockShelterCampaigns),
+      }),
+    );
+
+    await loginAndNavigate(page, 'shelter_admin', '/shelter/campaigns');
+
+    await expect(page.getByRole('heading', { name: /Mis Campañas/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/Campaña de vacunación/i)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/Alimento para refugio/i)).toBeVisible();
+  });
+
+  test('should display shelter donations with total', { tag: [...SHELTER_PANEL_DONATIONS] }, async ({ page }) => {
+    await page.route('**/api/donations/**', (route: any) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(mockShelterDonations),
+      }),
+    );
+
+    await loginAndNavigate(page, 'shelter_admin', '/shelter/donations');
+
+    await expect(page.getByRole('heading', { name: /Donaciones Recibidas/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/50.000|50,000/i).first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/donor1@example.com/i)).toBeVisible();
+  });
+
+  test('should display shelter settings form with current data', { tag: [...SHELTER_PANEL_SETTINGS] }, async ({ page }) => {
+    await page.route('**/api/shelters/**', (route: any) => {
+      if (route.request().method() === 'GET') {
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(mockShelterData),
+        });
+      }
+      if (route.request().method() === 'PATCH' || route.request().method() === 'PUT') {
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ ...mockShelterData[0], name: 'Refugio E2E Editado' }),
+        });
+      }
+      return route.continue();
+    });
+
+    await loginAndNavigate(page, 'shelter_admin', '/shelter/settings');
+
+    await expect(page.getByRole('heading', { name: /Configuración del Refugio/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByLabel(/Nombre/i).first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('button', { name: /Guardar cambios/i })).toBeVisible();
+  });
+
   test('should display shelter applications page with heading', { tag: [...SHELTER_PANEL_APPLICATIONS] }, async ({ page }) => {
     await loginAndNavigate(page, 'shelter_admin', '/shelter/applications');
 
-    // Heading: "Solicitudes de Adopción"
     await expect(page.getByRole('heading', { name: /Solicitudes de Adopción/i })).toBeVisible({ timeout: 15_000 });
 
-    // Either application list items or empty state message
     const hasApplications = page.getByRole('article').first();
     const emptyState = page.getByText(/No hay solicitudes de adopción/i);
     await expect(hasApplications.or(emptyState)).toBeVisible({ timeout: 10_000 });
@@ -169,10 +283,8 @@ test.describe('Shelter Panel — Authenticated', () => {
   test('should display shelter updates page with heading', { tag: [...SHELTER_PANEL_UPDATES] }, async ({ page }) => {
     await loginAndNavigate(page, 'shelter_admin', '/shelter/updates');
 
-    // Heading: "Mis actualizaciones"
     await expect(page.getByRole('heading', { name: /Mis actualizaciones/i })).toBeVisible({ timeout: 15_000 });
 
-    // Either updates list items or empty state
     const hasUpdates = page.getByRole('article').first();
     const emptyState = page.getByText(/No has publicado actualizaciones/i);
     await expect(hasUpdates.or(emptyState)).toBeVisible({ timeout: 10_000 });
@@ -181,14 +293,9 @@ test.describe('Shelter Panel — Authenticated', () => {
   test('should display shelter update create form with required fields', { tag: [...SHELTER_PANEL_UPDATE_CREATE] }, async ({ page }) => {
     await loginAndNavigate(page, 'shelter_admin', '/shelter/updates/create');
 
-    // Heading: "Publicar actualización"
     await expect(page.getByRole('heading', { name: /Publicar actualización/i })).toBeVisible();
-
-    // Form fields: title and content inputs (Spanish required fields)
     await expect(page.getByText(/Título \(Español\)/i)).toBeVisible();
     await expect(page.getByText(/Contenido \(Español\)/i)).toBeVisible();
-
-    // Submit button should be present
     await expect(page.getByRole('button', { name: /Publicar/i })).toBeVisible();
   });
 });
