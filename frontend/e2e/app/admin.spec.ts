@@ -80,6 +80,7 @@ test.describe('Admin Panel — Authenticated', () => {
   test.describe.configure({ mode: 'serial' });
 
   test('should display approve shelters page with pending list', { tag: [...ADMIN_APPROVE_SHELTERS] }, async ({ page }) => {
+    const pendingResponse = page.waitForResponse((res: any) => res.url().includes('/admin/shelters/pending'));
     await page.route('**/api/admin/shelters/pending/**', (route: any) =>
       route.fulfill({
         status: 200,
@@ -89,10 +90,11 @@ test.describe('Admin Panel — Authenticated', () => {
     );
 
     await loginAndNavigate(page, 'admin', '/admin/shelters/approve');
+    await pendingResponse;
 
     await expect(page.getByRole('heading', { name: /Aprobar Refugios/i })).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText('Refugio Nuevo')).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByText('Patitas Felices')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Refugio Nuevo', level: 3 })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('heading', { name: 'Patitas Felices', level: 3 })).toBeVisible();
 
     await expect(page.getByRole('button', { name: /Aprobar/i }).first()).toBeVisible();
     await expect(page.getByRole('button', { name: /Rechazar/i }).first()).toBeVisible();
@@ -119,17 +121,15 @@ test.describe('Admin Panel — Authenticated', () => {
     await loginAndNavigate(page, 'admin', '/admin/shelters/approve');
 
     await expect(page.getByRole('heading', { name: /Aprobar Refugios/i })).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText('Refugio Nuevo')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: 'Refugio Nuevo', level: 3 })).toBeVisible({ timeout: 10_000 });
 
     await page.getByRole('button', { name: /Aprobar/i }).first().click();
     pendingList = pendingList.filter(s => s.id !== 10);
 
-    // Shelter should disappear from list or success message should appear
-    const shelterCard = page.getByText('Refugio Nuevo');
-    const successMsg = page.getByText(/aprobado|approved/i);
-    await expect(shelterCard.or(successMsg)).toBeVisible({ timeout: 5_000 });
-
-    await expect(page.getByText('Patitas Felices')).toBeVisible();
+    // Approved shelter should be removed from the list
+    await expect(page.getByRole('heading', { name: 'Refugio Nuevo', level: 3 })).toBeHidden({ timeout: 10_000 });
+    // Remaining shelter should still be visible
+    await expect(page.getByRole('heading', { name: 'Patitas Felices', level: 3 })).toBeVisible();
   });
 
   test('should reject a pending shelter', { tag: [...ADMIN_APPROVE_SHELTERS] }, async ({ page }) => {
@@ -149,13 +149,12 @@ test.describe('Admin Panel — Authenticated', () => {
     );
 
     await loginAndNavigate(page, 'admin', '/admin/shelters/approve');
-    await expect(page.getByText('Refugio Nuevo')).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('heading', { name: 'Refugio Nuevo', level: 3 })).toBeVisible({ timeout: 15_000 });
 
     await page.getByRole('button', { name: /Rechazar/i }).first().click();
 
-    const shelterCard = page.getByText('Refugio Nuevo');
-    const rejectMsg = page.getByText(/rechazado|rejected/i);
-    await expect(shelterCard.or(rejectMsg)).toBeVisible({ timeout: 5_000 });
+    // Rejected shelter should be removed from the list
+    await expect(page.getByRole('heading', { name: 'Refugio Nuevo', level: 3 })).toBeHidden({ timeout: 10_000 });
   });
 
   test('should display empty state when no pending shelters', { tag: [...ADMIN_APPROVE_SHELTERS] }, async ({ page }) => {

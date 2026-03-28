@@ -1,3 +1,5 @@
+# CLAUDE.md
+
 # Mi Huella — Claude Code Configuration
 
 ## Project Identity

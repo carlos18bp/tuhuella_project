@@ -139,6 +139,7 @@ describe('SignUpPage', () => {
     const passwordFields = screen.getAllByPlaceholderText('••••••••');
     fireEvent.change(passwordFields[0], { target: { value: 'password123' } });
     fireEvent.change(passwordFields[1], { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('checkbox'));
     fireEvent.click(screen.getByRole('button', { name: 'Crear cuenta' }));
 
     await waitFor(() => {
@@ -148,6 +149,7 @@ describe('SignUpPage', () => {
         first_name: 'Test',
         last_name: 'User',
         captcha_token: undefined,
+        terms_accepted: true,
       });
     });
 
@@ -203,6 +205,7 @@ describe('SignUpPage', () => {
     const passwordFields = screen.getAllByPlaceholderText('••••••••');
     fireEvent.change(passwordFields[0], { target: { value: 'password123' } });
     fireEvent.change(passwordFields[1], { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('checkbox'));
     fireEvent.click(screen.getByRole('button', { name: 'Crear cuenta' }));
 
     expect(await screen.findByText('Registration failed')).toBeInTheDocument();
@@ -219,9 +222,12 @@ describe('SignUpPage', () => {
     const passwordFields = screen.getAllByPlaceholderText('••••••••');
     fireEvent.change(passwordFields[0], { target: { value: 'password123' } });
     fireEvent.change(passwordFields[1], { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('checkbox'));
     fireEvent.click(screen.getByRole('button', { name: 'Crear cuenta' }));
 
-    expect(await screen.findByText('Registration failed')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Registration failed')).toBeInTheDocument();
+    });
   });
 
   it('handles Google registration success', async () => {

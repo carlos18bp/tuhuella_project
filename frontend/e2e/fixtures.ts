@@ -142,6 +142,7 @@ export async function loginAndNavigate(page: any, role: 'adopter' | 'shelter_adm
   try {
     const response = await page.request.post('http://localhost:8000/api/auth/sign_in/', {
       data: { email: user.email, password: user.password },
+      timeout: 3000,
     });
     if (response.ok()) {
       const data = await response.json();
@@ -177,10 +178,8 @@ export async function loginAndNavigate(page: any, role: 'adopter' | 'shelter_adm
     }),
   );
 
-  // Navigate with commit-level wait (avoids ERR_ABORTED from useRequireAuth redirect race)
-  await page.goto(targetUrl, { waitUntil: 'commit' });
-  // Wait for page to stabilize — may have initial redirect then settle
-  await page.waitForLoadState('domcontentloaded', { timeout: 15_000 });
+  // Navigate and wait for full page load (gives React time to hydrate)
+  await page.goto(targetUrl, { waitUntil: 'load', timeout: 30_000 });
   // Dismiss Next.js dev-mode hydration error overlay if present
   await dismissErrorOverlay(page);
 }
@@ -207,7 +206,7 @@ export async function fillVolunteerForm(page: any) {
   if (!(await firstNameInput.inputValue())) await firstNameInput.fill('Carlos');
   const lastNameInput = page.getByLabel(/Apellido/i);
   if (!(await lastNameInput.inputValue())) await lastNameInput.fill('Pérez');
-  const emailInput = page.getByLabel(/Email/i);
+  const emailInput = page.getByLabel(/Correo electrónico/i);
   if (!(await emailInput.inputValue())) await emailInput.fill('adopter-e2e@example.com');
   const phoneInput = page.getByLabel(/Teléfono/i);
   if (!(await phoneInput.inputValue())) await phoneInput.fill('+57 300 123 4567');
