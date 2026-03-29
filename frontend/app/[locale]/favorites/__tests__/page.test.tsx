@@ -125,7 +125,7 @@ describe('FavoritosPage', () => {
     jest.setSystemTime(new Date('2026-03-28T12:00:00Z'));
 
     useFavoriteStore.setState({
-      favorites: [makeFavorite({ created_at: new Date().toISOString() })],
+      favorites: [makeFavorite({ created_at: '2026-03-28T12:00:00.000Z' })],
     });
 
     render(<FavoritosPage />);

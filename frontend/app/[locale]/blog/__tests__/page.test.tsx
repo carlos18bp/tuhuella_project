@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import BlogListingPage from '../page';
@@ -178,7 +178,7 @@ describe('BlogListingPage', () => {
     setupMock({ posts: [featuredPost, noCoverPost], loading: false });
     render(<BlogListingPage />);
     const cards = screen.getAllByTestId('post-card');
-    expect(cards[0].querySelector('img')).toBeNull();
+    expect(within(cards[0]).queryByRole('img')).not.toBeInTheDocument();
   });
 
   it('does not render pagination when totalPages is 1', () => {

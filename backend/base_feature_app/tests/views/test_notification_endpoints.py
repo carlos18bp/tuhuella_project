@@ -1,9 +1,10 @@
 import pytest
 from django.urls import reverse
 
-from base_feature_app.models import NotificationLog, NotificationPreference
-from base_feature_app.tests.factories import NotificationLogFactory, NotificationPreferenceFactory
-
+from base_feature_app.models import NotificationPreference
+from base_feature_app.tests.factories import (
+    NotificationLogFactory,
+)
 
 # ── Preferences: list ────────────────────────────────────────────────────────
 

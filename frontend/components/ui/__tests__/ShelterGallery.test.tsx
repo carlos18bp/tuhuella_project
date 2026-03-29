@@ -53,11 +53,8 @@ describe('ShelterGallery', () => {
     await user.click(imageButton);
     expect(screen.getByText('1 / 3')).toBeInTheDocument();
 
-    // Find next button (has ChevronRight icon class)
-    const buttons = screen.getAllByRole('button');
-    const nextButton = buttons.find((b) => b.querySelector('.lucide-chevron-right'));
-    expect(nextButton).toBeTruthy();
-    await user.click(nextButton!);
+    const nextButton = screen.getByRole('button', { name: /siguiente/i });
+    await user.click(nextButton);
     expect(screen.getByText('2 / 3')).toBeInTheDocument();
   });
 
@@ -70,14 +67,9 @@ describe('ShelterGallery', () => {
     await user.click(imageButton);
     expect(screen.getByText('1 / 3')).toBeInTheDocument();
 
-    // Click X button (first button in lightbox)
-    const closeBtn = screen.getAllByRole('button').find(
-      (b) => b.querySelector('.lucide-x'),
-    );
-    if (closeBtn) {
-      await user.click(closeBtn);
-      expect(screen.queryByText('1 / 3')).not.toBeInTheDocument();
-    }
+    const closeBtn = screen.getByRole('button', { name: /cerrar/i });
+    await user.click(closeBtn);
+    expect(screen.queryByText('1 / 3')).not.toBeInTheDocument();
   });
 
   it('renders single image without navigation buttons', async () => {
@@ -88,10 +80,7 @@ describe('ShelterGallery', () => {
     await user.click(imageButton);
 
     expect(screen.getByText('1 / 1')).toBeInTheDocument();
-    // No ChevronLeft/ChevronRight buttons
-    const chevrons = screen.queryAllByRole('button').filter(
-      (b) => b.querySelector('.lucide-chevron-left') || b.querySelector('.lucide-chevron-right'),
-    );
-    expect(chevrons.length).toBe(0);
+    expect(screen.queryByRole('button', { name: /anterior/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /siguiente/i })).not.toBeInTheDocument();
   });
 });

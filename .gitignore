@@ -122,4 +122,4 @@ pids
 test-results/test-quality-report.json
 
 # Claude
-claude/worktrees/
+.claude/worktrees/

@@ -149,6 +149,7 @@ function FavoriteNote({ favoriteId, initialNote }: { favoriteId: number; initial
     <div className="px-5 pb-2">
       <button
         type="button"
+        aria-label="Nota"
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(!open); }}
         className={`flex items-center gap-1 text-xs transition-colors ${note ? 'text-teal-600' : 'text-text-quaternary hover:text-text-tertiary'}`}
       >

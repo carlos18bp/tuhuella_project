@@ -31,7 +31,17 @@
       "Bash(git:*)",
       "Bash(fuser:*)",
       "Bash(E2E_REUSE_SERVER=1 npx playwright:*)",
-      "Bash(DEBUG=* npx playwright:*)"
+      "Bash(DEBUG=* npx playwright:*)",
+      "Bash(while:*)",
+      "Bash(do:*)",
+      "Bash(done)",
+      "Bash(wc:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(ruff:*)",
+      "Bash(npx eslint:*)",
+      "Bash(jq:*)",
+      "Read(//home/dev-env/**)"
     ],
     "deny": [
       "Bash(rm -rf:*)",

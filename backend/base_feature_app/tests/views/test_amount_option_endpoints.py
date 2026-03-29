@@ -1,7 +1,10 @@
 import pytest
 from django.urls import reverse
 
-from base_feature_app.tests.factories import DonationAmountOptionFactory, SponsorshipAmountOptionFactory
+from base_feature_app.tests.factories import (
+    DonationAmountOptionFactory,
+    SponsorshipAmountOptionFactory,
+)
 
 
 @pytest.mark.django_db

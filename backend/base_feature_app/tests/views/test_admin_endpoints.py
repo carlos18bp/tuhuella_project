@@ -1,16 +1,15 @@
+from datetime import datetime
+from datetime import timezone as dt_tz
 from decimal import Decimal
 
 import pytest
 from django.urls import reverse
-from django.utils import timezone
 from rest_framework import status
 
 from base_feature_app.tests.factories import (
     AdoptionApplicationFactory,
-    AnimalFactory,
     DonationFactory,
     ShelterAdminUserFactory,
-    ShelterFactory,
 )
 
 
@@ -208,7 +207,7 @@ def test_shelter_metrics_includes_avg_adoption_time(shelter_admin_client, animal
     AdoptionApplicationFactory(
         animal=animal,
         status='approved',
-        reviewed_at=timezone.now(),
+        reviewed_at=datetime(2030, 6, 15, 12, 0, 0, tzinfo=dt_tz.utc),
     )
     response = shelter_admin_client.get(reverse('shelter-metrics'))
     assert response.json()['avg_adoption_time_days'] is not None

@@ -32,7 +32,7 @@ def test_list_all_faqs_includes_active_items_only(api_client):
 @pytest.mark.django_db
 def test_faqs_by_topic_returns_matching_topic(api_client):
     """GET by slug returns the matching active topic."""
-    topic = FAQTopicFactory(slug='adoption', is_active=True)
+    FAQTopicFactory(slug='adoption', is_active=True)
     url = reverse('faq-by-topic', kwargs={'topic_slug': 'adoption'})
     response = api_client.get(url)
     assert response.status_code == 200

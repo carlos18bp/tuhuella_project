@@ -109,8 +109,8 @@ describe('MiPerfilPage', () => {
     useAuthStore.setState({
       user: mockUser,
       activity: [
-        { type: 'application', animal_name: 'Luna', status: 'submitted', date: new Date().toISOString() },
-        { type: 'favorite', animal_name: 'Max', date: new Date().toISOString() },
+        { type: 'application', animal_name: 'Luna', status: 'submitted', date: '2026-03-28T12:00:00.000Z' },
+        { type: 'favorite', animal_name: 'Max', date: '2026-03-28T12:00:00.000Z' },
       ],
     });
 
@@ -158,14 +158,11 @@ describe('MiPerfilPage', () => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2026-03-28T12:00:00Z'));
 
-    const yesterday = new Date('2026-03-27T12:00:00Z').toISOString();
-    const monthsAgo = new Date('2026-01-15T12:00:00Z').toISOString();
-
     useAuthStore.setState({
       user: mockUser,
       activity: [
-        { type: 'donation', amount: '50000', shelter_name: 'Patitas', date: yesterday },
-        { type: 'sponsorship', animal_name: 'Rocky', date: monthsAgo },
+        { type: 'donation', amount: '50000', shelter_name: 'Patitas', date: '2026-03-27T12:00:00.000Z' },
+        { type: 'sponsorship', animal_name: 'Rocky', date: '2026-01-15T12:00:00.000Z' },
       ],
     });
 

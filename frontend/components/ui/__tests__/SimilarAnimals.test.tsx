@@ -27,7 +27,7 @@ describe('SimilarAnimals', () => {
     mockApiGet.mockResolvedValue({ data: [] });
     const { container } = render(<SimilarAnimals animalId={1} />);
     // Initially empty since animals state is []
-    expect(container.querySelector('section')).toBeNull();
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('renders section heading when animals loaded', async () => {
@@ -57,6 +57,6 @@ describe('SimilarAnimals', () => {
     await waitFor(() => {
       expect(mockApiGet).toHaveBeenCalled();
     });
-    expect(container.querySelector('section')).toBeNull();
+    expect(container).toBeEmptyDOMElement();
   });
 });

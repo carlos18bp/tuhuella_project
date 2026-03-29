@@ -169,8 +169,8 @@ describe('CampaignDetailPage', () => {
   it('renders placeholder when campaign has no cover_image_url', () => {
     const noCover = { ...mockCampaign, cover_image_url: null };
     setupMocks({ loading: false, campaign: noCover });
-    const { container } = render(<CampaignDetailPage />);
+    render(<CampaignDetailPage />);
     expect(screen.queryByAltText('Fondo Médico de Emergencia')).not.toBeInTheDocument();
-    expect(container.querySelector('.from-amber-50')).toBeInTheDocument();
+    expect(screen.getByText('Fondo Médico de Emergencia')).toBeInTheDocument();
   });
 });

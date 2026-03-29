@@ -61,6 +61,7 @@ export default function ShelterGallery({ images, shelterName }: ShelterGalleryPr
           onClick={() => setLightboxIndex(null)}
         >
           <button
+            aria-label="Cerrar"
             className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
             onClick={() => setLightboxIndex(null)}
           >
@@ -73,6 +74,7 @@ export default function ShelterGallery({ images, shelterName }: ShelterGalleryPr
 
           {images.length > 1 && (
             <button
+              aria-label="Anterior"
               className="absolute left-3 md:left-6 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
@@ -93,6 +95,7 @@ export default function ShelterGallery({ images, shelterName }: ShelterGalleryPr
 
           {images.length > 1 && (
             <button
+              aria-label="Siguiente"
               className="absolute right-3 md:right-6 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
               onClick={(e) => {
                 e.stopPropagation();

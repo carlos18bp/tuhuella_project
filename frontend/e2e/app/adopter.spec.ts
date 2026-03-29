@@ -217,12 +217,13 @@ test.describe('Favorites — Authenticated', () => {
 test.describe('Favorite Note Edit', () => {
   test('should edit a note on a favorited animal', { tag: [...FAVORITE_NOTE_EDIT] }, async ({ page }) => {
     let patchedNote = '';
+    const singleFavorite = [mockFavorites[0]];
     await page.route('**/favorites/**', (route: any) => {
       if (route.request().method() === 'GET') {
         return route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify(mockFavorites),
+          body: JSON.stringify(singleFavorite),
         });
       }
       if (route.request().method() === 'PATCH') {
@@ -242,21 +243,19 @@ test.describe('Favorite Note Edit', () => {
     // Wait for favorites to load
     await expect(page.getByText('Luna')).toBeVisible({ timeout: 15_000 });
 
-    // Click the note toggle button on the first card to expand the textarea
-    const noteButtons = page.locator('button').filter({ has: page.locator('svg.lucide-sticky-note, svg[class*="sticky"]') });
-    const firstNoteBtn = noteButtons.first();
-    await expect(firstNoteBtn).toBeVisible({ timeout: 5_000 });
-    await firstNoteBtn.click();
+    // Click the note toggle button on the card to expand the textarea
+    const noteBtn = page.getByRole('button', { name: /nota/i });
+    await expect(noteBtn).toBeVisible({ timeout: 5_000 });
+    await noteBtn.click();
 
     // Textarea should appear
-    const textarea = page.locator('textarea').first();
+    const textarea = page.getByRole('textbox');
     await expect(textarea).toBeVisible({ timeout: 5_000 });
 
-    // Type a note
+    // Type a note and wait for the debounced PATCH request
+    const patchPromise = page.waitForResponse((r) => r.url().includes('/api/favorites/') && r.request().method() === 'PATCH');
     await textarea.fill('Mi favorita para adoptar');
-
-    // Wait for debounce (500ms) + API call
-    await page.waitForTimeout(700);
+    await patchPromise;
 
     // Verify the PATCH was sent with the note
     expect(patchedNote).toBe('Mi favorita para adoptar');

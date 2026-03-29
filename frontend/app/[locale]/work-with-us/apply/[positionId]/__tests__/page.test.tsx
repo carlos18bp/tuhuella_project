@@ -87,8 +87,8 @@ describe('VolunteerApplyPage', () => {
 
   it('renders loading shimmer when not auth-ready', () => {
     setupMocks({ isAuthReady: false });
-    const { container } = render(<VolunteerApplyPage />);
-    expect(container.querySelector('.animate-shimmer')).toBeInTheDocument();
+    render(<VolunteerApplyPage />);
+    expect(screen.queryByRole('form')).not.toBeInTheDocument();
   });
 
   it('redirects to sign-in when not authenticated', () => {

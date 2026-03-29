@@ -96,8 +96,6 @@ describe('NotificationPreferencesPage', () => {
 });
 
 describe('NotificationPreferencesPage — toggle interaction', () => {
-  const mockUpdatePreference = jest.fn();
-
   beforeEach(() => {
     jest.clearAllMocks();
   });

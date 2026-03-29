@@ -6,6 +6,17 @@ from django.urls import reverse
 from base_feature_app.models import VolunteerApplication
 from base_feature_app.tests.factories import VolunteerPositionFactory
 
+VALID_VOLUNTEER_DATA = {
+    'captcha_token': 'valid-token',
+    'first_name': 'Maria',
+    'last_name': 'Garcia',
+    'email': 'maria@example.com',
+    'phone': '3001234567',
+    'city': 'Bogota',
+    'country': 'Colombia',
+    'motivation': 'I want to help animals in shelters and make a difference.',
+}
+
 
 @pytest.mark.django_db
 def test_volunteer_create_requires_auth(api_client):
@@ -23,15 +34,7 @@ def test_volunteer_create_succeeds_with_valid_data(mock_captcha, mock_email, aut
     position = VolunteerPositionFactory(is_active=True)
     url = reverse('volunteer-application-create')
     response = authenticated_client.post(url, {
-        'captcha_token': 'valid-token',
-        'position': position.pk,
-        'first_name': 'Maria',
-        'last_name': 'Garcia',
-        'email': 'maria@example.com',
-        'phone': '3001234567',
-        'city': 'Bogota',
-        'country': 'Colombia',
-        'motivation': 'I want to help animals in shelters and make a difference.',
+        **VALID_VOLUNTEER_DATA, 'position': position.pk,
     }, format='json')
     assert response.status_code == 201
     assert VolunteerApplication.objects.count() == 1
@@ -69,15 +72,7 @@ def test_volunteer_create_rejects_short_motivation(mock_captcha, authenticated_c
     position = VolunteerPositionFactory(is_active=True)
     url = reverse('volunteer-application-create')
     response = authenticated_client.post(url, {
-        'captcha_token': 'valid',
-        'position': position.pk,
-        'first_name': 'Maria',
-        'last_name': 'Garcia',
-        'email': 'maria@example.com',
-        'phone': '3001234567',
-        'city': 'Bogota',
-        'country': 'Colombia',
-        'motivation': 'Short text',
+        **VALID_VOLUNTEER_DATA, 'position': position.pk, 'motivation': 'Short text',
     }, format='json')
     assert response.status_code == 400
     assert 'motivation' in response.json()
