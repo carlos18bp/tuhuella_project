@@ -2,38 +2,43 @@ from faker import Faker
 from django.core.management.base import BaseCommand
 from base_feature_app.models import User
 
+fake = Faker()
+
+
 class Command(BaseCommand):
-    help = 'Create User records in the database'
+    help = 'Create User records for Mi Huella'
 
     def add_arguments(self, parser):
-        parser.add_argument('number_of_users', type=int, nargs='?', default=10)
+        parser.add_argument('--count', type=int, default=10)
 
     def handle(self, *args, **options):
-        number_of_users = options['number_of_users']
-        fake = Faker()
+        count = options['count']
+        roles = [User.Role.ADOPTER, User.Role.SHELTER_ADMIN]
 
-        roles = [User.Role.CUSTOMER, User.Role.ADMIN]
-
-        for i in range(number_of_users):
-            # Generate unique email
-            email = fake.unique.email()
-            first_name = fake.first_name()
-            last_name = fake.last_name()
-            phone = fake.phone_number()
-            role = fake.random_element(elements=roles)
-            
-            # Create user with random password
-            user = User.objects.create_user(
-                email=email,
-                password='password123',  # Default password for fake users
-                first_name=first_name,
-                last_name=last_name,
-                phone=phone,
-                role=role,
-                is_active=True,
-                is_staff=(role == User.Role.ADMIN),
+        # Create admin user
+        if not User.objects.filter(email='admin@mihuella.com').exists():
+            User.objects.create_superuser(
+                email='admin@mihuella.com',
+                password='admin123456',
+                first_name='Admin',
+                last_name='Mi Huella',
             )
+            self.stdout.write(self.style.SUCCESS('Created admin user: admin@mihuella.com'))
 
-            self.stdout.write(self.style.SUCCESS(f'User "{user.email}" created with role {role}'))
+        created = 0
+        for i in range(count):
+            email = fake.unique.email()
+            # ~2:1 ratio of adopters to shelter_admins
+            role = roles[0] if i % 3 != 0 else roles[1]
+            User.objects.create_user(
+                email=email,
+                password='testpass123',
+                first_name=fake.first_name(),
+                last_name=fake.last_name(),
+                phone=fake.phone_number()[:20],
+                city=fake.city(),
+                role=role,
+            )
+            created += 1
 
-        self.stdout.write(self.style.SUCCESS(f'{number_of_users} User records created'))
+        self.stdout.write(self.style.SUCCESS(f'Created {created} users'))

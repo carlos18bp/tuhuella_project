@@ -40,7 +40,7 @@ def test_sign_up_rejects_existing_email(mock_captcha, api_client):
 
     response = api_client.post(
         reverse('sign_up'),
-        {'email': 'existing@example.com', 'password': 'pass1234'},
+        {'email': 'existing@example.com', 'password': 'pass1234', 'terms_accepted': True},
         format='json',
     )
 
@@ -59,6 +59,7 @@ def test_sign_up_creates_user(mock_captcha, api_client):
             'password': 'pass1234',
             'first_name': 'New',
             'last_name': 'User',
+            'terms_accepted': True,
         },
         format='json',
     )
@@ -69,6 +70,26 @@ def test_sign_up_creates_user(mock_captcha, api_client):
     User = get_user_model()
     user = User.objects.get(email='new@example.com')
     assert user.first_name == 'New'
+    assert user.terms_accepted_at is not None
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.views.auth.verify_recaptcha', return_value=True)
+def test_sign_up_rejects_without_terms_accepted(mock_captcha, api_client):
+    """sign_up returns 400 when terms_accepted is not provided."""
+    response = api_client.post(
+        reverse('sign_up'),
+        {
+            'email': 'noterms@example.com',
+            'password': 'pass1234',
+            'first_name': 'No',
+            'last_name': 'Terms',
+        },
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert 'terms' in response.json()['error'].lower()
 
 
 @pytest.mark.django_db
@@ -504,3 +525,83 @@ def test_validate_token_success(api_client):
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json()['valid'] is True
+
+
+@override_settings(DEBUG=False)
+def test_verify_recaptcha_returns_false_when_no_token():
+    """verify_recaptcha returns False when token is empty and DEBUG is False."""
+    result = auth_views.verify_recaptcha('')
+
+    assert result is False
+
+
+@override_settings(DEBUG=False, RECAPTCHA_SECRET_KEY='test-secret')
+def test_verify_recaptcha_calls_google_api(monkeypatch):
+    """verify_recaptcha posts to Google reCAPTCHA API and returns the success value."""
+    def fake_post(*_args, **_kwargs):
+        return DummyResponse(status_code=200, payload={'success': True})
+
+    monkeypatch.setattr(auth_views.requests, 'post', fake_post)
+
+    result = auth_views.verify_recaptcha('valid-token')
+
+    assert result is True
+
+
+@override_settings(DEBUG=False, RECAPTCHA_SECRET_KEY='test-secret')
+def test_verify_recaptcha_returns_false_on_exception(monkeypatch):
+    """verify_recaptcha returns False when requests.post raises an exception."""
+    def boom(*_args, **_kwargs):
+        raise auth_views.requests.RequestException('fail')
+
+    monkeypatch.setattr(auth_views.requests, 'post', boom)
+
+    result = auth_views.verify_recaptcha('some-token')
+
+    assert result is False
+
+
+@pytest.mark.django_db
+@override_settings(DEBUG=False)
+def test_sign_up_rejects_failed_captcha(api_client, monkeypatch):
+    """sign_up returns 400 when captcha verification fails."""
+    monkeypatch.setattr(auth_views, 'verify_recaptcha', lambda _token: False)
+
+    response = api_client.post(
+        reverse('sign_up'),
+        {'email': 'new@example.com', 'password': 'pass1234', 'captcha_token': 'bad'},
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert 'error' in response.json()
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.views.auth.verify_recaptcha', return_value=True)
+def test_sign_up_rejects_short_password(mock_captcha, api_client):
+    """sign_up returns 400 when password is shorter than 8 characters."""
+    response = api_client.post(
+        reverse('sign_up'),
+        {'email': 'short@example.com', 'password': 'short'},
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()['error'] == 'Password must be at least 8 characters'
+
+
+@pytest.mark.django_db
+@override_settings(DEBUG=False)
+def test_sign_in_rejects_failed_captcha(api_client, monkeypatch):
+    """sign_in returns 400 when captcha verification fails."""
+    monkeypatch.setattr(auth_views, 'verify_recaptcha', lambda _token: False)
+
+    response = api_client.post(
+        reverse('sign_in'),
+        {'email': 'user@example.com', 'password': 'pass1234', 'captcha_token': 'bad'},
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert 'error' in response.json()

@@ -1,7 +1,7 @@
 import pytest
 from django.contrib.auth import get_user_model
 
-from base_feature_app.utils import auth_utils
+from base_feature_app.utils import auth_utils, email_utils
 
 
 @pytest.mark.django_db
@@ -23,12 +23,12 @@ def test_send_password_reset_code_success(monkeypatch):
     user = User.objects.create_user(email='reset@example.com', password='pass1234', first_name='Reset')
     sent = {}
 
-    def fake_send_mail(subject, message, from_email, recipient_list, fail_silently):
-        sent['subject'] = subject
-        sent['recipients'] = recipient_list
+    def fake_send_mail(*args, **kwargs):
+        sent['subject'] = args[0]
+        sent['recipients'] = args[3]
         return 1
 
-    monkeypatch.setattr(auth_utils, 'send_mail', fake_send_mail)
+    monkeypatch.setattr(email_utils, 'send_mail', fake_send_mail)
 
     assert auth_utils.send_password_reset_code(user, '123456') is True
     assert sent['recipients'] == [user.email]
@@ -42,7 +42,7 @@ def test_send_password_reset_code_failure(monkeypatch):
     def fake_send_mail(*_args, **_kwargs):
         raise RuntimeError('send failed')
 
-    monkeypatch.setattr(auth_utils, 'send_mail', fake_send_mail)
+    monkeypatch.setattr(email_utils, 'send_mail', fake_send_mail)
 
     assert auth_utils.send_password_reset_code(user, '123456') is False
 
@@ -51,12 +51,12 @@ def test_send_password_reset_code_failure(monkeypatch):
 def test_send_verification_code_success(monkeypatch):
     sent = {}
 
-    def fake_send_mail(subject, message, from_email, recipient_list, fail_silently):
-        sent['subject'] = subject
-        sent['recipients'] = recipient_list
+    def fake_send_mail(*args, **kwargs):
+        sent['subject'] = args[0]
+        sent['recipients'] = args[3]
         return 1
 
-    monkeypatch.setattr(auth_utils, 'send_mail', fake_send_mail)
+    monkeypatch.setattr(email_utils, 'send_mail', fake_send_mail)
 
     assert auth_utils.send_verification_code('verify@example.com', '654321') is True
     assert sent['recipients'] == ['verify@example.com']
@@ -67,6 +67,6 @@ def test_send_verification_code_failure(monkeypatch):
     def fake_send_mail(*_args, **_kwargs):
         raise RuntimeError('send failed')
 
-    monkeypatch.setattr(auth_utils, 'send_mail', fake_send_mail)
+    monkeypatch.setattr(email_utils, 'send_mail', fake_send_mail)
 
     assert auth_utils.send_verification_code('verify@example.com', '654321') is False

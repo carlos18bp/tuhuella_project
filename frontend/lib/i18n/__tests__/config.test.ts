@@ -22,8 +22,8 @@ describe('i18n config', () => {
   });
 
   describe('constants', () => {
-    it('exposes DEFAULT_LOCALE as "en"', () => {
-      expect(DEFAULT_LOCALE).toBe('en');
+    it('exposes DEFAULT_LOCALE as "es"', () => {
+      expect(DEFAULT_LOCALE).toBe('es');
     });
 
     it('exposes SUPPORTED_LOCALES containing "en" and "es"', () => {

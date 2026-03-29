@@ -154,24 +154,31 @@ JSON artifacts:
 |--------|------|---------|
 | `waitForPageLoad(page)` | `fixtures.ts` | Wait for `load` + `domcontentloaded` |
 | `waitForApiResponse(page, url)` | `fixtures.ts` | Wait for a 200 response that matches a URL |
-| `testUser`, `testAdminUser`, `testCheckoutData` | `fixtures.ts` | Shared fixture data |
+| `testAdopter`, `testShelterAdmin`, `testPlatformAdmin`, `testDonationData`, `testSponsorshipData` | `fixtures.ts` | Shared fixture data |
 | `test` / `expect` | `test-with-coverage.ts` | Shared Playwright test base |
 | Flow tag constants | `helpers/flow-tags.ts` | Tag arrays per flow/module/priority |
 
-## Flow Definitions (33 flows)
+## Flow Definitions (48 flows)
 
 Source of truth: `e2e/flow-definitions.json` (update `lastUpdated` when adding flows).
 
 | Module | Flows | Priority |
 |--------|-------|----------|
-| **home** | home-loads, home-to-blog, home-to-catalog, home-product-carousel | P1-P3 |
-| **auth** | auth-sign-in-form, auth-login-invalid, auth-protected-redirect, auth-sign-up-form, auth-forgot-password-form | P1-P2 |
-| **blog** | blog-list-view, blog-detail-view, blog-detail-back | P2-P3 |
-| **navigation** | navigation-between-pages, navigation-header, navigation-footer | P2-P4 |
-| **catalog** | catalog-browse, catalog-product-detail, catalog-product-gallery, catalog-back-navigation | P1-P3 |
-| **cart** | cart-add, cart-empty, cart-update-qty, cart-remove, cart-subtotal, cart-persist, cart-multiple-products | P1-P2 |
-| **checkout** | checkout-form-display, checkout-form-validation, checkout-form-fill | P1-P2 |
-| **purchase** | purchase-complete-flow, purchase-multiple-items, purchase-disabled-empty-cart, purchase-loading-state | P1-P3 |
+| **home** | home-loads, home-to-animals, home-to-shelters, home-to-campaigns | P1-P3 |
+| **auth** | auth-sign-in-form, auth-login-invalid, auth-sign-up-form, auth-forgot-password-form, auth-protected-redirect, auth-role-redirect, auth-sign-out, auth-session-persistence, auth-google-login | P1-P2 |
+| **animal** | animal-browse, animal-filter, animal-detail, animal-gallery | P1-P3 |
+| **shelter** | shelter-browse, shelter-detail, shelter-onboarding | P1-P2 |
+| **adoption** | adoption-submit, adoption-track, adoption-manage | P1-P2 |
+| **campaign** | campaign-browse, campaign-detail | P2 |
+| **donation** | donation-checkout, donation-history, payment-confirmation | P1-P2 |
+| **sponsorship** | sponsorship-checkout, sponsorship-history | P1-P2 |
+| **favorite** | favorite-toggle, favorite-list | P2 |
+| **adopter-intent** | adopter-intent-create, adopter-intent-browse | P3 |
+| **adopter** | adopter-profile | P2 |
+| **public** | public-faq | P4 |
+| **shelter-panel** | shelter-panel-dashboard, shelter-panel-animals, shelter-panel-campaigns, shelter-panel-donations, shelter-panel-settings | P1-P2 |
+| **admin** | admin-dashboard, admin-approve-shelters, admin-moderation, admin-metrics, admin-payments | P1-P2 |
+| **navigation** | navigation-header, navigation-footer, navigation-between-pages | P2-P4 |
 
 ## References
 

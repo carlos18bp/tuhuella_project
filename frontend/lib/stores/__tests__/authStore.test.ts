@@ -8,6 +8,8 @@ import { clearTokens, getAccessToken, getRefreshToken, setTokens } from '../../s
 jest.mock('../../services/http', () => ({
   api: {
     post: jest.fn(),
+    get: jest.fn(),
+    patch: jest.fn(),
   },
 }));
 
@@ -18,7 +20,7 @@ jest.mock('../../services/tokens', () => ({
   clearTokens: jest.fn(),
 }));
 
-const mockApi = api as jest.Mocked<typeof api>;
+const mockApi = api as jest.Mocked<typeof api> & { get: jest.Mock };
 const mockGetAccessToken = getAccessToken as jest.Mock;
 const mockGetRefreshToken = getRefreshToken as jest.Mock;
 const mockSetTokens = setTokens as jest.Mock;
@@ -30,6 +32,10 @@ const resetAuthState = () => {
     refreshToken: null,
     user: null,
     isAuthenticated: false,
+    isAuthReady: false,
+    profileStats: null,
+    activity: [],
+    profileLoading: false,
   });
 };
 
@@ -44,6 +50,7 @@ describe('authStore', () => {
   it('syncs tokens from cookies', () => {
     mockGetAccessToken.mockReturnValue('access');
     mockGetRefreshToken.mockReturnValue('refresh');
+    mockApi.get.mockResolvedValue({ data: { user: null } });
 
     act(() => {
       useAuthStore.getState().syncFromCookies();
@@ -175,7 +182,7 @@ describe('authStore', () => {
       await useAuthStore.getState().sendPasswordResetCode('user@example.com');
     });
 
-    expect(mockApi.post).toHaveBeenCalledWith('send_passcode/', { email: 'user@example.com' });
+    expect(mockApi.post).toHaveBeenCalledWith('/auth/send_passcode/', { email: 'user@example.com' });
   });
 
   it('resets password', async () => {
@@ -187,10 +194,88 @@ describe('authStore', () => {
         .resetPassword({ email: 'user@example.com', code: '123456', new_password: 'password123' });
     });
 
-    expect(mockApi.post).toHaveBeenCalledWith('verify_passcode_and_reset_password/', {
+    expect(mockApi.post).toHaveBeenCalledWith('/auth/verify_passcode_and_reset_password/', {
       email: 'user@example.com',
       code: '123456',
       new_password: 'password123',
     });
+  });
+
+  it('fetchMe sets user on success', async () => {
+    const mockUser = { id: 1, email: 'test@example.com', first_name: 'Test', last_name: 'User', role: 'adopter' };
+    mockApi.get.mockResolvedValueOnce({ data: { user: mockUser } });
+
+    await act(async () => {
+      await useAuthStore.getState().fetchMe();
+    });
+
+    expect(useAuthStore.getState().user).toEqual(mockUser);
+  });
+
+  it('fetchMe calls signOut on error', async () => {
+    useAuthStore.setState({ isAuthenticated: true, accessToken: 'token' });
+    mockApi.get.mockRejectedValueOnce(new Error('Unauthorized'));
+
+    await act(async () => {
+      await useAuthStore.getState().fetchMe();
+    });
+
+    expect(mockClearTokens).toHaveBeenCalled();
+    expect(useAuthStore.getState().isAuthenticated).toBe(false);
+  });
+
+  it('fetchProfileStats sets stats on success', async () => {
+    const stats = { favorites_count: 5, applications_count: 2 };
+    mockApi.get.mockResolvedValueOnce({ data: stats });
+
+    await act(async () => {
+      await useAuthStore.getState().fetchProfileStats();
+    });
+
+    expect(useAuthStore.getState().profileStats).toEqual(stats);
+    expect(useAuthStore.getState().profileLoading).toBe(false);
+  });
+
+  it('fetchProfileStats handles error silently', async () => {
+    mockApi.get.mockRejectedValueOnce(new Error('fail'));
+
+    await act(async () => {
+      await useAuthStore.getState().fetchProfileStats();
+    });
+
+    expect(useAuthStore.getState().profileStats).toBeNull();
+    expect(useAuthStore.getState().profileLoading).toBe(false);
+  });
+
+  it('fetchActivity sets activity on success', async () => {
+    const events = [{ id: 1, type: 'login', created_at: '2026-01-01' }];
+    mockApi.get.mockResolvedValueOnce({ data: events });
+
+    await act(async () => {
+      await useAuthStore.getState().fetchActivity();
+    });
+
+    expect(useAuthStore.getState().activity).toEqual(events);
+  });
+
+  it('fetchActivity handles error silently', async () => {
+    mockApi.get.mockRejectedValueOnce(new Error('fail'));
+
+    await act(async () => {
+      await useAuthStore.getState().fetchActivity();
+    });
+
+    expect(useAuthStore.getState().activity).toEqual([]);
+  });
+
+  it('updateProfile updates user on success', async () => {
+    const updatedUser = { id: 1, email: 'test@example.com', first_name: 'Updated', last_name: 'User', role: 'adopter' };
+    mockApi.patch.mockResolvedValueOnce({ data: updatedUser });
+
+    await act(async () => {
+      await useAuthStore.getState().updateProfile({ first_name: 'Updated' });
+    });
+
+    expect(useAuthStore.getState().user).toEqual(updatedUser);
   });
 });

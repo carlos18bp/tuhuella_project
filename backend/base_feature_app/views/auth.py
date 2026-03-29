@@ -19,11 +19,28 @@ from base_feature_app.utils.auth_utils import (
     send_password_reset_code,
     send_verification_code
 )
-from base_feature_app.views.captcha_views import verify_recaptcha
+def verify_recaptcha(token):
+    """Placeholder reCAPTCHA verification. Returns True in DEBUG mode."""
+    from django.conf import settings as _settings
+    if _settings.DEBUG:
+        return True
+    if not token:
+        return False
+    try:
+        resp = requests.post(
+            'https://www.google.com/recaptcha/api/siteverify',
+            data={'secret': getattr(_settings, 'RECAPTCHA_SECRET_KEY', ''), 'response': token},
+            timeout=5,
+        )
+        return resp.json().get('success', False)
+    except Exception:
+        return False
 
 User = get_user_model()
 
 logger = logging.getLogger(__name__)
+
+CURRENT_TERMS_VERSION = '2026-03-25'
 
 
 @api_view(['POST'])
@@ -41,7 +58,7 @@ def sign_up(request):
     captcha_token = request.data.get('captcha_token', '')
     if not verify_recaptcha(captcha_token):
         return Response(
-            {'captcha_token': ['reCAPTCHA verification failed.']},
+            {'error': 'reCAPTCHA verification failed.'},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -67,14 +84,24 @@ def sign_up(request):
             {'error': 'User with this email already exists'},
             status=status.HTTP_400_BAD_REQUEST
         )
-    
+
+    terms_accepted = request.data.get('terms_accepted', False)
+    if not terms_accepted:
+        return Response(
+            {'error': 'You must accept the terms and conditions'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
     # Create user
+    from django.utils import timezone as tz
     user = User.objects.create(
         email=email,
         first_name=first_name,
         last_name=last_name,
         password=make_password(password),
-        is_active=True
+        is_active=True,
+        terms_accepted_at=tz.now(),
+        terms_version=CURRENT_TERMS_VERSION,
     )
     
     # Generate tokens
@@ -96,19 +123,19 @@ def sign_in(request):
     captcha_token = request.data.get('captcha_token', '')
     if not verify_recaptcha(captcha_token):
         return Response(
-            {'captcha_token': ['reCAPTCHA verification failed.']},
+            {'error': 'reCAPTCHA verification failed.'},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
     email = request.data.get('email', '').strip().lower()
     password = request.data.get('password')
-    
+
     if not email or not password:
         return Response(
             {'error': 'Email and password are required'},
             status=status.HTTP_400_BAD_REQUEST
         )
-    
+
     try:
         user = User.objects.get(email=email)
     except User.DoesNotExist:
@@ -208,12 +235,15 @@ def google_login(request):
         )
     
     # Get or create user
+    from django.utils import timezone as tz
     user, created = User.objects.get_or_create(
         email=email,
         defaults={
             'first_name': given_name,
             'last_name': family_name,
             'is_active': True,
+            'terms_accepted_at': tz.now(),
+            'terms_version': CURRENT_TERMS_VERSION,
         }
     )
 
@@ -380,6 +410,13 @@ def update_password(request):
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
+def get_captcha_site_key(request):
+    """Return the reCAPTCHA site key for frontend widgets."""
+    return Response({'site_key': settings.RECAPTCHA_SITE_KEY})
+
+
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def validate_token(request):
     """
@@ -393,7 +430,12 @@ def validate_token(request):
             'email': user.email,
             'first_name': user.first_name,
             'last_name': user.last_name,
+            'phone': user.phone,
+            'city': user.city,
             'role': user.role,
             'is_staff': user.is_staff,
+            'date_joined': user.date_joined.isoformat(),
+            'terms_version': user.terms_version or '',
+            'current_terms_version': CURRENT_TERMS_VERSION,
         }
     }, status=status.HTTP_200_OK)

@@ -3,7 +3,7 @@ trigger: manual
 description: Project intelligence and lessons learned. Reference for project-specific patterns, preferences, and key insights discovered during development.
 ---
 
-# Lessons Learned — ProjectApp
+# Lessons Learned — Mi Huella
 
 This file captures important patterns, preferences, and project intelligence that help work more effectively with this codebase. Updated as new insights are discovered.
 
@@ -11,21 +11,27 @@ This file captures important patterns, preferences, and project intelligence tha
 
 ## 1. Architecture Patterns
 
-### Content Storage: Structured JSON over CMS
-- Proposal sections, portfolio works, and blog posts use Django `JSONField` for content
-- Each proposal section's `content_json` maps directly to a Vue component's props schema
-- Blog supports dual format: structured JSON (preferred) with HTML fallback via `v-html`
-- This avoids the need for a full CMS while keeping content rich and structured
+### Single Django App: `base_feature_app`
+- All 16 models, views, serializers, and services live in `base_feature_app`
+- App name kept from template to avoid migration headaches
+- Models split into individual files under `base_feature_app/models/`
+- URLs split into 13 sub-modules under `base_feature_app/urls/`
 
-### Single Django App: `content`
-- All models, views, serializers, and services live in the `content` app
-- This works for now but may need splitting if scope grows significantly
-- Models are already split into individual files under `content/models/`
+### Role-Based Access
+- Three roles: `adopter` (default), `shelter_admin`, `admin`
+- Queryset filtering in views enforces object-level authorization
+- Shelter ownership verified via `user.shelters.filter(pk=...)` pattern
 
-### Service Layer Pattern
-- Business logic lives in `content/services/`, not in views
-- Views are thin FBV wrappers that call service methods
-- Services: `ProposalService`, `ProposalEmailService`, `ProposalPdfService`, `EmailTemplateRegistry`
+### Structured JSON for Forms
+- `AdoptionApplication.form_answers` uses `JSONField` for flexible adoption questionnaires
+- `AdopterIntent.preferences` uses `JSONField` for species/size/age preferences
+- This avoids rigid schema changes when form questions evolve
+
+### Image Handling
+- `django-attachments` provides `SingleImageField` and `GalleryField`
+- `Animal.gallery` uses `GalleryField` → serialized as `gallery_urls: string[]`
+- `Shelter.logo`, `Shelter.cover_image`, `Campaign.cover_image` use `SingleImageField`
+- `django-cleanup` auto-deletes orphaned files on model delete
 
 ---
 
@@ -34,23 +40,27 @@ This file captures important patterns, preferences, and project intelligence tha
 ### Backend: Function-Based Views (FBV)
 - **All** DRF views use `@api_view` decorators, not class-based views
 - Never convert to CBV unless explicitly requested
-- Views file for proposals is very large (123K) — be careful with edits
+- Each domain has its own view module: `views/animal.py`, `views/shelter.py`, etc.
 
-### Frontend: Pinia Options API
-- **All** Pinia stores use Options API pattern: `{ state, getters, actions }`
-- Do NOT use Composition API (`setup()`) style for stores
-- HTTP requests go through `stores/services/request_http` centralized service
+### Frontend: Zustand Stores
+- **All** stores use Zustand with TypeScript types
+- 9 stores: `authStore`, `animalStore`, `shelterStore`, `campaignStore`, `donationStore`, `sponsorshipStore`, `favoriteStore`, `localeStore`, `notificationStore`
+- HTTP requests go through centralized `lib/services/http.ts` Axios instance
+- Token management via `lib/services/tokens.ts` + `js-cookie`
 
-### Bilingual Content Pattern
-- Models have paired fields: `title_en`/`title_es`, `content_json_en`/`content_json_es`, etc.
-- Frontend reads the appropriate field based on current locale
-- Proposals have a `language` field (`es`/`en`) that determines which default content to use
+### i18n Pattern (next-intl)
+- Locale stored in Zustand `localeStore` with `persist` middleware (cookie)
+- `i18n/request.ts` reads locale from cookie on server side
+- Translation files: `messages/en.json`, `messages/es.json`
+- No URL prefix approach — single URL set for all locales
 
 ### Naming Conventions
 - Backend: snake_case for everything (Python standard)
-- Frontend stores: snake_case file names (`portfolio_works.js`, `proposals.js`)
-- Frontend components: PascalCase (`BusinessProposal/Greeting.vue`)
-- Frontend composables: camelCase with `use` prefix (`useExpirationTimer.js`)
+- Frontend stores: camelCase file names (`animalStore.ts`)
+- Frontend components: PascalCase (`AnimalCard.tsx`, `ShelterCard.tsx`)
+- Frontend hooks: camelCase with `use` prefix (`useScrollReveal.ts`, `useRequireAuth.ts`)
+- Types: PascalCase in `lib/types.ts` (`Animal`, `Shelter`, `Campaign`)
+- Routes: SCREAMING_SNAKE in `lib/constants.ts` (`ROUTES.ANIMALS`, `ROUTES.SHELTER_DETAIL(id)`)
 
 ---
 
@@ -59,93 +69,74 @@ This file captures important patterns, preferences, and project intelligence tha
 ### Backend Commands Always Need venv
 ```bash
 source venv/bin/activate && <command>
-# or
-venv/bin/python <command>
 ```
 
-### Huey Immediate Mode in Development
-- When `DJANGO_ENV != 'production'`, Huey tasks execute synchronously
-- No need to run Redis or Huey worker for development
-- Tasks still need to be importable and functional
-
 ### Frontend Dev Proxy
-- Nuxt proxies `/api`, `/admin`, `/static`, `/media` to Django at `127.0.0.1:8000`
+- Next.js rewrites `/api/:path*` → Django at `localhost:8000`
+- Also rewrites `/media/:path*` for uploaded images
 - Both servers must be running simultaneously for full functionality
-- In production, everything goes through Django (no separate Nuxt server)
 
 ### Test Execution Rules
 - Never run the full test suite — always specify files
-- Backend: `pytest backend/content/tests/<specific_file> -v`
+- Backend: `pytest base_feature_app/tests/<specific_file> -v`
 - Frontend: `npm test -- <specific_file>`
-- E2E: max 2 files per `npx playwright test` invocation
-- Use `E2E_REUSE_SERVER=1` when dev server is already running
+- E2E: `npx playwright test e2e/<specific_file>.spec.ts`
+- Max 20 tests or 3 commands per execution cycle
+
+### Fake Data Commands
+- 12 management commands create realistic test data
+- Run in dependency order via `python manage.py create_fake_data`
+- Delete all via `python manage.py delete_fake_data` (preserves superusers)
+- Uses Faker for realistic names, descriptions, etc.
 
 ---
 
-## 4. Production Deployment
+## 4. Frontend Design System
 
-### Build Flow
-1. Frontend: `npm run build:django` → generates `backend/static/frontend/`
-2. Backend: `python manage.py collectstatic` → copies to `backend/staticfiles/`
-3. Restart: `sudo systemctl restart projectapp && sudo systemctl restart projectapp-huey`
+### Color Palette
+- **Base**: Stone (50–900) — backgrounds, text, borders
+- **Primary**: Teal (500–700) — CTAs, links, hover states
+- **Accent**: Amber (500–700) — campaigns, donations, warnings
+- **Success**: Emerald (50–700) — badges (vaccinated, verified, sterilized)
+- **Error**: Red (50–500) — favorites heart, error states
 
-### Django Serves Nuxt Pages
-- The `serve_nuxt` catch-all view in `projectapp/views.py` serves pre-rendered Nuxt pages
-- This is the LAST URL pattern — all other routes take priority
-- CDN URL for assets configurable via `NUXT_APP_CDN_URL`
+### Animation Libraries
+- **GSAP + ScrollTrigger**: Scroll-reveal animations via `useScrollReveal` hook (dynamic import to avoid SSR issues)
+- **Swiper**: Image carousels via `AnimalGallery` component
+- **Framer Motion**: Page transitions via `app/template.tsx`
 
----
-
-## 5. Email System
-
-### Template Registry Pattern
-- All emails defined in `EmailTemplateRegistry` with default content
-- Admin can override content via `EmailTemplateConfig` model
-- Admin can disable specific emails via `is_active` flag
-- Preview rendering available for all templates
-
-### 24h Cooldown Rule
-- `last_automated_email_at` field on `BusinessProposal` tracks last automated email
-- All automated email tasks check this before sending
-- Manual sends (admin clicks "Send") bypass the cooldown
-
-### Automations Pause
-- `automations_paused` flag on `BusinessProposal` stops all automated emails
-- Each Huey task checks this flag early and returns if paused
+### Shared Components (`components/ui/`)
+- `AnimalCard` — animal grid card with species emoji, badges
+- `ShelterCard` — shelter card with verified badge
+- `CampaignCard` — campaign card with progress bar
+- `AnimalGallery` — Swiper-based image gallery with fallback emoji
+- `EmptyState` — centered empty state with icon + message
+- `LoadingSpinner` — animated spinner with size variants
 
 ---
 
-## 6. Proposal System Specifics
-
-### Section Types Are Fixed
-- 12 section types defined in `ProposalSection.SectionType` choices
-- Each maps to a specific Vue component in `components/BusinessProposal/`
-- Unique together constraint: `(proposal, section_type)` — one of each per proposal
-
-### Heat Score (1-10)
-- Pre-computed and cached in `cached_heat_score` field
-- Updated by tracking endpoint and periodic task (`refresh_all_heat_scores`)
-- Based on: view count, section time, recency, engagement patterns
-
-### Change Log Types
-- 20+ change types in `ProposalChangeLog.ChangeType`
-- Includes: created, updated, sent, viewed, accepted, rejected, resent, expired, duplicated, commented, negotiating, reengagement, call, meeting, followup, note, calc_confirmed, calc_abandoned, auto_archived, status_change, cond_accepted, calc_followup
-
----
-
-## 7. Testing Insights
+## 5. Testing Insights
 
 ### Backend conftest.py
-- Custom coverage report with Unicode progress bars replaces default pytest-cov output
+- Custom coverage report with Unicode progress bars
 - `api_client` fixture provides unauthenticated DRF APIClient
-- Content tests have their own `conftest.py` with model-specific fixtures
+- `authenticated_user` and `admin_user` fixtures for auth tests
+- Coverage hooks auto-generate top-10 uncovered files report
+
+### Stale Template References (Lesson Learned)
+- When transforming from a template project, **ALL** test files must be audited
+- Not just test files for deleted models — also helpers, utilities, conftest fixtures
+- `Role.CUSTOMER` → `Role.ADOPTER` was missed in two test files despite model being correct
+- The `urls.py` file path changed to `urls/__init__.py` and the test was not updated
 
 ### E2E Flow Definitions
-- Every navigation flow must be registered in `docs/USER_FLOW_MAP.md` and `frontend/e2e/flow-definitions.json`
-- E2E tests must reflect real user integrations
-- Follow quality standards from `docs/TESTING_QUALITY_STANDARDS.md`
+- 43 flows defined in `frontend/e2e/flow-definitions.json`
+- Mirror copy in `docs/e2e-flow-definitions.json` (keep in sync)
+- Every E2E test must have `@flow:<flow-id>` tag
+- Flow definitions document includes priority (P1–P4) and role
 
-### CI Sharding
-- Playwright E2E tests are sharded into 5 parallel jobs
-- Blob reports are merged after all shards complete
+### CI Pipeline
+- Playwright E2E tests sharded into 5 parallel jobs
+- Blob reports merged after all shards complete
 - Test quality gate runs after all test suites pass
+- Coverage reports generated for both backend and frontend

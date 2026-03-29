@@ -1,0 +1,70 @@
+{% extends "emails/base_email.html" %}
+
+{% block title %}Nueva Postulacion de Voluntario - Mi Huella{% endblock %}
+{% block header_subtitle %}Notificacion del equipo{% endblock %}
+
+{% block content %}
+<h2 style="margin: 0 0 16px; font-size: 22px; font-weight: 700; color: #1C1917;">
+  Nueva postulacion de voluntario
+</h2>
+
+<p style="margin: 0 0 24px; font-size: 15px; color: #57534E; line-height: 1.6;">
+  Se ha recibido una nueva postulacion para el equipo de voluntarios. Aqui estan los detalles:
+</p>
+
+<!-- Details table -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #E7E5E4; border-radius: 12px; overflow: hidden;">
+  <tr style="background-color: #F5F5F4;">
+    <td style="padding: 12px 16px; font-size: 13px; font-weight: 600; color: #78716C; width: 140px; border-bottom: 1px solid #E7E5E4;">
+      Posicion
+    </td>
+    <td style="padding: 12px 16px; font-size: 14px; color: #1C1917; border-bottom: 1px solid #E7E5E4;">
+      {{ application.position.title_es }}
+    </td>
+  </tr>
+  <tr>
+    <td style="padding: 12px 16px; font-size: 13px; font-weight: 600; color: #78716C; border-bottom: 1px solid #E7E5E4;">
+      Nombre
+    </td>
+    <td style="padding: 12px 16px; font-size: 14px; color: #1C1917; border-bottom: 1px solid #E7E5E4;">
+      {{ application.first_name }} {{ application.last_name }}
+    </td>
+  </tr>
+  <tr style="background-color: #F5F5F4;">
+    <td style="padding: 12px 16px; font-size: 13px; font-weight: 600; color: #78716C; border-bottom: 1px solid #E7E5E4;">
+      Email
+    </td>
+    <td style="padding: 12px 16px; font-size: 14px; color: #1C1917; border-bottom: 1px solid #E7E5E4;">
+      <a href="mailto:{{ application.email }}" style="color: #0D9488; text-decoration: none;">{{ application.email }}</a>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding: 12px 16px; font-size: 13px; font-weight: 600; color: #78716C; border-bottom: 1px solid #E7E5E4;">
+      Telefono
+    </td>
+    <td style="padding: 12px 16px; font-size: 14px; color: #1C1917; border-bottom: 1px solid #E7E5E4;">
+      {{ application.phone }}
+    </td>
+  </tr>
+  <tr style="background-color: #F5F5F4;">
+    <td style="padding: 12px 16px; font-size: 13px; font-weight: 600; color: #78716C; border-bottom: 1px solid #E7E5E4;">
+      Ubicacion
+    </td>
+    <td style="padding: 12px 16px; font-size: 14px; color: #1C1917; border-bottom: 1px solid #E7E5E4;">
+      {{ application.city }}, {{ application.country }}
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" style="padding: 16px; border-bottom: none;">
+      <p style="margin: 0 0 8px; font-size: 13px; font-weight: 600; color: #78716C;">Motivacion:</p>
+      <p style="margin: 0; font-size: 14px; color: #44403C; line-height: 1.6; background-color: #FAFAF9; padding: 12px; border-radius: 8px;">
+        {{ application.motivation }}
+      </p>
+    </td>
+  </tr>
+</table>
+
+<p style="margin: 24px 0 0; font-size: 13px; color: #A8A29E; line-height: 1.6;">
+  Puedes revisar y gestionar esta postulacion desde el panel de administracion de Mi Huella.
+</p>
+{% endblock %}

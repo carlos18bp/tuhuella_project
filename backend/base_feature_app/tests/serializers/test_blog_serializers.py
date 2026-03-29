@@ -1,108 +1,86 @@
-import io
-
 import pytest
-from django.conf import settings as django_settings
-from django.core.files.base import ContentFile
-from django_attachments.models import Attachment, Library
-from PIL import Image
-from rest_framework.test import APIRequestFactory
+from rest_framework.exceptions import ValidationError as DRFValidationError
 
-from base_feature_app.models import Blog
-from base_feature_app.serializers.blog import BlogSerializer
-from base_feature_app.serializers.blog_detail import BlogDetailSerializer
-from base_feature_app.serializers.blog_list import BlogListSerializer
+from base_feature_app.serializers.blog import (
+    BlogPostCreateUpdateSerializer,
+    _validate_content_json,
+)
 
-
-def _placeholder_image(name='placeholder.webp'):
-    image = Image.new('RGB', (10, 10), color=(240, 240, 240))
-    buffer = io.BytesIO()
-    image.save(buffer, format='WEBP')
-    buffer.seek(0)
-    return ContentFile(buffer.read(), name=name)
+# ── Sources validation ───────────────────────────────────────────────────────
 
 
 @pytest.mark.django_db
-def test_blog_list_serializer_includes_absolute_image_url():
-    library = Library.objects.create(title='Blog Image')
-    Attachment.objects.create(library=library, file=_placeholder_image(), original_name='placeholder.webp', rank=0)
-    blog = Blog.objects.create(title='T', description='D', category='C', image=library)
-
-    factory = APIRequestFactory()
-    request = factory.get('/api/blogs/')
-
-    serializer = BlogListSerializer(blog, context={'request': request})
-    assert serializer.data['image_url'].startswith('http://testserver/')
+def test_validate_sources_rejects_non_list():
+    """Non-list sources value raises validation error."""
+    serializer = BlogPostCreateUpdateSerializer(data={
+        'title_es': 'Test', 'sources': 'not a list',
+    })
+    assert not serializer.is_valid()
+    assert 'sources' in serializer.errors
 
 
 @pytest.mark.django_db
-def test_blog_list_serializer_returns_none_without_request():
-    library = Library.objects.create(title='Blog Image')
-    blog = Blog.objects.create(title='T', description='D', category='C', image=library)
-
-    serializer = BlogListSerializer(blog)
-
-    assert serializer.data['image_url'] is None
-
-
-@pytest.mark.django_db
-def test_blog_serializer_returns_none_without_request():
-    library = Library.objects.create(title='Blog Image')
-    blog = Blog.objects.create(title='T', description='D', category='C', image=library)
-
-    serializer = BlogSerializer(blog)
-
-    assert serializer.data['image_url'] is None
+def test_validate_sources_rejects_non_dict_item():
+    """Non-dict item in sources raises validation error."""
+    serializer = BlogPostCreateUpdateSerializer(data={
+        'title_es': 'Test', 'sources': ['string'],
+    })
+    assert not serializer.is_valid()
+    assert 'sources' in serializer.errors
 
 
 @pytest.mark.django_db
-def test_blog_serializer_returns_none_without_attachment(monkeypatch, tmp_path):
-    monkeypatch.setattr(django_settings, 'MEDIA_ROOT', tmp_path)
-    library = Library.objects.create(title='Blog Image')
-    blog = Blog.objects.create(title='T', description='D', category='C', image=library)
-
-    factory = APIRequestFactory()
-    request = factory.get('/api/blogs/')
-
-    serializer = BlogSerializer(blog, context={'request': request})
-
-    assert serializer.data['image_url'] is None
+def test_validate_sources_rejects_missing_url_key():
+    """Source item without url key raises validation error."""
+    serializer = BlogPostCreateUpdateSerializer(data={
+        'title_es': 'Test', 'sources': [{'name': 'x'}],
+    })
+    assert not serializer.is_valid()
+    assert 'sources' in serializer.errors
 
 
 @pytest.mark.django_db
-def test_blog_detail_serializer_includes_image_url(monkeypatch, tmp_path):
-    monkeypatch.setattr(django_settings, 'MEDIA_ROOT', tmp_path)
-    library = Library.objects.create(title='Blog Image')
-    Attachment.objects.create(library=library, file=_placeholder_image(), original_name='placeholder.webp', rank=0)
-    blog = Blog.objects.create(title='T', description='D', category='C', image=library)
-
-    factory = APIRequestFactory()
-    request = factory.get('/api/blogs/')
-
-    serializer = BlogDetailSerializer(blog, context={'request': request})
-
-    assert serializer.data['image_url'].startswith('http://testserver/')
+def test_validate_sources_passes_valid_data():
+    """Valid sources data passes validation."""
+    serializer = BlogPostCreateUpdateSerializer(data={
+        'title_es': 'Test',
+        'sources': [{'name': 'Wikipedia', 'url': 'https://wikipedia.org'}],
+    })
+    serializer.is_valid()
+    assert 'sources' not in serializer.errors
 
 
-@pytest.mark.django_db
-def test_blog_detail_serializer_returns_none_without_request():
-    library = Library.objects.create(title='Blog Image')
-    blog = Blog.objects.create(title='T', description='D', category='C', image=library)
-
-    serializer = BlogDetailSerializer(blog)
-
-    assert serializer.data['image_url'] is None
+# ── Content JSON validation ──────────────────────────────────────────────────
 
 
-@pytest.mark.django_db
-def test_blog_serializer_includes_image_url(monkeypatch, tmp_path):
-    monkeypatch.setattr(django_settings, 'MEDIA_ROOT', tmp_path)
-    library = Library.objects.create(title='Blog Image')
-    Attachment.objects.create(library=library, file=_placeholder_image(), original_name='placeholder.webp', rank=0)
-    blog = Blog.objects.create(title='T', description='D', category='C', image=library)
+def test_validate_content_json_rejects_non_dict():
+    """Non-dict content_json raises validation error."""
+    with pytest.raises(DRFValidationError) as exc_info:
+        _validate_content_json('not a dict')
+    assert 'JSON object' in str(exc_info.value)
 
-    factory = APIRequestFactory()
-    request = factory.get('/api/blogs/')
 
-    serializer = BlogSerializer(blog, context={'request': request})
+def test_validate_content_json_rejects_missing_intro():
+    """Content missing intro key raises validation error."""
+    with pytest.raises(DRFValidationError) as exc_info:
+        _validate_content_json({'sections': []})
+    assert 'intro' in str(exc_info.value)
 
-    assert serializer.data['image_url'].startswith('http://testserver/')
+
+def test_validate_content_json_rejects_section_without_heading():
+    """Section without heading key raises validation error."""
+    with pytest.raises(DRFValidationError) as exc_info:
+        _validate_content_json({
+            'intro': 'Introduction text',
+            'sections': [{'content': 'No heading here'}],
+        })
+    assert 'heading' in str(exc_info.value)
+
+
+def test_validate_content_json_passes_valid_structure():
+    """Valid content_json structure passes without error."""
+    result = _validate_content_json({
+        'intro': 'Introduction',
+        'sections': [{'heading': 'Section 1', 'content': 'Body text'}],
+    })
+    assert result['intro'] == 'Introduction'

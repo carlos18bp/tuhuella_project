@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 def test_user_default_role_customer():
     User = get_user_model()
     user = User.objects.create_user(email='user@example.com', password='pass1234')
-    assert user.role == User.Role.CUSTOMER
+    assert user.role == User.Role.ADOPTER
 
 
 @pytest.mark.django_db
