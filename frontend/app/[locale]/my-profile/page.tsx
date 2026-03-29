@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import {
   User as UserIcon, Mail, Shield, MapPin, Phone, FileText, DollarSign,
   Heart, Users, ChevronRight, Calendar, Pencil,
-  Clock, HandHeart, MailOpen,
+  Clock, HandHeart, MailOpen, Bell, HelpCircle, Briefcase, Megaphone, ScrollText,
 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
@@ -197,6 +197,41 @@ export default function MiPerfilPage() {
       icon: Users,
       color: 'text-teal-600 bg-teal-50 dark:bg-teal-900/20',
       intentStatus: stats?.adopter_intent?.status,
+    },
+    {
+      label: t('notifications'),
+      desc: t('notificationsDesc'),
+      href: ROUTES.MY_NOTIFICATIONS,
+      icon: Bell,
+      color: 'text-violet-600 bg-violet-50 dark:bg-violet-900/20',
+    },
+    {
+      label: t('campaigns'),
+      desc: t('campaignsDesc'),
+      href: ROUTES.CAMPAIGNS,
+      icon: Megaphone,
+      color: 'text-orange-500 bg-orange-50 dark:bg-orange-900/20',
+    },
+    {
+      label: t('workWithUs'),
+      desc: t('workWithUsDesc'),
+      href: ROUTES.WORK_WITH_US,
+      icon: Briefcase,
+      color: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20',
+    },
+    {
+      label: t('faq'),
+      desc: t('faqDesc'),
+      href: ROUTES.FAQ,
+      icon: HelpCircle,
+      color: 'text-sky-600 bg-sky-50 dark:bg-sky-900/20',
+    },
+    {
+      label: t('terms'),
+      desc: t('termsDesc'),
+      href: ROUTES.TERMS,
+      icon: ScrollText,
+      color: 'text-slate-500 bg-slate-50 dark:bg-slate-800/40',
     },
   ];
 

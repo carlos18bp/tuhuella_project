@@ -440,7 +440,17 @@
     "daysAgo": "{days} days ago",
     "monthsAgo": "{months} months ago",
     "shelterInvites": "You have {count} pending shelter invitation(s)",
-    "viewInvites": "View invitations"
+    "viewInvites": "View invitations",
+    "notifications": "Notifications",
+    "notificationsDesc": "Check your alerts and platform updates",
+    "faq": "Frequently Asked Questions",
+    "faqDesc": "Resolve your doubts about adoption, donations and more",
+    "workWithUs": "Work With Us",
+    "workWithUsDesc": "Join as a volunteer and be part of our mission",
+    "campaigns": "Active Campaigns",
+    "campaignsDesc": "Support open fundraising campaigns from shelters",
+    "terms": "Terms & Conditions",
+    "termsDesc": "Review the terms of use of the platform"
   },
   "myApplications": {
     "title": "My Adoption Applications",

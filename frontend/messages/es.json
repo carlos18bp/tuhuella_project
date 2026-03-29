@@ -440,7 +440,17 @@
     "daysAgo": "Hace {days} días",
     "monthsAgo": "Hace {months} meses",
     "shelterInvites": "Tienes {count} invitación(es) de refugios pendientes",
-    "viewInvites": "Ver invitaciones"
+    "viewInvites": "Ver invitaciones",
+    "notifications": "Notificaciones",
+    "notificationsDesc": "Revisa tus alertas y novedades de la plataforma",
+    "faq": "Preguntas Frecuentes",
+    "faqDesc": "Resuelve tus dudas sobre adopción, donaciones y más",
+    "workWithUs": "Trabaja con Nosotros",
+    "workWithUsDesc": "Únete como voluntario y sé parte de nuestra misión",
+    "campaigns": "Campañas Activas",
+    "campaignsDesc": "Apoya las campañas abiertas de los refugios",
+    "terms": "Términos y Condiciones",
+    "termsDesc": "Consulta los términos de uso de la plataforma"
   },
   "myApplications": {
     "title": "Mis Solicitudes de Adopción",
