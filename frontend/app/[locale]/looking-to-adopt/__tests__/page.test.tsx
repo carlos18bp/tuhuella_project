@@ -3,6 +3,7 @@ import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 
 jest.mock('@/components/ui', () => ({
+  Container: ({ children, className }: any) => <div className={className}>{children}</div>,
   FAQAccordion: ({ title }: any) => <div data-testid="faq-accordion">{title}</div>,
 }));
 

@@ -73,7 +73,7 @@ export default function AdoptPage() {
 
   if (success) {
     return (
-      <div className="mx-auto max-w-2xl px-6 py-16 text-center">
+      <div className="mx-auto max-w-2xl px-6 py-10 md:py-16 text-center">
         <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mx-auto">
           <CheckCircle2 className="h-8 w-8 text-emerald-500" />
         </div>

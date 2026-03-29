@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 
 import { useShelterStore } from '@/lib/stores/shelterStore';
-import { ShelterCard, EmptyState, FAQAccordion } from '@/components/ui';
+import { Container, ShelterCard, EmptyState, FAQAccordion } from '@/components/ui';
 import { useFAQsByTopic } from '@/lib/hooks/useFAQs';
 
 export default function RefugiosPage() {
@@ -21,8 +21,8 @@ export default function RefugiosPage() {
   }, [fetchShelters, locale]);
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <h1 className="text-3xl font-bold text-text-primary heading-decorated">{t('title')}</h1>
+    <Container className="py-10">
+      <h1 className="text-2xl sm:text-3xl font-bold text-text-primary heading-decorated">{t('title')}</h1>
       <p className="mt-2 text-text-tertiary">{t('subtitle')}</p>
 
       <div className="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -48,6 +48,6 @@ export default function RefugiosPage() {
           subtitle={t('faqSubtitle')}
         />
       )}
-    </div>
+    </Container>
   );
 }

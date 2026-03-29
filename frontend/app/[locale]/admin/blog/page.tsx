@@ -97,9 +97,9 @@ export default function AdminBlogListPage() {
         </div>
       )}
 
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-text-primary">Blog Posts</h1>
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-8">
+        <h1 className="text-xl sm:text-2xl font-bold text-text-primary">Blog Posts</h1>
+        <div className="flex items-center gap-2 sm:gap-3">
           <Link href={ROUTES.ADMIN_BLOG_CALENDAR} className="inline-flex items-center gap-2 px-4 py-2.5 border border-border-primary text-text-secondary rounded-xl font-medium text-sm hover:bg-surface-hover transition-colors">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
             Calendario
@@ -177,7 +177,7 @@ export default function AdminBlogListPage() {
           </div>
 
           {adminPagination.totalPages > 1 && (
-            <div className="flex items-center justify-between px-6 py-3 mt-4">
+            <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-2 px-4 sm:px-6 py-3 mt-4">
               <span className="text-xs text-text-quaternary">{adminPagination.count} posts · Página {adminPagination.page} de {adminPagination.totalPages}</span>
               <div className="flex gap-1">
                 <button type="button" disabled={adminPagination.page <= 1} className="px-3 py-1.5 rounded-lg text-xs font-medium border border-border-primary hover:bg-surface-hover disabled:opacity-40" onClick={() => goToPage(adminPagination.page - 1)}>← Anterior</button>

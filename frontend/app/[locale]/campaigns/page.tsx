@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 
 import { useCampaignStore } from '@/lib/stores/campaignStore';
-import { CampaignCard, EmptyState, FAQAccordion } from '@/components/ui';
+import { CampaignCard, Container, EmptyState, FAQAccordion } from '@/components/ui';
 import { useFAQsByTopic } from '@/lib/hooks/useFAQs';
 
 export default function CampanasPage() {
@@ -23,8 +23,8 @@ export default function CampanasPage() {
   }, [fetchCampaigns, locale, activeTab]);
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <h1 className="text-3xl font-bold text-text-primary heading-decorated-amber">{t('title')}</h1>
+    <Container className="py-10">
+      <h1 className="text-2xl sm:text-3xl font-bold text-text-primary heading-decorated-amber">{t('title')}</h1>
       <p className="mt-2 text-text-tertiary">{t('subtitle')}</p>
 
       {/* Tabs */}
@@ -75,6 +75,6 @@ export default function CampanasPage() {
           subtitle={t('faqSubtitle')}
         />
       )}
-    </div>
+    </Container>
   );
 }

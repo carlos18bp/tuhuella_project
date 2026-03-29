@@ -72,7 +72,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <main className="min-h-[calc(100vh-72px)] flex items-center justify-center px-6 py-12 bg-gradient-to-b from-surface-secondary to-surface-tertiary/50">
-      <div className="w-full max-w-md bg-surface-primary border border-border-primary rounded-2xl p-8 shadow-sm">
+      <div className="w-full max-w-md bg-surface-primary border border-border-primary rounded-2xl p-6 sm:p-8 shadow-sm">
         <div className="flex items-center gap-2 mb-6">
           <div className="h-10 w-10 rounded-xl bg-teal-50 flex items-center justify-center">
             <PawPrint className="h-5 w-5 text-teal-600" />

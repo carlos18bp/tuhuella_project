@@ -79,7 +79,7 @@ export default function AdminDashboardPage() {
           <Shield className="h-5 w-5 text-amber-600" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-text-primary">Panel de Administración</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Panel de Administración</h1>
           <p className="text-sm text-text-tertiary">Vista general de la plataforma Tu Huella</p>
         </div>
       </div>

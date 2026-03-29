@@ -21,7 +21,7 @@ function ConfirmacionContent() {
         <CheckCircle2 className="w-8 h-8 text-emerald-600" />
       </div>
 
-      <h1 className="mt-6 text-3xl font-bold text-text-primary">
+      <h1 className="mt-6 text-2xl sm:text-3xl font-bold text-text-primary">
         {isSponsorship ? 'Apadrinamiento registrado' : 'Donación registrada'}
       </h1>
 

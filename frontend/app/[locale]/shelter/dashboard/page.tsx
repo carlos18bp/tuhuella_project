@@ -125,7 +125,7 @@ export default function ShelterDashboardPage() {
             <LayoutDashboard className="h-5 w-5 text-teal-600" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-text-primary">{shelter.name}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">{shelter.name}</h1>
             <div className="flex items-center gap-1 mt-0.5 text-sm text-text-tertiary">
               <MapPin className="h-3.5 w-3.5 text-text-quaternary" />
               {shelter.city}
@@ -141,7 +141,7 @@ export default function ShelterDashboardPage() {
       {metrics && (
         <div className="mt-8">
           <h2 className="text-sm font-semibold text-text-tertiary uppercase tracking-wide mb-4">{t('shelterOverview')}</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {metricCards.map((card) => (
               <MetricCard key={card.label} {...card} />
             ))}
@@ -152,7 +152,7 @@ export default function ShelterDashboardPage() {
       <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {navItems.map((item) => (
           <Link key={item.href} href={item.href}
-            className="rounded-2xl border border-border-primary bg-surface-primary p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
+            className="rounded-2xl border border-border-primary bg-surface-primary p-5 md:p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold text-text-primary group-hover:text-teal-700 transition-colors">{item.label}</h3>
               <ChevronRight className="h-4 w-4 text-text-quaternary group-hover:text-teal-600 group-hover:translate-x-0.5 transition-all" />

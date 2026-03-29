@@ -2,6 +2,7 @@
 
 import { Link } from '@/i18n/navigation';
 import { Heart, Shield, Users, Target, Code, Stethoscope, PawPrint, ArrowRight } from 'lucide-react';
+import { Container } from '@/components/ui';
 import { ROUTES } from '@/lib/constants';
 
 export default function AboutPage() {
@@ -9,7 +10,7 @@ export default function AboutPage() {
     <>
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-border-primary bg-gradient-to-b from-surface-secondary via-teal-50/20 to-surface-secondary">
-        <div className="mx-auto max-w-[1400px] px-6 py-20 md:py-28 text-center">
+        <Container className="py-12 md:py-20 lg:py-28 text-center">
           <p className="inline-flex items-center text-xs font-medium text-teal-700 bg-teal-50 border border-teal-200 rounded-full px-3 py-1">
             Nosotros
           </p>
@@ -17,18 +18,18 @@ export default function AboutPage() {
             Conectamos corazones <br />
             <span className="text-teal-600">con quienes más lo necesitan</span>
           </h1>
-          <p className="mt-6 text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-6 text-base md:text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">
             Tu Huella nació de la convicción de que la tecnología puede transformar
             la manera en que cuidamos a los animales. Somos el puente entre refugios
             y personas comprometidas con dar un hogar o apoyar a un animal.
           </p>
-        </div>
+        </Container>
       </section>
 
       {/* Mission & Values */}
-      <section className="py-16">
-        <div className="mx-auto max-w-[1400px] px-6">
-          <div className="text-center mb-12">
+      <section className="py-10 md:py-16">
+        <Container>
+          <div className="text-center mb-8 md:mb-12">
             <h2 className="text-2xl font-bold text-text-primary heading-decorated-center">Nuestra misión</h2>
             <p className="mt-3 text-text-secondary max-w-2xl mx-auto leading-relaxed">
               Crear un punto de encuentro confiable entre refugios y personas — adoptantes,
@@ -75,35 +76,35 @@ export default function AboutPage() {
               </p>
             </div>
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* What we solve */}
-      <section className="py-16 bg-surface-tertiary/50 border-y border-border-primary">
-        <div className="mx-auto max-w-[1400px] px-6">
-          <div className="text-center mb-12">
+      <section className="py-10 md:py-16 bg-surface-tertiary/50 border-y border-border-primary">
+        <Container>
+          <div className="text-center mb-8 md:mb-12">
             <h2 className="text-2xl font-bold text-text-primary heading-decorated-center">El problema que resolvemos</h2>
             <p className="mt-3 text-text-secondary max-w-xl mx-auto">
               En Colombia y Latinoamérica, miles de animales esperan en refugios con recursos limitados
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <div className="bg-surface-primary rounded-2xl border border-border-primary p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-4xl mx-auto">
+            <div className="bg-surface-primary rounded-2xl border border-border-primary p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
               <h3 className="font-semibold text-text-primary">Poca visibilidad</h3>
               <p className="mt-2 text-sm text-text-tertiary leading-relaxed">
                 Muchos refugios pequeños operan sin presencia digital, perdiendo oportunidades de adopción
                 y donación. Les damos las herramientas para profesionalizar su alcance.
               </p>
             </div>
-            <div className="bg-surface-primary rounded-2xl border border-border-primary p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+            <div className="bg-surface-primary rounded-2xl border border-border-primary p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
               <h3 className="font-semibold text-text-primary">Información dispersa</h3>
               <p className="mt-2 text-sm text-text-tertiary leading-relaxed">
                 No existía un lugar central con información confiable sobre animales en adopción.
                 Tu Huella centraliza todo en una sola plataforma verificada.
               </p>
             </div>
-            <div className="bg-surface-primary rounded-2xl border border-border-primary p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+            <div className="bg-surface-primary rounded-2xl border border-border-primary p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
               <h3 className="font-semibold text-text-primary">Donaciones informales</h3>
               <p className="mt-2 text-sm text-text-tertiary leading-relaxed">
                 La ayuda económica se perdía sin trazabilidad ni confianza. Con Tu Huella, cada
@@ -111,29 +112,29 @@ export default function AboutPage() {
               </p>
             </div>
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* Partners */}
-      <section className="py-16">
-        <div className="mx-auto max-w-[1400px] px-6">
-          <div className="text-center mb-12">
+      <section className="py-10 md:py-16">
+        <Container>
+          <div className="text-center mb-8 md:mb-12">
             <h2 className="text-2xl font-bold text-text-primary heading-decorated-center">Quiénes hacemos Tu Huella</h2>
             <p className="mt-3 text-text-secondary max-w-xl mx-auto">
               Un equipo comprometido con la tecnología y el bienestar animal
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
             {/* ProjectApp */}
             <div className="rounded-2xl border border-border-primary bg-surface-primary overflow-hidden shadow-sm hover:shadow-md transition-shadow">
               <div className="h-2 bg-gradient-to-r from-teal-500 to-teal-600" />
-              <div className="p-8">
+              <div className="p-5 md:p-8">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-teal-50 to-teal-100 flex items-center justify-center">
+                  <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-teal-50 to-teal-100 flex items-center justify-center shrink-0">
                     <Code className="h-7 w-7 text-teal-600" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <h3 className="text-lg font-bold text-text-primary">ProjectApp.co</h3>
                     <p className="text-sm text-text-tertiary">Diseño y desarrollo</p>
                   </div>
@@ -163,12 +164,12 @@ export default function AboutPage() {
             {/* Entre Especies */}
             <div className="rounded-2xl border border-border-primary bg-surface-primary overflow-hidden shadow-sm hover:shadow-md transition-shadow">
               <div className="h-2 bg-gradient-to-r from-emerald-500 to-emerald-600" />
-              <div className="p-8">
+              <div className="p-5 md:p-8">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center">
+                  <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center shrink-0">
                     <Stethoscope className="h-7 w-7 text-emerald-600" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <h3 className="text-lg font-bold text-text-primary">Entre Especies Veterinaria</h3>
                     <p className="text-sm text-text-tertiary">Aliado en bienestar animal</p>
                   </div>
@@ -186,12 +187,12 @@ export default function AboutPage() {
               </div>
             </div>
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* CTA */}
-      <section className="py-16 bg-gradient-to-b from-teal-50/40 to-background border-t border-border-primary">
-        <div className="mx-auto max-w-[1400px] px-6 text-center">
+      <section className="py-10 md:py-16 bg-gradient-to-b from-teal-50/40 to-background border-t border-border-primary">
+        <Container className="text-center">
           <div className="w-14 h-14 rounded-2xl bg-teal-100 flex items-center justify-center mx-auto">
             <PawPrint className="h-7 w-7 text-teal-600" />
           </div>
@@ -220,7 +221,7 @@ export default function AboutPage() {
               Explorar Refugios
             </Link>
           </div>
-        </div>
+        </Container>
       </section>
     </>
   );

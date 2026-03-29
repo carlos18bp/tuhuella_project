@@ -77,14 +77,14 @@ export default function NotificationPreferencesPage() {
             </h2>
             <div className="rounded-2xl border border-border-primary bg-surface-primary overflow-hidden divide-y divide-border-tertiary">
               {/* Header row */}
-              <div className="grid grid-cols-[1fr_80px_80px] px-5 py-3 bg-surface-secondary text-xs font-medium text-text-quaternary uppercase">
+              <div className="grid grid-cols-[1fr_60px_60px] sm:grid-cols-[1fr_80px_80px] px-5 py-3 bg-surface-secondary text-xs font-medium text-text-quaternary uppercase">
                 <span>{t('event')}</span>
                 {CHANNELS.map((ch) => (
                   <span key={ch} className="text-center">{t(`channel_${ch}`)}</span>
                 ))}
               </div>
               {group.events.map((eventKey) => (
-                <div key={eventKey} className="grid grid-cols-[1fr_80px_80px] px-5 py-3 items-center">
+                <div key={eventKey} className="grid grid-cols-[1fr_60px_60px] sm:grid-cols-[1fr_80px_80px] px-5 py-3 items-center">
                   <span className="text-sm text-text-secondary">{t(`events.${eventKey}`)}</span>
                   {CHANNELS.map((ch) => {
                     const pref = getPref(eventKey, ch);

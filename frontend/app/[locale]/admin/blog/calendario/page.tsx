@@ -87,7 +87,7 @@ export default function AdminBlogCalendarPage() {
         <Link href={ROUTES.ADMIN_BLOG} className="text-text-quaternary hover:text-text-secondary transition-colors">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
         </Link>
-        <h1 className="text-2xl font-bold text-text-primary">Calendario del Blog</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-text-primary">Calendario del Blog</h1>
       </div>
 
       <div className="flex items-center justify-between mb-6">
@@ -96,7 +96,7 @@ export default function AdminBlogCalendarPage() {
         <button type="button" onClick={nextMonth} className="px-3 py-2 rounded-lg border border-border-primary text-sm hover:bg-surface-hover transition-colors">Siguiente →</button>
       </div>
 
-      <div className="flex items-center gap-4 mb-4 text-xs text-text-tertiary">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mb-4 text-xs text-text-tertiary">
         {Object.entries(STATUS_LABELS).map(([key, label]) => (
           <div key={key} className="flex items-center gap-1.5">
             <div className={`w-2.5 h-2.5 rounded-full ${STATUS_COLORS[key]}`} />

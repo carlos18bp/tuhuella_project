@@ -10,7 +10,7 @@ import Image from 'next/image';
 import { useCampaignStore } from '@/lib/stores/campaignStore';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { useFAQsByTopic } from '@/lib/hooks/useFAQs';
-import { FAQAccordion } from '@/components/ui';
+import { Container, FAQAccordion } from '@/components/ui';
 import { API_ENDPOINTS, ROUTES } from '@/lib/constants';
 import { api } from '@/lib/services/http';
 
@@ -58,12 +58,14 @@ export default function CampaignDetailPage() {
 
   if (loading || !campaign) {
     return (
-      <div data-testid="loading-skeleton" className="mx-auto max-w-[1400px] px-6 py-10 space-y-4">
-        <div className="h-8 animate-shimmer rounded w-1/3" />
-        <div className="aspect-[21/9] animate-shimmer rounded-2xl" />
-        <div className="h-4 animate-shimmer rounded w-2/3" />
-        <div className="h-3 animate-shimmer rounded w-full mt-4" />
-      </div>
+      <Container className="py-10">
+        <div data-testid="loading-skeleton" className="space-y-4">
+          <div className="h-8 animate-shimmer rounded w-1/3" />
+          <div className="aspect-[21/9] animate-shimmer rounded-2xl" />
+          <div className="h-4 animate-shimmer rounded w-2/3" />
+          <div className="h-3 animate-shimmer rounded w-full mt-4" />
+        </div>
+      </Container>
     );
   }
 
@@ -71,7 +73,7 @@ export default function CampaignDetailPage() {
   const endsAt = formatDate(campaign.ends_at);
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
+    <Container className="py-10">
       <Link href={ROUTES.CAMPAIGNS} className="inline-flex items-center gap-1.5 text-sm text-amber-600 hover:text-amber-700 transition-colors">
         <ArrowLeft className="h-4 w-4" />
         {t('backToCampaigns')}
@@ -95,11 +97,11 @@ export default function CampaignDetailPage() {
         </div>
       )}
 
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-10">
+      <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10">
         {/* Content column */}
         <div className="lg:col-span-2">
           <p className="text-sm text-amber-600 font-medium">{campaign.shelter_name}</p>
-          <h1 className="text-3xl font-bold tracking-[-0.02em] text-text-primary mt-2">{campaign.title}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-[-0.02em] text-text-primary mt-2">{campaign.title}</h1>
 
           {(startsAt || endsAt) && (
             <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-text-tertiary">
@@ -172,7 +174,7 @@ export default function CampaignDetailPage() {
 
       {/* Evidence Gallery (for completed campaigns) */}
       {campaign.status === 'completed' && campaign.evidence_gallery_urls && campaign.evidence_gallery_urls.length > 0 && (
-        <div className="mt-16 border-t border-border-primary pt-10">
+        <div className="mt-10 md:mt-16 border-t border-border-primary pt-8 md:pt-10">
           <div className="flex items-center gap-2 mb-6">
             <Camera className="h-5 w-5 text-amber-600" />
             <div>
@@ -249,7 +251,7 @@ export default function CampaignDetailPage() {
 
       {/* Updates / Evidence feed — only for completed campaigns */}
       {campaign.status === 'completed' && updates.length > 0 && (
-        <div className="mt-16 border-t border-border-primary pt-10">
+        <div className="mt-10 md:mt-16 border-t border-border-primary pt-8 md:pt-10">
           <div className="flex items-center gap-2 mb-6">
             <FileText className="h-5 w-5 text-amber-600" />
             <h2 className="text-xl font-bold text-text-primary">{tUpdates('feedTitle')}</h2>
@@ -283,7 +285,7 @@ export default function CampaignDetailPage() {
 
       {/* FAQ section */}
       {faqItems.length > 0 && (
-        <div className="mt-16 border-t border-border-primary pt-2">
+        <div className="mt-10 md:mt-16 border-t border-border-primary pt-2">
           <FAQAccordion
             items={faqItems}
             title={tCommon('faq')}
@@ -291,6 +293,6 @@ export default function CampaignDetailPage() {
           />
         </div>
       )}
-    </div>
+    </Container>
   );
 }

@@ -19,6 +19,8 @@ jest.mock('@/lib/stores/authStore', () => ({ useAuthStore: jest.fn() }));
 jest.mock('@/components/ui', () => ({
   AnimalGallery: ({ name }: any) =>
     React.createElement('div', { 'data-testid': 'gallery' }, name),
+  Container: ({ children, className }: any) =>
+    React.createElement('div', { className }, children),
   FAQAccordion: () => null,
   SimilarAnimals: () =>
     React.createElement('div', { 'data-testid': 'similar-animals' }),

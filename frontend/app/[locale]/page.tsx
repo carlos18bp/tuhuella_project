@@ -13,7 +13,7 @@ import { Heart, Shield, Users, TrendingUp } from 'lucide-react';
 import { useAnimalStore } from '@/lib/stores/animalStore';
 import { useCampaignStore } from '@/lib/stores/campaignStore';
 import { useShelterStore } from '@/lib/stores/shelterStore';
-import { AnimalCard, CampaignCard, ShelterCard, FAQAccordion } from '@/components/ui';
+import { AnimalCard, CampaignCard, ShelterCard, FAQAccordion, CTASection, Container } from '@/components/ui';
 import { useScrollReveal } from '@/lib/hooks/useScrollReveal';
 import { useFAQsByTopic } from '@/lib/hooks/useFAQs';
 import { ROUTES } from '@/lib/constants';
@@ -49,7 +49,7 @@ export default function HomePage() {
     <>
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-border-primary bg-gradient-to-b from-surface-secondary via-teal-50/30 to-surface-secondary">
-        <div className="mx-auto max-w-[1400px] px-6 py-20 md:py-28">
+        <Container className="py-12 md:py-20 lg:py-28">
           <div className="max-w-3xl">
             <p className="inline-flex items-center text-xs font-medium text-teal-700 bg-teal-50 border border-teal-200 rounded-full px-3 py-1">
               {t('badge')}
@@ -59,7 +59,7 @@ export default function HomePage() {
               <br />
               <span className="text-teal-600">{t('titleAccent')}</span>
             </h1>
-            <p className="mt-6 text-lg text-text-secondary max-w-2xl leading-relaxed">
+            <p className="mt-6 text-base md:text-lg text-text-secondary max-w-2xl leading-relaxed">
               {t('subtitle')}
             </p>
 
@@ -84,7 +84,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <div className="mt-10 grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="mt-10 grid grid-cols-3 gap-3">
               <div className="rounded-2xl bg-surface-primary/80 border border-border-primary p-4 shadow-sm hover:shadow-md transition-shadow">
                 <p className="text-xs text-text-tertiary">{t('statAdoptionLabel')}</p>
                 <p className="mt-1 text-sm font-semibold text-text-primary">{t('statAdoption')}</p>
@@ -99,22 +99,18 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* Featured Animals Carousel */}
-      <section className="py-16">
-        <div className="mx-auto max-w-[1400px] px-6">
-          <div className="flex items-end justify-between mb-8">
-            <div>
-              <h2 className="text-2xl font-bold text-text-primary heading-decorated">{t('featuredTitle')}</h2>
-              <p className="mt-1 text-text-tertiary">{t('featuredSubtitle')}</p>
-            </div>
-            <Link href={ROUTES.ANIMALS} className="text-sm text-teal-600 hover:text-teal-700 font-medium">
-              {t('viewAll')} &rarr;
-            </Link>
-          </div>
-
+      <section className="py-10 md:py-16">
+        <CTASection
+          title={t('featuredTitle')}
+          subtitle={t('featuredSubtitle')}
+          linkHref={ROUTES.ANIMALS}
+          linkLabel={t('viewAll')}
+          decorated
+        >
           {featuredAnimals.length > 0 ? (
             <Swiper
               modules={[Navigation, Pagination, Autoplay]}
@@ -148,19 +144,19 @@ export default function HomePage() {
               ))}
             </div>
           )}
-        </div>
+        </CTASection>
       </section>
 
       {/* How It Works */}
-      <section className="py-16 bg-gradient-to-b from-stone-100/60 via-stone-50/30 to-stone-100/60 border-y border-border-primary">
-        <div className="mx-auto max-w-[1400px] px-6 text-center">
+      <section className="py-10 md:py-16 bg-gradient-to-b from-stone-100/60 via-stone-50/30 to-stone-100/60 border-y border-border-primary">
+        <Container className="text-center">
           <h2 className="text-2xl font-bold text-text-primary heading-decorated-center">{t('howTitle')}</h2>
           <p className="mt-2 text-text-tertiary max-w-lg mx-auto">
             {t('howSubtitle')}
           </p>
 
-          <div ref={stepsRef} className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-surface-primary rounded-2xl border border-border-primary p-8 shadow-sm hover:shadow-md transition-shadow">
+          <div ref={stepsRef} className="mt-8 md:mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-surface-primary rounded-2xl border border-border-primary p-5 md:p-8 shadow-sm hover:shadow-md transition-shadow">
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-50 to-teal-100 text-teal-600 flex items-center justify-center text-xl font-bold mx-auto">
                 1
               </div>
@@ -169,7 +165,7 @@ export default function HomePage() {
                 {t('step1Desc')}
               </p>
             </div>
-            <div className="bg-surface-primary rounded-2xl border border-border-primary p-8 shadow-sm hover:shadow-md transition-shadow">
+            <div className="bg-surface-primary rounded-2xl border border-border-primary p-5 md:p-8 shadow-sm hover:shadow-md transition-shadow">
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100 text-amber-600 flex items-center justify-center text-xl font-bold mx-auto">
                 2
               </div>
@@ -178,7 +174,7 @@ export default function HomePage() {
                 {t('step2Desc')}
               </p>
             </div>
-            <div className="bg-surface-primary rounded-2xl border border-border-primary p-8 shadow-sm hover:shadow-md transition-shadow">
+            <div className="bg-surface-primary rounded-2xl border border-border-primary p-5 md:p-8 shadow-sm hover:shadow-md transition-shadow">
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-600 flex items-center justify-center text-xl font-bold mx-auto">
                 3
               </div>
@@ -188,23 +184,20 @@ export default function HomePage() {
               </p>
             </div>
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* Active Campaigns Carousel */}
       {activeCampaigns.length > 0 && (
-        <section className="py-16">
-          <div className="mx-auto max-w-[1400px] px-6">
-            <div className="flex items-end justify-between mb-8">
-              <div>
-                <h2 className="text-2xl font-bold text-text-primary heading-decorated">{t('campaignsTitle')}</h2>
-                <p className="mt-1 text-text-tertiary">{t('campaignsSubtitle')}</p>
-              </div>
-              <Link href={ROUTES.CAMPAIGNS} className="text-sm text-amber-600 hover:text-amber-700 font-medium">
-                {t('viewAllFeminine')} &rarr;
-              </Link>
-            </div>
-
+        <section className="py-10 md:py-16">
+          <CTASection
+            title={t('campaignsTitle')}
+            subtitle={t('campaignsSubtitle')}
+            linkHref={ROUTES.CAMPAIGNS}
+            linkLabel={t('viewAllFeminine')}
+            linkColor="text-amber-600 hover:text-amber-700"
+            decorated
+          >
             <Swiper
               modules={[Navigation, Pagination, Autoplay]}
               spaceBetween={24}
@@ -224,14 +217,14 @@ export default function HomePage() {
                 </SwiperSlide>
               ))}
             </Swiper>
-          </div>
+          </CTASection>
         </section>
       )}
 
       {/* Why Adopt — Value Content */}
-      <section className="py-16 bg-gradient-to-b from-stone-100/60 via-stone-50/30 to-stone-100/60 border-y border-border-primary">
-        <div className="mx-auto max-w-[1400px] px-6">
-          <div className="text-center mb-12">
+      <section className="py-10 md:py-16 bg-gradient-to-b from-stone-100/60 via-stone-50/30 to-stone-100/60 border-y border-border-primary">
+        <Container>
+          <div className="text-center mb-8 md:mb-12">
             <h2 className="text-2xl font-bold text-text-primary heading-decorated-center">{t('whyAdoptTitle')}</h2>
             <p className="mt-2 text-text-tertiary max-w-lg mx-auto">
               {t('whyAdoptSubtitle')}
@@ -276,29 +269,26 @@ export default function HomePage() {
               </p>
             </div>
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* Shelter Spotlight */}
       {featuredShelters.length > 0 && (
-        <section className="py-16">
-          <div className="mx-auto max-w-[1400px] px-6">
-            <div className="flex items-end justify-between mb-8">
-              <div>
-                <h2 className="text-2xl font-bold text-text-primary heading-decorated">{t('sheltersTitle')}</h2>
-                <p className="mt-1 text-text-tertiary">{t('sheltersSubtitle')}</p>
-              </div>
-              <Link href={ROUTES.SHELTERS} className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
-                {t('viewAll')} &rarr;
-              </Link>
-            </div>
-
+        <section className="py-10 md:py-16">
+          <CTASection
+            title={t('sheltersTitle')}
+            subtitle={t('sheltersSubtitle')}
+            linkHref={ROUTES.SHELTERS}
+            linkLabel={t('viewAll')}
+            linkColor="text-emerald-600 hover:text-emerald-700"
+            decorated
+          >
             <div ref={sheltersGridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredShelters.map((shelter) => (
                 <ShelterCard key={shelter.id} shelter={shelter} />
               ))}
             </div>
-          </div>
+          </CTASection>
         </section>
       )}
 

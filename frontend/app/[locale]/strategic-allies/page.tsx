@@ -6,6 +6,7 @@ import { ExternalLink } from 'lucide-react';
 
 import { api } from '@/lib/services/http';
 import { API_ENDPOINTS } from '@/lib/constants';
+import { Container } from '@/components/ui';
 import type { StrategicAlly } from '@/lib/types';
 
 export default function StrategicAlliesPage() {
@@ -23,8 +24,8 @@ export default function StrategicAlliesPage() {
   }, [locale]);
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <h1 className="text-3xl font-bold text-text-primary heading-decorated">{t('title')}</h1>
+    <Container className="py-10">
+      <h1 className="text-2xl sm:text-3xl font-bold text-text-primary heading-decorated">{t('title')}</h1>
       <p className="mt-2 text-text-tertiary max-w-2xl">{t('subtitle')}</p>
 
       {loading ? (
@@ -38,7 +39,7 @@ export default function StrategicAlliesPage() {
       ) : (
         <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {allies.map((ally) => (
-            <div key={ally.id} className="rounded-2xl border border-border-primary bg-surface-primary p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div key={ally.id} className="rounded-2xl border border-border-primary bg-surface-primary p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center gap-4 mb-4">
                 {ally.logo_url ? (
                   <img src={ally.logo_url} alt={ally.name} className="h-14 w-14 rounded-xl object-cover flex-shrink-0" />
@@ -72,6 +73,6 @@ export default function StrategicAlliesPage() {
           ))}
         </div>
       )}
-    </div>
+    </Container>
   );
 }

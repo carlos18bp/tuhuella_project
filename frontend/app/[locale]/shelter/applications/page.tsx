@@ -35,7 +35,7 @@ export default function ShelterSolicitudesPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <h1 className="text-3xl font-bold text-text-primary">Solicitudes de Adopción</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Solicitudes de Adopción</h1>
       <p className="mt-1 text-text-tertiary">Revisa y gestiona las solicitudes recibidas</p>
 
       {loading ? (

@@ -72,7 +72,7 @@ export default function MisApadrinamientosPage() {
           <HeartHandshake className="h-5 w-5 text-red-500" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-text-primary">
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">
             {t('title')}{sponsorships.length > 0 && ` (${sponsorships.length})`}
           </h1>
           <p className="text-sm text-text-tertiary">{t('subtitle')}</p>

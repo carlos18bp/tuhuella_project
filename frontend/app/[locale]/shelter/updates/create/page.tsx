@@ -86,10 +86,10 @@ export default function ShelterUpdateCreatePage() {
         {t('backToUpdates')}
       </Link>
 
-      <h1 className="text-2xl font-bold text-text-primary">{t('createTitle')}</h1>
+      <h1 className="text-xl sm:text-2xl font-bold text-text-primary">{t('createTitle')}</h1>
       <p className="mt-1 text-text-tertiary text-sm">{t('createSubtitle')}</p>
 
-      <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+      <form onSubmit={handleSubmit} className="mt-6 sm:mt-8 space-y-5 sm:space-y-6">
         <div>
           <label className="block text-sm font-medium text-text-secondary">{t('fieldTitleEs')} <span className="text-red-400">*</span></label>
           <input type="text" value={titleEs} onChange={(e) => setTitleEs(e.target.value)} className={inputClasses} required />

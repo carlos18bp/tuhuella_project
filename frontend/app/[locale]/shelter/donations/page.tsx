@@ -21,7 +21,7 @@ export default function ShelterDonacionesPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <h1 className="text-3xl font-bold text-text-primary">Donaciones Recibidas</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Donaciones Recibidas</h1>
 
       {!loading && donations.length > 0 && (
         <div className="mt-4 inline-block rounded-xl bg-amber-50 border border-amber-200 px-4 py-2">
@@ -45,10 +45,10 @@ export default function ShelterDonacionesPage() {
         <div className="mt-8 space-y-4">
           {donations.map((donation) => (
             <div key={donation.id} className="rounded-xl border border-border-primary bg-surface-primary p-5">
-              <div className="flex items-center justify-between">
-                <div>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div className="min-w-0">
                   <p className="font-semibold text-text-primary">${Number(donation.amount).toLocaleString()}</p>
-                  <p className="text-sm text-text-tertiary mt-0.5">{donation.user_email}</p>
+                  <p className="text-sm text-text-tertiary mt-0.5 truncate">{donation.user_email}</p>
                   {donation.campaign_title && (
                     <p className="text-xs text-amber-600 mt-0.5">Campaña: {donation.campaign_title}</p>
                   )}
@@ -56,7 +56,7 @@ export default function ShelterDonacionesPage() {
                     <p className="text-sm text-text-secondary mt-2 bg-surface-secondary rounded-lg p-2">&ldquo;{donation.message}&rdquo;</p>
                   )}
                 </div>
-                <div className="text-right">
+                <div className="sm:text-right flex sm:flex-col items-center sm:items-end gap-2 sm:gap-0">
                   <span className={`text-xs px-2 py-0.5 rounded-full ${
                     donation.status === 'paid' ? 'bg-emerald-50 text-emerald-700' : 'bg-surface-tertiary text-text-secondary'
                   }`}>
