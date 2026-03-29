@@ -50,7 +50,7 @@ export default function CheckoutDonacionPage() {
 
   return (
     <div className="mx-auto max-w-xl px-6 py-10">
-      <h1 className="text-3xl font-bold text-text-primary heading-decorated-amber">Donar</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold text-text-primary heading-decorated-amber">Donar</h1>
       <p className="mt-2 text-text-tertiary">Tu donación ayuda a refugios y animales que lo necesitan</p>
 
       <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">

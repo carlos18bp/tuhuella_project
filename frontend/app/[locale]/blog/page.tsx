@@ -98,7 +98,7 @@ function HeroPost({ post }: { post: BlogPost }) {
           </div>
         )}
       </div>
-      <div className="p-8 flex flex-col justify-center">
+      <div className="p-5 md:p-8 flex flex-col justify-center">
         <span className="text-xs font-medium text-teal-600 uppercase tracking-wider mb-3">
           {post.is_featured ? '⭐ ' : ''}{categoryLabel}
         </span>
@@ -156,18 +156,18 @@ export default function BlogListingPage() {
   return (
     <div className="min-h-screen bg-surface-secondary">
       {/* Hero */}
-      <section className="bg-gradient-to-b from-teal-50 to-background pt-16 pb-12">
+      <section className="bg-gradient-to-b from-teal-50 to-background pt-10 md:pt-16 pb-8 md:pb-12">
         <div className="mx-auto max-w-[1200px] px-6 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-4">
+          <h1 className="text-3xl md:text-5xl font-bold text-text-primary mb-4">
             Blog Mi Huella
           </h1>
-          <p className="text-lg text-text-tertiary max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-text-tertiary max-w-2xl mx-auto">
             Artículos sobre adopción, cuidado animal, historias inspiradoras y mucho más.
           </p>
         </div>
       </section>
 
-      <div className="mx-auto max-w-[1200px] px-6 pb-20">
+      <div className="mx-auto max-w-[1200px] px-6 pb-12 md:pb-20">
         {/* Filters */}
         <div className="flex flex-col gap-4 mb-8">
           <div className="relative w-full max-w-xl">

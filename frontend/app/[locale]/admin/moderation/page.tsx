@@ -43,7 +43,7 @@ export default function AdminModeracionPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <h1 className="text-3xl font-bold text-text-primary">Moderación</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Moderación</h1>
       <p className="mt-1 text-text-tertiary">Revisa contenido publicado en la plataforma</p>
 
       {loading ? (
@@ -63,14 +63,14 @@ export default function AdminModeracionPage() {
             ) : (
               <div className="mt-4 space-y-3">
                 {animals.map((animal) => (
-                  <div key={animal.id} className="rounded-xl border border-border-primary bg-surface-primary p-4 flex items-center justify-between">
-                    <div>
+                  <div key={animal.id} className="rounded-xl border border-border-primary bg-surface-primary p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div className="min-w-0">
                       <p className="font-medium text-text-primary">{animal.name}</p>
                       <p className="text-sm text-text-tertiary">
                         {animal.species === 'dog' ? 'Perro' : animal.species === 'cat' ? 'Gato' : 'Otro'} · {animal.shelter_name}
                       </p>
                     </div>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-teal-50 text-teal-700">{animal.status}</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 self-start sm:self-auto">{animal.status}</span>
                   </div>
                 ))}
               </div>
@@ -84,10 +84,10 @@ export default function AdminModeracionPage() {
             ) : (
               <div className="mt-4 space-y-3">
                 {shelters.map((shelter) => (
-                  <div key={shelter.id} className="rounded-xl border border-border-primary bg-surface-primary p-4 flex items-center justify-between">
-                    <div>
+                  <div key={shelter.id} className="rounded-xl border border-border-primary bg-surface-primary p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div className="min-w-0">
                       <p className="font-medium text-text-primary">{shelter.name}</p>
-                      <p className="text-sm text-text-tertiary">{shelter.city} · {shelter.owner_email}</p>
+                      <p className="text-sm text-text-tertiary truncate">{shelter.city} · {shelter.owner_email}</p>
                     </div>
                     <span className={`text-xs px-2 py-0.5 rounded-full ${
                       shelter.verification_status === 'verified' ? 'bg-emerald-50 text-emerald-700' :

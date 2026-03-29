@@ -152,7 +152,7 @@ export default function AdminBlogEditPage() {
               {adminPost?.cover_image_display && <img src={adminPost.cover_image_display} alt="Cover" className="w-full max-h-48 object-cover rounded-xl mb-3" />}
               <div><label htmlFor="cover_upload" className={labelClass}>Subir imagen</label><input id="cover_upload" type="file" accept="image/*" onChange={handleCoverUpload} className="text-sm text-text-secondary" /></div>
               <div><label htmlFor="cover_url" className={labelClass}>O usar URL externa</label><input id="cover_url" type="url" value={form.cover_image_url || ''} onChange={(e) => handleChange('cover_image_url', e.target.value)} className={inputClass} placeholder="https://..." /></div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div><label htmlFor="cover_credit" className={labelClass}>Crédito</label><input id="cover_credit" type="text" value={form.cover_image_credit || ''} onChange={(e) => handleChange('cover_image_credit', e.target.value)} className={inputClass} placeholder="Photo by..." /></div>
                 <div><label htmlFor="cover_credit_url" className={labelClass}>URL crédito</label><input id="cover_credit_url" type="url" value={form.cover_image_credit_url || ''} onChange={(e) => handleChange('cover_image_credit_url', e.target.value)} className={inputClass} /></div>
               </div>
@@ -189,11 +189,11 @@ export default function AdminBlogEditPage() {
 
         <fieldset className="border border-border-primary rounded-xl p-5 space-y-4">
           <legend className="text-sm font-medium text-text-secondary px-2">Metadatos</legend>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><label htmlFor="slug" className={labelClass}>Slug</label><input id="slug" type="text" value={form.slug || ''} onChange={(e) => handleChange('slug', e.target.value)} className={inputClass} /></div>
             <div><label htmlFor="category" className={labelClass}>Categoría</label><select id="category" value={form.category || ''} onChange={(e) => handleChange('category', e.target.value)} className={inputClass}>{CATEGORIES.map((c) => <option key={c.slug} value={c.slug}>{c.label}</option>)}</select></div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><label htmlFor="author" className={labelClass}>Autor</label><select id="author" value={form.author || 'tuhuella-team'} onChange={(e) => handleChange('author', e.target.value)} className={inputClass}>{AUTHORS.map((a) => <option key={a.slug} value={a.slug}>{a.label}</option>)}</select></div>
             <div><label htmlFor="read_time" className={labelClass}>Tiempo de lectura (min)</label><input id="read_time" type="number" min={0} value={form.read_time_minutes || 0} onChange={(e) => handleChange('read_time_minutes', parseInt(e.target.value) || 0)} className={inputClass} /></div>
           </div>
@@ -205,15 +205,15 @@ export default function AdminBlogEditPage() {
 
         <fieldset className="border border-border-primary rounded-xl p-5 space-y-4">
           <legend className="text-sm font-medium text-text-secondary px-2">SEO</legend>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><label htmlFor="meta_title_es" className={labelClass}>Meta título (ES)</label><input id="meta_title_es" type="text" value={form.meta_title_es || ''} onChange={(e) => handleChange('meta_title_es', e.target.value)} className={inputClass} /></div>
             <div><label htmlFor="meta_title_en" className={labelClass}>Meta title (EN)</label><input id="meta_title_en" type="text" value={form.meta_title_en || ''} onChange={(e) => handleChange('meta_title_en', e.target.value)} className={inputClass} /></div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><label htmlFor="meta_desc_es" className={labelClass}>Meta descripción (ES)</label><textarea id="meta_desc_es" rows={2} value={form.meta_description_es || ''} onChange={(e) => handleChange('meta_description_es', e.target.value)} className={`${inputClass} resize-y`} /></div>
             <div><label htmlFor="meta_desc_en" className={labelClass}>Meta description (EN)</label><textarea id="meta_desc_en" rows={2} value={form.meta_description_en || ''} onChange={(e) => handleChange('meta_description_en', e.target.value)} className={`${inputClass} resize-y`} /></div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><label htmlFor="meta_kw_es" className={labelClass}>Keywords (ES)</label><input id="meta_kw_es" type="text" value={form.meta_keywords_es || ''} onChange={(e) => handleChange('meta_keywords_es', e.target.value)} className={inputClass} placeholder="adopción, mascotas, ..." /></div>
             <div><label htmlFor="meta_kw_en" className={labelClass}>Keywords (EN)</label><input id="meta_kw_en" type="text" value={form.meta_keywords_en || ''} onChange={(e) => handleChange('meta_keywords_en', e.target.value)} className={inputClass} placeholder="adoption, pets, ..." /></div>
           </div>

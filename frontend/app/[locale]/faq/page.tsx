@@ -1,5 +1,6 @@
 'use client';
 
+import { Container } from '@/components/ui';
 import FAQAccordion from '@/components/ui/FAQAccordion';
 import { useAllFAQs } from '@/lib/hooks/useFAQs';
 
@@ -7,7 +8,7 @@ export default function FaqPage() {
   const { topics, loading } = useAllFAQs();
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
+    <Container className="py-10">
       <h1 className="text-3xl font-bold text-text-primary heading-decorated-center">Preguntas Frecuentes</h1>
       <p className="mt-2 text-text-tertiary">Resolvemos tus dudas sobre Tu Huella</p>
 
@@ -22,6 +23,6 @@ export default function FaqPage() {
           <FAQAccordion key={topic.slug} items={topic.items} title={topic.display_name} />
         ))
       )}
-    </div>
+    </Container>
   );
 }

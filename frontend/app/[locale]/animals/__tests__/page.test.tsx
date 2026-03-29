@@ -14,6 +14,8 @@ jest.mock('@/lib/stores/animalStore', () => ({
 jest.mock('@/components/ui', () => ({
   AnimalCard: ({ animal }: any) =>
     React.createElement('div', { 'data-testid': `animal-card-${animal.id}` }, animal.name),
+  Container: ({ children, className }: any) =>
+    React.createElement('div', { className }, children),
   EmptyState: ({ message }: any) =>
     React.createElement('div', { 'data-testid': 'empty-state' }, message),
   MultiSelectDropdown: ({ label, selected, onChange }: any) =>

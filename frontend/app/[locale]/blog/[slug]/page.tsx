@@ -127,7 +127,7 @@ export default function BlogDetailPage() {
             {post.title}
           </h1>
 
-          <p className="text-lg text-text-tertiary mb-6">{post.excerpt}</p>
+          <p className="text-base md:text-lg text-text-tertiary mb-6">{post.excerpt}</p>
 
           <div className="flex flex-wrap items-center gap-4 text-sm text-text-tertiary">
             <div className="flex items-center gap-2">
@@ -179,7 +179,7 @@ export default function BlogDetailPage() {
       )}
 
       {/* Content */}
-      <div className="mx-auto max-w-[800px] px-6 pb-16">
+      <div className="mx-auto max-w-[800px] px-6 pb-10 md:pb-16">
         <BlogContentRenderer
           contentJson={post.content_json}
           contentHtml={post.content}
@@ -187,7 +187,7 @@ export default function BlogDetailPage() {
 
         {/* Sources */}
         {post.sources && post.sources.length > 0 && (
-          <div className="mt-12 pt-8 border-t border-border-primary">
+          <div className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-border-primary">
             <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-3">
               Fuentes
             </h3>
@@ -209,7 +209,7 @@ export default function BlogDetailPage() {
         )}
 
         {/* Share + Nav */}
-        <div className="mt-12 pt-8 border-t border-border-primary flex items-center justify-between">
+        <div className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-border-primary flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <ShareButton title={post.title} slug={post.slug} />
           <Link
             href={ROUTES.BLOG}

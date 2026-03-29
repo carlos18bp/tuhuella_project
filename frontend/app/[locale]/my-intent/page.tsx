@@ -59,7 +59,7 @@ export default function MiIntencionPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <h1 className="text-3xl font-bold text-text-primary heading-decorated">Mi Intención de Adopción</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold text-text-primary heading-decorated">Mi Intención de Adopción</h1>
       <p className="mt-2 text-text-tertiary">
         Comparte lo que buscas y deja que los refugios te encuentren
       </p>

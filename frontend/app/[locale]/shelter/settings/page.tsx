@@ -96,7 +96,7 @@ export default function ShelterConfiguracionPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-10">
-      <h1 className="text-3xl font-bold text-text-primary">Configuración del Refugio</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Configuración del Refugio</h1>
       <p className="mt-2 text-text-tertiary">Actualiza la información de tu refugio</p>
 
       <form onSubmit={handleSave} className="mt-8 space-y-5">
@@ -158,7 +158,7 @@ export default function ShelterConfiguracionPage() {
             placeholder="https://" />
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <button type="submit" disabled={saving}
             className="bg-teal-600 text-white rounded-full px-6 py-2.5 text-sm font-medium hover:bg-teal-700 transition-colors disabled:opacity-50">
             {saving ? 'Guardando...' : 'Guardar cambios'}

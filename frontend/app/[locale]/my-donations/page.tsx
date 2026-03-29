@@ -70,7 +70,7 @@ export default function MisDonacionesPage() {
           <HandCoins className="h-5 w-5 text-amber-600" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-text-primary">
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">
             {t('title')}{donations.length > 0 && ` (${donations.length})`}
           </h1>
           <p className="text-sm text-text-tertiary">{t('subtitle')}</p>

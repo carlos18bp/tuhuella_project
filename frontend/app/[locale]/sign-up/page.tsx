@@ -150,7 +150,7 @@ export default function SignUpPage() {
   return (
     <main className="relative min-h-[calc(100vh-72px)] flex items-center justify-center px-6 py-12 bg-gradient-to-b from-surface-secondary to-surface-tertiary/50">
       <div className="absolute top-1/4 right-1/4 w-64 h-64 rounded-full bg-teal-100/30 blur-3xl pointer-events-none" />
-      <div className="w-full max-w-md bg-surface-primary border border-border-primary rounded-2xl p-8 shadow-lg ring-1 ring-border-tertiary">
+      <div className="w-full max-w-md bg-surface-primary border border-border-primary rounded-2xl p-6 sm:p-8 shadow-lg ring-1 ring-border-tertiary">
         <div className="flex items-center gap-2 mb-6">
           <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-50 to-teal-100 shadow-sm flex items-center justify-center">
             <PawPrint className="h-5 w-5 text-teal-600" />
@@ -162,7 +162,7 @@ export default function SignUpPage() {
         </div>
 
         <form className="space-y-4" onSubmit={onSubmit}>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label htmlFor="signup-firstname" className="block text-sm font-medium text-text-secondary mb-1.5">{tAuth('firstName')}</label>
               <input

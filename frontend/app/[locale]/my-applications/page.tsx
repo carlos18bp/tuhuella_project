@@ -71,7 +71,7 @@ export default function MisSolicitudesPage() {
           <ClipboardList className="h-5 w-5 text-teal-600" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-text-primary">
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">
             {t('title')}{counts.total > 0 && ` (${counts.total})`}
           </h1>
           <p className="text-sm text-text-tertiary">{t('subtitle')}</p>

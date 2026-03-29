@@ -127,7 +127,7 @@ export default function MiPerfilPage() {
   if (!user) {
     return (
       <div data-testid="loading-skeleton" className="mx-auto max-w-[1200px] px-6 py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           <div className="rounded-2xl border border-border-primary p-8 h-72 animate-shimmer" />
           <div className="lg:col-span-2 space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -222,7 +222,7 @@ export default function MiPerfilPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         {/* Left column — Profile card */}
         <div className="lg:col-span-1 space-y-6">
           <div className="rounded-2xl border border-border-primary bg-surface-primary shadow-sm overflow-hidden relative">

@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { useAnimalStore } from '@/lib/stores/animalStore';
-import { AnimalCard, EmptyState, MultiSelectDropdown, FAQAccordion } from '@/components/ui';
+import { AnimalCard, Container, EmptyState, MultiSelectDropdown, FAQAccordion } from '@/components/ui';
 import type { MultiSelectOption } from '@/components/ui/MultiSelectDropdown';
 import { useFAQsByTopic } from '@/lib/hooks/useFAQs';
 
@@ -130,8 +130,8 @@ export default function AnimalesPage() {
   };
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <h1 className="text-3xl font-bold text-text-primary heading-decorated">{t('title')}</h1>
+    <Container className="py-10">
+      <h1 className="text-2xl sm:text-3xl font-bold text-text-primary heading-decorated">{t('title')}</h1>
       <p className="mt-2 text-text-tertiary">{t('subtitle')}</p>
 
       {/* Filters */}
@@ -170,7 +170,7 @@ export default function AnimalesPage() {
 
       {/* Grid */}
       {loading ? (
-        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
+        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-7">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="rounded-2xl border border-border-primary bg-surface-primary overflow-hidden">
               <div className="aspect-[4/3] animate-shimmer" />
@@ -183,7 +183,7 @@ export default function AnimalesPage() {
         </div>
       ) : (
         <>
-          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
+          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-7">
             {animals.length === 0 && (
               <EmptyState message={t('noResults')} />
             )}
@@ -202,6 +202,6 @@ export default function AnimalesPage() {
           subtitle={t('faqSubtitle')}
         />
       )}
-    </div>
+    </Container>
   );
 }

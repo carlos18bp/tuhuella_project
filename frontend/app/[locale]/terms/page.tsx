@@ -26,9 +26,9 @@ export default function TermsPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-text-primary">{t('title')}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">{t('title')}</h1>
           <p className="mt-2 text-sm text-text-quaternary">
             {t('lastUpdated')}: 2026-03-25
           </p>
@@ -36,7 +36,7 @@ export default function TermsPage() {
         <button
           type="button"
           onClick={() => setShowModal(true)}
-          className="shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200/60 transition-colors"
+          className="shrink-0 self-start inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200/60 transition-colors"
         >
           <BookOpen className="h-4 w-4" />
           {tModal('title')}

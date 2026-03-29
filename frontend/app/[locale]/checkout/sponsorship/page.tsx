@@ -49,7 +49,7 @@ export default function CheckoutApadrinamientoPage() {
 
   return (
     <div className="mx-auto max-w-xl px-6 py-10">
-      <h1 className="text-3xl font-bold text-text-primary heading-decorated">Apadrinar</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold text-text-primary heading-decorated">Apadrinar</h1>
       <p className="mt-2 text-text-tertiary">Apadrina un animal y apoya su cuidado continuo</p>
 
       <div className="mt-6 rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-700">

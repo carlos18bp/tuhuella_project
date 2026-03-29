@@ -45,7 +45,7 @@ export default function AdminPagosPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <h1 className="text-3xl font-bold text-text-primary">Auditoría de Pagos</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Auditoría de Pagos</h1>
       <p className="mt-1 text-text-tertiary">Historial de transacciones en la plataforma</p>
 
       {loading ? (

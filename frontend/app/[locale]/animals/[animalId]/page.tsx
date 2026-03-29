@@ -13,7 +13,7 @@ import { useAnimalStore } from '@/lib/stores/animalStore';
 import { useFavoriteStore } from '@/lib/stores/favoriteStore';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { useFAQsByTopic } from '@/lib/hooks/useFAQs';
-import { AnimalGallery, FAQAccordion, SimilarAnimals } from '@/components/ui';
+import { AnimalGallery, Container, FAQAccordion, SimilarAnimals } from '@/components/ui';
 import { ROUTES } from '@/lib/constants';
 import type { AnimalCompatibility } from '@/lib/types';
 
@@ -53,13 +53,13 @@ export default function AnimalDetailPage() {
 
   if (loading || !animal) {
     return (
-      <div className="mx-auto max-w-[1400px] px-6 py-10">
+      <Container className="py-10">
         <div data-testid="loading-skeleton" className="space-y-6">
           <div className="h-8 animate-shimmer rounded w-1/3" />
           <div className="aspect-video animate-shimmer rounded-2xl" />
           <div className="h-4 animate-shimmer rounded w-2/3" />
         </div>
-      </div>
+      </Container>
     );
   }
 
@@ -87,13 +87,13 @@ export default function AnimalDetailPage() {
     animal.is_house_trained || animal.microchip_id;
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
+    <Container className="py-10">
       <Link href={ROUTES.ANIMALS} className="inline-flex items-center gap-1.5 text-sm text-teal-600 hover:text-teal-700 transition-colors">
         <ArrowLeft className="h-4 w-4" />
         {t('backToAnimals')}
       </Link>
 
-      <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-10">
+      <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
         {/* Gallery */}
         <AnimalGallery
           images={animal.gallery_urls ?? []}
@@ -106,7 +106,7 @@ export default function AnimalDetailPage() {
           <div className="flex items-start justify-between">
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold tracking-[-0.02em] text-text-primary">{animal.name}</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-[-0.02em] text-text-primary">{animal.name}</h1>
                 {animal.status === 'in_process' && (
                   <span data-testid="status-badge" className="text-xs px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200/60 font-medium">
                     {t('adoptionInProgress')}
@@ -277,7 +277,7 @@ export default function AnimalDetailPage() {
 
       {/* FAQ section */}
       {adoptionFaqs.length > 0 && (
-        <div className="mt-16 border-t border-border-primary pt-2">
+        <div className="mt-10 md:mt-16 border-t border-border-primary pt-2">
           <FAQAccordion
             items={adoptionFaqs}
             title={tCommon('faq')}
@@ -285,6 +285,6 @@ export default function AnimalDetailPage() {
           />
         </div>
       )}
-    </div>
+    </Container>
   );
 }

@@ -199,8 +199,8 @@ export default function VolunteerApplyPage() {
   if (submitted) {
     return (
       <div className="mx-auto max-w-[800px] px-6 py-10">
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-10 text-center">
-          <CheckCircle className="h-16 w-16 text-emerald-500 mx-auto" />
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 md:p-10 text-center">
+          <CheckCircle className="h-12 w-12 md:h-16 md:w-16 text-emerald-500 mx-auto" />
           <h2 className="mt-4 text-2xl font-bold text-text-primary">{t('successTitle')}</h2>
           <p className="mt-2 text-text-secondary">{t('successMessage')}</p>
           <Link

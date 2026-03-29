@@ -8,7 +8,7 @@ import Image from 'next/image';
 import { ArrowLeft, MapPin, Phone, Mail, Globe } from 'lucide-react';
 
 import { useShelterStore } from '@/lib/stores/shelterStore';
-import { ShelterGallery } from '@/components/ui';
+import { Container, ShelterGallery } from '@/components/ui';
 import { ROUTES } from '@/lib/constants';
 
 export default function ShelterDetailPage() {
@@ -26,23 +26,25 @@ export default function ShelterDetailPage() {
 
   if (loading || !shelter) {
     return (
-      <div role="status" aria-label="loading" className="mx-auto max-w-[1400px] px-6 py-10 space-y-4">
-        <div className="h-64 animate-shimmer rounded-2xl" />
-        <div className="h-8 animate-shimmer rounded w-1/3" />
-        <div className="h-4 animate-shimmer rounded w-1/2" />
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="rounded-xl border border-border-primary p-4 h-20 animate-shimmer" />
-          ))}
+      <Container className="py-10">
+        <div role="status" aria-label="loading" className="space-y-4">
+          <div className="h-64 animate-shimmer rounded-2xl" />
+          <div className="h-8 animate-shimmer rounded w-1/3" />
+          <div className="h-4 animate-shimmer rounded w-1/2" />
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="rounded-xl border border-border-primary p-4 h-20 animate-shimmer" />
+            ))}
+          </div>
         </div>
-      </div>
+      </Container>
     );
   }
 
   const galleryUrls = shelter.gallery_urls ?? [];
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
+    <Container className="py-10">
       <Link href={ROUTES.SHELTERS} className="inline-flex items-center gap-1.5 text-sm text-teal-600 hover:text-teal-700 transition-colors">
         <ArrowLeft className="h-4 w-4" />
         {t('backToShelters')}
@@ -80,7 +82,7 @@ export default function ShelterDetailPage() {
       </div>
 
       <div className="mt-16">
-        <h1 className="text-3xl font-bold text-text-primary">{shelter.name}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">{shelter.name}</h1>
         {shelter.city && (
           <div className="flex items-center gap-1.5 mt-1 text-text-tertiary">
             <MapPin className="h-4 w-4 text-text-quaternary" />
@@ -141,6 +143,6 @@ export default function ShelterDetailPage() {
         </div>
       </div>
 
-    </div>
+    </Container>
   );
 }

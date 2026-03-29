@@ -67,7 +67,7 @@ export default function ShelterUpdatesPage() {
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-text-primary">{t('shelterTitle')}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">{t('shelterTitle')}</h1>
           <p className="mt-1 text-text-tertiary">{t('shelterSubtitle')}</p>
         </div>
         <Link
@@ -92,9 +92,9 @@ export default function ShelterUpdatesPage() {
         <div className="mt-8 space-y-4">
           {updates.map((update) => (
             <div key={update.id} role="article" className="rounded-xl border border-border-primary bg-surface-primary p-5 shadow-sm">
-              <div className="flex gap-4">
+              <div className="flex gap-3 sm:gap-4">
                 {update.image_url && (
-                  <img src={update.image_url} alt={update.title} className="w-20 h-20 rounded-xl object-cover flex-shrink-0" />
+                  <img src={update.image_url} alt={update.title} className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover flex-shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-text-primary">{update.title}</h3>
@@ -106,7 +106,7 @@ export default function ShelterUpdatesPage() {
                 </div>
                 <button
                   onClick={() => handleDelete(update.id)}
-                  className="text-text-quaternary hover:text-red-500 transition-colors self-start p-1"
+                  className="text-text-quaternary hover:text-red-500 transition-colors self-start p-2"
                   title={t('delete')}
                 >
                   <Trash2 className="h-4 w-4" />
