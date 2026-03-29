@@ -52,8 +52,8 @@ export default function Footer() {
     <footer className="relative bg-stone-950 dark:bg-[#080A0C] mt-16">
       {/* Gradient fade top */}
       <div className="absolute inset-x-0 -top-px h-[2px] bg-gradient-to-r from-transparent via-teal-500/40 to-transparent" />
-      <div className="mx-auto max-w-[1400px] px-6 py-14">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
+      <div className="mx-auto max-w-[1400px] px-6 py-8 md:py-14">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10">
           <div>
             <div className="flex items-center gap-2 mb-4">
               <PawPrint className="h-5 w-5 text-teal-400" />

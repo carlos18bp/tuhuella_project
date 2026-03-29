@@ -43,6 +43,7 @@ describe('components/ui barrel exports', () => {
   });
 
   it('exports section components', () => {
+    expect(ui.Container).toBeDefined();
     expect(ui.CTASection).toBeDefined();
     expect(ui.FAQAccordion).toBeDefined();
     expect(ui.Hero).toBeDefined();

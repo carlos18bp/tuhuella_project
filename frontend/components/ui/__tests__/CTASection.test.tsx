@@ -50,4 +50,24 @@ describe('CTASection', () => {
     );
     expect(screen.getByText('Child content here')).toBeInTheDocument();
   });
+
+  it('applies heading-decorated class when decorated is true', () => {
+    render(
+      <CTASection title="Featured" linkHref="/animals" linkLabel="See all" decorated>
+        <p>Content</p>
+      </CTASection>
+    );
+    const heading = screen.getByRole('heading', { name: 'Featured' });
+    expect(heading).toHaveClass('heading-decorated');
+  });
+
+  it('does not apply heading-decorated class by default', () => {
+    render(
+      <CTASection title="Featured" linkHref="/animals" linkLabel="See all">
+        <p>Content</p>
+      </CTASection>
+    );
+    const heading = screen.getByRole('heading', { name: 'Featured' });
+    expect(heading).not.toHaveClass('heading-decorated');
+  });
 });

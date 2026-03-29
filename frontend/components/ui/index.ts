@@ -7,6 +7,7 @@ export { default as ApplicationStatusBadge } from './ApplicationStatusBadge';
 export { default as ApplicationTimeline } from './ApplicationTimeline';
 export { default as CampaignCard } from './CampaignCard';
 export { default as CheckoutForm } from './CheckoutForm';
+export { default as Container } from './Container';
 export { default as CTASection } from './CTASection';
 export { default as DonationForm } from './DonationForm';
 export { default as EmptyState } from './EmptyState';

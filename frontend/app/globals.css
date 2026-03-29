@@ -708,6 +708,14 @@ button,
   border-radius: 4px !important;
 }
 
+/* Hide Swiper nav arrows on mobile — users can swipe */
+@media (max-width: 639px) {
+  .swiper-button-next,
+  .swiper-button-prev {
+    display: none !important;
+  }
+}
+
 /* Swiper navigation arrows */
 .swiper-button-next,
 .swiper-button-prev {
