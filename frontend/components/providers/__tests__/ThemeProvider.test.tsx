@@ -31,8 +31,8 @@ describe('ThemeProvider', () => {
     const provider = screen.getByTestId('next-themes-provider');
     const props = JSON.parse(provider.getAttribute('data-props') || '{}');
     expect(props.attribute).toBe('class');
-    expect(props.defaultTheme).toBe('system');
-    expect(props.enableSystem).toBe(true);
+    expect(props.defaultTheme).toBe('light');
+    expect(props.enableSystem).toBe(false);
     expect(props.storageKey).toBe('mi-huella-theme');
     expect(props.disableTransitionOnChange).toBe(true);
   });

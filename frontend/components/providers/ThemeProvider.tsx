@@ -10,8 +10,8 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   return (
     <NextThemesProvider
       attribute="class"
-      defaultTheme="system"
-      enableSystem
+      defaultTheme="light"
+      enableSystem={false}
       storageKey="mi-huella-theme"
       disableTransitionOnChange
     >
