@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef, type ReactElement } from 'react';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import {
@@ -62,7 +62,7 @@ function getStatusBadge(status: string, t: (key: string) => string) {
   }
 }
 
-function getRelativeDate(dateStr: string, t: (key: string, values?: Record<string, unknown>) => string) {
+function getRelativeDate(dateStr: string, t: (key: string, values?: Record<string, string | number | Date>) => string) {
   const now = new Date();
   const saved = new Date(dateStr);
   const diffDays = Math.floor((now.getTime() - saved.getTime()) / (1000 * 60 * 60 * 24));
@@ -284,7 +284,7 @@ function CompareModal({ favorites, selected, onClose }: { favorites: Favorite[];
   const tAnimals = useTranslations('animals');
   const items = selected.map((id) => favorites.find((f) => f.animal === id)).filter(Boolean) as Favorite[];
 
-  const rows: { label: string; values: (string | JSX.Element)[] }[] = [
+  const rows: { label: string; values: (string | ReactElement)[] }[] = [
     { label: tAnimals('speciesFilter'), values: items.map((f) => f.animal_species === 'dog' ? tAnimals('dogs') : f.animal_species === 'cat' ? tAnimals('cats') : tAnimals('others')) },
     { label: tAnimals('breed') || 'Raza', values: items.map((f) => f.breed || '—') },
     { label: tAnimals('ageFilter'), values: items.map((f) => f.age_range || '—') },

@@ -17,7 +17,7 @@ import AdminProfileSection from '@/components/ui/AdminProfileSection'
 // Profile completeness helpers
 // ---------------------------------------------------------------------------
 
-type UserData = NonNullable<ReturnType<typeof useAuthStore>['user']>
+type UserData = NonNullable<ReturnType<typeof useAuthStore.getState>['user']>
 
 interface CompletenessItem {
   key: string

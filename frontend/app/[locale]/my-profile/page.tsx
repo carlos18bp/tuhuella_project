@@ -16,7 +16,7 @@ import type { ProfileStats, ActivityEvent } from '@/lib/types';
 // Profile completeness — frontend-only calculation
 // ---------------------------------------------------------------------------
 
-function calcCompleteness(user: NonNullable<ReturnType<typeof useAuthStore>['user']>, hasIntent: boolean) {
+function calcCompleteness(user: NonNullable<ReturnType<typeof useAuthStore.getState>['user']>, hasIntent: boolean) {
   let score = 0;
   if (user.first_name && user.last_name) score += 15;
   if (user.email) score += 15;
