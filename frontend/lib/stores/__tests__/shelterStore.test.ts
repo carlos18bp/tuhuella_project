@@ -120,4 +120,30 @@ describe('shelterStore', () => {
     expect(result.name).toBe('Updated Paws');
     expect(mockApi.patch).toHaveBeenCalledTimes(1);
   });
+
+  it('passes lang param to fetchShelters when provided', async () => {
+    mockApi.get.mockResolvedValueOnce({ data: [] });
+
+    await act(async () => {
+      await useShelterStore.getState().fetchShelters('es');
+    });
+
+    expect(mockApi.get).toHaveBeenCalledWith(
+      expect.any(String),
+      { params: { lang: 'es' } },
+    );
+  });
+
+  it('passes lang param to fetchShelter when provided', async () => {
+    mockApi.get.mockResolvedValueOnce({ data: SHELTER_FIXTURE });
+
+    await act(async () => {
+      await useShelterStore.getState().fetchShelter(1, 'en');
+    });
+
+    expect(mockApi.get).toHaveBeenCalledWith(
+      expect.any(String),
+      { params: { lang: 'en' } },
+    );
+  });
 });

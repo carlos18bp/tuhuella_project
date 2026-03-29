@@ -128,4 +128,28 @@ describe('useScrollReveal', () => {
 
     expect(target.classList.contains('scroll-reveal-hidden')).toBe(false);
   });
+
+  it('removes scroll-reveal-hidden from children on unmount when stagger > 0', async () => {
+    mockContext.mockImplementationOnce((fn: () => void) => {
+      fn();
+      return { revert: mockRevert };
+    });
+
+    const { getByTestId, unmount } = render(<TestComponent stagger={0.2} />);
+    await flush();
+
+    const target = getByTestId('target');
+    const children = Array.from(target.children);
+    // Children should have the hidden class added by the effect
+    children.forEach((child) => {
+      expect(child.classList.contains('scroll-reveal-hidden')).toBe(true);
+    });
+
+    unmount();
+
+    // After unmount, hidden class should be removed from children
+    children.forEach((child) => {
+      expect(child.classList.contains('scroll-reveal-hidden')).toBe(false);
+    });
+  });
 });

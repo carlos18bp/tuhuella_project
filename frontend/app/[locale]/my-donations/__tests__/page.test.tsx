@@ -1,6 +1,7 @@
 import React from 'react';
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('swiper/react', () => ({
   Swiper: ({ children }: any) => React.createElement('div', null, children),
@@ -99,5 +100,53 @@ describe('MisDonacionesPage', () => {
 
     render(<MisDonacionesPage />);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('(1)');
+  });
+
+  it('filters donations by status when filter button is clicked', async () => {
+    useDonationStore.setState({
+      donations: [
+        makeDonation({ id: 1, status: 'paid' }),
+        makeDonation({ id: 2, status: 'pending', amount: '25000.00', campaign_title: 'Other Fund' }),
+      ],
+    });
+
+    render(<MisDonacionesPage />);
+    // Both donations should be visible initially
+    expect(screen.getByText('Medical Fund')).toBeInTheDocument();
+    expect(screen.getByText('Other Fund')).toBeInTheDocument();
+
+    // Click the "Pendiente" filter button
+    await userEvent.click(screen.getByRole('button', { name: 'Pendiente' }));
+
+    // Only the pending donation should remain
+    expect(screen.getByText('Other Fund')).toBeInTheDocument();
+    expect(screen.queryByText('Medical Fund')).not.toBeInTheDocument();
+  });
+
+  it('shows empty filter state and clear button when filter matches nothing', async () => {
+    useDonationStore.setState({
+      donations: [makeDonation({ id: 1, status: 'paid' })],
+    });
+
+    render(<MisDonacionesPage />);
+
+    // Click "Fallida" filter - no donations match
+    await userEvent.click(screen.getByRole('button', { name: 'Fallida' }));
+
+    expect(screen.getByText('No hay donaciones con este estado')).toBeInTheDocument();
+    // Click clear filter
+    await userEvent.click(screen.getByRole('button', { name: 'Limpiar filtro' }));
+
+    // Donation should be visible again
+    expect(screen.getByText('Medical Fund')).toBeInTheDocument();
+  });
+
+  it('renders donation message when provided', () => {
+    useDonationStore.setState({
+      donations: [makeDonation({ message: 'Hope this helps' })],
+    });
+
+    render(<MisDonacionesPage />);
+    expect(screen.getByText(/Hope this helps/)).toBeInTheDocument();
   });
 });

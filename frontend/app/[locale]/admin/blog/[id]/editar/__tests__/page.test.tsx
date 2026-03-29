@@ -283,4 +283,231 @@ describe('AdminBlogEditPage', () => {
     render(<AdminBlogEditPage />);
     expect(state.fetchAdminPost).toHaveBeenCalledWith(1);
   });
+
+  it('shows fallback error message when handleSave rejects with a non-Error value', async () => {
+    const user = userEvent.setup();
+    const state = setupMock();
+    state.updatePost.mockRejectedValue('some string rejection');
+
+    render(<AdminBlogEditPage />);
+
+    await user.click(screen.getByRole('button', { name: 'Guardar cambios' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Error al guardar')).toBeInTheDocument();
+    });
+  });
+
+  it('shows fallback error message when uploadCoverImage rejects with a non-Error value', async () => {
+    const user = userEvent.setup();
+    const state = setupMock();
+    state.uploadCoverImage.mockRejectedValue('string rejection');
+
+    render(<AdminBlogEditPage />);
+
+    const file = new File(['data'], 'photo.png', { type: 'image/png' });
+    const fileInput = screen.getByLabelText('Subir imagen') as HTMLInputElement;
+
+    await user.upload(fileInput, file);
+
+    await waitFor(() => {
+      expect(screen.getByText('Error al subir imagen')).toBeInTheDocument();
+    });
+  });
+
+  it('renders cover image when adminPost has cover_image_display', () => {
+    setupMock({
+      adminPost: { ...mockAdminPost, cover_image_display: 'http://example.com/cover.jpg' },
+    });
+    render(<AdminBlogEditPage />);
+    const img = screen.getByAltText('Cover') as HTMLImageElement;
+    expect(img.src).toBe('http://example.com/cover.jpg');
+  });
+
+  it('updates excerpt_es field when user types', async () => {
+    const user = userEvent.setup();
+    setupMock();
+    render(<AdminBlogEditPage />);
+    const textarea = screen.getByLabelText('Resumen (ES)') as HTMLTextAreaElement;
+    await user.type(textarea, 'Nuevo resumen');
+    expect(textarea.value).toContain('Nuevo resumen');
+  });
+
+  it('updates content_es field when user types', async () => {
+    const user = userEvent.setup();
+    setupMock();
+    render(<AdminBlogEditPage />);
+    const textarea = screen.getByLabelText('Contenido HTML (ES)') as HTMLTextAreaElement;
+    await user.type(textarea, '<p>Hola</p>');
+    expect(textarea.value).toContain('<p>Hola</p>');
+  });
+
+  it('updates English fields when user types', async () => {
+    const user = userEvent.setup();
+    setupMock();
+    render(<AdminBlogEditPage />);
+    const excerptEn = screen.getByLabelText('Excerpt (EN)') as HTMLTextAreaElement;
+    await user.type(excerptEn, 'New excerpt');
+    expect(excerptEn.value).toContain('New excerpt');
+  });
+
+  it('updates cover image url field', async () => {
+    const user = userEvent.setup();
+    setupMock();
+    render(<AdminBlogEditPage />);
+    const input = screen.getByLabelText('O usar URL externa') as HTMLInputElement;
+    await user.type(input, 'https://example.com/img.jpg');
+    expect(input.value).toContain('https://example.com/img.jpg');
+  });
+
+  it('updates cover credit fields', async () => {
+    const user = userEvent.setup();
+    setupMock();
+    render(<AdminBlogEditPage />);
+    const credit = screen.getByLabelText('Crédito') as HTMLInputElement;
+    await user.type(credit, 'Photo by Test');
+    expect(credit.value).toContain('Photo by Test');
+  });
+
+  it('changes category selection', async () => {
+    const user = userEvent.setup();
+    setupMock();
+    render(<AdminBlogEditPage />);
+    const select = screen.getByLabelText('Categoría') as HTMLSelectElement;
+    await user.selectOptions(select, 'salud-animal');
+    expect(select.value).toBe('salud-animal');
+  });
+
+  it('changes author selection', async () => {
+    const user = userEvent.setup();
+    setupMock();
+    render(<AdminBlogEditPage />);
+    const select = screen.getByLabelText('Autor') as HTMLSelectElement;
+    await user.selectOptions(select, 'laura-blanco');
+    expect(select.value).toBe('laura-blanco');
+  });
+
+  it('updates read time field', async () => {
+    const user = userEvent.setup();
+    setupMock();
+    render(<AdminBlogEditPage />);
+    const input = screen.getByLabelText('Tiempo de lectura (min)') as HTMLInputElement;
+    await user.clear(input);
+    await user.type(input, '10');
+    expect(input.value).toBe('10');
+  });
+
+  it('toggles is_published checkbox', async () => {
+    const user = userEvent.setup();
+    setupMock();
+    render(<AdminBlogEditPage />);
+    const checkbox = screen.getByLabelText('Publicado') as HTMLInputElement;
+    // Initially true from mockAdminPost
+    await user.click(checkbox);
+    expect(checkbox.checked).toBe(false);
+  });
+
+  it('toggles is_featured checkbox', async () => {
+    const user = userEvent.setup();
+    setupMock();
+    render(<AdminBlogEditPage />);
+    const checkbox = screen.getByLabelText('Destacado') as HTMLInputElement;
+    await user.click(checkbox);
+    expect(checkbox.checked).toBe(true);
+  });
+
+  it('updates SEO meta fields', async () => {
+    const user = userEvent.setup();
+    setupMock();
+    render(<AdminBlogEditPage />);
+    const metaEs = screen.getByLabelText('Meta título (ES)') as HTMLInputElement;
+    await user.type(metaEs, 'Mi título SEO');
+    expect(metaEs.value).toContain('Mi título SEO');
+  });
+
+  it('updates meta description fields', async () => {
+    const user = userEvent.setup();
+    setupMock();
+    render(<AdminBlogEditPage />);
+    const descEs = screen.getByLabelText('Meta descripción (ES)') as HTMLTextAreaElement;
+    await user.type(descEs, 'Descripción SEO');
+    expect(descEs.value).toContain('Descripción SEO');
+  });
+
+  it('updates keywords fields', async () => {
+    const user = userEvent.setup();
+    setupMock();
+    render(<AdminBlogEditPage />);
+    const kwEs = screen.getByLabelText('Keywords (ES)') as HTMLInputElement;
+    await user.type(kwEs, 'adopcion, mascotas');
+    expect(kwEs.value).toContain('adopcion, mascotas');
+  });
+
+  it('updates sources JSON textarea', () => {
+    setupMock();
+    render(<AdminBlogEditPage />);
+    const textareas = screen.getAllByRole('textbox') as HTMLTextAreaElement[];
+    // Sources textarea is the last one in the fields tab
+    const sourcesTextarea = textareas[textareas.length - 1];
+    fireEvent.change(sourcesTextarea, {
+      target: { value: JSON.stringify([{ name: 'Test', url: 'http://test.com' }]) },
+    });
+    // Should not throw
+    expect(sourcesTextarea).toBeInTheDocument();
+  });
+
+  it('updates JSON ES textarea in JSON tab', async () => {
+    const user = userEvent.setup();
+    setupMock();
+    render(<AdminBlogEditPage />);
+    await user.click(screen.getByRole('button', { name: 'JSON Content' }));
+    const textareas = screen.getAllByRole('textbox') as HTMLTextAreaElement[];
+    fireEvent.change(textareas[0], { target: { value: '{"test": true}' } });
+    expect(textareas[0].value).toBe('{"test": true}');
+  });
+
+  it('updates cover credit URL field', async () => {
+    const user = userEvent.setup();
+    setupMock();
+    render(<AdminBlogEditPage />);
+    const input = screen.getByLabelText('URL crédito') as HTMLInputElement;
+    await user.type(input, 'https://credit.com');
+    expect(input.value).toContain('https://credit.com');
+  });
+
+  it('updates Content HTML EN field', async () => {
+    const user = userEvent.setup();
+    setupMock();
+    render(<AdminBlogEditPage />);
+    const textarea = screen.getByLabelText('Content HTML (EN)') as HTMLTextAreaElement;
+    await user.type(textarea, '<p>Hello</p>');
+    expect(textarea.value).toContain('<p>Hello</p>');
+  });
+
+  it('updates Meta title EN field', async () => {
+    const user = userEvent.setup();
+    setupMock();
+    render(<AdminBlogEditPage />);
+    const input = screen.getByLabelText('Meta title (EN)') as HTMLInputElement;
+    await user.type(input, 'SEO title');
+    expect(input.value).toContain('SEO title');
+  });
+
+  it('updates Meta description EN field', async () => {
+    const user = userEvent.setup();
+    setupMock();
+    render(<AdminBlogEditPage />);
+    const textarea = screen.getByLabelText('Meta description (EN)') as HTMLTextAreaElement;
+    await user.type(textarea, 'SEO desc');
+    expect(textarea.value).toContain('SEO desc');
+  });
+
+  it('updates Keywords EN field', async () => {
+    const user = userEvent.setup();
+    setupMock();
+    render(<AdminBlogEditPage />);
+    const input = screen.getByLabelText('Keywords (EN)') as HTMLInputElement;
+    await user.type(input, 'adoption, pets');
+    expect(input.value).toContain('adoption, pets');
+  });
 });

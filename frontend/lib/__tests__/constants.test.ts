@@ -67,6 +67,54 @@ describe('constants', () => {
     it('ADMIN_APPROVE_SHELTER returns the correct API path for a given id', () => {
       expect(API_ENDPOINTS.ADMIN_APPROVE_SHELTER(12)).toBe('/admin/shelters/approve/12/');
     });
+
+    it('ANIMAL_SIMILAR returns the correct API path for a given id', () => {
+      expect(API_ENDPOINTS.ANIMAL_SIMILAR(5)).toBe('/animals/5/similar/');
+    });
+
+    it('UPDATE_UPDATE returns the correct API path for a given id', () => {
+      expect(API_ENDPOINTS.UPDATE_UPDATE(3)).toBe('/updates/3/update/');
+    });
+
+    it('UPDATE_DELETE returns the correct API path for a given id', () => {
+      expect(API_ENDPOINTS.UPDATE_DELETE(4)).toBe('/updates/4/delete/');
+    });
+
+    it('BLOG_DETAIL returns the correct API path for a given slug', () => {
+      expect(API_ENDPOINTS.BLOG_DETAIL('my-post')).toBe('/blog/my-post/');
+    });
+
+    it('BLOG_ADMIN_DETAIL returns the correct API path for a given id', () => {
+      expect(API_ENDPOINTS.BLOG_ADMIN_DETAIL(10)).toBe('/blog/admin/10/detail/');
+    });
+
+    it('BLOG_ADMIN_UPDATE returns the correct API path for a given id', () => {
+      expect(API_ENDPOINTS.BLOG_ADMIN_UPDATE(10)).toBe('/blog/admin/10/update/');
+    });
+
+    it('BLOG_ADMIN_DELETE returns the correct API path for a given id', () => {
+      expect(API_ENDPOINTS.BLOG_ADMIN_DELETE(10)).toBe('/blog/admin/10/delete/');
+    });
+
+    it('BLOG_ADMIN_DUPLICATE returns the correct API path for a given id', () => {
+      expect(API_ENDPOINTS.BLOG_ADMIN_DUPLICATE(10)).toBe('/blog/admin/10/duplicate/');
+    });
+
+    it('BLOG_ADMIN_UPLOAD_COVER returns the correct API path for a given id', () => {
+      expect(API_ENDPOINTS.BLOG_ADMIN_UPLOAD_COVER(10)).toBe('/blog/admin/10/upload-cover/');
+    });
+
+    it('NOTIFICATION_LOG_READ returns the correct API path for a given id', () => {
+      expect(API_ENDPOINTS.NOTIFICATION_LOG_READ(7)).toBe('/notifications/logs/7/read/');
+    });
+
+    it('FAQS_BY_TOPIC returns the correct API path for a given slug', () => {
+      expect(API_ENDPOINTS.FAQS_BY_TOPIC('adopcion')).toBe('/faqs/adopcion/');
+    });
+
+    it('FAVORITE_UPDATE returns the correct API path for a given id', () => {
+      expect(API_ENDPOINTS.FAVORITE_UPDATE(3)).toBe('/favorites/3/');
+    });
   });
 
   describe('ROUTES', () => {
@@ -104,6 +152,22 @@ describe('constants', () => {
 
     it('CAMPAIGN_DETAIL returns the correct route for a given id', () => {
       expect(ROUTES.CAMPAIGN_DETAIL(7)).toBe('/campaigns/7');
+    });
+
+    it('BLOG_DETAIL returns the correct route for a given slug', () => {
+      expect(ROUTES.BLOG_DETAIL('my-slug')).toBe('/blog/my-slug');
+    });
+
+    it('ADMIN_BLOG_EDIT returns the correct route for a given id', () => {
+      expect(ROUTES.ADMIN_BLOG_EDIT(5)).toBe('/admin/blog/5/editar');
+    });
+
+    it('ADOPT returns the correct route for a given id', () => {
+      expect(ROUTES.ADOPT(9)).toBe('/adopt/9');
+    });
+
+    it('VOLUNTEER_APPLY returns the correct route for a given positionId', () => {
+      expect(ROUTES.VOLUNTEER_APPLY(2)).toBe('/work-with-us/apply/2');
     });
   });
 

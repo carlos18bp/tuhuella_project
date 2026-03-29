@@ -152,4 +152,12 @@ describe('CheckoutApadrinamientoPage', () => {
     await userEvent.click(nequiRadio);
     expect(nequiRadio).toBeChecked();
   });
+
+  it('allows changing payment method to PSE', async () => {
+    render(<CheckoutApadrinamientoPage />);
+    const pseRadio = screen.getByDisplayValue('pse');
+    await userEvent.click(pseRadio);
+    expect(pseRadio).toBeChecked();
+    expect(screen.getByDisplayValue('card')).not.toBeChecked();
+  });
 });

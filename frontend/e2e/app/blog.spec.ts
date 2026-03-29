@@ -7,6 +7,8 @@ import {
   BLOG_ADMIN_CREATE,
   BLOG_ADMIN_EDIT,
   BLOG_ADMIN_CALENDAR,
+  BLOG_ADMIN_DELETE,
+  BLOG_ADMIN_DUPLICATE,
 } from '../helpers/flow-tags';
 
 const mockBlogPost = {
@@ -166,5 +168,75 @@ test.describe('Blog — Admin', () => {
     // Day headers
     await expect(page.getByText('Lun', { exact: true })).toBeVisible();
     await expect(page.getByText('Vie', { exact: true })).toBeVisible();
+  });
+
+  test('should delete a blog post with confirmation dialog', { tag: [...BLOG_ADMIN_DELETE] }, async ({ page }) => {
+    let deleteRequested = false;
+    await page.route(/\/api\/blog\/admin\/1\/delete/, (route) => {
+      deleteRequested = true;
+      return route.fulfill({ status: 204, body: '' });
+    });
+    // After delete, the list re-fetches and returns empty
+    await page.route(/\/api\/blog\/admin\//, (route) => {
+      if (route.request().url().includes('/delete')) return route.fallback();
+      const body = deleteRequested
+        ? { results: [], count: 0, page: 1, page_size: 10, total_pages: 1 }
+        : { results: [{ ...mockBlogPost, id: 1, status: 'published' }], count: 1, page: 1, page_size: 10, total_pages: 1 };
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
+    });
+
+    await loginAndNavigate(page, 'admin', '/admin/blog');
+    await waitForPageLoad(page);
+
+    // Click Eliminar button on the post
+    const deleteBtn = page.getByRole('button', { name: /Eliminar/i }).first();
+    await expect(deleteBtn).toBeVisible({ timeout: 15_000 });
+    await deleteBtn.click();
+
+    // Confirmation dialog appears
+    const dialog = page.getByRole('dialog', { name: /Eliminar post/i });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByText(/no se puede deshacer/i)).toBeVisible();
+
+    // Confirm deletion
+    await dialog.getByRole('button', { name: /Eliminar/i }).click();
+
+    // Post should be removed from the list
+    await expect(page.getByText('No hay posts aún')).toBeVisible({ timeout: 10_000 });
+  });
+
+  test('should duplicate a blog post with confirmation dialog', { tag: [...BLOG_ADMIN_DUPLICATE] }, async ({ page }) => {
+    let duplicated = false;
+    const duplicatedPost = { ...mockBlogPost, id: 3, title: 'Copia de Cómo adoptar responsablemente', slug: 'copia-como-adoptar', status: 'draft', is_published: false };
+    await page.route(/\/api\/blog\/admin\/1\/duplicate/, (route) => {
+      duplicated = true;
+      return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify(duplicatedPost) });
+    });
+    // After duplicate, the list re-fetches and includes the new post
+    await page.route(/\/api\/blog\/admin\//, (route) => {
+      if (route.request().url().includes('/duplicate')) return route.fallback();
+      const results = duplicated
+        ? [{ ...mockBlogPost, id: 1, status: 'published' }, duplicatedPost]
+        : [{ ...mockBlogPost, id: 1, status: 'published' }];
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ results, count: results.length, page: 1, page_size: 10, total_pages: 1 }) });
+    });
+
+    await loginAndNavigate(page, 'admin', '/admin/blog');
+    await waitForPageLoad(page);
+
+    // Click Duplicar button on the post
+    const duplicateBtn = page.getByRole('button', { name: /Duplicar/i }).first();
+    await expect(duplicateBtn).toBeVisible({ timeout: 15_000 });
+    await duplicateBtn.click();
+
+    // Confirmation dialog appears
+    const dialog = page.getByRole('dialog', { name: /Duplicar post/i });
+    await expect(dialog).toBeVisible();
+
+    // Confirm duplication
+    await dialog.getByRole('button', { name: /Duplicar/i }).click();
+
+    // Duplicated post should appear in the list
+    await expect(page.getByText('Copia de Cómo adoptar responsablemente')).toBeVisible({ timeout: 10_000 });
   });
 });

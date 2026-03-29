@@ -8,6 +8,7 @@ jest.mock('../../services/http', () => ({
   api: {
     get: jest.fn(),
     post: jest.fn(),
+    patch: jest.fn(),
   },
 }));
 
@@ -79,5 +80,42 @@ describe('favoriteStore', () => {
 
     expect(useFavoriteStore.getState().isFavorited(10)).toBe(true);
     expect(useFavoriteStore.getState().isFavorited(999)).toBe(false);
+  });
+
+  it('updates favorite note on success', async () => {
+    const updated = { ...FAVORITE_FIXTURE, note: 'great dog' };
+    useFavoriteStore.setState({ favorites: [FAVORITE_FIXTURE as never] });
+    mockApi.patch.mockResolvedValueOnce({ data: updated });
+
+    await act(async () => {
+      await useFavoriteStore.getState().updateFavoriteNote(1, 'great dog');
+    });
+
+    expect(useFavoriteStore.getState().favorites[0]).toEqual(updated);
+  });
+
+  it('handles updateFavoriteNote failure silently', async () => {
+    useFavoriteStore.setState({ favorites: [FAVORITE_FIXTURE as never] });
+    mockApi.patch.mockRejectedValueOnce(new Error('fail'));
+
+    await act(async () => {
+      await useFavoriteStore.getState().updateFavoriteNote(1, 'test');
+    });
+
+    // Favorites remain unchanged
+    expect(useFavoriteStore.getState().favorites[0]).toEqual(FAVORITE_FIXTURE);
+  });
+
+  it('rolls back favorites on toggleFavorite error', async () => {
+    useFavoriteStore.setState({ favorites: [FAVORITE_FIXTURE as never] });
+    mockApi.post.mockRejectedValueOnce(new Error('fail'));
+
+    await expect(
+      useFavoriteStore.getState().toggleFavorite(10),
+    ).rejects.toThrow('fail');
+
+    // Favorites should be restored to original
+    expect(useFavoriteStore.getState().favorites).toHaveLength(1);
+    expect(useFavoriteStore.getState().favorites[0].animal).toBe(10);
   });
 });

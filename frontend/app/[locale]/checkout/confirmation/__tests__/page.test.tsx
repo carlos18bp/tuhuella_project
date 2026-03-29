@@ -74,3 +74,17 @@ describe('CheckoutConfirmacionPage - real status', () => {
     expect(screen.queryByText(/flujo de pago placeholder/)).not.toBeInTheDocument();
   });
 });
+
+describe('CheckoutConfirmacionPage - default params', () => {
+  it('defaults to donation type when type param is missing', () => {
+    mockSearchParams = new URLSearchParams('status=placeholder');
+    render(<CheckoutConfirmacionPage />);
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Donación registrada');
+  });
+
+  it('defaults to placeholder status when status param is missing', () => {
+    mockSearchParams = new URLSearchParams('type=donation');
+    render(<CheckoutConfirmacionPage />);
+    expect(screen.getByText(/flujo de pago placeholder/)).toBeInTheDocument();
+  });
+});

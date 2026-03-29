@@ -93,4 +93,33 @@ describe('ShelterUpdatesPage — after fetch', () => {
       expect(screen.getAllByTestId('trash-icon').length).toBe(2);
     });
   });
+
+});
+
+describe('ShelterUpdatesPage — image and empty states', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('renders update with image when image_url is provided', async () => {
+    const updateWithImage = { ...mockUpdates[0], image_url: 'http://example.com/photo.jpg' };
+    mockApiGet
+      .mockResolvedValueOnce({ data: [{ id: 1 }] })
+      .mockResolvedValueOnce({ data: [updateWithImage] });
+    render(<ShelterUpdatesPage />);
+    await waitFor(() => {
+      const img = screen.getByRole('img', { name: 'Actualización de salud de Rex' });
+      expect(img).toHaveAttribute('src', 'http://example.com/photo.jpg');
+    });
+  });
+
+  it('renders no-updates message when shelter has no updates', async () => {
+    mockApiGet
+      .mockResolvedValueOnce({ data: [{ id: 1 }] })
+      .mockResolvedValueOnce({ data: [] });
+    render(<ShelterUpdatesPage />);
+    await waitFor(() => {
+      expect(screen.getByText('No has publicado actualizaciones aún.')).toBeInTheDocument();
+    });
+  });
 });

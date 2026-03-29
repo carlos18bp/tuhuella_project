@@ -110,4 +110,24 @@ describe('MisSolicitudesPage', () => {
     render(<MisSolicitudesPage />);
     expect(screen.getAllByText('Rechazada').length).toBeGreaterThanOrEqual(1);
   });
+
+  it('shows clear filter button when filter yields no results', async () => {
+    useAdoptionStore.setState({
+      applications: [makeApp({ id: 1, status: 'submitted', animal_name: 'Firulais' })],
+    });
+    render(<MisSolicitudesPage />);
+    const approvedChip = screen.getAllByRole('button', { name: /Aprobada/ })[0];
+    await userEvent.click(approvedChip);
+    expect(screen.getByText('No hay solicitudes con este estado')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Limpiar filtro/ })).toBeInTheDocument();
+  });
+
+  it('renders thumbnail image when application has thumbnail_url', () => {
+    useAdoptionStore.setState({
+      applications: [makeApp({ thumbnail_url: 'http://example.com/luna.jpg' })],
+    });
+    render(<MisSolicitudesPage />);
+    const img = screen.getByRole('img', { name: 'Luna' });
+    expect(img).toHaveAttribute('src', 'http://example.com/luna.jpg');
+  });
 });

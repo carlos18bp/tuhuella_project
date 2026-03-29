@@ -200,4 +200,36 @@ describe('MiIntencionPage', () => {
       expect(screen.getByRole('button', { name: 'Crear intención' })).not.toBeDisabled();
     });
   });
+
+  it('defaults description to empty string when intent has no description', async () => {
+    mockApi.get.mockResolvedValueOnce({
+      data: { visibility: 'public', status: 'active' },
+    });
+    setupMock();
+    render(<MiIntencionPage />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/Cuéntanos qué buscas/)).toHaveValue('');
+    });
+  });
+
+  it('shows Guardando text while save is in progress', async () => {
+    mockApi.get.mockRejectedValueOnce(new Error('not found'));
+    let resolveSave!: (v: any) => void;
+    mockApi.post.mockReturnValueOnce(new Promise((res) => { resolveSave = res; }));
+    setupMock();
+    render(<MiIntencionPage />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Crear intención' })).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Crear intención' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Guardando/i })).toBeDisabled();
+    });
+
+    resolveSave({ data: { description: '', visibility: 'public', status: 'active' } });
+  });
 });

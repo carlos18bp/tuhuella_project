@@ -131,4 +131,14 @@ describe('AdminPagosPage', () => {
       expect(screen.getByText('custom_status')).toBeInTheDocument();
     });
   });
+
+  it('renders Rechazado label for declined payment', async () => {
+    const declinedPayment = { ...mockPayments[0], id: 10, status: 'declined' };
+    mockApi.get.mockResolvedValueOnce({ data: [declinedPayment] });
+    setupMock();
+    render(<AdminPagosPage />);
+    await waitFor(() => {
+      expect(screen.getByText('Rechazado')).toBeInTheDocument();
+    });
+  });
 });

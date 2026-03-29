@@ -5,7 +5,15 @@ import userEvent from '@testing-library/user-event';
 
 import CheckoutForm from '../CheckoutForm';
 
-jest.mock('../TermsModal', () => function MockTermsModal() { return null; });
+jest.mock('../TermsModal', () => function MockTermsModal({ open, onAccept, onClose, showActions }: any) {
+  if (!open) return null;
+  return (
+    <div data-testid="terms-modal">
+      {showActions && <button data-testid="accept-terms" onClick={onAccept}>Accept</button>}
+      <button data-testid="close-terms-modal" onClick={onClose}>Close</button>
+    </div>
+  );
+});
 
 describe('CheckoutForm', () => {
   const mockOnSubmit = jest.fn();
@@ -169,5 +177,20 @@ describe('CheckoutForm', () => {
   it('renders terms link button', () => {
     render(<CheckoutForm type="donation" recipientName="Test" onSubmit={mockOnSubmit} />);
     expect(screen.getByText('Términos y Condiciones')).toBeInTheDocument();
+  });
+
+  it('accepts terms and closes modal when onAccept is triggered from TermsModal', async () => {
+    render(<CheckoutForm type="donation" recipientName="Test" onSubmit={mockOnSubmit} />);
+
+    // Open the terms modal via the link button
+    await userEvent.click(screen.getByText('Términos y Condiciones'));
+    expect(screen.getByTestId('terms-modal')).toBeInTheDocument();
+
+    // Accept terms from inside the modal
+    await userEvent.click(screen.getByTestId('accept-terms'));
+
+    // Modal closes and terms checkbox is now checked
+    expect(screen.queryByTestId('terms-modal')).not.toBeInTheDocument();
+    expect(screen.getByRole('checkbox')).toBeChecked();
   });
 });

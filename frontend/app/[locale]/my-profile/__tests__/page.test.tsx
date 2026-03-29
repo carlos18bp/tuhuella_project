@@ -135,4 +135,65 @@ describe('MiPerfilPage', () => {
     // Luna's initial should be visible as preview
     expect(screen.getAllByText('L').length).toBeGreaterThanOrEqual(1);
   });
+
+  it('renders red completeness bar when completeness < 50%', () => {
+    const incompleteUser = { ...mockUser, phone: undefined, city: undefined };
+    useAuthStore.setState({ user: incompleteUser });
+
+    render(<MiPerfilPage />);
+    // Only name (15) + email (15) = 30%
+    expect(screen.getByText('30%')).toBeInTheDocument();
+  });
+
+  it('renders 100% completeness with intent', () => {
+    useAuthStore.setState({ user: mockUser, profileStats: mockStats });
+
+    render(<MiPerfilPage />);
+    // name(15) + email(15) + phone(20) + city(20) + intent(30) = 100
+    expect(screen.getByText('100%')).toBeInTheDocument();
+    expect(screen.getByText('Perfil completo')).toBeInTheDocument();
+  });
+
+  it('renders donation and sponsorship activity events', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-03-28T12:00:00Z'));
+
+    const yesterday = new Date('2026-03-27T12:00:00Z').toISOString();
+    const monthsAgo = new Date('2026-01-15T12:00:00Z').toISOString();
+
+    useAuthStore.setState({
+      user: mockUser,
+      activity: [
+        { type: 'donation', amount: '50000', shelter_name: 'Patitas', date: yesterday },
+        { type: 'sponsorship', animal_name: 'Rocky', date: monthsAgo },
+      ],
+    });
+
+    render(<MiPerfilPage />);
+    expect(screen.getByText(/Donaste \$50000/)).toBeInTheDocument();
+    expect(screen.getByText(/Comenzaste a apadrinar a Rocky/)).toBeInTheDocument();
+    expect(screen.getByText('Ayer')).toBeInTheDocument();
+
+    jest.useRealTimers();
+  });
+
+  it('renders +N indicator when favorites exceed preview limit', () => {
+    const manyFavStats = {
+      ...mockStats,
+      favorites: {
+        count: 8,
+        preview: [
+          { id: 1, name: 'Luna', species: 'dog', thumbnail_url: null },
+          { id: 2, name: 'Max', species: 'dog', thumbnail_url: null },
+          { id: 3, name: 'Rocky', species: 'dog', thumbnail_url: null },
+          { id: 4, name: 'Milo', species: 'cat', thumbnail_url: null },
+          { id: 5, name: 'Nala', species: 'cat', thumbnail_url: null },
+        ],
+      },
+    };
+    useAuthStore.setState({ user: mockUser, profileStats: manyFavStats });
+
+    render(<MiPerfilPage />);
+    expect(screen.getByText('+4')).toBeInTheDocument();
+  });
 });

@@ -306,4 +306,60 @@ describe('SignUpPage', () => {
     });
     expect(replace).toHaveBeenCalledWith('/');
   });
+
+  it('shows error when terms not accepted', async () => {
+    const signUp = jest.fn();
+    setAuthStoreState({ signUp, googleLogin: jest.fn() });
+    mockUseRouter.mockReturnValue({ replace: jest.fn() });
+
+    render(<SignUpPage />);
+
+    fireEvent.change(screen.getByPlaceholderText('tu@email.com'), { target: { value: 'user@example.com' } });
+    const passwordFields = screen.getAllByPlaceholderText('••••••••');
+    fireEvent.change(passwordFields[0], { target: { value: 'password123' } });
+    fireEvent.change(passwordFields[1], { target: { value: 'password123' } });
+    // Do NOT check the terms checkbox
+    fireEvent.click(screen.getByRole('button', { name: 'Crear cuenta' }));
+
+    expect(await screen.findByText('Debes aceptar los términos y condiciones para continuar')).toBeInTheDocument();
+    expect(signUp).not.toHaveBeenCalled();
+  });
+
+  it('shows field-level array error from backend', async () => {
+    const signUp = jest.fn().mockRejectedValue({
+      response: { data: { email: ['This email is already taken'] } },
+    });
+    setAuthStoreState({ signUp, googleLogin: jest.fn() });
+    mockUseRouter.mockReturnValue({ replace: jest.fn() });
+
+    render(<SignUpPage />);
+
+    fireEvent.change(screen.getByPlaceholderText('tu@email.com'), { target: { value: 'user@example.com' } });
+    const passwordFields = screen.getAllByPlaceholderText('••••••••');
+    fireEvent.change(passwordFields[0], { target: { value: 'password123' } });
+    fireEvent.change(passwordFields[1], { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.click(screen.getByRole('button', { name: 'Crear cuenta' }));
+
+    expect(await screen.findByText('This email is already taken')).toBeInTheDocument();
+  });
+
+  it('shows field-level string error from backend', async () => {
+    const signUp = jest.fn().mockRejectedValue({
+      response: { data: { password: 'Too common' } },
+    });
+    setAuthStoreState({ signUp, googleLogin: jest.fn() });
+    mockUseRouter.mockReturnValue({ replace: jest.fn() });
+
+    render(<SignUpPage />);
+
+    fireEvent.change(screen.getByPlaceholderText('tu@email.com'), { target: { value: 'user@example.com' } });
+    const passwordFields = screen.getAllByPlaceholderText('••••••••');
+    fireEvent.change(passwordFields[0], { target: { value: 'password123' } });
+    fireEvent.change(passwordFields[1], { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.click(screen.getByRole('button', { name: 'Crear cuenta' }));
+
+    expect(await screen.findByText('Too common')).toBeInTheDocument();
+  });
 });

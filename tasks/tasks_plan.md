@@ -1,6 +1,6 @@
 # Mi Huella — Feature Task Plan
 
-> Last updated: 2026-03-26
+> Last updated: 2026-03-29
 
 ## Status Legend
 - ✅ Done
@@ -8,7 +8,7 @@
 - ⏳ Pending
 - ❌ Blocked
 
-## Phase 1 — Backend Models (20 models)
+## Phase 1 — Backend Models (24 model classes, 21 files)
 | Task | Status | Notes |
 |------|--------|-------|
 | User model | ✅ | city field, adopter/shelter_admin/admin roles |
@@ -32,17 +32,17 @@
 | StrategicAlly model | ✅ | partner organizations |
 | VolunteerPosition model | ✅ | volunteer opportunities |
 
-## Phase 2 — Backend Serializers (40 files)
+## Phase 2 — Backend Serializers (44 files)
 | Task | Status | Notes |
 |------|--------|-------|
-| 40 serializer files | ✅ | list/detail/create_update pattern + blog + utils |
+| 44 serializer files | ✅ | list/detail/create_update pattern + blog + utils |
 
 ## Phase 3 — Backend Views, URLs, Admin, Commands
 | Task | Status | Notes |
 |------|--------|-------|
-| 19 view modules | ✅ | FBV pattern |
-| 18 URL modules | ✅ | Split under urls/ |
-| Admin (MiHuellaAdminSite, 21 classes) | ✅ | All 20 models registered |
+| 22 view modules | ✅ | FBV pattern |
+| 20 URL modules | ✅ | Split under urls/ |
+| Admin (MiHuellaAdminSite, 22 classes) | ✅ | All models registered |
 | 21 management commands | ✅ | Including seed_amount_options |
 | Payment placeholder views | ✅ | Wompi stub |
 | Services (email, notification) | ✅ | 3 service files |
@@ -61,7 +61,7 @@
 ## Phase 5 — Frontend Types, Constants, Stores
 | Task | Status | Notes |
 |------|--------|-------|
-| types.ts (34 exported types) | ✅ | |
+| types.ts (40 exported types) | �� | |
 | constants.ts (routes + API endpoints) | ✅ | |
 | 10 Zustand stores | ✅ | Added blogStore, notificationStore |
 | next-intl setup (en/es) | ✅ | messages, config, LocaleSwitcher |
@@ -69,9 +69,9 @@
 ## Phase 6 — Frontend Pages & Components
 | Task | Status | Notes |
 |------|--------|-------|
-| 47 page.tsx files | ✅ | All routes covered |
+| 49 page.tsx files | ✅ | All routes covered |
 | Header + Footer + Sidebar | ✅ | Role-aware, mobile menu, locale switcher, theme toggle |
-| 25 UI components | ✅ | All barrel-exported from components/ui/index.ts |
+| 31 UI components | ✅ | All barrel-exported from components/ui/index.ts |
 | Blog components (2) | ✅ | BlogContentRenderer, ReadingProgressBar |
 | Provider components | ✅ | ThemeProvider |
 
@@ -80,7 +80,7 @@
 |------|--------|-------|
 | flow-definitions.json (75 flows) | ✅ | |
 | USER_FLOW_MAP.md | ✅ | |
-| E2E test implementation (14 spec files) | 🔧 | Coverage expanding |
+| E2E test implementation (16 spec files) | 🔧 | Coverage expanding |
 
 ## Phase 8 — Cleanup
 | Task | Status | Notes |
@@ -108,15 +108,15 @@
 ## Phase 10 — Test Coverage Expansion
 | Task | Status | Notes |
 |------|--------|-------|
-| Backend tests: 56 files | ✅ | Models, serializers, views, services, utils, commands |
-| Frontend unit tests: 100 files | ✅ | Pages, components, stores, hooks, services |
-| E2E specs: 14 files | 🔧 | Covers auth, public, app flows |
+| Backend tests: 57 files | ✅ | Models, serializers, views, services, utils, commands |
+| Frontend unit tests: 107 files | ✅ | Pages, components, stores, hooks, services |
+| E2E specs: 16 files | 🔧 | Covers auth, public, app, contract flows |
 | E2E flow definitions: 75 flows | ✅ | P1–P4 priority levels |
 
 ## Methodology
 | Task | Status | Notes |
 |------|--------|-------|
-| docs/methodology/ (7 core files) | ✅ | Refreshed 2026-03-26 |
+| docs/methodology/ (7 core files) | ✅ | Refreshed 2026-03-29 |
 | tasks/ directory | ✅ | |
 | Claude Code skills | ✅ | 15+ skills configured |
 | Error documentation | ✅ | 4 resolved issues |
@@ -151,7 +151,26 @@
 | S2: next/image optimization | ✅ | Shelter detail + campaign detail pages |
 | S3: Email function centralization | ✅ | email_utils.py + backwards-compat re-exports |
 
-## Phase 13 — Enriched My-Profile Dashboard
+## Phase 13a — Enriched Favorites View ✅
+| Task | Status | Notes |
+|------|--------|-------|
+| Favorite model — `note` field + migration | ✅ | Optional text note per favorite |
+| FavoriteSerializer — 10 enriched fields | ✅ | breed, age_range, size, gender, vaccinated, sterilized, status, shelter_city, thumbnail_url, note |
+| PATCH /favorites/{id}/ endpoint | ✅ | Note updates |
+| favorite_toggle returns full serialized favorite | ✅ | On add |
+| 5 new backend tests | ✅ | Enriched fields, toggle, note CRUD, auth, ownership |
+| AnimalCard reuse + status badge overlays | ✅ | adopted=red, in_process=amber, unavailable=grey |
+| Remove favorite with inline confirmation | ✅ | |
+| Counter + relative date display | ✅ | "Guardado hace X días" |
+| Client-side filters (species, size) + sort | ✅ | Chips + dropdown |
+| Grid/list toggle with localStorage | ✅ | |
+| Personal notes with debounced auto-save | ✅ | |
+| Compare mode (2–3 animals) | ✅ | Floating bar + comparison table modal |
+| Enhanced empty state | ✅ | Popular animals suggestion |
+| 36 i18n keys (es + en) | ✅ | |
+| 14 frontend unit tests | ✅ | All passing |
+
+## Phase 13b — Enriched My-Profile Dashboard
 | Task | Status | Notes |
 |------|--------|-------|
 | Step 1: User model — 6 new fields + migration | ⏳ | avatar, bio, housing_type, has_yard, has_other_pets, experience_level |

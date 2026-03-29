@@ -187,4 +187,59 @@ describe('ShelterUpdateCreatePage', () => {
       expect(screen.getByText('Error del servidor')).toBeInTheDocument();
     });
   });
+
+  it('falls back to t("errorCreating") when error has no response data', async () => {
+    setupDataMocks();
+    mockApiPost.mockRejectedValue(new Error('Network error'));
+    const user = userEvent.setup();
+    render(<ShelterUpdateCreatePage />);
+
+    await waitFor(() => {
+      expect(mockApiGet).toHaveBeenCalledTimes(3);
+    });
+
+    const titleEsInput = screen.getAllByRole('textbox').filter((el) => el.tagName === 'INPUT')[0];
+    await user.type(titleEsInput, 'Mi título');
+
+    const contentEsTextarea = screen.getAllByRole('textbox').filter((el) => el.tagName === 'TEXTAREA')[0];
+    await user.type(contentEsTextarea, 'Contenido de prueba');
+
+    await user.click(screen.getByRole('button', { name: 'Publicar actualización' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Error al publicar la actualización')).toBeInTheDocument();
+    });
+  });
+
+  it('sends optional campaign and animal IDs in payload when selected', async () => {
+    setupDataMocks();
+    mockApiPost.mockResolvedValue({ data: {} });
+    const user = userEvent.setup();
+    render(<ShelterUpdateCreatePage />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('option', { name: 'Campaign 1' })).toBeInTheDocument();
+    });
+
+    const titleEsInput = screen.getAllByRole('textbox').filter((el) => el.tagName === 'INPUT')[0];
+    await user.type(titleEsInput, 'Título');
+
+    const contentEsTextarea = screen.getAllByRole('textbox').filter((el) => el.tagName === 'TEXTAREA')[0];
+    await user.type(contentEsTextarea, 'Contenido');
+
+    await user.selectOptions(screen.getAllByRole('combobox')[0], '1');
+    await user.selectOptions(screen.getAllByRole('combobox')[1], '1');
+
+    await user.click(screen.getByRole('button', { name: 'Publicar actualización' }));
+
+    await waitFor(() => {
+      expect(mockApiPost).toHaveBeenCalledWith(
+        expect.stringContaining('/updates/create'),
+        expect.objectContaining({
+          campaign: 1,
+          animal: 1,
+        })
+      );
+    });
+  });
 });

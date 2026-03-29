@@ -275,3 +275,40 @@ describe('AdoptPage — submitting state', () => {
     resolvePost({ data: {} });
   });
 });
+
+describe('AdoptPage — no user state', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    const animalState = {
+      animal: mockAnimal,
+      loading: false,
+      fetchAnimal: jest.fn(),
+    };
+    const authState = { user: null };
+    mockUseAnimalStore.mockImplementation((sel: any) => sel(animalState));
+    mockUseAuthStore.mockImplementation((sel: any) => sel(authState));
+  });
+
+  it('renders AdoptionForm without default values when user is null', () => {
+    render(<AdoptPage />);
+    expect(screen.getByTestId('adoption-form')).toBeInTheDocument();
+    expect(screen.getByText('Rex')).toBeInTheDocument();
+  });
+});
+
+describe('AdoptPage — error response with error field', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupLoadedState();
+  });
+
+  it('shows error field value when api.post returns error key in response data', async () => {
+    mockApiPost.mockRejectedValue({ response: { data: { error: 'Animal no disponible' } } });
+    const user = userEvent.setup();
+    render(<AdoptPage />);
+    await user.click(screen.getByTestId('submit-form'));
+    await waitFor(() => {
+      expect(screen.getByText('Animal no disponible')).toBeInTheDocument();
+    });
+  });
+});

@@ -90,4 +90,36 @@ describe('ReadingProgressBar', () => {
 
     expect(screen.queryByTestId('reading-progress-remaining')).not.toBeInTheDocument();
   });
+
+  it('sets progress to 0 when docHeight is 0', () => {
+    Object.defineProperty(document.documentElement, 'scrollHeight', { value: 800, configurable: true });
+    Object.defineProperty(document.documentElement, 'clientHeight', { value: 800, configurable: true });
+
+    render(<ReadingProgressBar readTimeMinutes={5} />);
+
+    const bar = screen.getByTestId('reading-progress-fill');
+    expect(bar).toHaveStyle({ width: '0%' });
+  });
+
+  it('does not show remaining time when progress is below 5%', () => {
+    render(<ReadingProgressBar readTimeMinutes={10} />);
+
+    act(() => {
+      Object.defineProperty(window, 'scrollY', { value: 10, writable: true, configurable: true });
+      window.dispatchEvent(new Event('scroll'));
+    });
+
+    expect(screen.queryByTestId('reading-progress-remaining')).not.toBeInTheDocument();
+  });
+
+  it('does not show remaining time when progress is above 95%', () => {
+    render(<ReadingProgressBar readTimeMinutes={10} />);
+
+    act(() => {
+      Object.defineProperty(window, 'scrollY', { value: 1150, writable: true, configurable: true });
+      window.dispatchEvent(new Event('scroll'));
+    });
+
+    expect(screen.queryByTestId('reading-progress-remaining')).not.toBeInTheDocument();
+  });
 });

@@ -296,4 +296,35 @@ describe('AnimalDetailPage', () => {
     const shelterLink = screen.getByText('Patitas Felices');
     expect(shelterLink.closest('a')).toHaveAttribute('href', '/shelter/1');
   });
+
+  it('renders compatibility "no" labels correctly', () => {
+    const noCompat = {
+      ...mockAnimal,
+      good_with_kids: 'no',
+      good_with_dogs: 'no',
+      good_with_cats: 'yes',
+    };
+    setupMocks({ loading: false, animal: noCompat });
+    render(<AnimalDetailPage />);
+    expect(screen.getByTestId('compatibility-section')).toBeInTheDocument();
+    // Kids and Dogs should show "No" label
+    expect(screen.getByText(/Niños.*No/)).toBeInTheDocument();
+    expect(screen.getByText(/Perros.*No/)).toBeInTheDocument();
+    // Cats should show "Sí"
+    expect(screen.getByText(/Gatos.*Sí/)).toBeInTheDocument();
+  });
+
+  it('renders low energy icon and label', () => {
+    const lowEnergy = { ...mockAnimal, energy_level: 'low' };
+    setupMocks({ loading: false, animal: lowEnergy });
+    render(<AnimalDetailPage />);
+    expect(screen.getByText('Bajo')).toBeInTheDocument();
+  });
+
+  it('renders high energy icon and label', () => {
+    const highEnergy = { ...mockAnimal, energy_level: 'high' };
+    setupMocks({ loading: false, animal: highEnergy });
+    render(<AnimalDetailPage />);
+    expect(screen.getByText('Alto')).toBeInTheDocument();
+  });
 });

@@ -141,3 +141,10 @@ export const PROFILE_EDIT = ['@flow:profile-edit', '@module:adopter', '@priority
 
 // ── Favorite (compare) ──
 export const FAVORITES_COMPARE = ['@flow:favorites-compare', '@module:favorite', '@priority:P3'];
+
+// ── Favorite (note edit) ──
+export const FAVORITE_NOTE_EDIT = ['@flow:favorite-note-edit', '@module:favorite', '@priority:P3'];
+
+// ── Blog Admin (delete & duplicate) ──
+export const BLOG_ADMIN_DELETE = ['@flow:blog-admin-delete', '@module:blog-admin', '@priority:P2'];
+export const BLOG_ADMIN_DUPLICATE = ['@flow:blog-admin-duplicate', '@module:blog-admin', '@priority:P3'];

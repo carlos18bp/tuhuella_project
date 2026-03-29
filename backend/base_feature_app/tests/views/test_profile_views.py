@@ -150,3 +150,59 @@ def test_update_profile_returns_date_joined(authenticated_client):
     )
     assert response.status_code == status.HTTP_200_OK
     assert 'date_joined' in response.json()
+
+
+# ---------------------------------------------------------------------------
+# profile — role-specific data
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_get_profile_returns_admin_stats(api_client, admin_user, shelter, animal):
+    """Admin user's profile includes admin_stats with counts."""
+    admin_user.role = 'admin'
+    admin_user.save(update_fields=['role'])
+    api_client.force_authenticate(user=admin_user)
+    response = api_client.get(reverse('update-profile'))
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert 'admin_stats' in data
+    assert data['admin_stats']['total_users'] >= 1
+    assert data['admin_stats']['total_shelters'] >= 1
+    assert data['admin_stats']['total_animals'] >= 1
+
+
+@pytest.mark.django_db
+def test_get_profile_returns_shelter_data_for_shelter_admin(shelter_admin_client, shelter):
+    """Shelter admin's profile includes shelter details."""
+    response = shelter_admin_client.get(reverse('update-profile'))
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert 'shelter' in data
+    assert data['shelter']['name'] == 'Happy Paws'
+
+
+@pytest.mark.django_db
+def test_get_profile_no_shelter_key_for_adopter(authenticated_client):
+    """Regular adopter profile does not include shelter data."""
+    response = authenticated_client.get(reverse('update-profile'))
+    assert response.status_code == status.HTTP_200_OK
+    assert 'shelter' not in response.json()
+
+
+@pytest.mark.django_db
+def test_profile_stats_with_adopter_intent(authenticated_client, adopter_intent):
+    """Profile stats include adopter intent status."""
+    response = authenticated_client.get(reverse('profile-stats'))
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data['adopter_intent']['status'] == 'active'
+
+
+@pytest.mark.django_db
+def test_profile_stats_pending_invites_counted(authenticated_client, shelter_invite):
+    """Profile stats count pending shelter invites for public intent users."""
+    response = authenticated_client.get(reverse('profile-stats'))
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data['shelter_invites']['pending_count'] == 1

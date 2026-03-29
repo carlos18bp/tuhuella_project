@@ -6,8 +6,12 @@ import userEvent from '@testing-library/user-event';
 import TermsPage from '../page';
 
 jest.mock('@/components/ui', () => ({
-  TermsModal: ({ open }: any) =>
-    open ? React.createElement('div', { 'data-testid': 'terms-modal' }) : null,
+  TermsModal: ({ open, onClose }: any) =>
+    open
+      ? React.createElement('div', { 'data-testid': 'terms-modal' },
+          React.createElement('button', { 'data-testid': 'close-modal', onClick: onClose }, 'Close'),
+        )
+      : null,
 }));
 
 describe('TermsPage', () => {
@@ -69,5 +73,14 @@ describe('TermsPage', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /Términos y Condiciones/ }));
     expect(screen.getByTestId('terms-modal')).toBeInTheDocument();
+  });
+
+  it('closes modal when onClose is triggered', async () => {
+    render(<TermsPage />);
+    await userEvent.click(screen.getByRole('button', { name: /Términos y Condiciones/ }));
+    expect(screen.getByTestId('terms-modal')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('close-modal'));
+    expect(screen.queryByTestId('terms-modal')).not.toBeInTheDocument();
   });
 });

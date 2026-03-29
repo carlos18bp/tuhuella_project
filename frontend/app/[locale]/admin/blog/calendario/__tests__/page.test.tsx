@@ -1,6 +1,7 @@
 import React from 'react';
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('@/lib/stores/blogStore', () => ({ useBlogStore: jest.fn() }));
 
@@ -84,5 +85,26 @@ describe('AdminBlogCalendarPage', () => {
     setupMock();
     render(<AdminBlogCalendarPage />);
     expect(screen.getByText('Borrador')).toBeInTheDocument();
+  });
+
+  it('navigates to previous month when "Anterior" is clicked', async () => {
+    const state = setupMock();
+    render(<AdminBlogCalendarPage />);
+
+    const prevBtn = screen.getByRole('button', { name: '← Anterior' });
+    await userEvent.click(prevBtn);
+
+    // fetchCalendarPosts should be called again with the previous month range
+    expect(state.fetchCalendarPosts.mock.calls.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('navigates to next month when "Siguiente" is clicked', async () => {
+    const state = setupMock();
+    render(<AdminBlogCalendarPage />);
+
+    const nextBtn = screen.getByRole('button', { name: 'Siguiente →' });
+    await userEvent.click(nextBtn);
+
+    expect(state.fetchCalendarPosts.mock.calls.length).toBeGreaterThanOrEqual(2);
   });
 });

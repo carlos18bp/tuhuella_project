@@ -1,5 +1,5 @@
 {
-  "version": "4.0.0",
+  "version": "5.0.0",
   "lastUpdated": "2026-03-28",
   "flows": {
     "home-loads": {
@@ -624,6 +624,30 @@
       "roles": ["adopter"],
       "priority": "P3",
       "description": "Authenticated user selects 2+ favorited animals and views side-by-side attribute comparison",
+      "expectedSpecs": 1
+    },
+    "favorite-note-edit": {
+      "name": "Edit favorite animal note",
+      "module": "favorite",
+      "roles": ["adopter"],
+      "priority": "P3",
+      "description": "Authenticated user edits the personal note on a favorited animal at /favoritos via inline text input",
+      "expectedSpecs": 1
+    },
+    "blog-admin-delete": {
+      "name": "Admin delete blog post",
+      "module": "blog-admin",
+      "roles": ["admin"],
+      "priority": "P2",
+      "description": "Admin deletes a blog post from the admin list with confirmation dialog",
+      "expectedSpecs": 1
+    },
+    "blog-admin-duplicate": {
+      "name": "Admin duplicate blog post",
+      "module": "blog-admin",
+      "roles": ["admin"],
+      "priority": "P3",
+      "description": "Admin duplicates a blog post from the admin list, creating a new draft copy",
       "expectedSpecs": 1
     }
   }

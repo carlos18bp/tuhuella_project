@@ -5,7 +5,7 @@ description: Project intelligence and lessons learned. Reference for project-spe
 
 # Lessons Learned — Mi Huella
 
-> Last updated: 2026-03-27
+> Last updated: 2026-03-29
 
 This file captures important patterns, preferences, and project intelligence that help work more effectively with this codebase. Updated as new insights are discovered.
 
@@ -14,10 +14,10 @@ This file captures important patterns, preferences, and project intelligence tha
 ## 1. Architecture Patterns
 
 ### Single Django App: `base_feature_app`
-- All 21 models, views, serializers, and services live in `base_feature_app`
+- All 24 model classes (21 files), views, serializers, and services live in `base_feature_app`
 - App name kept from template to avoid migration headaches
 - Models split into individual files under `base_feature_app/models/`
-- URLs split into 19 sub-modules under `base_feature_app/urls/`
+- URLs split into 20 sub-modules under `base_feature_app/urls/`
 
 ### Role-Based Access
 - Three roles: `adopter` (default), `shelter_admin`, `admin`
@@ -59,7 +59,7 @@ This file captures important patterns, preferences, and project intelligence tha
 - Each domain has its own view module: `views/animal.py`, `views/shelter.py`, etc.
 
 ### Frontend: Zustand Stores
-- **10** stores use Zustand with TypeScript types
+- **10** Zustand stores with TypeScript types
 - Stores: `authStore`, `animalStore`, `shelterStore`, `campaignStore`, `donationStore`, `sponsorshipStore`, `favoriteStore`, `adoptionStore`, `blogStore`, `notificationStore`
 - HTTP requests go through centralized `lib/services/http.ts` Axios instance
 - Token management via `lib/services/tokens.ts` + `js-cookie`
@@ -122,7 +122,7 @@ source venv/bin/activate && <command>
 - **Swiper**: Image carousels via `AnimalGallery` and `ShelterGallery` components
 - **Framer Motion**: Page transitions via `app/template.tsx`
 
-### Shared Components (`components/ui/` — 26 components)
+### Shared Components (`components/ui/` — 31 components)
 - `AnimalCard`, `AnimalGrid`, `AnimalFilters`, `AnimalGallery` — animal browsing
 - `ShelterCard`, `ShelterProfile`, `ShelterGallery` — shelter display
 - `CampaignCard` — campaign card with progress bar
@@ -158,10 +158,26 @@ source venv/bin/activate && <command>
 - 75 flows defined in `frontend/e2e/flow-definitions.json` (single source of truth)
 - Every E2E test must have `@flow:<flow-id>` tag
 - Flow definitions include priority (P1–P4) and role
-- 14 spec files across auth/, public/, and app/ directories
+- 16 spec files across auth/, public/, app/, and contracts/ directories
 
 ### CI Pipeline
 - Playwright E2E tests sharded into 5 parallel jobs
 - Blob reports merged after all shards complete
 - Test quality gate runs after all test suites pass
 - Coverage reports generated for both backend and frontend
+
+### Enriched Serializer Pattern (Phase 13a)
+- When a list view needs data from related models, enrich the serializer with computed/FK fields rather than forcing extra API calls
+- Example: `FavoriteSerializer` was enriched with 10 fields from the related `Animal` (breed, age_range, size, gender, vaccination status, shelter_city, thumbnail_url)
+- Include a `note` field on the through-table for user-attached metadata
+
+### Client-Side Filter/Sort UI Pattern (Phase 13a)
+- For small datasets (user's favorites ≤ ~100 items), client-side filtering is simpler than server-side
+- UI pattern: chip buttons for categorical filters (species, size) + dropdown for sort (recent/name/species)
+- Grid/list view toggle with `localStorage` persistence for user preference
+- Debounced auto-save (e.g., 500ms) for inline editable fields (favorite notes)
+
+### Compare Mode Pattern (Phase 13a)
+- Multi-select with floating action bar: user checks 2–3 items → fixed bottom bar shows count + "Compare" button
+- Comparison rendered in a modal with a side-by-side table (columns = selected items, rows = attributes)
+- Selection state managed locally in the page component, not in a global store

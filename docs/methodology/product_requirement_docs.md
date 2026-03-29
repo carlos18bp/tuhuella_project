@@ -27,6 +27,7 @@ Animal shelters in Colombia and Latin America lack centralized digital tools to:
 - View animal detail with gallery, medical info, special needs
 - Submit adoption application with structured form wizard
 - Track application status (pending → reviewing → approved/rejected)
+- Enriched favorites: personal notes, species/size filters, sort, grid/list toggle, compare mode (2–3 animals side-by-side)
 
 ### 2. Sponsorship & Donations
 - Monthly or one-time sponsorship for specific animals

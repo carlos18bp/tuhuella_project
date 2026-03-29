@@ -217,4 +217,57 @@ describe('AdminBlogCreatePage', () => {
 
     expect(input.value).toBe('Nuevo título');
   });
+
+  it('shows fallback error message when createPost rejects with a non-Error value', async () => {
+    const user = userEvent.setup();
+    const state = setupMock();
+    state.createPost.mockRejectedValue('string rejection');
+
+    render(<AdminBlogCreatePage />);
+
+    await user.type(screen.getByLabelText('Título (ES)'), 'Título');
+    await user.type(screen.getByLabelText('Title (EN)'), 'Title');
+    await user.type(screen.getByLabelText('Resumen (ES)'), 'Resumen');
+    await user.type(screen.getByLabelText('Excerpt (EN)'), 'Summary');
+
+    await user.click(screen.getByRole('button', { name: 'Crear Post' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Error al crear el post')).toBeInTheDocument();
+    });
+  });
+
+  it('shows fallback error message when createPostFromJSON rejects with a non-Error and non-SyntaxError', async () => {
+    const user = userEvent.setup();
+    const state = setupMock();
+    state.createPostFromJSON.mockRejectedValue('api failure');
+
+    render(<AdminBlogCreatePage />);
+
+    await user.click(screen.getByRole('button', { name: 'Importar JSON' }));
+
+    const jsonPayload = JSON.stringify({ title_es: 'Test' });
+    const textarea = screen.getByPlaceholderText(/title_es/);
+    fireEvent.change(textarea, { target: { value: jsonPayload } });
+
+    await user.click(screen.getByRole('button', { name: 'Crear desde JSON' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Error al crear desde JSON')).toBeInTheDocument();
+    });
+  });
+
+  it('toggles the is_published checkbox when clicked', async () => {
+    const user = userEvent.setup();
+    setupMock();
+
+    render(<AdminBlogCreatePage />);
+
+    const checkbox = screen.getByRole('checkbox', { name: /Publicado/ });
+    expect(checkbox).not.toBeChecked();
+
+    await user.click(checkbox);
+
+    expect(checkbox).toBeChecked();
+  });
 });

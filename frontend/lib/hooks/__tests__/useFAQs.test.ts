@@ -52,6 +52,16 @@ describe('useFAQsByTopic', () => {
 
     await waitFor(() => expect(result.current.loading).toBe(false));
   });
+
+  it('returns empty array when response items is null', async () => {
+    mockApiGet.mockResolvedValueOnce({ data: { items: null } });
+
+    const { result } = renderHook(() => useFAQsByTopic('adoption'));
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.items).toEqual([]);
+  });
 });
 
 describe('useAllFAQs', () => {
@@ -95,5 +105,15 @@ describe('useAllFAQs', () => {
     expect(result.current.loading).toBe(true);
 
     await waitFor(() => expect(result.current.loading).toBe(false));
+  });
+
+  it('returns empty array when response data is null', async () => {
+    mockApiGet.mockResolvedValueOnce({ data: null });
+
+    const { result } = renderHook(() => useAllFAQs());
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.topics).toEqual([]);
   });
 });

@@ -83,3 +83,74 @@ def test_update_post_create_rejects_missing_title(authenticated_client, shelter)
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+# ── PATCH / DELETE ───────────────────────────────────────────────────────────
+
+
+@pytest.mark.django_db
+def test_update_post_patch_by_owner(shelter_admin_client, update_post):
+    """Shelter owner can update their post."""
+    response = shelter_admin_client.patch(
+        reverse('update-post-update', args=[update_post.pk]),
+        {'title_es': 'Updated title'},
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()['title'] == 'Updated title'
+
+
+@pytest.mark.django_db
+def test_update_post_patch_denied_for_non_owner(authenticated_client, update_post):
+    """Non-owner cannot update the post."""
+    response = authenticated_client.patch(
+        reverse('update-post-update', args=[update_post.pk]),
+        {'title_es': 'Hacked'},
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@pytest.mark.django_db
+def test_update_post_patch_not_found(shelter_admin_client):
+    """Nonexistent post returns 404."""
+    response = shelter_admin_client.patch(
+        reverse('update-post-update', args=[99999]),
+        {'title_es': 'Test'},
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+def test_update_post_delete_by_owner(shelter_admin_client, update_post):
+    """Shelter owner can delete their post."""
+    response = shelter_admin_client.delete(
+        reverse('update-post-delete', args=[update_post.pk]),
+    )
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert not UpdatePost.objects.filter(pk=update_post.pk).exists()
+
+
+@pytest.mark.django_db
+def test_update_post_delete_denied_for_non_owner(authenticated_client, update_post):
+    """Non-owner cannot delete the post."""
+    response = authenticated_client.delete(
+        reverse('update-post-delete', args=[update_post.pk]),
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@pytest.mark.django_db
+def test_update_post_delete_not_found(shelter_admin_client):
+    """Nonexistent post returns 404."""
+    response = shelter_admin_client.delete(
+        reverse('update-post-delete', args=[99999]),
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND

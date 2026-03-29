@@ -109,4 +109,30 @@ describe('AdminModeracionPage', () => {
       expect(screen.getByText('Pendiente')).toBeInTheDocument();
     });
   });
+
+  it('renders Rechazado badge for rejected shelter', async () => {
+    const rejectedShelter = { ...mockShelter, id: 3, verification_status: 'rejected' };
+    mockApi.get
+      .mockResolvedValueOnce({ data: [] })
+      .mockResolvedValueOnce({ data: [rejectedShelter] });
+    setupMock();
+    render(<AdminModeracionPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Rechazado')).toBeInTheDocument();
+    });
+  });
+
+  it('renders Otro label for species other than dog or cat', async () => {
+    const otherAnimal = { ...mockAnimals[0], id: 99, species: 'rabbit' };
+    mockApi.get
+      .mockResolvedValueOnce({ data: [otherAnimal] })
+      .mockResolvedValueOnce({ data: [] });
+    setupMock();
+    render(<AdminModeracionPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Otro/)).toBeInTheDocument();
+    });
+  });
 });

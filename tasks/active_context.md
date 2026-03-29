@@ -1,15 +1,15 @@
 # Mi Huella — Active Context
 
-> Last updated: 2026-03-27
+> Last updated: 2026-03-29
 
 ## Current State
 
 The project is a mature animal adoption platform with complete backend and frontend implementations, extensive test coverage, and a methodology system for maintaining context.
 
 ### What's Working
-- **Backend**: 21 models, 41 serializers, 20 view modules, 19 URL modules, 22 admin classes, 21 management commands, 3 services
-- **Frontend**: 48 pages, 10 Zustand stores, 35 components (26 UI + 6 layout + 2 blog + 1 provider), 3 custom hooks, next-intl (en/es)
-- **Tests**: 56 backend test files, 100 frontend unit test files, 14 E2E spec files
+- **Backend**: 24 model classes (21 files), 44 serializers, 22 view modules, 20 URL modules, 22 admin classes, 21 management commands, 3 services
+- **Frontend**: 49 pages, 10 Zustand stores, 41 components (31 UI + 6 layout + 2 blog + 2 providers), 4 custom hooks, next-intl (en/es)
+- **Tests**: 57 backend test files, 107 frontend unit test files, 16 E2E spec files
 - **E2E**: 75 flow definitions documented across all roles and priorities
 - **Design System**: Stone palette + teal/amber/emerald accents, Inter font, glassmorphism header, dark mode
 - **Blog**: Full bilingual blog with public listing/detail, admin CRUD, calendar, JSON content, cover images, SEO
@@ -60,18 +60,21 @@ The project is a mature animal adoption platform with complete backend and front
 
 | Asset | Count |
 |-------|-------|
-| Backend models | 21 |
-| Backend serializers | 41 |
-| Backend views | 20 |
-| Backend URL modules | 19 |
+| Backend model classes | 24 (21 files) |
+| Backend serializers | 44 |
+| Backend views | 22 |
+| Backend URL modules | 20 |
+| Backend admin classes | 22 |
 | Management commands | 21 |
-| Frontend pages | 48 |
+| Frontend pages | 49 |
 | Zustand stores | 10 |
-| UI components | 26 |
-| Custom hooks | 3 |
-| Backend test files | 56 |
-| Frontend unit test files | 100 |
-| E2E spec files | 14 |
+| UI components | 31 |
+| Total frontend components | 41 |
+| Custom hooks | 4 |
+| Exported types | 40 |
+| Backend test files | 57 |
+| Frontend unit test files | 107 |
+| E2E spec files | 16 |
 | E2E flow definitions | 75 |
 
 ## Recently Completed: Phase 13a — Enriched Favorites View
@@ -102,9 +105,15 @@ Complete overhaul of the favorites page with 14 parts implemented:
 - 14 frontend unit tests (all passing)
 
 ## Pending: Phase 13b — Enriched My-Profile Dashboard
-(Plan documented — waiting to implement)
+(Plan documented in tasks_plan.md — waiting to implement)
+
+### E2E Test Improvements (2026-03-29)
+- Updated `adopter.spec.ts` and `blog.spec.ts` with improved test coverage and flow tags
+- Updated `flow-definitions.json` and `flow-tags.ts` helper with new flow mappings
+- Total E2E spec files: 16 (up from 14)
 
 ## Next Steps
+- Implement Phase 13b (enriched my-profile dashboard)
 - Integrate Wompi SDK when ready
 - Add tests for new volunteer application system (backend views, serializer, frontend form)
 - Add E2E flow definitions for volunteer application flow

@@ -115,4 +115,17 @@ describe('ShelterOnboardingPage', () => {
 
     resolveCreate!({ id: 1 });
   });
+
+  it('shows validation error when name is whitespace-only on submit', async () => {
+    const state = setupMock();
+    render(<ShelterOnboardingPage />);
+    fireEvent.change(screen.getByLabelText(/Nombre del refugio/), { target: { value: '   ' } });
+    fireEvent.change(screen.getByLabelText(/Ciudad/), { target: { value: 'Bogotá' } });
+    await userEvent.click(screen.getByRole('button', { name: 'Registrar refugio' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('El nombre y la ciudad son obligatorios')).toBeInTheDocument();
+    });
+    expect(state.createShelter).not.toHaveBeenCalled();
+  });
 });

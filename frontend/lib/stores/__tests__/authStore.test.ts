@@ -9,6 +9,7 @@ jest.mock('../../services/http', () => ({
   api: {
     post: jest.fn(),
     get: jest.fn(),
+    patch: jest.fn(),
   },
 }));
 
@@ -32,6 +33,9 @@ const resetAuthState = () => {
     user: null,
     isAuthenticated: false,
     isAuthReady: false,
+    profileStats: null,
+    activity: [],
+    profileLoading: false,
   });
 };
 
@@ -195,5 +199,83 @@ describe('authStore', () => {
       code: '123456',
       new_password: 'password123',
     });
+  });
+
+  it('fetchMe sets user on success', async () => {
+    const mockUser = { id: 1, email: 'test@example.com', first_name: 'Test', last_name: 'User', role: 'adopter' };
+    mockApi.get.mockResolvedValueOnce({ data: { user: mockUser } });
+
+    await act(async () => {
+      await useAuthStore.getState().fetchMe();
+    });
+
+    expect(useAuthStore.getState().user).toEqual(mockUser);
+  });
+
+  it('fetchMe calls signOut on error', async () => {
+    useAuthStore.setState({ isAuthenticated: true, accessToken: 'token' });
+    mockApi.get.mockRejectedValueOnce(new Error('Unauthorized'));
+
+    await act(async () => {
+      await useAuthStore.getState().fetchMe();
+    });
+
+    expect(mockClearTokens).toHaveBeenCalled();
+    expect(useAuthStore.getState().isAuthenticated).toBe(false);
+  });
+
+  it('fetchProfileStats sets stats on success', async () => {
+    const stats = { favorites_count: 5, applications_count: 2 };
+    mockApi.get.mockResolvedValueOnce({ data: stats });
+
+    await act(async () => {
+      await useAuthStore.getState().fetchProfileStats();
+    });
+
+    expect(useAuthStore.getState().profileStats).toEqual(stats);
+    expect(useAuthStore.getState().profileLoading).toBe(false);
+  });
+
+  it('fetchProfileStats handles error silently', async () => {
+    mockApi.get.mockRejectedValueOnce(new Error('fail'));
+
+    await act(async () => {
+      await useAuthStore.getState().fetchProfileStats();
+    });
+
+    expect(useAuthStore.getState().profileStats).toBeNull();
+    expect(useAuthStore.getState().profileLoading).toBe(false);
+  });
+
+  it('fetchActivity sets activity on success', async () => {
+    const events = [{ id: 1, type: 'login', created_at: '2026-01-01' }];
+    mockApi.get.mockResolvedValueOnce({ data: events });
+
+    await act(async () => {
+      await useAuthStore.getState().fetchActivity();
+    });
+
+    expect(useAuthStore.getState().activity).toEqual(events);
+  });
+
+  it('fetchActivity handles error silently', async () => {
+    mockApi.get.mockRejectedValueOnce(new Error('fail'));
+
+    await act(async () => {
+      await useAuthStore.getState().fetchActivity();
+    });
+
+    expect(useAuthStore.getState().activity).toEqual([]);
+  });
+
+  it('updateProfile updates user on success', async () => {
+    const updatedUser = { id: 1, email: 'test@example.com', first_name: 'Updated', last_name: 'User', role: 'adopter' };
+    mockApi.patch.mockResolvedValueOnce({ data: updatedUser });
+
+    await act(async () => {
+      await useAuthStore.getState().updateProfile({ first_name: 'Updated' });
+    });
+
+    expect(useAuthStore.getState().user).toEqual(updatedUser);
   });
 });

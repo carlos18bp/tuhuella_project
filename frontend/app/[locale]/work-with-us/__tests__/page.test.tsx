@@ -116,4 +116,28 @@ describe('WorkWithUsPage', () => {
       expect(screen.getByText('Cámara propia')).toBeInTheDocument();
     });
   });
+
+  it('hides requirements section when position has no requirements', async () => {
+    const noReqPosition = { ...mockPosition, id: 2, requirements: null };
+    mockApi.get
+      .mockResolvedValueOnce({ data: [noReqPosition] })
+      .mockResolvedValueOnce({ data: [] });
+    render(<WorkWithUsPage />);
+    await waitFor(() => {
+      expect(screen.getByText('Voluntario Fotógrafo')).toBeInTheDocument();
+    });
+    expect(screen.queryByText(/^Requisitos/)).not.toBeInTheDocument();
+  });
+
+  it('renders ally with logo image when logo_url is provided', async () => {
+    const allyWithLogo = { ...mockAlly, logo_url: 'http://example.com/logo.png' };
+    mockApi.get
+      .mockResolvedValueOnce({ data: [] })
+      .mockResolvedValueOnce({ data: [allyWithLogo] });
+    render(<WorkWithUsPage />);
+    await waitFor(() => {
+      const img = screen.getByRole('img', { name: 'Entre Especies' });
+      expect(img).toHaveAttribute('src', 'http://example.com/logo.png');
+    });
+  });
 });

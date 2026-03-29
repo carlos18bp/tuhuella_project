@@ -1,6 +1,7 @@
 import React from 'react';
 import { describe, it, expect } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
+import { useAuthStore } from '@/lib/stores/authStore';
 
 jest.mock('@/i18n/navigation', () => ({
   Link: ({ href, children, ...props }: { href: string; children: React.ReactNode; [key: string]: unknown }) =>
@@ -49,5 +50,14 @@ describe('Footer', () => {
     expect(screen.getByText('Explorar')).toBeInTheDocument();
     expect(screen.queryByText('Mi Cuenta')).not.toBeInTheDocument();
     expect(screen.getByText('Información')).toBeInTheDocument();
+  });
+
+  it('renders account section links when user is authenticated', () => {
+    useAuthStore.setState({ isAuthenticated: true, isAuthReady: true });
+    render(<Footer />);
+    expect(screen.getByText('Mi Cuenta')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Favoritos' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Mis Solicitudes' })).toBeInTheDocument();
+    useAuthStore.setState({ isAuthenticated: false, isAuthReady: false });
   });
 });

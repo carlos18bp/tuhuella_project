@@ -1,13 +1,13 @@
 # Mi Huella — Technical Stack & Decisions
 
-> Last updated: 2026-03-26
+> Last updated: 2026-03-29
 
 ## Backend
 
 | Component | Technology | Version | Notes |
 |-----------|-----------|---------|-------|
-| Framework | Django | 5.x | Monolith with DRF |
-| API | Django REST Framework | 3.x | FBV pattern, JWT auth |
+| Framework | Django | 6.0.2 | Monolith with DRF |
+| API | Django REST Framework | 3.16.x | FBV pattern, JWT auth |
 | Auth | `djangorestframework-simplejwt` | — | Access + refresh tokens |
 | OAuth | Google OAuth | — | `@react-oauth/google` on frontend |
 | Database | SQLite (dev) / MySQL (prod) | — | Single DB, no sharding |
@@ -18,15 +18,15 @@
 | Profiling | `django-silk` | — | Slow query / N+1 detection |
 | Backups | `django-dbbackup` | — | Scheduled DB backups |
 | Fake Data | Faker + factory-boy | 3.3.3 | 21 management commands + 24 factory classes in tests/factories.py |
-| Linting | Ruff | — | Fast Python linter |
-| Testing | pytest + pytest-django | — | 56 test files |
+| Linting | Ruff | 0.15.x | Fast Python linter |
+| Testing | pytest + pytest-django | 9.x / 4.x | 57 test files |
 
 ## Frontend
 
 | Component | Technology | Version | Notes |
 |-----------|-----------|---------|-------|
-| Framework | Next.js | 16.x | App Router |
-| UI Library | React | 19.x | Server + Client components |
+| Framework | Next.js | 16.1.x | App Router |
+| UI Library | React | 19.2.x | Server + Client components |
 | Language | TypeScript | 5.x | Strict mode |
 | State | Zustand | 5.x | 10 stores, persist middleware |
 | HTTP | Axios | — | Centralized `api` instance with interceptors |
@@ -38,7 +38,7 @@
 | Icons | Heroicons + Lucide | — | Dual icon library |
 | Auth | `@react-oauth/google` | — | Google sign-in button |
 | Cookies | `js-cookie` + `jwt-decode` | — | Token management |
-| Testing | Jest (unit, 100 files) + Playwright (E2E, 14 specs) | — | Component + flow tests |
+| Testing | Jest (unit, 107 files) + Playwright (E2E, 16 specs) | 30.x / 1.58.x | Component + flow tests |
 
 ## Architecture Decisions
 
@@ -87,24 +87,27 @@ NEXT_PUBLIC_BACKEND_ORIGIN=http://localhost:8000
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=
 ```
 
-## Verified Counts (2026-03-26)
+## Verified Counts (2026-03-29)
 
 | Asset | Count |
 |-------|-------|
-| Backend models | 20 |
-| Backend serializers | 40 |
-| Backend views | 19 |
-| Backend URL modules | 18 |
+| Backend model classes | 24 (21 files; amount_option, faq, notification have 2 classes each) |
+| Backend serializers | 44 |
+| Backend views | 22 |
+| Backend URL modules | 20 |
 | Backend services | 3 (email, notification, notification_templates) |
 | Management commands | 21 |
-| Admin classes | 21 |
-| Frontend pages | 47 |
+| Admin classes | 22 (21 model admins + MiHuellaAdminSite) |
+| Frontend pages | 49 |
 | Zustand stores | 10 |
-| Custom hooks | 3 |
-| UI components | 25 |
-| Total frontend components | 34 |
-| Exported types | 34 |
-| Backend test files | 56 |
-| Frontend unit test files | 100 |
-| E2E spec files | 14 |
+| Custom hooks | 4 (useFAQs, useRequireAuth, useScrollReveal, useAuthSync) |
+| UI components | 31 |
+| Layout components | 6 (Header, Footer, Sidebar, PageTransition, LocaleSwitcher, ThemeToggle) |
+| Blog components | 2 (BlogContentRenderer, ReadingProgressBar) |
+| Provider components | 2 (ThemeProvider, AuthSyncProvider) |
+| Total frontend components | 41 |
+| Exported types | 40 |
+| Backend test files | 57 |
+| Frontend unit test files | 107 |
+| E2E spec files | 16 |
 | E2E flow definitions | 75 |

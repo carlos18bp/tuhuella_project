@@ -1,6 +1,7 @@
 import React from 'react';
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('next/navigation', () => ({ useParams: () => ({ slug: 'test-post' }) }));
 jest.mock('@/components/blog/BlogContentRenderer', () => ({
@@ -115,5 +116,100 @@ describe('BlogDetailPage', () => {
     setupLoaded();
     render(<BlogDetailPage />);
     expect(screen.getByText('Ver todos los artículos →')).toBeInTheDocument();
+  });
+
+  it('renders cover image when post has cover_image', () => {
+    setupLoaded({
+      post: { ...mockPost, cover_image: 'http://example.com/cover.jpg' },
+    });
+    render(<BlogDetailPage />);
+    const img = screen.getByAltText('Guía de adopción responsable');
+    expect(img).toBeInTheDocument();
+    expect(img).toHaveAttribute('src', 'http://example.com/cover.jpg');
+  });
+
+  it('does not render cover image when post has no cover_image', () => {
+    setupLoaded({ post: { ...mockPost, cover_image: null } });
+    render(<BlogDetailPage />);
+    expect(screen.queryByAltText('Guía de adopción responsable')).not.toBeInTheDocument();
+  });
+
+  it('renders cover image credit as text when no credit url', () => {
+    setupLoaded({
+      post: {
+        ...mockPost,
+        cover_image: 'http://example.com/cover.jpg',
+        cover_image_credit: 'Photo by Test',
+        cover_image_credit_url: '',
+      },
+    });
+    render(<BlogDetailPage />);
+    expect(screen.getByText('Photo by Test')).toBeInTheDocument();
+  });
+
+  it('renders cover image credit as link when credit url is present', () => {
+    setupLoaded({
+      post: {
+        ...mockPost,
+        cover_image: 'http://example.com/cover.jpg',
+        cover_image_credit: 'Photo by Author',
+        cover_image_credit_url: 'http://example.com/author',
+      },
+    });
+    render(<BlogDetailPage />);
+    const link = screen.getByText('Photo by Author');
+    expect(link.tagName).toBe('A');
+    expect(link).toHaveAttribute('href', 'http://example.com/author');
+  });
+
+  it('renders source links when post has sources', () => {
+    setupLoaded({
+      post: {
+        ...mockPost,
+        sources: [
+          { name: 'OMS Animal', url: 'http://example.com/source' },
+          { name: 'ASPCA', url: 'http://aspca.org' },
+        ],
+      },
+    });
+    render(<BlogDetailPage />);
+    expect(screen.getByText('Fuentes')).toBeInTheDocument();
+    expect(screen.getByText('OMS Animal')).toHaveAttribute('href', 'http://example.com/source');
+    expect(screen.getByText('ASPCA')).toHaveAttribute('href', 'http://aspca.org');
+  });
+
+  it('does not render sources section when sources array is empty', () => {
+    setupLoaded({ post: { ...mockPost, sources: [] } });
+    render(<BlogDetailPage />);
+    expect(screen.queryByText('Fuentes')).not.toBeInTheDocument();
+  });
+
+  it('renders share button', () => {
+    setupLoaded();
+    render(<BlogDetailPage />);
+    expect(screen.getByText('Compartir')).toBeInTheDocument();
+  });
+
+  it('calls navigator.clipboard.writeText when share button is clicked and navigator.share is unavailable', async () => {
+    const user = userEvent.setup();
+    const writeTextMock = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText: writeTextMock },
+      writable: true,
+      configurable: true,
+    });
+    Object.defineProperty(navigator, 'share', {
+      value: undefined,
+      writable: true,
+      configurable: true,
+    });
+
+    setupLoaded();
+    render(<BlogDetailPage />);
+
+    await user.click(screen.getByText('Compartir'));
+    expect(writeTextMock).toHaveBeenCalledWith(
+      expect.stringContaining('/blog/test-post'),
+    );
   });
 });

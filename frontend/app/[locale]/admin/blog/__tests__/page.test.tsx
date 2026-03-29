@@ -221,4 +221,30 @@ describe('AdminBlogListPage', () => {
     expect(prevBtn).toBeDisabled();
     expect(state.fetchAdminPosts).toHaveBeenCalledTimes(1); // only initial load
   });
+
+  it('renders date as dash for post with null published_at and null created_at', () => {
+    const postNullDate = {
+      id: 97,
+      title: 'Post Sin Fecha',
+      slug: 'post-sin-fecha',
+      is_published: false,
+      published_at: null,
+      created_at: null,
+    };
+    setupMock({ posts: [postNullDate], loading: false });
+    render(<AdminBlogListPage />);
+    expect(screen.getAllByText('—').length).toBeGreaterThan(0);
+  });
+
+  it('renders page number buttons for visible pages in pagination', () => {
+    setupMock({
+      posts: mockBlogPosts,
+      loading: false,
+      adminPagination: { count: 75, page: 3, pageSize: 15, totalPages: 5 },
+    });
+    render(<AdminBlogListPage />);
+    // visiblePages should include pages 1-5 (current=3, so 1..5)
+    expect(screen.getByRole('button', { name: '1' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '5' })).toBeInTheDocument();
+  });
 });

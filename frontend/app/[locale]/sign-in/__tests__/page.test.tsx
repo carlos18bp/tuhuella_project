@@ -266,4 +266,42 @@ describe('SignInPage', () => {
     });
     expect(replace).toHaveBeenCalledWith('/');
   });
+
+  it('shows captcha error when siteKey is set but captcha not completed', async () => {
+    // Override the api mock to return a site key
+    const { api: mockApi } = jest.requireMock('../../../../lib/services/http') as any;
+    mockApi.get.mockResolvedValueOnce({ data: { site_key: 'test-site-key' } });
+
+    const signIn = jest.fn();
+    setAuthStoreState({ signIn, googleLogin: jest.fn() });
+    mockUseRouter.mockReturnValue({ replace: jest.fn() });
+
+    render(<SignInPage />);
+
+    // Wait for siteKey to be set
+    await waitFor(() => {
+      expect(screen.getByTestId('mock-recaptcha')).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByPlaceholderText('tu@email.com'), { target: { value: 'user@example.com' } });
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
+
+    expect(await screen.findByText('Please complete the captcha')).toBeInTheDocument();
+    expect(signIn).not.toHaveBeenCalled();
+  });
+
+  it('renders reCAPTCHA disclosure text when siteKey is available', async () => {
+    const { api: mockApi } = jest.requireMock('../../../../lib/services/http') as any;
+    mockApi.get.mockResolvedValueOnce({ data: { site_key: 'test-site-key' } });
+
+    setAuthStoreState({ signIn: jest.fn(), googleLogin: jest.fn() });
+    mockUseRouter.mockReturnValue({ replace: jest.fn() });
+
+    render(<SignInPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Protegido por reCAPTCHA/)).toBeInTheDocument();
+    });
+  });
 });

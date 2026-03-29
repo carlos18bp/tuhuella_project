@@ -123,4 +123,11 @@ describe('DonationForm', () => {
       method: 'card',
     });
   });
+
+  it('highlights selected preset amount button with accent style', async () => {
+    render(<DonationForm onSubmit={mockOnSubmit} />);
+    const btn = screen.getByRole('button', { name: /25,000/ });
+    await userEvent.click(btn);
+    expect(btn.className).toContain('text-white');
+  });
 });

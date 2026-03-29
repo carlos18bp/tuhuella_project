@@ -1,25 +1,25 @@
 # Mi Huella — Architecture Overview
 
-> Last updated: 2026-03-27
+> Last updated: 2026-03-29
 
 ## System Diagram
 
 ```mermaid
 graph TB
     subgraph Frontend["Frontend (Next.js 16)"]
-        AppRouter["App Router<br/>47 pages"]
+        AppRouter["App Router<br/>49 pages"]
         Stores["Zustand Stores<br/>10 stores"]
-        Components["Shared UI<br/>25 ui + 9 layout/blog"]
-        Hooks["Hooks<br/>3 (useFAQs, useRequireAuth, useScrollReveal)"]
+        Components["Shared UI<br/>31 ui + 10 layout/blog/providers"]
+        Hooks["Hooks<br/>4 (useFAQs, useRequireAuth, useScrollReveal, useAuthSync)"]
         I18n["next-intl<br/>en/es"]
         GSAP["GSAP + Swiper<br/>+ Framer Motion"]
     end
 
-    subgraph Backend["Backend (Django 5 + DRF)"]
-        Views["FBV Views<br/>19 modules"]
-        Serializers["Serializers<br/>40 files"]
-        Models["Models<br/>20 classes"]
-        Admin["Admin Site<br/>21 admin classes"]
+    subgraph Backend["Backend (Django 6 + DRF)"]
+        Views["FBV Views<br/>22 modules"]
+        Serializers["Serializers<br/>44 files"]
+        Models["Models<br/>24 classes"]
+        Admin["Admin Site<br/>22 admin classes"]
         Commands["Management Commands<br/>21 commands"]
         Services["Services<br/>email + notification"]
     end
@@ -82,12 +82,12 @@ erDiagram
     PasswordCode }o--|| User : belongs_to
 ```
 
-## Models (21)
+## Models (24 classes across 21 files)
 
 | # | Model | Key Fields |
 |---|-------|------------|
 | 1 | User | email, role, city, avatar, bio, housing_type, has_yard, has_other_pets, experience_level |
-| 2 | Shelter | name, logo, cover_image, verification_status |
+| 2 | Shelter | name, logo, cover_image, gallery, verification_status |
 | 3 | Animal | species, age, gender, size, GalleryField |
 | 4 | Adoption (AdoptionApplication) | form_answers (JSON), status |
 | 5 | Campaign | goal_amount, raised_amount, progress_percentage, evidence_gallery |
@@ -98,15 +98,18 @@ erDiagram
 | 10 | AdopterIntent | preferences (JSON), OneToOne User |
 | 11 | ShelterInvite | unique_together shelter+intent |
 | 12 | Subscription | OneToOne Sponsorship |
-| 13 | Favorite | User + Animal through table |
-| 14 | Notification | NotificationPreference + NotificationLog |
-| 15 | PasswordCode | kept from template |
-| 16 | BlogPost | bilingual, JSON content, SEO, categories |
-| 17 | AmountOption | predefined donation/sponsorship amounts |
-| 18 | FAQ | question/answer pairs |
-| 19 | StrategicAlly | partner organizations |
-| 20 | VolunteerPosition | volunteer opportunities |
-| 21 | VolunteerApplication | position FK, user FK, motivation, status (pending/reviewed/accepted/rejected) |
+| 13 | Favorite | User + Animal through table, note |
+| 14 | NotificationPreference | user FK, event_key, channel, unique_together |
+| 15 | NotificationLog | user FK, event_key, channel, metadata (JSON), is_read |
+| 16 | PasswordCode | kept from template |
+| 17 | BlogPost | bilingual, JSON content, SEO, categories |
+| 18 | DonationAmountOption | amount, label, is_active, order |
+| 19 | SponsorshipAmountOption | amount, label, is_active, order |
+| 20 | FAQTopic | slug, display_name_es/en, order |
+| 21 | FAQItem | topic FK, question_es/en, answer_es/en |
+| 22 | StrategicAlly | partner organizations |
+| 23 | VolunteerPosition | volunteer opportunities, 12 categories |
+| 24 | VolunteerApplication | position FK, user FK, motivation, status (pending/reviewed/accepted/rejected) |
 
 ## Request Flow
 
@@ -134,15 +137,15 @@ sequenceDiagram
 tuhuella_project/
 ├── backend/
 │   ├── base_feature_app/
-│   │   ├── models/          # 21 model files
-│   │   ├── serializers/     # 41 serializer files
-│   │   ├── views/           # 20 view modules
-│   │   ├── urls/            # 19 URL modules
+│   │   ├── models/          # 21 model files (24 classes)
+│   │   ├── serializers/     # 44 serializer files
+│   │   ├── views/           # 22 view modules
+│   │   ├── urls/            # 20 URL modules
 │   │   ├── management/commands/  # 21 commands
 │   │   ├── services/        # email_service, notification_service, notification_templates
 │   │   ├── utils/           # auth_utils, email_utils, recaptcha
 │   │   ├── templates/emails/ # Branded HTML email templates (base + 3 specific)
-│   │   ├── tests/           # 56 test files (models, serializers, views, services, utils, commands)
+│   │   ├── tests/           # 57 test files (models, serializers, views, services, utils, commands)
 │   │   └── admin.py         # MiHuellaAdminSite (22 admin classes)
 │   ├── base_feature_project/
 │   │   ├── settings.py      # Base settings
@@ -151,26 +154,26 @@ tuhuella_project/
 │   ├── django_attachments/  # Custom image handling
 │   └── conftest.py          # Root pytest config
 ├── frontend/
-│   ├── app/[locale]/        # 48 page.tsx files
+│   ├── app/[locale]/        # 49 page.tsx files
 │   │   ├── page.tsx         # Home
 │   │   ├── template.tsx     # Framer Motion transitions
 │   │   ├── layout.tsx       # Root layout (Inter, Header, Footer)
 │   │   └── providers.tsx    # Google OAuth + Theme provider
 │   ├── components/
-│   │   ├── layout/          # Header, Footer, Sidebar, PageTransition, LocaleSwitcher, ThemeToggle
-│   │   ├── blog/            # BlogContentRenderer, ReadingProgressBar
-│   │   ├── ui/              # 26 shared components
-│   │   └── providers/       # ThemeProvider
+│   │   ├── layout/          # Header, Footer, Sidebar, PageTransition, LocaleSwitcher, ThemeToggle (6)
+│   │   ├── blog/            # BlogContentRenderer, ReadingProgressBar (2)
+│   │   ├── ui/              # 31 shared components
+│   │   └── providers/       # ThemeProvider, AuthSyncProvider (2)
 │   ├── lib/
 │   │   ├── stores/          # 10 Zustand stores
-│   │   ├── hooks/           # useFAQs, useRequireAuth, useScrollReveal
+│   │   ├── hooks/           # useFAQs, useRequireAuth, useScrollReveal, useAuthSync
 │   │   ├── services/        # http.ts, tokens.ts
 │   │   ├── i18n/            # config.ts
-│   │   ├── types.ts         # 34 exported types
+│   │   ├── types.ts         # 40 exported types
 │   │   └── constants.ts     # ROUTES, API_ENDPOINTS
 │   ├── i18n/                # next-intl request config
 │   ├── messages/            # en.json, es.json
-│   └── e2e/                 # 14 Playwright spec files + flow-definitions.json (75 flows)
+│   └── e2e/                 # 16 Playwright spec files + flow-definitions.json (75 flows)
 ├── docs/
 │   ├── methodology/         # PRD, technical, architecture, errors, lessons
 │   └── *.md                 # Standards & guidelines (9 files)
@@ -194,7 +197,7 @@ tuhuella_project/
 
 | Layer | Count | Tool |
 |-------|-------|------|
-| Backend tests | 56 files | pytest + pytest-django |
-| Frontend unit tests | 100 files | Jest + Testing Library |
-| E2E tests | 14 spec files | Playwright |
+| Backend tests | 57 files | pytest + pytest-django |
+| Frontend unit tests | 107 files | Jest + Testing Library |
+| E2E tests | 16 spec files | Playwright |
 | E2E flow definitions | 75 flows | flow-definitions.json |

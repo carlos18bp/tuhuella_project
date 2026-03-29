@@ -141,4 +141,18 @@ describe('ShelterApplicationsPage', () => {
     render(<ShelterApplicationsPage />);
     expect(state.fetchApplications).toHaveBeenCalled();
   });
+
+  it('renders fallback status label for unknown status', () => {
+    const unknownApp = { ...mockAdoptionApplications[0], status: 'custom_unknown' };
+    setupMock({ applications: [unknownApp] });
+    render(<ShelterApplicationsPage />);
+    expect(screen.getByText('custom_unknown')).toBeInTheDocument();
+  });
+
+  it('hides notes section when notes are empty', () => {
+    const noNotesApp = { ...mockAdoptionApplications[0], notes: '' };
+    setupMock({ applications: [noNotesApp] });
+    render(<ShelterApplicationsPage />);
+    expect(screen.queryByText('Tengo experiencia con perros')).not.toBeInTheDocument();
+  });
 });

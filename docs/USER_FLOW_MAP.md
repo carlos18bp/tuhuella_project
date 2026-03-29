@@ -115,9 +115,12 @@ Use this document to understand each flow's steps, branching conditions, role re
 | `blog-admin-create` | Admin blog create | blog-admin | P2 | admin | `/admin/blog/crear` |
 | `blog-admin-edit` | Admin blog edit | blog-admin | P2 | admin | `/admin/blog/[id]/editar` |
 | `blog-admin-calendar` | Admin blog calendar | blog-admin | P3 | admin | `/admin/blog/calendario` |
+| `blog-admin-delete` | Admin delete blog post | blog-admin | P2 | admin | `/admin/blog` |
+| `blog-admin-duplicate` | Admin duplicate blog post | blog-admin | P3 | admin | `/admin/blog` |
 | `volunteer-apply` | Submit volunteer application | volunteer | P2 | shared | `/work-with-us/apply/[positionId]` |
 | `profile-edit` | Edit user profile | adopter | P2 | adopter | `/my-profile/edit` |
 | `favorites-compare` | Compare favorited animals | favorite | P3 | adopter | `/favorites` |
+| `favorite-note-edit` | Edit favorite animal note | favorite | P3 | adopter | `/favorites` |
 
 ---
 
@@ -2002,6 +2005,88 @@ Use this document to understand each flow's steps, branching conditions, role re
 
 - If fewer than 2 animals selected → Compare button disabled.
 - If no favorites exist → empty state with CTA to browse animals.
+
+---
+
+### blog-admin-delete
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | admin |
+| **Frontend route** | `/admin/blog` |
+| **API endpoints** | `DELETE /api/blog/admin/<id>/delete/` |
+
+**Preconditions:** User is authenticated with `admin` role. At least one blog post exists.
+
+**Steps:**
+
+1. Admin navigates to `/admin/blog`.
+2. Blog list renders with post rows containing action buttons.
+3. Admin clicks **Eliminar** on a post.
+4. Confirmation dialog appears: "¿Eliminar [title]? Esta acción no se puede deshacer."
+5. Admin clicks **Eliminar** to confirm.
+6. Frontend sends `DELETE /api/blog/admin/<id>/delete/`.
+7. Post removed from list, page refreshes.
+
+**Branching:**
+
+- If admin clicks **Cancelar** → dialog closes, no deletion.
+
+---
+
+### blog-admin-duplicate
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P3 |
+| **Roles** | admin |
+| **Frontend route** | `/admin/blog` |
+| **API endpoints** | `POST /api/blog/admin/<id>/duplicate/` |
+
+**Preconditions:** User is authenticated with `admin` role. At least one blog post exists.
+
+**Steps:**
+
+1. Admin navigates to `/admin/blog`.
+2. Blog list renders with post rows containing action buttons.
+3. Admin clicks **Duplicar** on a post.
+4. Confirmation dialog appears: "¿Duplicar [title]?"
+5. Admin clicks **Duplicar** to confirm.
+6. Frontend sends `POST /api/blog/admin/<id>/duplicate/`.
+7. New draft post created, list refreshes showing the duplicate.
+
+**Branching:**
+
+- If admin clicks **Cancelar** → dialog closes, no duplication.
+
+---
+
+### favorite-note-edit
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P3 |
+| **Roles** | adopter |
+| **Frontend route** | `/favorites` |
+| **API endpoints** | `PATCH /api/favorites/<id>/` |
+
+**Preconditions:** User is authenticated and has at least one favorited animal.
+
+**Steps:**
+
+1. User navigates to `/favorites`.
+2. Favorites list renders with animal cards.
+3. User clicks the note icon (sticky note) on a favorite card.
+4. Textarea expands inline below the card.
+5. User types or edits the note text.
+6. After 500ms debounce, frontend sends `PATCH /api/favorites/<id>/` with updated note.
+7. Note persists on reload.
+
+**Branching:**
+
+- If note is empty → note icon appears in muted style.
+- If note has content → note icon appears in teal with truncated preview.
 
 ---
 

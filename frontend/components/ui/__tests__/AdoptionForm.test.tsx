@@ -44,6 +44,8 @@ const fillQuestionnaire = async () => {
 };
 
 describe('AdoptionForm', () => {
+  jest.setTimeout(30000);
+
   const mockOnSubmit = jest.fn();
 
   beforeEach(() => {

@@ -98,4 +98,30 @@ describe('campaignStore', () => {
 
     expect(useCampaignStore.getState().campaign?.title).toBe('Medical Fund');
   });
+
+  it('passes lang and status params to fetchCampaigns', async () => {
+    mockApi.get.mockResolvedValueOnce({ data: [] });
+
+    await act(async () => {
+      await useCampaignStore.getState().fetchCampaigns('es', 'active');
+    });
+
+    expect(mockApi.get).toHaveBeenCalledWith(
+      expect.any(String),
+      { params: { lang: 'es', status: 'active' } },
+    );
+  });
+
+  it('passes lang param to fetchCampaign', async () => {
+    mockApi.get.mockResolvedValueOnce({ data: CAMPAIGN_FIXTURE });
+
+    await act(async () => {
+      await useCampaignStore.getState().fetchCampaign(1, 'en');
+    });
+
+    expect(mockApi.get).toHaveBeenCalledWith(
+      expect.any(String),
+      { params: { lang: 'en' } },
+    );
+  });
 });

@@ -224,4 +224,140 @@ describe('Header', () => {
     const signInLinks = screen.getAllByRole('link', { name: 'Iniciar sesión' });
     expect(signInLinks.length).toBeGreaterThanOrEqual(2);
   });
+
+  it('renders Blog link in navigation', () => {
+    setupMock();
+    render(<Header />);
+    expect(screen.getByRole('link', { name: 'Blog' })).toHaveAttribute('href', '/blog');
+  });
+
+  it('renders loading skeleton when auth is not ready', () => {
+    setupMock({ isAuthReady: false });
+    render(<Header />);
+    const pulseElements = document.querySelectorAll('.animate-pulse');
+    expect(pulseElements.length).toBeGreaterThan(0);
+  });
+
+  it('opens about dropdown when button is clicked', async () => {
+    setupMock();
+    render(<Header />);
+
+    await userEvent.click(screen.getByRole('button', { name: /Nosotros/ }));
+
+    expect(screen.getByRole('link', { name: 'Quiénes Somos' })).toHaveAttribute('href', '/about');
+    expect(screen.getByRole('link', { name: 'Trabaja con Nosotros' })).toHaveAttribute('href', '/work-with-us');
+    expect(screen.getByRole('link', { name: 'Aliados Estratégicos' })).toHaveAttribute('href', '/strategic-allies');
+  });
+
+  it('closes about dropdown when clicking about sub-link', async () => {
+    setupMock();
+    render(<Header />);
+
+    await userEvent.click(screen.getByRole('button', { name: /Nosotros/ }));
+    expect(screen.getByRole('link', { name: 'Quiénes Somos' })).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('link', { name: 'Quiénes Somos' }));
+    expect(screen.queryByRole('link', { name: 'Trabaja con Nosotros' })).not.toBeInTheDocument();
+  });
+
+  it('opens notification dropdown when bell is clicked', async () => {
+    const mockFetchNotifications = jest.fn();
+    jest.mocked(jest.requireMock('@/lib/stores/notificationStore') as any).useNotificationStore.mockImplementation(
+      (selector: (s: Record<string, unknown>) => unknown) =>
+        selector({
+          unreadCount: 3,
+          notifications: [],
+          fetchUnreadCount: jest.fn(),
+          fetchNotifications: mockFetchNotifications,
+          markAllAsRead: jest.fn(),
+        }),
+    );
+    setupMock({ isAuthenticated: true, user: { role: 'adopter' } });
+    render(<Header />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Notificaciones' }));
+
+    expect(screen.getByTestId('notification-dropdown')).toBeInTheDocument();
+    expect(screen.getByText('Notificaciones')).toBeInTheDocument();
+    expect(mockFetchNotifications).toHaveBeenCalledWith('in_app');
+  });
+
+  it('closes notification dropdown when bell is clicked again', async () => {
+    jest.mocked(jest.requireMock('@/lib/stores/notificationStore') as any).useNotificationStore.mockImplementation(
+      (selector: (s: Record<string, unknown>) => unknown) =>
+        selector({
+          unreadCount: 0,
+          notifications: [],
+          fetchUnreadCount: jest.fn(),
+          fetchNotifications: jest.fn(),
+          markAllAsRead: jest.fn(),
+        }),
+    );
+    setupMock({ isAuthenticated: true, user: { role: 'adopter' } });
+    render(<Header />);
+
+    const bellButton = screen.getByRole('button', { name: 'Notificaciones' });
+    await userEvent.click(bellButton);
+    expect(screen.getByTestId('notification-dropdown')).toBeInTheDocument();
+
+    await userEvent.click(bellButton);
+    expect(screen.queryByTestId('notification-dropdown')).not.toBeInTheDocument();
+  });
+
+  it('shows mark-all-read button when there are unread notifications', async () => {
+    const mockMarkAllAsRead = jest.fn().mockResolvedValue(undefined);
+    jest.mocked(jest.requireMock('@/lib/stores/notificationStore') as any).useNotificationStore.mockImplementation(
+      (selector: (s: Record<string, unknown>) => unknown) =>
+        selector({
+          unreadCount: 5,
+          notifications: [],
+          fetchUnreadCount: jest.fn(),
+          fetchNotifications: jest.fn(),
+          markAllAsRead: mockMarkAllAsRead,
+        }),
+    );
+    setupMock({ isAuthenticated: true, user: { role: 'adopter' } });
+    render(<Header />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Notificaciones' }));
+    const markAllBtn = screen.getByRole('button', { name: /Marcar todo leído/ });
+    await userEvent.click(markAllBtn);
+
+    expect(mockMarkAllAsRead).toHaveBeenCalled();
+  });
+
+  it('displays 99+ when unread count exceeds 99', () => {
+    jest.mocked(jest.requireMock('@/lib/stores/notificationStore') as any).useNotificationStore.mockImplementation(
+      (selector: (s: Record<string, unknown>) => unknown) =>
+        selector({
+          unreadCount: 150,
+          notifications: [],
+          fetchUnreadCount: jest.fn(),
+          fetchNotifications: jest.fn(),
+          markAllAsRead: jest.fn(),
+        }),
+    );
+    setupMock({ isAuthenticated: true, user: { role: 'adopter' } });
+    render(<Header />);
+
+    expect(screen.getByText('99+')).toBeInTheDocument();
+  });
+
+  it('shows no-notifications message in empty dropdown', async () => {
+    jest.mocked(jest.requireMock('@/lib/stores/notificationStore') as any).useNotificationStore.mockImplementation(
+      (selector: (s: Record<string, unknown>) => unknown) =>
+        selector({
+          unreadCount: 0,
+          notifications: [],
+          fetchUnreadCount: jest.fn(),
+          fetchNotifications: jest.fn(),
+          markAllAsRead: jest.fn(),
+        }),
+    );
+    setupMock({ isAuthenticated: true, user: { role: 'adopter' } });
+    render(<Header />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Notificaciones' }));
+    expect(screen.getByText('No tienes notificaciones.')).toBeInTheDocument();
+  });
 });

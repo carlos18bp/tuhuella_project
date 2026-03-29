@@ -240,4 +240,44 @@ describe('blogStore', () => {
     expect(useBlogStore.getState().error).toBe('Calendar error');
     expect(useBlogStore.getState().loading).toBe(false);
   });
+
+  it('sets fallback error when fetchPost rejects with non-Error', async () => {
+    mockApi.get.mockRejectedValueOnce('string rejection');
+
+    await act(async () => {
+      await useBlogStore.getState().fetchPost('some-slug');
+    });
+
+    expect(useBlogStore.getState().error).toBe('Failed to fetch blog post');
+  });
+
+  it('sets fallback error when fetchAdminPosts rejects with non-Error', async () => {
+    mockApi.get.mockRejectedValueOnce(42);
+
+    await act(async () => {
+      await useBlogStore.getState().fetchAdminPosts();
+    });
+
+    expect(useBlogStore.getState().error).toBe('Failed to fetch admin blog posts');
+  });
+
+  it('sets fallback error when fetchAdminPost rejects with non-Error', async () => {
+    mockApi.get.mockRejectedValueOnce(null);
+
+    await act(async () => {
+      await useBlogStore.getState().fetchAdminPost(1);
+    });
+
+    expect(useBlogStore.getState().error).toBe('Failed to fetch blog post');
+  });
+
+  it('sets fallback error when fetchCalendarPosts rejects with non-Error', async () => {
+    mockApi.get.mockRejectedValueOnce({ code: 'TIMEOUT' });
+
+    await act(async () => {
+      await useBlogStore.getState().fetchCalendarPosts('2026-03-01', '2026-03-31');
+    });
+
+    expect(useBlogStore.getState().error).toBe('Failed to fetch calendar posts');
+  });
 });

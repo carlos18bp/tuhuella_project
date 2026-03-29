@@ -13,8 +13,14 @@ jest.mock('next/navigation', () => ({
 
 jest.mock('@/lib/stores/campaignStore', () => ({ useCampaignStore: jest.fn() }));
 jest.mock('@/lib/stores/authStore', () => ({ useAuthStore: jest.fn() }));
+
+const mockUseFAQsByTopic = jest.fn().mockReturnValue({ items: [], loading: false });
 jest.mock('@/lib/hooks/useFAQs', () => ({
-  useFAQsByTopic: () => ({ items: [], loading: false }),
+  useFAQsByTopic: (...args: unknown[]) => mockUseFAQsByTopic(...args),
+}));
+
+jest.mock('@/lib/services/http', () => ({
+  api: { get: jest.fn().mockResolvedValue({ data: [] }) },
 }));
 
 const mockUseCampaignStore = useCampaignStore as unknown as jest.Mock;
@@ -36,6 +42,7 @@ const setupMocks = (overrides: Record<string, unknown> = {}) => {
 describe('CampaignDetailPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseFAQsByTopic.mockReturnValue({ items: [], loading: false });
   });
 
   it('renders loading skeleton when loading', () => {
@@ -118,5 +125,52 @@ describe('CampaignDetailPage', () => {
     render(<CampaignDetailPage />);
     const bar = screen.getByTestId('progress-bar');
     expect(bar.getAttribute('style')).toContain('100%');
+  });
+
+  it('renders start and end dates when provided', () => {
+    setupMocks({ loading: false, campaign: mockCampaign });
+    render(<CampaignDetailPage />);
+    expect(screen.getByText(/Inicio:/)).toBeInTheDocument();
+    expect(screen.getByText(/Fin:/)).toBeInTheDocument();
+  });
+
+  it('hides date section when no dates provided', () => {
+    const noDates = { ...mockCampaign, starts_at: null, ends_at: null };
+    setupMocks({ loading: false, campaign: noDates });
+    render(<CampaignDetailPage />);
+    expect(screen.queryByText(/Inicio:/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Fin:/)).not.toBeInTheDocument();
+  });
+
+  it('renders FAQ section when FAQ items are available', () => {
+    mockUseFAQsByTopic.mockReturnValue({
+      items: [{ question: '¿Cómo funciona?', answer: 'Así funciona.' }],
+      loading: false,
+    });
+    setupMocks({ loading: false, campaign: mockCampaign });
+    render(<CampaignDetailPage />);
+    expect(screen.getByText('Preguntas frecuentes')).toBeInTheDocument();
+    expect(screen.getByText('¿Cómo funciona?')).toBeInTheDocument();
+  });
+
+  it('does not render FAQ section when no FAQ items', () => {
+    setupMocks({ loading: false, campaign: mockCampaign });
+    render(<CampaignDetailPage />);
+    expect(screen.queryByText('Preguntas frecuentes')).not.toBeInTheDocument();
+  });
+
+  it('renders cover image when campaign has cover_image_url', () => {
+    setupMocks({ loading: false, campaign: mockCampaign });
+    render(<CampaignDetailPage />);
+    const img = screen.getByAltText('Fondo Médico de Emergencia');
+    expect(img).toBeInTheDocument();
+  });
+
+  it('renders placeholder when campaign has no cover_image_url', () => {
+    const noCover = { ...mockCampaign, cover_image_url: null };
+    setupMocks({ loading: false, campaign: noCover });
+    const { container } = render(<CampaignDetailPage />);
+    expect(screen.queryByAltText('Fondo Médico de Emergencia')).not.toBeInTheDocument();
+    expect(container.querySelector('.from-amber-50')).toBeInTheDocument();
   });
 });

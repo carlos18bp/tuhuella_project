@@ -1,6 +1,17 @@
+from decimal import Decimal
+
 import pytest
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework import status
+
+from base_feature_app.tests.factories import (
+    AdoptionApplicationFactory,
+    AnimalFactory,
+    DonationFactory,
+    ShelterAdminUserFactory,
+    ShelterFactory,
+)
 
 
 @pytest.mark.django_db
@@ -134,3 +145,70 @@ def test_admin_metrics_denied_for_regular_user(authenticated_client):
     response = authenticated_client.get(reverse('admin-metrics'))
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+# ── Shelter Metrics ──────────────────────────────────────────────────────────
+
+
+@pytest.mark.django_db
+def test_shelter_metrics_requires_auth(api_client):
+    """Unauthenticated request returns 401."""
+    response = api_client.get(reverse('shelter-metrics'))
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.django_db
+def test_shelter_metrics_denied_for_adopter(authenticated_client):
+    """Adopter role cannot access shelter metrics."""
+    response = authenticated_client.get(reverse('shelter-metrics'))
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@pytest.mark.django_db
+def test_shelter_metrics_returns_data_for_shelter_admin(shelter_admin_client, shelter, animal):
+    """Shelter admin receives dashboard metrics for their shelter."""
+    response = shelter_admin_client.get(reverse('shelter-metrics'))
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data['total_animals'] >= 1
+    assert data['published_animals'] >= 1
+    assert 'donations' in data
+    assert 'sponsorships' in data
+
+
+@pytest.mark.django_db
+def test_shelter_metrics_no_shelter_returns_404(api_client):
+    """Shelter admin without any shelter gets 404."""
+    orphan_admin = ShelterAdminUserFactory()
+    api_client.force_authenticate(user=orphan_admin)
+    response = api_client.get(reverse('shelter-metrics'))
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+def test_shelter_metrics_includes_donation_stats(shelter_admin_client, shelter):
+    """Paid donation appears in shelter donation stats."""
+    DonationFactory(shelter=shelter, status='paid', amount=Decimal('100000.00'))
+    response = shelter_admin_client.get(reverse('shelter-metrics'))
+    data = response.json()
+    assert data['donations']['total_count'] >= 1
+
+
+@pytest.mark.django_db
+def test_shelter_metrics_includes_application_count(shelter_admin_client, animal):
+    """Adoption application appears in shelter application count."""
+    AdoptionApplicationFactory(animal=animal)
+    response = shelter_admin_client.get(reverse('shelter-metrics'))
+    assert response.json()['total_applications'] >= 1
+
+
+@pytest.mark.django_db
+def test_shelter_metrics_includes_avg_adoption_time(shelter_admin_client, animal):
+    """Approved application with reviewed_at produces avg adoption time."""
+    AdoptionApplicationFactory(
+        animal=animal,
+        status='approved',
+        reviewed_at=timezone.now(),
+    )
+    response = shelter_admin_client.get(reverse('shelter-metrics'))
+    assert response.json()['avg_adoption_time_days'] is not None

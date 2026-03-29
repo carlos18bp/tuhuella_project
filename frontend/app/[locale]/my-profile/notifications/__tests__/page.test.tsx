@@ -94,3 +94,38 @@ describe('NotificationPreferencesPage', () => {
     expect(screen.getAllByText('App').length).toBeGreaterThan(0);
   });
 });
+
+describe('NotificationPreferencesPage — toggle interaction', () => {
+  const mockUpdatePreference = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  jest.mock('@/lib/stores/notificationStore', () => ({
+    useNotificationStore: (selector: any) => {
+      const updatePref = jest.fn();
+      const state = {
+        preferences: [
+          { id: 1, event_key: 'adoption_submitted', channel: 'email', enabled: true },
+          { id: 2, event_key: 'adoption_submitted', channel: 'in_app', enabled: false },
+        ],
+        initPreferences: jest.fn(),
+        updatePreference: updatePref,
+      };
+      return selector(state);
+    },
+  }));
+
+  it('renders enabled toggle with teal background for enabled preference', () => {
+    render(<NotificationPreferencesPage />);
+    const toggle = screen.getByTestId('toggle-adoption_submitted-email');
+    expect(toggle.className).toContain('bg-teal-500');
+  });
+
+  it('renders disabled toggle with stone background for disabled preference', () => {
+    render(<NotificationPreferencesPage />);
+    const toggle = screen.getByTestId('toggle-adoption_submitted-in_app');
+    expect(toggle.className).toContain('bg-stone-200');
+  });
+});

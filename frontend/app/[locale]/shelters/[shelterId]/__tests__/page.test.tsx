@@ -117,4 +117,18 @@ describe('ShelterDetailPage', () => {
     render(<ShelterDetailPage />);
     expect(state.fetchShelter).toHaveBeenCalledWith(1);
   });
+
+  it('renders cover image when cover_image_url is provided', () => {
+    const withCover = { ...mockShelter, cover_image_url: 'http://example.com/cover.jpg' };
+    setupMock({ loading: false, shelter: withCover });
+    render(<ShelterDetailPage />);
+    expect(screen.getByRole('img', { name: 'Patitas Felices' })).toHaveAttribute('src', 'http://example.com/cover.jpg');
+  });
+
+  it('renders logo image when logo_url is provided', () => {
+    const withLogo = { ...mockShelter, logo_url: 'http://example.com/logo.png' };
+    setupMock({ loading: false, shelter: withLogo });
+    render(<ShelterDetailPage />);
+    expect(screen.getByRole('img', { name: 'Patitas Felices logo' })).toHaveAttribute('src', 'http://example.com/logo.png');
+  });
 });

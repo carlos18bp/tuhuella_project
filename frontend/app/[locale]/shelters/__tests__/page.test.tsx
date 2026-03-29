@@ -54,4 +54,16 @@ describe('RefugiosPage', () => {
     render(<RefugiosPage />);
     expect(screen.getByText('Patitas Felices')).toBeInTheDocument();
   });
+
+  it('renders loading skeletons when loading', () => {
+    useShelterStore.setState({
+      shelters: [],
+      loading: true,
+      fetchShelters: jest.fn(),
+    });
+
+    render(<RefugiosPage />);
+    const skeletons = document.querySelectorAll('.animate-shimmer');
+    expect(skeletons.length).toBeGreaterThanOrEqual(6);
+  });
 });

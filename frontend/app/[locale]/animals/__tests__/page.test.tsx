@@ -96,4 +96,44 @@ describe('AnimalesPage', () => {
     await userEvent.selectOptions(speciesSelect, 'dog');
     expect(state.setFilters).toHaveBeenCalled();
   });
+
+  it('renders pagination when totalPages > 1', () => {
+    const setPage = jest.fn();
+    setupMock({
+      animals: mockAnimals,
+      loading: false,
+      pagination: { page: 2, totalPages: 5, count: 50, pageSize: 10 },
+      setPage,
+    });
+    render(<AnimalesPage />);
+    // Page 2 button should be present (current page)
+    expect(screen.getByText('2')).toBeInTheDocument();
+    // Navigation buttons should exist
+    expect(screen.getAllByRole('button').length).toBeGreaterThan(1);
+  });
+
+  it('calls setPage when a pagination button is clicked', async () => {
+    const setPage = jest.fn();
+    setupMock({
+      animals: mockAnimals,
+      loading: false,
+      pagination: { page: 2, totalPages: 5, count: 50, pageSize: 10 },
+      setPage,
+    });
+    render(<AnimalesPage />);
+    await userEvent.click(screen.getByText('3'));
+    expect(setPage).toHaveBeenCalledWith(3);
+  });
+
+  it('does not render pagination when totalPages is 1', () => {
+    setupMock({
+      animals: mockAnimals,
+      loading: false,
+      pagination: { page: 1, totalPages: 1, count: 2, pageSize: 10 },
+      setPage: jest.fn(),
+    });
+    render(<AnimalesPage />);
+    // Only filter selects should be buttons, no pagination buttons for page numbers
+    expect(screen.queryByText('2')).not.toBeInTheDocument();
+  });
 });

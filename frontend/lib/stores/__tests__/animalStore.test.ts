@@ -159,4 +159,40 @@ describe('animalStore', () => {
     expect(result.name).toBe('Luna Updated');
     expect(mockApi.patch).toHaveBeenCalledTimes(1);
   });
+
+  it('setPage calls fetchAnimals with stored filters and updates pagination page', async () => {
+    useAnimalStore.setState({
+      filters: { species: 'dog' },
+      pagination: { count: 40, page: 1, pageSize: 20, totalPages: 2 },
+    });
+    mockApi.get.mockResolvedValueOnce({
+      data: { results: [ANIMAL_FIXTURE], count: 40, page: 2, page_size: 20, total_pages: 2 },
+    });
+
+    await act(async () => {
+      useAnimalStore.getState().setPage(2);
+    });
+
+    expect(mockApi.get).toHaveBeenCalledWith(
+      expect.any(String),
+      { params: { species: 'dog', page: 2, page_size: 20 } },
+    );
+    expect(useAnimalStore.getState().pagination?.page).toBe(2);
+  });
+
+  it('setPage works when pagination is null', async () => {
+    useAnimalStore.setState({ filters: {}, pagination: null });
+    mockApi.get.mockResolvedValueOnce({
+      data: { results: [], count: 0, page: 3, page_size: 20, total_pages: 0 },
+    });
+
+    await act(async () => {
+      useAnimalStore.getState().setPage(3);
+    });
+
+    expect(mockApi.get).toHaveBeenCalledWith(
+      expect.any(String),
+      { params: { page: 3, page_size: 20 } },
+    );
+  });
 });

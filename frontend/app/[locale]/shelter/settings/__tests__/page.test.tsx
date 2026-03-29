@@ -161,4 +161,43 @@ describe('ShelterConfigPage', () => {
       expect(screen.getByText('No tienes un refugio registrado.')).toBeInTheDocument();
     });
   });
+
+  it('clears success message when form field is edited after save', async () => {
+    mockApi.get.mockResolvedValueOnce({ data: [mockShelter] });
+    render(<ShelterConfigPage />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Guardar/i })).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByRole('button', { name: /Guardar/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/guardados correctamente/i)).toBeInTheDocument();
+    });
+
+    const nameInput = screen.getByDisplayValue('Patitas Felices');
+    await userEvent.type(nameInput, 'x');
+
+    expect(screen.queryByText(/guardados correctamente/i)).not.toBeInTheDocument();
+  });
+
+  it('shows Guardando text while saving', async () => {
+    let resolveUpdate!: (v: any) => void;
+    mockUpdateShelter.mockReturnValueOnce(new Promise((res) => { resolveUpdate = res; }));
+    mockApi.get.mockResolvedValueOnce({ data: [mockShelter] });
+    render(<ShelterConfigPage />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Guardar/i })).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByRole('button', { name: /Guardar/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Guardando/i })).toBeDisabled();
+    });
+
+    resolveUpdate(mockShelter);
+  });
 });
