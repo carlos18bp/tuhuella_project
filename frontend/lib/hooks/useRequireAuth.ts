@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 
 import { useAuthStore } from '@/lib/stores/authStore';
 
 export const useRequireAuth = () => {
   const router = useRouter();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const isAuthReady = useAuthStore((s) => s.isAuthReady);
   const syncFromCookies = useAuthStore((s) => s.syncFromCookies);
 
   useEffect(() => {
@@ -15,10 +16,10 @@ export const useRequireAuth = () => {
   }, [syncFromCookies]);
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (isAuthReady && !isAuthenticated) {
       router.replace('/sign-in');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthReady, isAuthenticated, router]);
 
   return { isAuthenticated };
 };

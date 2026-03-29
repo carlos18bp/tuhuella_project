@@ -1,4 +1,7 @@
 import type { NextConfig } from 'next';
+import createNextIntlPlugin from 'next-intl/plugin';
+
+const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 const backendOrigin = (process.env.NEXT_PUBLIC_BACKEND_ORIGIN || 'http://localhost:8000').replace(/\/$/, '');
 let backendRemotePattern: { protocol: 'http' | 'https'; hostname: string; port?: string; pathname: string } | null = null;
@@ -18,7 +21,6 @@ try {
 const nextConfig: NextConfig = {
   skipTrailingSlashRedirect: true,
   images: {
-    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'http',
@@ -45,6 +47,16 @@ const nextConfig: NextConfig = {
         pathname: '/media/**',
       },
       ...(backendRemotePattern ? [backendRemotePattern] : []),
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'fastly.picsum.photos',
+        pathname: '/**',
+      },
     ],
   },
   async rewrites() {
@@ -61,4 +73,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

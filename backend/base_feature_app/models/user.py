@@ -31,19 +31,23 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     class Role(models.TextChoices):
-        CUSTOMER = 'customer', 'Customer'
+        ADOPTER = 'adopter', 'Adopter'
+        SHELTER_ADMIN = 'shelter_admin', 'Shelter Admin'
         ADMIN = 'admin', 'Admin'
 
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
     phone = models.CharField(max_length=50, blank=True)
+    city = models.CharField(max_length=100, blank=True)
 
-    role = models.CharField(max_length=20, choices=Role.choices, default=Role.CUSTOMER)
+    role = models.CharField(max_length=20, choices=Role.choices, default=Role.ADOPTER)
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
+    terms_accepted_at = models.DateTimeField(null=True, blank=True)
+    terms_version = models.CharField(max_length=20, blank=True, default='')
 
     objects = UserManager()
 

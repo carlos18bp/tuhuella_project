@@ -4,6 +4,22 @@ from pathlib import Path
 
 import pytest
 
+URL_SUB_MODULES = [
+    'base_feature_app.urls.auth',
+    'base_feature_app.urls.shelter',
+    'base_feature_app.urls.animal',
+    'base_feature_app.urls.adoption',
+    'base_feature_app.urls.campaign',
+    'base_feature_app.urls.donation',
+    'base_feature_app.urls.sponsorship',
+    'base_feature_app.urls.payment',
+    'base_feature_app.urls.update_post',
+    'base_feature_app.urls.adopter_intent',
+    'base_feature_app.urls.shelter_invite',
+    'base_feature_app.urls.admin_urls',
+    'base_feature_app.urls.favorite',
+]
+
 
 @pytest.mark.django_db
 def test_url_modules_import_and_have_patterns():
@@ -12,21 +28,33 @@ def test_url_modules_import_and_have_patterns():
     assert hasattr(package_urls, 'urlpatterns')
 
     auth_urls = importlib.import_module('base_feature_app.urls.auth')
-    blog_urls = importlib.import_module('base_feature_app.urls.blog')
-    product_urls = importlib.import_module('base_feature_app.urls.product')
-    sale_urls = importlib.import_module('base_feature_app.urls.sale')
-    user_urls = importlib.import_module('base_feature_app.urls.user')
+    shelter_urls = importlib.import_module('base_feature_app.urls.shelter')
+    animal_urls = importlib.import_module('base_feature_app.urls.animal')
+    adoption_urls = importlib.import_module('base_feature_app.urls.adoption')
+    campaign_urls = importlib.import_module('base_feature_app.urls.campaign')
+    favorite_urls = importlib.import_module('base_feature_app.urls.favorite')
 
     assert any(pattern.name == 'sign_up' for pattern in auth_urls.urlpatterns)
-    assert any(pattern.name == 'blog-list' for pattern in blog_urls.urlpatterns)
-    assert any(pattern.name == 'product-list' for pattern in product_urls.urlpatterns)
-    assert any(pattern.name == 'sale-list' for pattern in sale_urls.urlpatterns)
-    assert any(pattern.name == 'user-list' for pattern in user_urls.urlpatterns)
+    assert any(pattern.name == 'shelter-list' for pattern in shelter_urls.urlpatterns)
+    assert any(pattern.name == 'animal-list' for pattern in animal_urls.urlpatterns)
+    assert any(pattern.name == 'adoption-list' for pattern in adoption_urls.urlpatterns)
+    assert any(pattern.name == 'campaign-list' for pattern in campaign_urls.urlpatterns)
+    assert any(pattern.name == 'favorite-list' for pattern in favorite_urls.urlpatterns)
 
 
 @pytest.mark.django_db
-def test_module_urls_py_is_executable():
-    urls_path = Path(__file__).resolve().parents[2] / 'urls.py'
+def test_all_url_modules_importable():
+    """Verifies all 13 URL sub-modules import without errors."""
+    for module_path in URL_SUB_MODULES:
+        mod = importlib.import_module(module_path)
+        assert hasattr(mod, 'urlpatterns'), f'{module_path} missing urlpatterns'
+        assert len(mod.urlpatterns) >= 1, f'{module_path} has no URL patterns'
+
+
+@pytest.mark.django_db
+def test_module_urls_package_is_executable():
+    """Verifies the urls package __init__.py loads and has at least 13 included URL modules."""
+    urls_path = Path(__file__).resolve().parents[2] / 'urls' / '__init__.py'
     spec = importlib.util.spec_from_file_location('base_feature_app.urls_module', urls_path)
     module = importlib.util.module_from_spec(spec)
     assert spec is not None
@@ -34,5 +62,4 @@ def test_module_urls_py_is_executable():
     spec.loader.exec_module(module)
 
     assert hasattr(module, 'urlpatterns')
-    names = [pattern.url_patterns for pattern in module.urlpatterns]
-    assert len(names) >= 1
+    assert len(module.urlpatterns) >= 13

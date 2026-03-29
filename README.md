@@ -1,31 +1,35 @@
-# 🚀 Base Django React Next Feature
+# Mi Huella — Adopta, Apadrina, Transforma
 
-> Base template for developing projects with Django REST Framework + Next.js + React
-
-This repository serves as a foundation for rapid implementation of future projects using Django backend and Next.js + React frontend, with RESTful architecture and JWT authentication.
+> Plataforma de adopción y apadrinamiento animal. Conectamos refugios con personas que quieren dar un hogar o apoyar a un animal.
 
 [![Django](https://img.shields.io/badge/Django-6.0+-092E20?style=flat&logo=django)](https://www.djangoproject.com/)
 [![Next.js](https://img.shields.io/badge/Next.js-16+-000000?style=flat&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19+-61DAFB?style=flat&logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?style=flat&logo=typescript)](https://www.typescriptlang.org/)
 [![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=flat&logo=python)](https://www.python.org/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
-## 📋 Table of Contents
+## Descripción
 
-- [Features](#-features)
-- [Technologies](#-technologies)
-- [Project Structure](#-project-structure)
-- [Quick Start](#-quick-start)
-- [Backend (Django)](#-backend-django)
-- [Frontend (Next.js + React)](#-frontend-nextjs--react)
-- [Testing](#-testing)
-- [Documentation](#-documentation)
-- [Reference Projects](#-reference-projects)
-- [Customization](#-customization)
-- [Contributing](#-contributing)
+Mi Huella es una plataforma web que conecta refugios de animales con personas interesadas en adoptar, apadrinar o donar. Los refugios verificados pueden publicar animales, gestionar solicitudes de adopción, y crear campañas de recaudación. Los adoptantes pueden explorar animales, enviar solicitudes, apadrinar mensualmente y donar a campañas.
+
+### Roles del sistema
+
+- **Adopter** — Explora animales, envía solicitudes, apadrina, dona, marca favoritos
+- **Shelter Admin** — Gestiona animales, revisa solicitudes, crea campañas, envía invitaciones
+- **Admin** — Aprueba refugios, modera contenido, visualiza métricas
+
+---
+
+## Tabla de Contenidos
+
+- [Tecnologías](#tecnologías)
+- [Estructura](#estructura)
+- [Inicio Rápido](#inicio-rápido)
+- [Backend (Django)](#backend)
+- [Frontend (Next.js)](#frontend)
+- [E2E Flows](#e2e-flows)
 
 ---
 
@@ -38,7 +42,7 @@ This repository serves as a foundation for rapid implementation of future projec
 - ✅ **Password Reset** - Email-based passcode flow with `PasswordCode` model
 - ✅ **Email Service** - Centralized email logic (`services/email_service.py`)
 - ✅ **Custom User Model** - User with email as identifier and role-based permissions
-- ✅ **Complete CRUD** - Blog, Product, Sale, User
+- ✅ **Complete CRUD** - Shelter, Animal, Adoption, Campaign, Donation, Sponsorship, Payment, UpdatePost, AdopterIntent, ShelterInvite, Favorite, Notification
 - ✅ **Customized Django Admin** - Organized by sections
 - ✅ **File Management** - `django-attachments` for images and files
 - ✅ **Image Thumbnails** - `easy-thumbnails` for automatic resizing
@@ -135,32 +139,22 @@ This repository serves as a foundation for rapid implementation of future projec
 ## 📁 Project Structure
 
 ```
-base_django_react_next_feature/
+tuhuella_project/
 ├── backend/                              # Django Backend
 │   ├── base_feature_app/                # Main app
-│   │   ├── models/                      # Blog, Product, Sale, SoldProduct, User, PasswordCode
-│   │   ├── serializers/                 # List, Detail, CreateUpdate per model
-│   │   ├── views/                       # Function-based CRUD views + auth
-│   │   ├── urls/                        # URL routing by model
-│   │   ├── forms/                       # Django forms (blog, product, user)
+│   │   ├── models/                      # User, Shelter, Animal, Adoption, Campaign,
+│   │   │                                # Donation, Sponsorship, Payment, UpdatePost,
+│   │   │                                # AdopterIntent, ShelterInvite, Subscription,
+│   │   │                                # Favorite, Notification, PasswordCode
+│   │   ├── serializers/                 # List, Detail, CreateUpdate per model (~34 files)
+│   │   ├── views/                       # Function-based CRUD views + auth + admin + payment
+│   │   ├── urls/                        # URL routing by domain module
 │   │   ├── services/                    # Business logic (email_service)
 │   │   ├── utils/                       # Utility functions (auth_utils)
-│   │   ├── tests/                       # Tests
-│   │   │   ├── models/                  # Model tests
-│   │   │   ├── serializers/             # Serializer tests
-│   │   │   ├── views/                   # View/endpoint tests
-│   │   │   ├── services/               # Service tests
-│   │   │   ├── commands/               # Management command tests
-│   │   │   ├── utils/                   # Admin, forms, URL, auth utils tests
-│   │   │   ├── conftest.py              # App-level fixtures
-│   │   │   └── helpers.py              # Test helper utilities
-│   │   ├── admin.py                     # Custom admin site organized by sections
-│   │   └── management/commands/         # create_fake_data, delete_fake_data, etc.
+│   │   ├── tests/                       # Tests (models, serializers, views, commands, utils)
+│   │   ├── admin.py                     # Custom MiHuellaAdminSite organized by sections
+│   │   └── management/commands/         # create_fake_data, delete_fake_data, create_users, etc.
 │   ├── base_feature_project/            # Settings and configuration
-│   │   ├── settings.py                  # Base settings
-│   │   ├── urls.py                      # Root URL configuration
-│   │   ├── wsgi.py / asgi.py            # Server entry points
-│   │   └── __init__.py
 │   ├── django_attachments/              # File management app
 │   ├── conftest.py                      # Root pytest config (coverage report)
 │   ├── pytest.ini                       # Pytest configuration
@@ -169,95 +163,55 @@ base_django_react_next_feature/
 │
 ├── frontend/                             # Next.js + React Frontend
 │   ├── app/                             # Next.js App Router
-│   │   ├── page.tsx                     # Home page
-│   │   ├── layout.tsx                   # Root layout (Header + Footer)
+│   │   ├── page.tsx                     # Home / landing page
+│   │   ├── layout.tsx                   # Root layout (Inter font, Header + Footer)
 │   │   ├── providers.tsx                # Google OAuth provider
-│   │   ├── globals.css                  # Global styles
+│   │   ├── globals.css                  # Stone palette, teal/amber/emerald accents
+│   │   ├── animales/                    # Animal listing + [animalId] detail
+│   │   ├── refugios/                    # Shelter listing + [shelterId] profile
+│   │   ├── campanas/                    # Campaign listing + [campaignId] detail
+│   │   ├── busco-adoptar/               # Public adopter intents
+│   │   ├── favoritos/                   # User favorites
+│   │   ├── mis-solicitudes/             # User adoption applications
+│   │   ├── mis-donaciones/              # User donation history
+│   │   ├── mis-apadrinamientos/         # User sponsorships
+│   │   ├── mi-intencion/                # User adopter intent
+│   │   ├── mi-perfil/                   # User profile
+│   │   ├── refugio/                     # Shelter panel (dashboard, animales, solicitudes,
+│   │   │                                # campanas, donaciones, configuracion, onboarding)
+│   │   ├── admin/                       # Admin panel (dashboard, refugios/aprobar,
+│   │   │                                # moderacion, pagos, metricas)
+│   │   ├── checkout/                    # Donation, sponsorship, confirmation (placeholder)
 │   │   ├── sign-in/                     # Sign in page
 │   │   ├── sign-up/                     # Sign up page
 │   │   ├── forgot-password/             # Password reset page
-│   │   ├── blogs/                       # Blog list + [blogId] detail
-│   │   ├── catalog/                     # Product catalog
-│   │   ├── products/                    # [productId] detail
-│   │   ├── checkout/                    # Checkout page
-│   │   ├── dashboard/                   # Dashboard (auth)
-│   │   ├── backoffice/                  # Backoffice (auth)
+│   │   ├── faq/                         # FAQ page
 │   │   └── __tests__/                   # Page-level tests
 │   ├── components/                      # React components
-│   │   ├── blog/                        # BlogCard, BlogCarousel
-│   │   │   └── __tests__/               # Component tests
-│   │   ├── product/                     # ProductCard, ProductCarousel
-│   │   │   └── __tests__/               # Component tests
-│   │   └── layout/                      # Header, Footer
-│   │       └── __tests__/               # Layout tests
+│   │   └── layout/                      # Header (glassmorphism + role nav), Footer
 │   ├── lib/                             # Libraries and utilities
-│   │   ├── stores/                      # Zustand stores
-│   │   │   ├── authStore.ts             # Authentication + token management
-│   │   │   ├── blogStore.ts             # Blog state
-│   │   │   ├── productStore.ts          # Product state
-│   │   │   ├── cartStore.ts             # Shopping cart (persisted)
-│   │   │   ├── localeStore.ts           # Language state (persisted)
-│   │   │   └── __tests__/               # Store tests
+│   │   ├── stores/                      # Zustand stores (auth, shelter, animal, adoption,
+│   │   │                                # campaign, donation, sponsorship, favorite, locale)
 │   │   ├── services/                    # API client + token utilities
-│   │   │   ├── http.ts                  # Axios instance with interceptors
-│   │   │   ├── tokens.ts                # Cookie-based token management
-│   │   │   └── __tests__/               # Service tests
-│   │   ├── hooks/                       # Custom hooks
-│   │   │   ├── useRequireAuth.ts        # Auth guard hook
-│   │   │   └── __tests__/               # Hook tests
-│   │   ├── i18n/                        # Internationalization config
-│   │   │   ├── config.ts                # Locale definitions (en/es)
-│   │   │   └── __tests__/               # i18n tests
-│   │   ├── types.ts                     # TypeScript type definitions
-│   │   ├── constants.ts                 # Routes, API endpoints, cookie keys
-│   │   └── __tests__/                   # Constants tests + fixtures
+│   │   ├── hooks/                       # useRequireAuth
+│   │   ├── i18n/                        # Internationalization config (en/es)
+│   │   ├── types.ts                     # Domain type definitions
+│   │   └── constants.ts                 # Routes, API endpoints, cookie keys
 │   ├── e2e/                             # Modular E2E tests (Playwright)
-│   │   ├── auth/                        # Login, logout, register tests
-│   │   ├── app/                         # Cart, checkout, purchase, user flows
-│   │   ├── public/                      # Blogs, products, navigation, smoke
+│   │   ├── auth/                        # Auth tests
+│   │   ├── app/                         # App flow tests
+│   │   ├── public/                      # Public page tests
 │   │   ├── helpers/                     # Flow tags, test utils
-│   │   ├── reporters/                   # Flow coverage reporter
 │   │   ├── fixtures.ts                  # E2E test fixtures
-│   │   └── flow-definitions.json        # E2E flow definitions
-│   ├── scripts/                         # Coverage & module helpers
-│   │   ├── ast-parser.cjs               # AST parser for quality analysis
-│   │   ├── coverage-summary.cjs         # Coverage summary generator
-│   │   ├── e2e-modules.cjs              # List E2E modules
-│   │   ├── e2e-module.cjs               # Run single E2E module
-│   │   ├── e2e-coverage-module.cjs      # Module-scoped coverage
-│   │   ├── test-summary.sh              # Test summary script
-│   │   └── __tests__/                   # Script tests
+│   │   └── flow-definitions.json        # Mi Huella E2E flow definitions
 │   ├── package.json                     # npm dependencies
-│   ├── jest.config.cjs                  # Jest configuration
 │   ├── playwright.config.ts             # Playwright configuration
-│   ├── eslint.config.mjs                # ESLint configuration
-│   ├── tsconfig.json                    # TypeScript configuration
-│   ├── next.config.ts                   # Next.js configuration (rewrites)
-│   ├── postcss.config.mjs               # PostCSS configuration
-│   ├── TESTING.md                       # Frontend testing guide
-│   ├── SETUP.md                         # Frontend setup guide
 │   └── .env.example                     # Environment variables (example)
 │
 ├── scripts/                              # Test & quality tooling
-│   ├── run-tests-all-suites.py          # Global test runner (backend + unit + E2E)
-│   ├── test_quality_gate.py             # Test quality gate CLI
-│   └── quality/                         # Quality gate analyzer modules
-│
 ├── docs/                                 # Project documentation
-│   ├── DJANGO_REACT_ARCHITECTURE_STANDARD.md
-│   ├── TESTING_QUALITY_STANDARDS.md
-│   ├── BACKEND_AND_FRONTEND_COVERAGE_REPORT_STANDARD.md
-│   ├── E2E_FLOW_COVERAGE_REPORT_STANDARD.md
-│   ├── TEST_QUALITY_GATE_REFERENCE.md
-│   ├── GLOBAL_RULES_GUIDELINES.md
-│   └── USER_FLOW_MAP.md
-│
 ├── .github/workflows/                    # CI pipelines
-│   └── test-quality-gate.yml            # Quality gate GitHub Action
 ├── .pre-commit-config.yaml              # Pre-commit hooks
-├── .gitignore                            # Git ignore rules
-├── test-reports/                         # Test runner logs & resume metadata
-├── test-results/                         # Quality gate reports
 └── README.md                             # This file
 ```
 
@@ -274,8 +228,8 @@ base_django_react_next_feature/
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/carlos18bp/base_django_react_next_feature.git
-cd base_django_react_next_feature
+git clone https://github.com/carlos18bp/tuhuella_project.git
+cd tuhuella_project
 ```
 
 ### 2. Backend Setup
@@ -372,7 +326,7 @@ python -c "from django.core.management.utils import get_random_secret_key; print
 
 ### Backups
 
-Automated backups run every 20 days via Huey task queue. Backups are stored in `/var/backups/base_feature_project/` with 90-day retention (5 backups).
+Automated backups run every 20 days via Huey task queue. Backups are stored in `/var/backups/mi_huella/` with 90-day retention (5 backups).
 
 Manual backup:
 ```bash
@@ -454,15 +408,15 @@ WEEKLY QUERY REPORT - 2026-02-24
 
 ## SLOW QUERIES (>500ms)
 ----------------------------------------
-[1230ms] /api/products/ - SELECT "product"."id", "product"."title" FROM "product" LEFT OUTER JOIN...
-[874ms] /api/sales/ - SELECT "sale"."id", "sale"."email" FROM "sale" INNER JOIN "sold_product"...
-[612ms] /api/blogs/ - SELECT COUNT(*) AS "__count" FROM "blog"...
+[1230ms] /api/animals/ - SELECT "animal"."id", "animal"."name" FROM "animal" LEFT OUTER JOIN...
+[874ms] /api/adoptions/ - SELECT "adoption_application"."id" FROM "adoption_application" INNER JOIN...
+[612ms] /api/campaigns/ - SELECT COUNT(*) AS "__count" FROM "campaign"...
 
 ## POTENTIAL N+1 (>10 queries/request)
 ----------------------------------------
-[34 queries] /api/products/
-[18 queries] /api/sales/
-[11 queries] /api/blogs/42/
+[34 queries] /api/animals/
+[18 queries] /api/adoptions/
+[11 queries] /api/campaigns/3/
 
 ============================================================
 ```
@@ -486,11 +440,21 @@ sudo systemctl status base_feature_project-huey
 
 | Model | Description | Main Fields |
 |-------|-------------|------------|
-| **User** | Custom user (email as identifier) | email, first_name, last_name, phone, role, is_active, date_joined |
-| **Blog** | Blog entries | title, description, category, image |
-| **Product** | Products | title, category, sub_category, description, price, gallery |
-| **Sale** | Sales | email, address, city, state, postal_code, sold_products (M2M) |
-| **SoldProduct** | Products in a sale | product (FK), quantity |
+| **User** | Custom user (email as identifier) | email, first_name, last_name, phone, city, role (adopter/shelter_admin/admin) |
+| **Shelter** | Animal shelters | name, legal_name, description, city, address, phone, email, verification_status, owner (FK) |
+| **Animal** | Animals for adoption | name, species, breed, age_range, gender, size, status, special_needs, gallery, shelter (FK) |
+| **AdoptionApplication** | Adoption requests | animal (FK), user (FK), status, form_answers (JSON), notes |
+| **Campaign** | Fundraising campaigns | title, description, goal_amount, raised_amount, status, shelter (FK) |
+| **Donation** | One-time donations | amount, status, message, user (FK), shelter (FK), campaign (FK) |
+| **Sponsorship** | Recurring animal sponsorships | amount, frequency, status, user (FK), animal (FK) |
+| **Payment** | Payment transactions | provider (wompi), provider_reference, amount, status, metadata (JSON) |
+| **UpdatePost** | Shelter/campaign updates | title, content, image, shelter (FK), campaign (FK), animal (FK) |
+| **AdopterIntent** | Adopter search profiles | preferences (JSON), description, status, visibility, user (1-to-1) |
+| **ShelterInvite** | Shelter → adopter invitations | message, status, shelter (FK), adopter_intent (FK) |
+| **Subscription** | Recurring payment subscriptions | provider, interval, next_payment_at, status, sponsorship (1-to-1) |
+| **Favorite** | User favorite animals | user (FK), animal (FK) |
+| **NotificationPreference** | Notification settings | user (FK), event_key, channel, enabled |
+| **NotificationLog** | Notification history | recipient (FK), event_key, channel, status, sent_at |
 | **PasswordCode** | Password reset codes | user (FK), code, created_at, used |
 
 ### API Endpoints
@@ -508,40 +472,83 @@ POST   /api/update_password/                           # Update password (auth)
 GET    /api/validate_token/                            # Validate current token (auth)
 ```
 
-#### Blog
+#### Shelters
 ```
-GET    /api/blogs-data/                # List blogs (public, serialized)
-GET    /api/blogs/                     # List blogs (CRUD)
-POST   /api/blogs/                     # Create blog (auth)
-GET    /api/blogs/<id>/                # Blog detail
-PUT    /api/blogs/<id>/                # Update blog (auth)
-DELETE /api/blogs/<id>/                # Delete blog (auth)
+GET    /api/shelters/                  # List shelters (public)
+POST   /api/shelters/                  # Create shelter (auth)
+GET    /api/shelters/<id>/             # Shelter detail
+PATCH  /api/shelters/<id>/             # Update shelter (owner)
 ```
 
-#### Product
+#### Animals
 ```
-GET    /api/products-data/             # List products (public, serialized)
-GET    /api/products/                  # List products (CRUD)
-POST   /api/products/                  # Create product (auth)
-GET    /api/products/<id>/             # Product detail
-PUT    /api/products/<id>/             # Update product (auth)
-DELETE /api/products/<id>/             # Delete product (auth)
+GET    /api/animals/                   # List animals (public, filterable)
+POST   /api/animals/                   # Create animal (shelter_admin)
+GET    /api/animals/<id>/              # Animal detail
+PATCH  /api/animals/<id>/              # Update animal (shelter_admin)
 ```
 
-#### Sale
+#### Adoptions
 ```
-POST   /api/create-sale/               # Create sale (public checkout)
-GET    /api/sales/                     # List sales (auth)
-GET    /api/sales/<id>/                # Sale detail (auth)
+GET    /api/adoptions/                 # List applications (auth)
+POST   /api/adoptions/                 # Create application (adopter)
+PATCH  /api/adoptions/<id>/status/     # Update application status (shelter_admin)
 ```
 
-#### User
+#### Campaigns
 ```
-GET    /api/users/                     # List users (auth)
-POST   /api/users/                     # Create user (auth)
-GET    /api/users/<id>/                # User detail (auth)
-PUT    /api/users/<id>/                # Update user (auth)
-DELETE /api/users/<id>/                # Delete user (auth)
+GET    /api/campaigns/                 # List campaigns (public)
+POST   /api/campaigns/                 # Create campaign (shelter_admin)
+GET    /api/campaigns/<id>/            # Campaign detail
+PATCH  /api/campaigns/<id>/            # Update campaign (shelter_admin)
+```
+
+#### Donations
+```
+GET    /api/donations/                 # List donations (auth)
+POST   /api/donations/                 # Create donation (auth)
+```
+
+#### Sponsorships
+```
+GET    /api/sponsorships/              # List sponsorships (auth)
+POST   /api/sponsorships/              # Create sponsorship (auth)
+```
+
+#### Payments (Wompi placeholder)
+```
+POST   /api/payments/create-intent/    # Create payment intent
+POST   /api/payments/webhook/          # Payment webhook callback
+GET    /api/payments/<id>/status/      # Payment status
+```
+
+#### Favorites
+```
+GET    /api/favorites/                 # List favorites (auth)
+POST   /api/favorites/                 # Add favorite (auth)
+DELETE /api/favorites/<id>/            # Remove favorite (auth)
+```
+
+#### Adopter Intents
+```
+GET    /api/adopter-intents/           # List public intents
+POST   /api/adopter-intents/           # Create intent (auth)
+GET    /api/adopter-intents/me/        # Get own intent (auth)
+PATCH  /api/adopter-intents/me/        # Update own intent (auth)
+```
+
+#### Shelter Invites
+```
+GET    /api/shelter-invites/           # List invites (auth)
+POST   /api/shelter-invites/           # Create invite (shelter_admin)
+```
+
+#### Admin
+```
+GET    /api/admin/dashboard/           # Dashboard metrics (admin)
+GET    /api/admin/pending-shelters/    # Pending shelters (admin)
+POST   /api/admin/shelters/<id>/approve/ # Approve/reject shelter (admin)
+GET    /api/admin/metrics/             # Detailed metrics (admin)
 ```
 
 ### Management Commands
@@ -549,17 +556,19 @@ DELETE /api/users/<id>/                # Delete user (auth)
 #### Create Fake Data
 
 ```bash
-# Create all data with defaults
+# Create all data with defaults (users → shelters → animals → campaigns → donations → sponsorships)
 python manage.py create_fake_data
 
-# Create all data with a single count for every model
+# Create all data with custom count
 python manage.py create_fake_data 20
 
 # Individual commands
-python manage.py create_blogs 20
-python manage.py create_products 50
-python manage.py create_sales 30
 python manage.py create_users 10
+python manage.py create_shelters 5
+python manage.py create_animals 30
+python manage.py create_campaigns 10
+python manage.py create_donations 20
+python manage.py create_sponsorships 15
 ```
 
 **Note:** The `create_users` command never deletes superusers or staff.
@@ -591,9 +600,11 @@ python manage.py silk_garbage_collect --dry-run
 Admin is organized in logical sections:
 
 - **👥 User Management**: Users, PasswordCodes
-- **📝 Blog Management**: Blogs
-- **🛍️ Product Management**: Products
-- **💰 Sales Management**: Sales, SoldProducts
+- **🏠 Shelter Management**: Shelters, ShelterInvites
+- **🐾 Animal Management**: Animals, Favorites
+- **� Adoption Management**: AdoptionApplications, AdopterIntents
+- **💰 Campaigns & Donations**: Campaigns, Donations, Sponsorships, Payments, Subscriptions
+- **📢 Content & Notifications**: UpdatePosts, NotificationPreferences, NotificationLogs
 
 Access: http://localhost:8000/admin
 
@@ -635,43 +646,78 @@ sendPasswordResetCode(email)             // Send reset code
 resetPassword({ email, code, new_password }) // Verify code + reset
 ```
 
-#### Blog Store (`lib/stores/blogStore.ts`)
+#### Shelter Store (`lib/stores/shelterStore.ts`)
 ```typescript
 // State
-{ blogs: [], loading, error }
+{ shelters: [], shelter: null, loading, error }
 
 // Actions
-fetchBlogs()                             // Fetch all blogs
-fetchBlog(blogId)                        // Fetch single blog
-
-// Selectors
-selectBlogs, selectBlogsLoading, selectBlogsError
+fetchShelters()                          // Fetch all shelters
+fetchShelter(id)                         // Fetch single shelter
+createShelter(data)                      // Register new shelter
+updateShelter(id, data)                  // Update shelter info
 ```
 
-#### Product Store (`lib/stores/productStore.ts`)
+#### Animal Store (`lib/stores/animalStore.ts`)
 ```typescript
 // State
-{ products: [], loading, error }
+{ animals: [], animal: null, filters: {}, loading, error }
 
 // Actions
-fetchProducts()                          // Fetch all products
-fetchProduct(productId)                  // Fetch single product
-
-// Selectors
-selectProducts, selectProductsLoading, selectProductsError
+fetchAnimals(filters?)                   // Fetch animals with optional filters
+fetchAnimal(id)                          // Fetch single animal
+createAnimal(data)                       // Create animal (shelter_admin)
+updateAnimal(id, data)                   // Update animal (shelter_admin)
+setFilters(filters)                      // Set filter state
 ```
 
-#### Cart Store (`lib/stores/cartStore.ts`)
+#### Adoption Store (`lib/stores/adoptionStore.ts`)
 ```typescript
-// State (persisted via zustand/persist)
-{ items: CartItem[] }
+// State
+{ applications: [], loading, error }
 
 // Actions
-addToCart(product, quantity)              // Add/increment cart item
-removeFromCart(productId)                 // Remove cart item
-updateQuantity(productId, quantity)       // Update item quantity
-clearCart()                              // Empty cart
-subtotal()                               // Calculate total price
+fetchApplications()                      // Fetch user's applications
+createApplication(data)                  // Submit adoption application
+updateStatus(id, status)                 // Update application status (shelter_admin)
+```
+
+#### Campaign Store (`lib/stores/campaignStore.ts`)
+```typescript
+// State
+{ campaigns: [], campaign: null, loading, error }
+
+// Actions
+fetchCampaigns()                         // Fetch all campaigns
+fetchCampaign(id)                        // Fetch single campaign
+```
+
+#### Donation Store (`lib/stores/donationStore.ts`)
+```typescript
+// State
+{ donations: [], loading, error }
+
+// Actions
+fetchDonations()                         // Fetch user's donations
+createDonation(data)                     // Create donation
+```
+
+#### Sponsorship Store (`lib/stores/sponsorshipStore.ts`)
+```typescript
+// State
+{ sponsorships: [], loading, error }
+
+// Actions
+fetchSponsorships()                      // Fetch user's sponsorships
+```
+
+#### Favorite Store (`lib/stores/favoriteStore.ts`)
+```typescript
+// State
+{ favorites: [], loading, error }
+
+// Actions
+fetchFavorites()                         // Fetch user's favorites
 ```
 
 #### Locale Store (`lib/stores/localeStore.ts`)
@@ -685,33 +731,47 @@ setLocale(locale)                        // Switch locale (en/es)
 
 ### Main Components
 
-#### Blog
-- **BlogCard** - Blog presentation card
-- **BlogCarousel** - Featured blogs carousel
-
-#### Product
-- **ProductCard** - Product presentation card
-- **ProductCarousel** - Products carousel
-
 #### Layout
-- **Header** - Main navigation
-- **Footer** - Footer
+- **Header** - Glassmorphism navigation with role-aware links (adopter/shelter_admin/admin)
+- **Footer** - Stone-100 footer with explore, account, and info columns
 
 ### Available Routes
 
 | Route | Page | Description |
 |-------|------|-------------|
-| `/` | Home | Home page |
-| `/blogs` | Blogs | Blog list |
-| `/blogs/:blogId` | Blog Detail | Blog detail |
-| `/catalog` | Catalog | Product catalog |
-| `/products/:productId` | Product Detail | Product detail |
-| `/checkout` | Checkout | Checkout |
+| `/` | Home | Landing page with hero, featured animals, shelter spotlight |
+| `/animales` | Animales | Animal listing with filters |
+| `/animales/:id` | Animal Detail | Animal info, gallery, adoption/sponsorship CTAs |
+| `/refugios` | Refugios | Shelter listing |
+| `/refugios/:id` | Shelter Profile | Shelter info, animals, campaigns |
+| `/campanas` | Campañas | Campaign listing with progress bars |
+| `/campanas/:id` | Campaign Detail | Campaign detail with donation CTA |
+| `/busco-adoptar` | Busco Adoptar | Public adopter intents |
+| `/faq` | FAQ | Frequently asked questions |
 | `/sign-in` | Sign In | Sign in (guest only) |
 | `/sign-up` | Sign Up | Sign up (guest only) |
 | `/forgot-password` | Forgot Password | Password reset flow |
-| `/dashboard` | Dashboard | Dashboard (auth) |
-| `/backoffice` | Backoffice | Backoffice (auth) |
+| `/favoritos` | Favoritos | User's favorite animals (auth) |
+| `/mis-solicitudes` | Mis Solicitudes | User's adoption applications (auth) |
+| `/mis-donaciones` | Mis Donaciones | User's donation history (auth) |
+| `/mis-apadrinamientos` | Mis Apadrinamientos | User's sponsorships (auth) |
+| `/mi-intencion` | Mi Intención | User's adopter intent (auth) |
+| `/mi-perfil` | Mi Perfil | User profile (auth) |
+| `/refugio/onboarding` | Registrar Refugio | Shelter registration form (auth) |
+| `/refugio/dashboard` | Panel Refugio | Shelter dashboard (shelter_admin) |
+| `/refugio/animales` | Gestión Animales | Manage shelter animals (shelter_admin) |
+| `/refugio/solicitudes` | Solicitudes | Manage adoption applications (shelter_admin) |
+| `/refugio/campanas` | Campañas | Manage campaigns (shelter_admin) |
+| `/refugio/donaciones` | Donaciones | View received donations (shelter_admin) |
+| `/refugio/configuracion` | Configuración | Shelter settings (shelter_admin) |
+| `/admin/dashboard` | Admin Panel | Platform metrics (admin) |
+| `/admin/refugios/aprobar` | Aprobar Refugios | Approve/reject shelters (admin) |
+| `/admin/moderacion` | Moderación | Content moderation (admin) |
+| `/admin/pagos` | Auditoría Pagos | Payment audit (admin) |
+| `/admin/metricas` | Métricas | Detailed platform metrics (admin) |
+| `/checkout/donacion` | Checkout Donación | Donation payment (placeholder) |
+| `/checkout/apadrinamiento` | Checkout Apadrinamiento | Sponsorship payment (placeholder) |
+| `/checkout/confirmacion` | Confirmación | Payment confirmation |
 
 ### NPM Scripts
 
@@ -1075,31 +1135,6 @@ Real implementation examples using this base:
 ---
 
 ## 🔧 Customization
-
-### Change Project Name
-
-If you want to use this base for a new project:
-
-1. **Search and replace** all occurrences of `base_feature`:
-
-```bash
-# Use ag (the silver searcher) or grep
-ag base_feature
-# Or
-grep -r "base_feature" .
-
-# Replace in files
-find . -type f -exec sed -i 's/base_feature/your_new_name/g' {} +
-```
-
-2. **Rename directories**:
-
-```bash
-mv backend/base_feature_project backend/your_project
-mv backend/base_feature_app backend/your_app
-```
-
-3. **Update imports** in Python and references in configuration.
 
 ### Add New Models
 

@@ -3,9 +3,9 @@ import { renderHook, waitFor } from '@testing-library/react';
 
 import { useRequireAuth } from '../useRequireAuth';
 import { useAuthStore } from '../../stores/authStore';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 
-jest.mock('next/navigation', () => ({
+jest.mock('@/i18n/navigation', () => ({
   useRouter: jest.fn(),
 }));
 
@@ -21,12 +21,12 @@ describe('useRequireAuth', () => {
     jest.clearAllMocks();
   });
 
-  it('syncs cookies and redirects when unauthenticated', async () => {
+  it('syncs cookies and redirects when unauthenticated and auth is ready', async () => {
     const replace = jest.fn();
     mockUseRouter.mockReturnValue({ replace });
 
     const syncFromCookies = jest.fn();
-    const state = { isAuthenticated: false, syncFromCookies };
+    const state = { isAuthenticated: false, isAuthReady: true, syncFromCookies };
     mockUseAuthStore.mockImplementation((selector?: (s: typeof state) => unknown) =>
       selector ? selector(state) : state
     );
@@ -39,12 +39,30 @@ describe('useRequireAuth', () => {
     });
   });
 
+  it('does not redirect before auth is ready', async () => {
+    const replace = jest.fn();
+    mockUseRouter.mockReturnValue({ replace });
+
+    const syncFromCookies = jest.fn();
+    const state = { isAuthenticated: false, isAuthReady: false, syncFromCookies };
+    mockUseAuthStore.mockImplementation((selector?: (s: typeof state) => unknown) =>
+      selector ? selector(state) : state
+    );
+
+    renderHook(() => useRequireAuth());
+
+    await waitFor(() => {
+      expect(syncFromCookies).toHaveBeenCalledTimes(1);
+    });
+    expect(replace).not.toHaveBeenCalled();
+  });
+
   it('does not redirect when authenticated', async () => {
     const replace = jest.fn();
     mockUseRouter.mockReturnValue({ replace });
 
     const syncFromCookies = jest.fn();
-    const state = { isAuthenticated: true, syncFromCookies };
+    const state = { isAuthenticated: true, isAuthReady: true, syncFromCookies };
     mockUseAuthStore.mockImplementation((selector?: (s: typeof state) => unknown) =>
       selector ? selector(state) : state
     );

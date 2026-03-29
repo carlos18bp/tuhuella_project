@@ -1,18 +1,39 @@
+import createIntlMiddleware from 'next-intl/middleware';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { routing } from './i18n/routing';
 
-const PROTECTED_PREFIXES = ['/backoffice', '/dashboard'];
+const intlMiddleware = createIntlMiddleware(routing);
 
+const PROTECTED_PREFIXES = [
+  '/admin',
+  '/backoffice',
+  '/checkout',
+  '/dashboard',
+  '/favorites',
+  '/my-',
+  '/shelter/',
+];
 const AUTH_ROUTES = ['/sign-in', '/sign-up', '/forgot-password'];
-
 const ACCESS_TOKEN_KEY = 'access_token';
 
+function stripLocalePrefix(pathname: string): string {
+  for (const locale of routing.locales) {
+    if (pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`) {
+      return pathname.replace(`/${locale}`, '') || '/';
+    }
+  }
+  return pathname;
+}
+
 function isProtected(pathname: string): boolean {
-  return PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+  const bare = stripLocalePrefix(pathname);
+  return PROTECTED_PREFIXES.some((prefix) => bare.startsWith(prefix));
 }
 
 function isAuthRoute(pathname: string): boolean {
-  return AUTH_ROUTES.some((route) => pathname.startsWith(route));
+  const bare = stripLocalePrefix(pathname);
+  return AUTH_ROUTES.some((route) => bare.startsWith(route));
 }
 
 export function proxy(request: NextRequest): NextResponse {
@@ -29,11 +50,12 @@ export function proxy(request: NextRequest): NextResponse {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  return NextResponse.next();
+  // Delegate to next-intl middleware for locale negotiation
+  return intlMiddleware(request);
 }
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|media).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|media|.*\\..*).*)',
   ],
 };

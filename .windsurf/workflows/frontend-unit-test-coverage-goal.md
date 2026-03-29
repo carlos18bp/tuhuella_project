@@ -1,6 +1,6 @@
 ---
-description: Frontend & Component Testing
 auto_execution_mode: 2
+description: Frontend & Component Testing
 ---
 # Frontend Unit Test Coverage Strategy
 

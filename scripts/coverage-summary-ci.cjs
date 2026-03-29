@@ -259,7 +259,8 @@ function parseE2ETestResults() {
       const title = parentTitle ? `${parentTitle} > ${suite.title}` : suite.title;
       for (const spec of (suite.specs || [])) {
         for (const test of (spec.tests || [])) {
-          if (test.status === 'expected') passed++;
+          // 'expected' = passed on all attempts, 'flaky' = passed after retry
+          if (test.status === 'expected' || test.status === 'flaky') passed++;
           else if (test.status === 'skipped') skipped++;
           else {
             failed++;

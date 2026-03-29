@@ -10,6 +10,8 @@ const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   testMatch: ['<rootDir>/**/__tests__/**/*.test.(ts|tsx)'],
   moduleNameMapper: {
+    '^@/i18n/navigation$': '<rootDir>/__mocks__/i18n/navigation.tsx',
+    '^(\\.\\./)*i18n/navigation$': '<rootDir>/__mocks__/i18n/navigation.tsx',
     '^@/(.*)$': '<rootDir>/$1',
   },
   collectCoverageFrom: [

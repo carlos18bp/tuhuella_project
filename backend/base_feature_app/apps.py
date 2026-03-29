@@ -7,3 +7,4 @@ class BaseFeatureAppConfig(AppConfig):
 
     def ready(self):
         import base_feature_project.tasks  # noqa: F401
+        import base_feature_app.signals  # noqa: F401
