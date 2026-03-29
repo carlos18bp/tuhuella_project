@@ -158,6 +158,11 @@ test.describe('Blog — Admin', () => {
   });
 
   test('should display admin blog calendar page', { tag: [...BLOG_ADMIN_CALENDAR] }, async ({ page }) => {
+    // Calendar endpoint returns an array, not paginated — override the beforeEach catch-all
+    await page.route(/\/api\/blog\/admin\/calendar/, (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
+    );
+
     await loginAndNavigate(page, 'admin', '/admin/blog/calendario');
     await waitForPageLoad(page);
 
@@ -237,6 +242,6 @@ test.describe('Blog — Admin', () => {
     await dialog.getByRole('button', { name: /Duplicar/i }).click();
 
     // Duplicated post should appear in the list
-    await expect(page.getByText('Copia de Cómo adoptar responsablemente')).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('table').getByText('Copia de Cómo adoptar responsablemente')).toBeVisible({ timeout: 10_000 });
   });
 });
