@@ -59,6 +59,11 @@ jest.mock('lucide-react', () => ({
 jest.mock('@/lib/stores/animalStore', () => ({ useAnimalStore: jest.fn() }));
 jest.mock('@/lib/stores/authStore', () => ({ useAuthStore: jest.fn() }));
 jest.mock('@/components/ui', () => ({
+  Container: ({ children, className }: { children: React.ReactNode; className?: string }) => (
+    <div data-testid="container" className={className}>
+      {children}
+    </div>
+  ),
   AdoptionForm: ({ onSubmit, submitting, animalName }: any) => (
     <div data-testid="adoption-form">
       <span>{animalName}</span>
