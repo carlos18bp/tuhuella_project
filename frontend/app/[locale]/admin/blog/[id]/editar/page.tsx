@@ -5,6 +5,9 @@ import { useParams } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
 import { useBlogStore } from '@/lib/stores/blogStore';
 import { ROUTES } from '@/lib/constants';
+import { useRequireAuth } from '@/lib/hooks/useRequireAuth';
+import { useAuthStore } from '@/lib/stores/authStore';
+import AdminAccessDenied from '@/components/ui/AdminAccessDenied';
 import type { BlogPostAdmin } from '@/lib/types';
 
 const CATEGORIES = [
@@ -26,10 +29,12 @@ const AUTHORS = [
   { slug: 'laura-blanco', label: 'Laura Blanco' },
 ];
 
-const inputClass = 'w-full px-4 py-2.5 rounded-xl border border-border-primary text-sm focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all';
+const inputClass = 'w-full px-4 py-2.5 rounded-xl border border-border-primary bg-surface-primary text-sm text-text-primary focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 dark:focus:border-teal-500/60 dark:focus:ring-teal-500/20 transition-all';
 const labelClass = 'block text-sm font-medium text-text-secondary mb-1';
 
 export default function AdminBlogEditPage() {
+  useRequireAuth();
+  const user = useAuthStore((s) => s.user);
   const params = useParams();
   const postId = Number(params?.id);
   const { adminPost, loading, fetchAdminPost, updatePost, uploadCoverImage } = useBlogStore();
@@ -106,6 +111,14 @@ export default function AdminBlogEditPage() {
     }
   };
 
+  if (user && user.role !== 'admin' && !user.is_staff) {
+    return (
+      <AdminAccessDenied maxWidthClass="max-w-3xl">
+        Acceso denegado. Solo el equipo autorizado puede gestionar el blog.
+      </AdminAccessDenied>
+    );
+  }
+
   if (loading && !adminPost) {
     return (
       <div className="flex justify-center py-20">
@@ -116,7 +129,7 @@ export default function AdminBlogEditPage() {
 
   if (!adminPost && !loading) {
     return (
-      <div className="max-w-3xl mx-auto px-6 py-8 text-center text-text-tertiary">
+      <div className="max-w-3xl mx-auto px-6 py-8 min-w-0 overflow-x-hidden text-center text-text-tertiary">
         Post no encontrado.
         <br />
         <Link href={ROUTES.ADMIN_BLOG} className="text-teal-600 text-sm">← Volver</Link>
@@ -125,19 +138,19 @@ export default function AdminBlogEditPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-8">
+    <div className="max-w-3xl mx-auto px-6 py-8 min-w-0 overflow-x-hidden">
       <div className="flex items-center gap-4 mb-8">
-        <Link href={ROUTES.ADMIN_BLOG} className="text-text-quaternary hover:text-text-secondary transition-colors">
+        <Link href={ROUTES.ADMIN_BLOG} className="inline-flex items-center justify-center min-h-11 min-w-11 -ml-1 text-text-quaternary hover:text-teal-600 dark:hover:text-teal-400 transition-colors rounded-lg">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
         </Link>
         <h1 className="text-2xl font-bold text-text-primary">Editar Post</h1>
         {adminPost?.slug && (
-          <Link href={ROUTES.BLOG_DETAIL(adminPost.slug)} className="ml-auto text-xs text-teal-600 hover:text-teal-700" target="_blank">Ver en el blog →</Link>
+          <Link href={ROUTES.BLOG_DETAIL(adminPost.slug)} className="ml-auto text-xs text-teal-600 hover:text-teal-700 dark:hover:text-teal-400" target="_blank">Ver en el blog →</Link>
         )}
       </div>
 
-      {error && <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-600 text-sm mb-6">{error}</div>}
-      {success && <div className="bg-teal-50 border border-teal-200 rounded-xl p-4 text-teal-700 text-sm mb-6">Post guardado correctamente.</div>}
+      {error && <div className="bg-red-50 dark:bg-red-950/25 border border-red-200 dark:border-red-800/40 rounded-xl p-4 text-red-600 dark:text-red-300 text-sm mb-6">{error}</div>}
+      {success && <div className="bg-teal-50 dark:bg-teal-950/30 border border-teal-200 dark:border-teal-800/40 rounded-xl p-4 text-teal-700 dark:text-teal-300 text-sm mb-6">Post guardado correctamente.</div>}
 
       <div className="flex gap-1 mb-6 bg-surface-tertiary rounded-xl p-1 max-w-xs">
         <button type="button" className={`flex-1 px-4 py-2 text-sm rounded-lg transition-all ${activeTab === 'fields' ? 'bg-surface-primary shadow-sm font-medium text-text-primary' : 'text-text-tertiary'}`} onClick={() => setActiveTab('fields')}>Campos</button>
@@ -231,8 +244,8 @@ export default function AdminBlogEditPage() {
         </fieldset>
 
         <div className="flex justify-end gap-3 pt-4">
-          <Link href={ROUTES.ADMIN_BLOG} className="px-5 py-2.5 rounded-xl border border-border-primary text-sm text-text-secondary hover:bg-surface-hover transition-colors">Cancelar</Link>
-          <button type="button" onClick={handleSave} disabled={saving} className="px-5 py-2.5 bg-teal-600 text-white rounded-xl text-sm font-medium hover:bg-teal-700 transition-colors disabled:opacity-50">{saving ? 'Guardando...' : 'Guardar cambios'}</button>
+          <Link href={ROUTES.ADMIN_BLOG} className="inline-flex items-center justify-center min-h-11 px-5 py-2.5 rounded-xl border border-border-primary text-sm text-text-secondary hover:bg-surface-hover dark:hover:bg-surface-hover transition-colors">Cancelar</Link>
+          <button type="button" onClick={handleSave} disabled={saving} className="inline-flex items-center justify-center min-h-11 px-5 py-2.5 bg-teal-600 text-white rounded-xl text-sm font-medium hover:bg-teal-700 dark:hover:bg-teal-500 transition-colors disabled:opacity-50">{saving ? 'Guardando...' : 'Guardar cambios'}</button>
         </div>
       </div>
     </div>

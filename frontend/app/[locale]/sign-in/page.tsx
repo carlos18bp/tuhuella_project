@@ -11,6 +11,7 @@ import { PawPrint } from 'lucide-react';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { api } from '@/lib/services/http';
 import { ROUTES } from '@/lib/constants';
+import { authInputFieldClass } from '@/lib/ui/authFormClasses';
 
 type GoogleUser = {
   email: string;
@@ -100,12 +101,12 @@ export default function SignInPage() {
   };
 
   return (
-    <main className="relative min-h-[calc(100vh-72px)] flex items-center justify-center px-6 py-12 bg-gradient-to-b from-surface-secondary to-surface-tertiary/50">
-      <div className="absolute top-1/4 right-1/4 w-64 h-64 rounded-full bg-teal-100/30 blur-3xl pointer-events-none" />
+    <main className="relative min-h-[calc(100vh-72px)] flex items-center justify-center px-6 py-12 bg-gradient-to-b from-surface-secondary to-surface-tertiary/50 min-w-0 overflow-x-hidden">
+      <div className="absolute top-1/4 right-1/4 w-64 h-64 rounded-full bg-teal-100/30 dark:bg-teal-900/20 blur-3xl pointer-events-none" />
       <div className="w-full max-w-md bg-surface-primary border border-border-primary rounded-2xl p-6 sm:p-8 shadow-lg ring-1 ring-border-tertiary">
         <div className="flex items-center gap-2 mb-6">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-50 to-teal-100 shadow-sm flex items-center justify-center">
-            <PawPrint className="h-5 w-5 text-teal-600" />
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-950/50 dark:to-teal-900/30 shadow-sm ring-1 ring-teal-200/50 dark:ring-teal-700/30 flex items-center justify-center">
+            <PawPrint className="h-5 w-5 text-teal-600 dark:text-teal-400" />
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-text-primary">Iniciar sesión</h1>
@@ -118,7 +119,7 @@ export default function SignInPage() {
             <label htmlFor="signin-email" className="block text-sm font-medium text-text-secondary mb-1.5">Correo electrónico</label>
             <input
               id="signin-email"
-              className="border border-border-primary rounded-xl px-3.5 py-2.5 w-full bg-surface-primary text-text-primary placeholder:text-text-quaternary shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] focus:outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-colors" 
+              className={authInputFieldClass}
               placeholder="tu@email.com" 
               type="email"
               value={email} 
@@ -132,7 +133,7 @@ export default function SignInPage() {
             <label htmlFor="signin-password" className="block text-sm font-medium text-text-secondary mb-1.5">Contraseña</label>
             <input
               id="signin-password"
-              className="border border-border-primary rounded-xl px-3.5 py-2.5 w-full bg-surface-primary text-text-primary placeholder:text-text-quaternary shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] focus:outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-colors" 
+              className={authInputFieldClass}
               placeholder="••••••••" 
               value={password} 
               onChange={(e) => setPassword(e.target.value)} 
@@ -153,19 +154,26 @@ export default function SignInPage() {
             </div>
           )}
 
-          <button 
-            className="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600 text-white rounded-full px-5 py-3 w-full font-medium disabled:opacity-50 btn-base shadow-sm hover:shadow-md" 
-            type="submit" 
+          <button
+            className="inline-flex items-center justify-center min-h-11 bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600 text-white rounded-full px-5 py-3 w-full font-medium disabled:opacity-50 btn-base shadow-sm hover:shadow-md"
+            type="submit"
             disabled={loading}
           >
             {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
           </button>
 
-          {error ? <p className="text-red-600 text-sm bg-red-50 border border-red-200/60 rounded-lg px-3 py-2">{error}</p> : null}
+          {error ? (
+            <p className="text-red-600 dark:text-red-300 text-sm bg-red-50 dark:bg-red-950/25 border border-red-200/60 dark:border-red-800/40 rounded-lg px-3 py-2">
+              {error}
+            </p>
+          ) : null}
         </form>
 
         <div className="mt-4 text-center">
-          <Link href="/forgot-password" className="text-sm text-text-tertiary hover:text-teal-600 transition-colors">
+          <Link
+            href="/forgot-password"
+            className="inline-flex items-center justify-center min-h-11 text-sm text-text-tertiary hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+          >
             ¿Olvidaste tu contraseña?
           </Link>
         </div>
@@ -197,7 +205,10 @@ export default function SignInPage() {
 
         <div className="mt-6 text-center text-sm">
           <span className="text-text-tertiary">¿No tienes cuenta? </span>
-          <Link href="/sign-up" className="text-teal-600 font-medium hover:text-teal-700 transition-colors">
+          <Link
+            href="/sign-up"
+            className="text-teal-600 dark:text-teal-400 font-medium hover:text-teal-700 dark:hover:text-teal-300 transition-colors inline-flex items-center min-h-11"
+          >
             Regístrate
           </Link>
         </div>

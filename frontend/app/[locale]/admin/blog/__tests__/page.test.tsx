@@ -5,7 +5,13 @@ import userEvent from '@testing-library/user-event';
 
 import AdminBlogListPage from '../page';
 import { useBlogStore } from '@/lib/stores/blogStore';
+import { useAuthStore } from '@/lib/stores/authStore';
 import { mockBlogPosts } from '@/lib/__tests__/fixtures';
+
+
+jest.mock('@/lib/hooks/useRequireAuth', () => ({ useRequireAuth: jest.fn() }));
+
+jest.mock('@/lib/stores/authStore', () => ({ useAuthStore: jest.fn() }));
 
 jest.mock('@/lib/stores/blogStore', () => ({
   useBlogStore: jest.fn(),
@@ -53,6 +59,11 @@ const setupMock = (overrides: Record<string, unknown> = {}) => {
 describe('AdminBlogListPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    const mockUseAuthStore = useAuthStore as unknown as jest.Mock;
+    mockUseAuthStore.mockImplementation((selector: (s: { user: { id: number; role: string; is_staff: boolean } }) => unknown) =>
+      selector({ user: { id: 1, role: 'admin', is_staff: true } }),
+    );
+
   });
 
   it('renders page heading', () => {

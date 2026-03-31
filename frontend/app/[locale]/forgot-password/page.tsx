@@ -6,6 +6,7 @@ import { FormEvent, useState } from 'react';
 import { PawPrint, ArrowLeft } from 'lucide-react';
 
 import { useAuthStore } from '@/lib/stores/authStore';
+import { authInputCodeClass, authInputFieldClass } from '@/lib/ui/authFormClasses';
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -68,14 +69,12 @@ export default function ForgotPasswordPage() {
     }
   };
 
-  const inputClasses = "border border-border-primary rounded-xl px-3.5 py-2.5 w-full bg-surface-primary text-text-primary placeholder:text-text-quaternary focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-colors";
-
   return (
-    <main className="min-h-[calc(100vh-72px)] flex items-center justify-center px-6 py-12 bg-gradient-to-b from-surface-secondary to-surface-tertiary/50">
+    <main className="min-h-[calc(100vh-72px)] flex items-center justify-center px-6 py-12 bg-gradient-to-b from-surface-secondary to-surface-tertiary/50 min-w-0 overflow-x-hidden">
       <div className="w-full max-w-md bg-surface-primary border border-border-primary rounded-2xl p-6 sm:p-8 shadow-sm">
         <div className="flex items-center gap-2 mb-6">
-          <div className="h-10 w-10 rounded-xl bg-teal-50 flex items-center justify-center">
-            <PawPrint className="h-5 w-5 text-teal-600" />
+          <div className="h-10 w-10 rounded-xl bg-teal-50 dark:bg-teal-950/40 ring-1 ring-teal-200/50 dark:ring-teal-700/30 flex items-center justify-center">
+            <PawPrint className="h-5 w-5 text-teal-600 dark:text-teal-400" />
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-text-primary">Recuperar contraseña</h1>
@@ -91,7 +90,7 @@ export default function ForgotPasswordPage() {
               <label htmlFor="reset-email" className="block text-sm font-medium text-text-secondary mb-1.5">Correo electrónico</label>
               <input 
                 id="reset-email"
-                className={inputClasses}
+                className={authInputFieldClass}
                 placeholder="tu@email.com" 
                 type="email"
                 value={email} 
@@ -101,16 +100,16 @@ export default function ForgotPasswordPage() {
               />
             </div>
 
-            <button 
-              className="bg-teal-600 text-white rounded-full px-5 py-3 w-full font-medium disabled:opacity-50 hover:bg-teal-700 btn-base shadow-sm" 
-              type="submit" 
+            <button
+              className="inline-flex items-center justify-center min-h-11 bg-teal-600 text-white rounded-full px-5 py-3 w-full font-medium disabled:opacity-50 hover:bg-teal-700 btn-base shadow-sm"
+              type="submit"
               disabled={loading}
             >
               {loading ? 'Enviando...' : 'Enviar código de verificación'}
             </button>
 
-            {error ? <p className="text-red-600 text-sm">{error}</p> : null}
-            {message ? <p className="text-emerald-600 text-sm">{message}</p> : null}
+            {error ? <p className="text-red-600 dark:text-red-300 text-sm">{error}</p> : null}
+            {message ? <p className="text-emerald-600 dark:text-emerald-300 text-sm">{message}</p> : null}
           </form>
         ) : (
           <form className="space-y-4" onSubmit={onResetPassword}>
@@ -122,7 +121,7 @@ export default function ForgotPasswordPage() {
               <label htmlFor="reset-code" className="block text-sm font-medium text-text-secondary mb-1.5">Código</label>
               <input 
                 id="reset-code"
-                className="border border-border-primary rounded-xl px-3.5 py-3 w-full bg-surface-primary text-text-primary text-center text-2xl tracking-widest placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-colors" 
+                className={authInputCodeClass} 
                 placeholder="000000" 
                 type="text"
                 value={code} 
@@ -137,7 +136,7 @@ export default function ForgotPasswordPage() {
               <label htmlFor="reset-newpw" className="block text-sm font-medium text-text-secondary mb-1.5">Nueva contraseña</label>
               <input 
                 id="reset-newpw"
-                className={inputClasses}
+                className={authInputFieldClass}
                 placeholder="••••••••" 
                 value={newPassword} 
                 onChange={(e) => setNewPassword(e.target.value)} 
@@ -152,7 +151,7 @@ export default function ForgotPasswordPage() {
               <label htmlFor="reset-confirm" className="block text-sm font-medium text-text-secondary mb-1.5">Confirmar contraseña</label>
               <input 
                 id="reset-confirm"
-                className={inputClasses}
+                className={authInputFieldClass}
                 placeholder="••••••••" 
                 value={confirmPassword} 
                 onChange={(e) => setConfirmPassword(e.target.value)} 
@@ -162,21 +161,21 @@ export default function ForgotPasswordPage() {
               />
             </div>
 
-            <button 
-              className="bg-teal-600 text-white rounded-full px-5 py-3 w-full font-medium disabled:opacity-50 hover:bg-teal-700 btn-base shadow-sm" 
-              type="submit" 
+            <button
+              className="inline-flex items-center justify-center min-h-11 bg-teal-600 text-white rounded-full px-5 py-3 w-full font-medium disabled:opacity-50 hover:bg-teal-700 btn-base shadow-sm"
+              type="submit"
               disabled={loading}
             >
               {loading ? 'Restableciendo...' : 'Restablecer contraseña'}
             </button>
 
-            {error ? <p className="text-red-600 text-sm">{error}</p> : null}
-            {message ? <p className="text-emerald-600 text-sm">{message}</p> : null}
-            
+            {error ? <p className="text-red-600 dark:text-red-300 text-sm">{error}</p> : null}
+            {message ? <p className="text-emerald-600 dark:text-emerald-300 text-sm">{message}</p> : null}
+
             <button
               type="button"
               onClick={() => setStep('email')}
-              className="flex items-center justify-center gap-1 text-sm text-text-tertiary hover:text-teal-600 transition-colors w-full"
+              className="flex items-center justify-center gap-1 min-h-11 text-sm text-text-tertiary hover:text-teal-600 dark:hover:text-teal-400 transition-colors w-full"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Volver al correo
@@ -185,7 +184,10 @@ export default function ForgotPasswordPage() {
         )}
 
         <div className="mt-6 text-center text-sm">
-          <Link href="/sign-in" className="flex items-center justify-center gap-1 text-text-tertiary hover:text-teal-600 transition-colors">
+          <Link
+            href="/sign-in"
+            className="flex items-center justify-center gap-1 min-h-11 text-text-tertiary hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+          >
             <ArrowLeft className="h-3.5 w-3.5" />
             Volver a iniciar sesión
           </Link>

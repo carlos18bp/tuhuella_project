@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { useAuthStore } from '@/lib/stores/authStore';
@@ -43,7 +43,7 @@ const baseUser = {
 const mockUpdateProfile = jest.fn();
 const mockFetchProfileStats = jest.fn();
 
-function setupMocks(overrides: Record<string, unknown> = {}) {
+function setupMocks(overrides: Record<string, unknown> = {}, apiGetData: Record<string, unknown> = {}) {
   const state = {
     user: baseUser,
     profileStats: null,
@@ -52,7 +52,36 @@ function setupMocks(overrides: Record<string, unknown> = {}) {
     ...overrides,
   };
   mockUseAuthStore.mockImplementation((selector: (s: typeof state) => unknown) => selector(state));
-  mockApiGet.mockResolvedValue({ data: {} });
+  mockApiGet.mockResolvedValue({ data: apiGetData });
+}
+
+/** Drain microtasks and await api.get promises so setRoleData runs inside act. */
+async function flushEditProfileEffects() {
+  await act(async () => {
+    await Promise.resolve();
+  });
+  const results = mockApiGet.mock.results;
+  for (let i = 0; i < results.length; i++) {
+    const r = results[i] as { type: string; value?: Promise<unknown> };
+    if (r.type === 'return' && r.value != null && typeof r.value.then === 'function') {
+      await act(async () => {
+        await r.value;
+      });
+    }
+  }
+  await act(async () => {
+    await Promise.resolve();
+  });
+}
+
+async function renderEditProfile(
+  overrides: Record<string, unknown> = {},
+  apiGetData: Record<string, unknown> = {},
+) {
+  setupMocks(overrides, apiGetData);
+  const view = render(<EditProfilePage />);
+  await flushEditProfileEffects();
+  return view;
 }
 
 describe('EditProfilePage', () => {
@@ -65,48 +94,43 @@ describe('EditProfilePage', () => {
     jest.useRealTimers();
   });
 
-  it('renders loading skeleton when user is null', () => {
+  it('renders loading skeleton when user is null', async () => {
     setupMocks({ user: null });
     render(<EditProfilePage />);
     expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
+    await flushEditProfileEffects();
   });
 
-  it('renders page title when user loads', () => {
-    setupMocks();
-    render(<EditProfilePage />);
+  it('renders page title when user loads', async () => {
+    await renderEditProfile();
     expect(screen.getByText('Editar perfil')).toBeInTheDocument();
   });
 
-  it('renders subtitle for adopter role', () => {
-    setupMocks();
-    render(<EditProfilePage />);
+  it('renders subtitle for adopter role', async () => {
+    await renderEditProfile();
     expect(screen.getByText('Actualiza tu información personal y preferencias de adopción')).toBeInTheDocument();
   });
 
-  it('renders subtitle for non-adopter role', () => {
-    setupMocks({ user: { ...baseUser, role: 'shelter_admin' } });
-    render(<EditProfilePage />);
+  it('renders subtitle for non-adopter role', async () => {
+    await renderEditProfile({ user: { ...baseUser, role: 'shelter_admin' } });
     expect(screen.getByText('Actualiza tu información personal')).toBeInTheDocument();
   });
 
-  it('populates form fields from user data', () => {
-    setupMocks();
-    render(<EditProfilePage />);
+  it('populates form fields from user data', async () => {
+    await renderEditProfile();
     expect(screen.getByLabelText(/Nombre/)).toHaveValue('Carlos');
     expect(screen.getByLabelText(/Apellido/)).toHaveValue('Pérez');
     expect(screen.getByLabelText(/Teléfono/)).toHaveValue('3001234567');
     expect(screen.getByLabelText(/Ciudad/)).toHaveValue('Bogotá');
   });
 
-  it('shows avatar with initials when user has name', () => {
-    setupMocks();
-    render(<EditProfilePage />);
+  it('shows avatar with initials when user has name', async () => {
+    await renderEditProfile();
     expect(screen.getByText('CP')).toBeInTheDocument();
   });
 
   it('shows error when submitting whitespace-only first name', async () => {
-    setupMocks({ user: { ...baseUser, first_name: '  ', last_name: '  ' } });
-    render(<EditProfilePage />);
+    await renderEditProfile({ user: { ...baseUser, first_name: '  ', last_name: '  ' } });
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     const saveBtn = screen.getByRole('button', { name: 'Guardar cambios' });
@@ -118,8 +142,7 @@ describe('EditProfilePage', () => {
 
   it('calls updateProfile on valid form submission', async () => {
     mockUpdateProfile.mockResolvedValue(undefined);
-    setupMocks();
-    render(<EditProfilePage />);
+    await renderEditProfile();
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     await user.click(screen.getByRole('button', { name: 'Guardar cambios' }));
@@ -134,8 +157,7 @@ describe('EditProfilePage', () => {
 
   it('shows success message after successful save', async () => {
     mockUpdateProfile.mockResolvedValue(undefined);
-    setupMocks();
-    render(<EditProfilePage />);
+    await renderEditProfile();
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     await user.click(screen.getByRole('button', { name: 'Guardar cambios' }));
@@ -147,8 +169,7 @@ describe('EditProfilePage', () => {
 
   it('clears success message after 4 seconds', async () => {
     mockUpdateProfile.mockResolvedValue(undefined);
-    setupMocks();
-    render(<EditProfilePage />);
+    await renderEditProfile();
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     await user.click(screen.getByRole('button', { name: 'Guardar cambios' }));
@@ -157,7 +178,9 @@ describe('EditProfilePage', () => {
       expect(screen.getByText('Cambios guardados correctamente')).toBeInTheDocument();
     });
 
-    jest.advanceTimersByTime(4100);
+    await act(async () => {
+      jest.advanceTimersByTime(4100);
+    });
 
     await waitFor(() => {
       expect(screen.queryByText('Cambios guardados correctamente')).not.toBeInTheDocument();
@@ -166,8 +189,7 @@ describe('EditProfilePage', () => {
 
   it('shows error message when updateProfile fails', async () => {
     mockUpdateProfile.mockRejectedValue(new Error('fail'));
-    setupMocks();
-    render(<EditProfilePage />);
+    await renderEditProfile();
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     await user.click(screen.getByRole('button', { name: 'Guardar cambios' }));
@@ -177,16 +199,14 @@ describe('EditProfilePage', () => {
     });
   });
 
-  it('renders completeness bar at correct percentage', () => {
-    setupMocks();
-    render(<EditProfilePage />);
+  it('renders completeness bar at correct percentage', async () => {
+    await renderEditProfile();
     // User has name+email+phone+city = 15+15+20+20 = 70%
     expect(screen.getByText('70%')).toBeInTheDocument();
   });
 
-  it('renders completeness checklist items', () => {
-    setupMocks();
-    render(<EditProfilePage />);
+  it('renders completeness checklist items', async () => {
+    await renderEditProfile();
     expect(screen.getByText('Nombre completo')).toBeInTheDocument();
     expect(screen.getByText('Intención de adopción')).toBeInTheDocument();
     // "Email", "Teléfono", "Ciudad" appear in both form labels and checklist
@@ -195,59 +215,50 @@ describe('EditProfilePage', () => {
     expect(screen.getAllByText('Ciudad').length).toBeGreaterThanOrEqual(2);
   });
 
-  it('renders intent CTA for adopter without intent', () => {
-    setupMocks({ profileStats: {} });
-    render(<EditProfilePage />);
+  it('renders intent CTA for adopter without intent', async () => {
+    await renderEditProfile({ profileStats: {} });
     expect(screen.getByText('Comparte lo que buscas')).toBeInTheDocument();
     expect(screen.getByText('Crear intención')).toBeInTheDocument();
   });
 
-  it('renders intent section for adopter with existing intent', () => {
-    setupMocks({
+  it('renders intent section for adopter with existing intent', async () => {
+    await renderEditProfile({
       profileStats: {
         adopter_intent: { status: 'active', visibility: 'public' },
       },
     });
-    render(<EditProfilePage />);
     expect(screen.getByText('active')).toBeInTheDocument();
     expect(screen.getByText('Público')).toBeInTheDocument();
     expect(screen.getByText('Editar intención')).toBeInTheDocument();
   });
 
-  it('renders intent status badge with paused status', () => {
-    setupMocks({
+  it('renders intent status badge with paused status', async () => {
+    await renderEditProfile({
       profileStats: {
         adopter_intent: { status: 'paused', visibility: 'private' },
       },
     });
-    render(<EditProfilePage />);
     expect(screen.getByText('paused')).toBeInTheDocument();
     expect(screen.getByText('Privado')).toBeInTheDocument();
   });
 
-  it('renders ShelterAdminProfileSection for shelter_admin role', () => {
-    setupMocks({ user: { ...baseUser, role: 'shelter_admin' } });
-    mockApiGet.mockResolvedValue({ data: { shelter: { name: 'Test' } } });
-    render(<EditProfilePage />);
+  it('renders ShelterAdminProfileSection for shelter_admin role', async () => {
+    await renderEditProfile({ user: { ...baseUser, role: 'shelter_admin' } }, { shelter: { name: 'Test' } });
     expect(screen.getByTestId('shelter-admin-section')).toBeInTheDocument();
   });
 
-  it('renders AdminProfileSection for admin role', () => {
-    setupMocks({ user: { ...baseUser, role: 'admin' } });
-    mockApiGet.mockResolvedValue({ data: { admin_stats: {} } });
-    render(<EditProfilePage />);
+  it('renders AdminProfileSection for admin role', async () => {
+    await renderEditProfile({ user: { ...baseUser, role: 'admin' } }, { admin_stats: {} });
     expect(screen.getByTestId('admin-section')).toBeInTheDocument();
   });
 
-  it('hides intent section for non-adopter role', () => {
-    setupMocks({ user: { ...baseUser, role: 'shelter_admin' } });
-    render(<EditProfilePage />);
+  it('hides intent section for non-adopter role', async () => {
+    await renderEditProfile({ user: { ...baseUser, role: 'shelter_admin' } });
     expect(screen.queryByText('Mi intención de adopción')).not.toBeInTheDocument();
   });
 
-  it('renders account info section with email and role', () => {
-    setupMocks();
-    render(<EditProfilePage />);
+  it('renders account info section with email and role', async () => {
+    await renderEditProfile();
     expect(screen.getByText('Información de cuenta')).toBeInTheDocument();
     expect(screen.getByText('test@example.com')).toBeInTheDocument();
   });

@@ -28,6 +28,7 @@ export default function Footer() {
       links: [
         { label: t('faq'), href: ROUTES.FAQ },
         { label: t('about'), href: ROUTES.ABOUT },
+        { label: t('contactUs'), href: ROUTES.CONTACTANOS },
         { label: t('workWithUs'), href: ROUTES.WORK_WITH_US },
         { label: t('strategicAllies'), href: ROUTES.STRATEGIC_ALLIES },
         { label: t('registerShelter'), href: ROUTES.SHELTER_ONBOARDING },

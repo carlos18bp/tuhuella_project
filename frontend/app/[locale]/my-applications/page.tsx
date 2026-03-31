@@ -64,11 +64,11 @@ export default function MisSolicitudesPage() {
   };
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
+    <div className="mx-auto max-w-[1400px] px-6 py-10 min-w-0 overflow-x-hidden">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-xl bg-teal-50 dark:bg-teal-900/20 flex items-center justify-center">
-          <ClipboardList className="h-5 w-5 text-teal-600" />
+        <div className="h-10 w-10 rounded-xl bg-teal-50 dark:bg-teal-950/40 ring-1 ring-teal-200/50 dark:ring-teal-700/30 flex items-center justify-center">
+          <ClipboardList className="h-5 w-5 text-teal-600 dark:text-teal-400" />
         </div>
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">
@@ -101,10 +101,10 @@ export default function MisSolicitudesPage() {
               key={opt.value}
               type="button"
               onClick={() => setStatusFilter(opt.value)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors min-h-11 sm:min-h-0 inline-flex items-center justify-center ${
                 statusFilter === opt.value
                   ? 'bg-teal-600 text-white'
-                  : 'bg-surface-primary border border-border-primary text-text-secondary hover:bg-surface-hover'
+                  : 'bg-surface-primary border border-border-primary text-text-secondary hover:bg-surface-hover dark:hover:bg-surface-hover'
               }`}
             >
               {opt.label}
@@ -134,7 +134,11 @@ export default function MisSolicitudesPage() {
         <div className="mt-10 text-center py-12">
           <PawPrint className="h-10 w-10 text-stone-300 dark:text-stone-600 mx-auto" />
           <p className="mt-3 text-text-quaternary">{t('noResults')}</p>
-          <button type="button" onClick={() => setStatusFilter('')} className="mt-3 text-sm text-teal-600 hover:text-teal-700 font-medium">
+          <button
+            type="button"
+            onClick={() => setStatusFilter('')}
+            className="mt-3 inline-flex items-center justify-center min-h-11 text-sm text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 font-medium"
+          >
             {t('clearFilter')}
           </button>
         </div>
@@ -144,7 +148,7 @@ export default function MisSolicitudesPage() {
           <div className="rounded-2xl bg-gradient-to-br from-teal-50 via-surface-primary to-emerald-50/30 dark:from-teal-900/10 dark:via-surface-primary dark:to-emerald-900/10 border border-border-primary p-8 md:p-12">
             <div className="max-w-lg mx-auto text-center">
               <div className="h-16 w-16 rounded-2xl bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center mx-auto">
-                <ClipboardList className="h-8 w-8 text-teal-600" />
+                <ClipboardList className="h-8 w-8 text-teal-600 dark:text-teal-400" />
               </div>
               <h2 className="mt-5 text-xl font-bold text-text-primary">{t('empty')}</h2>
               <p className="mt-2 text-sm text-text-tertiary leading-relaxed">{t('emptyDesc')}</p>
@@ -158,14 +162,17 @@ export default function MisSolicitudesPage() {
                 ].map((step, i) => (
                   <div key={i} className="flex items-center gap-3 bg-surface-primary/80 dark:bg-surface-secondary/50 rounded-xl px-4 py-3 flex-1 border border-border-tertiary">
                     <div className="h-8 w-8 rounded-full bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center shrink-0">
-                      <step.icon className="h-4 w-4 text-teal-600" />
+                      <step.icon className="h-4 w-4 text-teal-600 dark:text-teal-400" />
                     </div>
                     <span className="text-xs font-medium text-text-secondary">{step.label}</span>
                   </div>
                 ))}
               </div>
 
-              <Link href={ROUTES.ANIMALS} className="mt-6 inline-block bg-teal-600 text-white rounded-full px-8 py-3 text-sm font-medium hover:bg-teal-700 shadow-md hover:shadow-lg transition-all">
+              <Link
+                href={ROUTES.ANIMALS}
+                className="mt-6 inline-flex items-center justify-center min-h-11 w-full sm:w-auto bg-teal-600 text-white rounded-full px-8 py-3 text-sm font-medium hover:bg-teal-700 shadow-md hover:shadow-lg transition-all"
+              >
                 {t('exploreAnimals')} &rarr;
               </Link>
             </div>
@@ -173,7 +180,7 @@ export default function MisSolicitudesPage() {
 
           {/* Featured animals carousel */}
           {animals.length > 0 && (
-            <div className="mt-10">
+            <div className="mt-10 min-w-0 overflow-x-hidden">
               <h2 className="text-lg font-semibold text-text-primary mb-4">{t('featuredAnimals')}</h2>
               <Swiper
                 modules={[Navigation, Pagination, Autoplay]}
@@ -218,7 +225,7 @@ export default function MisSolicitudesPage() {
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <h3 className="font-semibold text-text-primary group-hover:text-teal-600 transition-colors truncate">
+                      <h3 className="font-semibold text-text-primary group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors truncate">
                         {app.animal_name}
                       </h3>
                       <div className="flex items-center gap-2 shrink-0">

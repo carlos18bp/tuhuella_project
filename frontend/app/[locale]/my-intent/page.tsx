@@ -51,14 +51,14 @@ export default function MiIntencionPage() {
 
   if (!user) {
     return (
-      <div className="mx-auto max-w-[1400px] px-6 py-10">
+      <div className="mx-auto max-w-[1400px] px-6 py-10 min-w-0 overflow-x-hidden">
         <p className="text-text-quaternary">Cargando...</p>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
+    <div className="mx-auto max-w-[1400px] px-6 py-10 min-w-0 overflow-x-hidden">
       <h1 className="text-2xl sm:text-3xl font-bold text-text-primary heading-decorated">Mi Intención de Adopción</h1>
       <p className="mt-2 text-text-tertiary">
         Comparte lo que buscas y deja que los refugios te encuentren
@@ -82,7 +82,7 @@ export default function MiIntencionPage() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
-              className="mt-2 w-full rounded-xl border border-border-primary shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] p-3 text-sm text-text-primary placeholder:text-text-quaternary focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none transition-colors"
+              className="mt-2 w-full rounded-xl border border-border-primary bg-surface-primary shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] dark:shadow-none p-3 text-sm text-text-primary placeholder:text-text-quaternary focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 dark:focus:border-teal-500/60 dark:focus:ring-teal-500/20 outline-none transition-colors"
               placeholder="Describe qué tipo de animal te gustaría adoptar, tu situación, espacio disponible..."
             />
           </div>
@@ -95,7 +95,7 @@ export default function MiIntencionPage() {
               id="visibility"
               value={visibility}
               onChange={(e) => setVisibility(e.target.value as 'public' | 'private')}
-              className="mt-2 w-full rounded-xl border border-border-primary shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] p-3 text-sm text-text-primary focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
+              className="mt-2 w-full rounded-xl border border-border-primary bg-surface-primary shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] dark:shadow-none p-3 text-sm text-text-primary focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 dark:focus:border-teal-500/60 dark:focus:ring-teal-500/20 outline-none"
             >
               <option value="public">Pública — los refugios pueden ver tu intención</option>
               <option value="private">Privada — solo tú la ves</option>
@@ -105,20 +105,25 @@ export default function MiIntencionPage() {
           {intent && (
             <div className="rounded-xl border border-border-primary p-4 bg-surface-secondary">
               <p className="text-xs text-text-tertiary">Estado actual</p>
-              <span className={`mt-1 inline-block text-xs px-2 py-0.5 rounded-full ${
-                intent.status === 'active' ? 'bg-emerald-50 text-emerald-700' :
-                intent.status === 'matched' ? 'bg-teal-50 text-teal-700' :
-                'bg-surface-tertiary text-text-secondary'
-              }`}>
+              <span
+                className={`mt-1 inline-block text-xs px-2 py-0.5 rounded-full ring-1 ${
+                  intent.status === 'active'
+                    ? 'bg-emerald-50 text-emerald-700 ring-emerald-200/60 dark:bg-emerald-950/35 dark:text-emerald-300 dark:ring-emerald-700/40'
+                    : intent.status === 'matched'
+                      ? 'bg-teal-50 text-teal-700 ring-teal-200/60 dark:bg-teal-950/35 dark:text-teal-300 dark:ring-teal-700/40'
+                      : 'bg-surface-tertiary text-text-secondary ring-border-primary dark:ring-border-primary'
+                }`}
+              >
                 {intent.status === 'active' ? 'Activa' : intent.status === 'matched' ? 'Emparejada' : 'Pausada'}
               </span>
             </div>
           )}
 
           <button
+            type="button"
             onClick={handleSave}
             disabled={saving}
-            className="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600 shadow-sm hover:shadow-md text-white rounded-full px-6 py-2.5 text-sm font-medium btn-base disabled:opacity-50"
+            className="inline-flex items-center justify-center min-h-11 w-full sm:w-auto bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600 shadow-sm hover:shadow-md text-white rounded-full px-6 py-2.5 text-sm font-medium btn-base disabled:opacity-50"
           >
             {saving ? 'Guardando...' : intent ? 'Actualizar intención' : 'Crear intención'}
           </button>

@@ -11,6 +11,7 @@ import { api } from '@/lib/services/http';
 import { API_ENDPOINTS, ROUTES } from '@/lib/constants';
 import MetricCard from '@/components/ui/MetricCard';
 import type { Shelter } from '@/lib/types';
+import { shelterVerificationPillClass } from '@/lib/ui/shelterPanelBadges';
 
 type ShelterMetrics = {
   total_animals: number;
@@ -57,7 +58,7 @@ export default function ShelterDashboardPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-[1400px] px-6 py-10">
+      <div className="mx-auto max-w-[1400px] px-6 py-10 min-w-0 overflow-x-hidden">
         <div data-testid="loading-skeleton" className="space-y-4">
           <div className="h-8 animate-shimmer rounded w-1/3" />
           <div className="h-4 animate-shimmer rounded w-1/2" />
@@ -73,22 +74,20 @@ export default function ShelterDashboardPage() {
 
   if (!shelter) {
     return (
-      <div className="mx-auto max-w-[1400px] px-6 py-10 text-center py-20">
+      <div className="mx-auto max-w-[1400px] px-6 py-10 text-center py-20 min-w-0 overflow-x-hidden">
         <h1 className="text-2xl font-bold text-text-primary">No tienes un refugio registrado</h1>
         <p className="mt-2 text-text-tertiary">Registra tu refugio para comenzar a gestionar animales.</p>
-        <Link href={ROUTES.SHELTER_ONBOARDING}
-          className="mt-6 inline-block bg-teal-600 text-white rounded-full px-6 py-2.5 text-sm font-medium hover:bg-teal-700 btn-base shadow-sm">
+        <Link
+          href={ROUTES.SHELTER_ONBOARDING}
+          className="mt-6 inline-flex items-center justify-center min-h-11 bg-teal-600 text-white rounded-full px-6 py-2.5 text-sm font-medium hover:bg-teal-700 btn-base shadow-sm"
+        >
           Registrar refugio
         </Link>
       </div>
     );
   }
 
-  const verificationColor = shelter.verification_status === 'verified'
-    ? 'bg-emerald-50 text-emerald-700'
-    : shelter.verification_status === 'pending'
-      ? 'bg-amber-50 text-amber-700'
-      : 'bg-red-50 text-red-700';
+  const verificationColor = shelterVerificationPillClass(shelter.verification_status);
 
   const verificationLabel = shelter.verification_status === 'verified'
     ? 'Verificado'
@@ -106,8 +105,8 @@ export default function ShelterDashboardPage() {
   ];
 
   const metricCards = metrics ? [
-    { label: t('totalAnimals'), value: metrics.total_animals, icon: PawPrint, color: 'border-teal-200 bg-teal-50/50', iconColor: 'text-teal-600' },
-    { label: t('adoptedAnimals'), value: metrics.adopted_animals, icon: PawPrint, color: 'border-emerald-200 bg-emerald-50/50', iconColor: 'text-emerald-600' },
+    { label: t('totalAnimals'), value: metrics.total_animals, icon: PawPrint, color: 'border-teal-200 bg-teal-50/50 dark:bg-surface-tertiary dark:border-teal-500/20', iconColor: 'text-teal-600 dark:text-teal-400' },
+    { label: t('adoptedAnimals'), value: metrics.adopted_animals, icon: PawPrint, color: 'border-emerald-200 bg-emerald-50/50 dark:bg-surface-tertiary dark:border-emerald-500/20', iconColor: 'text-emerald-600 dark:text-emerald-400' },
     { label: t('totalApplications'), value: metrics.total_applications, icon: Users, color: 'border-blue-200 bg-blue-50/50 dark:bg-surface-tertiary dark:border-blue-500/20', iconColor: 'text-blue-600 dark:text-blue-400' },
     { label: t('avgAppsPerAnimal'), value: metrics.avg_applications_per_animal, icon: Users, color: 'border-indigo-200 bg-indigo-50/50 dark:bg-surface-tertiary dark:border-indigo-500/20', iconColor: 'text-indigo-600 dark:text-indigo-400' },
     { label: t('totalDonations'), value: `$${Number(metrics.donations.total_amount).toLocaleString()}`, icon: DollarSign, color: 'border-amber-200 bg-amber-50/50 dark:bg-surface-tertiary dark:border-amber-500/20', iconColor: 'text-amber-600 dark:text-amber-400' },
@@ -118,11 +117,11 @@ export default function ShelterDashboardPage() {
   ] : [];
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
+    <div className="mx-auto max-w-[1400px] px-6 py-10 min-w-0 overflow-x-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-teal-50 flex items-center justify-center">
-            <LayoutDashboard className="h-5 w-5 text-teal-600" />
+          <div className="h-10 w-10 rounded-xl bg-teal-50 dark:bg-teal-950/40 flex items-center justify-center ring-1 ring-teal-200/50 dark:ring-teal-700/30">
+            <LayoutDashboard className="h-5 w-5 text-teal-600 dark:text-teal-400" />
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">{shelter.name}</h1>
@@ -154,8 +153,8 @@ export default function ShelterDashboardPage() {
           <Link key={item.href} href={item.href}
             className="rounded-2xl border border-border-primary bg-surface-primary p-5 md:p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-text-primary group-hover:text-teal-700 transition-colors">{item.label}</h3>
-              <ChevronRight className="h-4 w-4 text-text-quaternary group-hover:text-teal-600 group-hover:translate-x-0.5 transition-all" />
+              <h3 className="font-semibold text-text-primary group-hover:text-teal-700 dark:group-hover:text-teal-300 transition-colors">{item.label}</h3>
+              <ChevronRight className="h-4 w-4 text-text-quaternary group-hover:text-teal-600 dark:group-hover:text-teal-400 group-hover:translate-x-0.5 transition-all" />
             </div>
             <p className="text-sm text-text-tertiary mt-1">{item.description}</p>
           </Link>
@@ -163,7 +162,7 @@ export default function ShelterDashboardPage() {
       </div>
 
       {user?.role !== 'shelter_admin' && (
-        <p className="mt-6 text-xs text-amber-600">
+        <p className="mt-6 text-xs text-amber-600 dark:text-amber-400">
           Tu rol actual es &quot;{user?.role}&quot;. Algunas funciones pueden estar restringidas.
         </p>
       )}

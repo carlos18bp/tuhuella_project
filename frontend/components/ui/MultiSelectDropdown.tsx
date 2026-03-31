@@ -13,6 +13,10 @@ interface MultiSelectDropdownProps {
   options: MultiSelectOption[];
   selected: string[];
   onChange: (selected: string[]) => void;
+  /** Extra classes on the root wrapper (e.g. w-full sm:w-auto) */
+  className?: string;
+  /** Extra classes on the trigger button */
+  triggerClassName?: string;
 }
 
 export default function MultiSelectDropdown({
@@ -20,6 +24,8 @@ export default function MultiSelectDropdown({
   options,
   selected,
   onChange,
+  className = '',
+  triggerClassName = '',
 }: MultiSelectDropdownProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -50,11 +56,11 @@ export default function MultiSelectDropdown({
         : `${label} (${selected.length})`;
 
   return (
-    <div ref={ref} className="relative" data-testid={`filter-${label}`}>
+    <div ref={ref} className={`relative ${className}`.trim()} data-testid={`filter-${label}`}>
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${
+        className={`flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm transition-colors sm:w-auto ${triggerClassName} ${
           selected.length > 0
             ? 'border-teal-400 bg-teal-50 text-teal-700 ring-1 ring-teal-200/50 dark:border-teal-500/40 dark:ring-teal-500/20'
             : 'border-border-secondary bg-surface-primary text-text-secondary hover:border-stone-400 hover:shadow-sm'

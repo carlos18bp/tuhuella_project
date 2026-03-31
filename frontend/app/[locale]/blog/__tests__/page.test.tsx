@@ -134,8 +134,8 @@ describe('BlogListingPage', () => {
       pagination: { count: 14, page: 1, pageSize: 7, totalPages: 2 },
     });
     render(<BlogListingPage />);
-    expect(screen.getByText('← Anterior')).toBeInTheDocument();
-    expect(screen.getByText('Siguiente →')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Anterior' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Siguiente' })).toBeInTheDocument();
     expect(screen.getByText('Página 1 de 2')).toBeInTheDocument();
   });
 
@@ -145,7 +145,7 @@ describe('BlogListingPage', () => {
       pagination: { count: 14, page: 1, pageSize: 7, totalPages: 2 },
     });
     render(<BlogListingPage />);
-    expect(screen.getByText('← Anterior')).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Anterior' })).toBeDisabled();
   });
 
   it('disables next button on last page', () => {
@@ -154,7 +154,7 @@ describe('BlogListingPage', () => {
       pagination: { count: 14, page: 2, pageSize: 7, totalPages: 2 },
     });
     render(<BlogListingPage />);
-    expect(screen.getByText('Siguiente →')).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Siguiente' })).toBeDisabled();
   });
 
   it('calls fetchPosts for next page when next button is clicked', async () => {
@@ -165,7 +165,7 @@ describe('BlogListingPage', () => {
     });
     render(<BlogListingPage />);
 
-    await user.click(screen.getByText('Siguiente →'));
+    await user.click(screen.getByRole('button', { name: 'Siguiente' }));
 
     expect(state.fetchPosts).toHaveBeenCalledWith(
       expect.objectContaining({ page: 2 }),
@@ -187,6 +187,6 @@ describe('BlogListingPage', () => {
       pagination: { count: 2, page: 1, pageSize: 7, totalPages: 1 },
     });
     render(<BlogListingPage />);
-    expect(screen.queryByText('← Anterior')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Anterior' })).not.toBeInTheDocument();
   });
 });

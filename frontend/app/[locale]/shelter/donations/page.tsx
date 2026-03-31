@@ -20,12 +20,12 @@ export default function ShelterDonacionesPage() {
     .reduce((sum, d) => sum + Number(d.amount), 0);
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
+    <div className="mx-auto max-w-[1400px] px-6 py-10 min-w-0 overflow-x-hidden">
       <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Donaciones Recibidas</h1>
 
       {!loading && donations.length > 0 && (
-        <div className="mt-4 inline-block rounded-xl bg-amber-50 border border-amber-200 px-4 py-2">
-          <p className="text-sm text-amber-700">
+        <div className="mt-4 inline-block rounded-xl bg-amber-50 border border-amber-200 px-4 py-2 dark:bg-amber-950/25 dark:border-amber-800/40">
+          <p className="text-sm text-amber-700 dark:text-amber-300">
             Total recaudado: <span className="font-bold">${totalPaid.toLocaleString()}</span>
           </p>
         </div>
@@ -50,16 +50,20 @@ export default function ShelterDonacionesPage() {
                   <p className="font-semibold text-text-primary">${Number(donation.amount).toLocaleString()}</p>
                   <p className="text-sm text-text-tertiary mt-0.5 truncate">{donation.user_email}</p>
                   {donation.campaign_title && (
-                    <p className="text-xs text-amber-600 mt-0.5">Campaña: {donation.campaign_title}</p>
+                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">Campaña: {donation.campaign_title}</p>
                   )}
                   {donation.message && (
                     <p className="text-sm text-text-secondary mt-2 bg-surface-secondary rounded-lg p-2">&ldquo;{donation.message}&rdquo;</p>
                   )}
                 </div>
                 <div className="sm:text-right flex sm:flex-col items-center sm:items-end gap-2 sm:gap-0">
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    donation.status === 'paid' ? 'bg-emerald-50 text-emerald-700' : 'bg-surface-tertiary text-text-secondary'
-                  }`}>
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full ${
+                      donation.status === 'paid'
+                        ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300 ring-1 ring-emerald-200/60 dark:ring-emerald-700/40'
+                        : 'bg-surface-tertiary text-text-secondary'
+                    }`}
+                  >
                     {donation.status === 'paid' ? 'Pagada' : donation.status}
                   </span>
                   <p className="text-xs text-text-quaternary mt-1">{new Date(donation.created_at).toLocaleDateString('es')}</p>

@@ -17,6 +17,12 @@ import { AnimalCard, CampaignCard, ShelterCard, FAQAccordion, CTASection, Contai
 import { useScrollReveal } from '@/lib/hooks/useScrollReveal';
 import { useFAQsByTopic } from '@/lib/hooks/useFAQs';
 import { ROUTES } from '@/lib/constants';
+import {
+  ctaAmberOutlineClass,
+  heroTealPillClass,
+  pastelIconCircle12Class,
+  pastelStepTile14Class,
+} from '@/lib/ui/pastelAccent';
 
 export default function HomePage() {
   const locale = useLocale();
@@ -42,60 +48,65 @@ export default function HomePage() {
 
   const { items: homeFaqs } = useFAQsByTopic('home');
 
-  const stepsRef = useScrollReveal<HTMLDivElement>(0.15);
   const sheltersGridRef = useScrollReveal<HTMLDivElement>(0.1);
 
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border-primary bg-gradient-to-b from-surface-secondary via-teal-50/30 to-surface-secondary">
+      <section className="relative overflow-hidden border-b border-border-primary bg-gradient-to-b from-surface-secondary via-teal-50/30 to-surface-secondary dark:via-teal-950/25">
         <Container className="py-12 md:py-20 lg:py-28">
           <div className="max-w-3xl">
-            <p className="inline-flex items-center text-xs font-medium text-teal-700 bg-teal-50 border border-teal-200 rounded-full px-3 py-1">
+            <p className={heroTealPillClass}>
               {t('badge')}
             </p>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-text-primary mt-6 leading-tight">
               {t('title')}
               <br />
-              <span className="text-teal-600">{t('titleAccent')}</span>
+              <span className="text-teal-600 dark:text-teal-400">{t('titleAccent')}</span>
             </h1>
             <p className="mt-6 text-base md:text-lg text-text-secondary max-w-2xl leading-relaxed">
               {t('subtitle')}
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:items-center">
               <Link
                 href={ROUTES.ANIMALS}
-                className="bg-teal-600 text-white rounded-full px-6 py-3 font-medium hover:bg-teal-700 btn-base shadow-sm"
+                className="inline-flex justify-center items-center min-h-11 w-full sm:w-auto bg-teal-600 text-white rounded-full px-6 py-3 font-medium hover:bg-teal-700 btn-base shadow-sm"
               >
                 {t('ctaAnimals')}
               </Link>
               <Link
                 href={ROUTES.LOOKING_TO_ADOPT}
-                className="border border-border-secondary text-text-secondary rounded-full px-6 py-3 font-medium hover:bg-surface-primary btn-base shadow-sm"
+                className="inline-flex justify-center items-center min-h-11 w-full sm:w-auto border border-border-secondary text-text-secondary rounded-full px-6 py-3 font-medium hover:bg-surface-primary dark:hover:bg-surface-hover btn-base shadow-sm"
               >
                 {t('ctaAdopt')}
               </Link>
               <Link
                 href={ROUTES.CAMPAIGNS}
-                className="border border-amber-300 text-amber-700 rounded-full px-6 py-3 font-medium hover:bg-amber-50 btn-base shadow-sm"
+                className={ctaAmberOutlineClass}
               >
                 {t('ctaDonate')}
               </Link>
+              <Link
+                href={ROUTES.WORK_WITH_US}
+                className="inline-flex justify-center items-center min-h-11 w-full sm:w-auto border border-teal-200 text-teal-700 rounded-full px-6 py-3 font-medium hover:bg-teal-50 dark:border-teal-500/35 dark:text-teal-400 dark:hover:bg-teal-950/40 btn-base shadow-sm"
+              >
+                {t('ctaWork')}
+              </Link>
             </div>
 
-            <div className="mt-10 grid grid-cols-3 gap-3">
-              <div className="rounded-2xl bg-surface-primary/80 border border-border-primary p-4 shadow-sm hover:shadow-md transition-shadow">
-                <p className="text-xs text-text-tertiary">{t('statAdoptionLabel')}</p>
-                <p className="mt-1 text-sm font-semibold text-text-primary">{t('statAdoption')}</p>
+            <div className="mt-10 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
+              <div className="min-w-0 rounded-2xl bg-surface-primary/80 border border-border-primary p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow">
+                <p className="text-xs text-text-tertiary truncate">{t('statAdoptionLabel')}</p>
+                <p className="mt-1 text-xs sm:text-sm font-semibold text-text-primary leading-tight break-words">{t('statAdoption')}</p>
               </div>
-              <div className="rounded-2xl bg-surface-primary/80 border border-border-primary p-4 shadow-sm hover:shadow-md transition-shadow">
-                <p className="text-xs text-text-tertiary">{t('statSponsorshipLabel')}</p>
-                <p className="mt-1 text-sm font-semibold text-text-primary">{t('statSponsorship')}</p>
+              <div className="min-w-0 rounded-2xl bg-surface-primary/80 border border-border-primary p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow">
+                <p className="text-xs text-text-tertiary truncate">{t('statSponsorshipLabel')}</p>
+                <p className="mt-1 text-xs sm:text-sm font-semibold text-text-primary leading-tight break-words">{t('statSponsorship')}</p>
               </div>
-              <div className="rounded-2xl bg-surface-primary/80 border border-border-primary p-4 shadow-sm hover:shadow-md transition-shadow">
-                <p className="text-xs text-text-tertiary">{t('statSheltersLabel')}</p>
-                <p className="mt-1 text-sm font-semibold text-text-primary">{t('statShelters')}</p>
+              <div className="min-w-0 rounded-2xl bg-surface-primary/80 border border-border-primary p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow">
+                <p className="text-xs text-text-tertiary truncate">{t('statSheltersLabel')}</p>
+                <p className="mt-1 text-xs sm:text-sm font-semibold text-text-primary leading-tight break-words">{t('statShelters')}</p>
               </div>
             </div>
           </div>
@@ -103,7 +114,7 @@ export default function HomePage() {
       </section>
 
       {/* Featured Animals Carousel */}
-      <section className="py-10 md:py-16">
+      <section className="py-10 md:py-16 overflow-x-hidden min-w-0">
         <CTASection
           title={t('featuredTitle')}
           subtitle={t('featuredSubtitle')}
@@ -148,16 +159,16 @@ export default function HomePage() {
       </section>
 
       {/* How It Works */}
-      <section className="py-10 md:py-16 bg-gradient-to-b from-stone-100/60 via-stone-50/30 to-stone-100/60 border-y border-border-primary">
+      <section className="py-10 md:py-16 bg-gradient-to-b from-surface-secondary via-surface-tertiary/35 to-surface-secondary border-y border-border-primary">
         <Container className="text-center">
           <h2 className="text-2xl font-bold text-text-primary heading-decorated-center">{t('howTitle')}</h2>
           <p className="mt-2 text-text-tertiary max-w-lg mx-auto">
             {t('howSubtitle')}
           </p>
 
-          <div ref={stepsRef} className="mt-8 md:mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="mt-8 md:mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-surface-primary rounded-2xl border border-border-primary p-5 md:p-8 shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-50 to-teal-100 text-teal-600 flex items-center justify-center text-xl font-bold mx-auto">
+              <div className={pastelStepTile14Class('teal')}>
                 1
               </div>
               <h3 className="mt-5 font-semibold text-text-primary">{t('step1Title')}</h3>
@@ -166,7 +177,7 @@ export default function HomePage() {
               </p>
             </div>
             <div className="bg-surface-primary rounded-2xl border border-border-primary p-5 md:p-8 shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100 text-amber-600 flex items-center justify-center text-xl font-bold mx-auto">
+              <div className={pastelStepTile14Class('amber')}>
                 2
               </div>
               <h3 className="mt-5 font-semibold text-text-primary">{t('step2Title')}</h3>
@@ -175,7 +186,7 @@ export default function HomePage() {
               </p>
             </div>
             <div className="bg-surface-primary rounded-2xl border border-border-primary p-5 md:p-8 shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-600 flex items-center justify-center text-xl font-bold mx-auto">
+              <div className={pastelStepTile14Class('emerald')}>
                 3
               </div>
               <h3 className="mt-5 font-semibold text-text-primary">{t('step3Title')}</h3>
@@ -189,7 +200,7 @@ export default function HomePage() {
 
       {/* Active Campaigns Carousel */}
       {activeCampaigns.length > 0 && (
-        <section className="py-10 md:py-16">
+        <section className="py-10 md:py-16 overflow-x-hidden min-w-0">
           <CTASection
             title={t('campaignsTitle')}
             subtitle={t('campaignsSubtitle')}
@@ -222,7 +233,7 @@ export default function HomePage() {
       )}
 
       {/* Why Adopt — Value Content */}
-      <section className="py-10 md:py-16 bg-gradient-to-b from-stone-100/60 via-stone-50/30 to-stone-100/60 border-y border-border-primary">
+      <section className="py-10 md:py-16 bg-gradient-to-b from-surface-secondary via-surface-tertiary/35 to-surface-secondary border-y border-border-primary">
         <Container>
           <div className="text-center mb-8 md:mb-12">
             <h2 className="text-2xl font-bold text-text-primary heading-decorated-center">{t('whyAdoptTitle')}</h2>
@@ -233,8 +244,8 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-surface-primary rounded-2xl border border-border-primary p-6 text-center shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-50 to-teal-100 flex items-center justify-center mx-auto">
-                <Heart className="h-6 w-6 text-teal-600" />
+              <div className={pastelIconCircle12Class('teal')}>
+                <Heart className="h-6 w-6 text-teal-600 dark:text-teal-400" />
               </div>
               <h3 className="mt-4 font-semibold text-text-primary">{t('whySaveLives')}</h3>
               <p className="mt-2 text-sm text-text-tertiary leading-relaxed">
@@ -242,8 +253,8 @@ export default function HomePage() {
               </p>
             </div>
             <div className="bg-surface-primary rounded-2xl border border-border-primary p-6 text-center shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-50 to-amber-100 flex items-center justify-center mx-auto">
-                <Shield className="h-6 w-6 text-amber-600" />
+              <div className={pastelIconCircle12Class('amber')}>
+                <Shield className="h-6 w-6 text-amber-600 dark:text-amber-400" />
               </div>
               <h3 className="mt-4 font-semibold text-text-primary">{t('whySafeProcess')}</h3>
               <p className="mt-2 text-sm text-text-tertiary leading-relaxed">
@@ -251,8 +262,8 @@ export default function HomePage() {
               </p>
             </div>
             <div className="bg-surface-primary rounded-2xl border border-border-primary p-6 text-center shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center mx-auto">
-                <Users className="h-6 w-6 text-emerald-600" />
+              <div className={pastelIconCircle12Class('emerald')}>
+                <Users className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
               </div>
               <h3 className="mt-4 font-semibold text-text-primary">{t('whyCommunity')}</h3>
               <p className="mt-2 text-sm text-text-tertiary leading-relaxed">
@@ -260,8 +271,8 @@ export default function HomePage() {
               </p>
             </div>
             <div className="bg-surface-primary rounded-2xl border border-border-primary p-6 text-center shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-rose-50 to-rose-100 flex items-center justify-center mx-auto">
-                <TrendingUp className="h-6 w-6 text-rose-600" />
+              <div className={pastelIconCircle12Class('rose')}>
+                <TrendingUp className="h-6 w-6 text-rose-600 dark:text-rose-400" />
               </div>
               <h3 className="mt-4 font-semibold text-text-primary">{t('whyImpact')}</h3>
               <p className="mt-2 text-sm text-text-tertiary leading-relaxed">
@@ -274,7 +285,7 @@ export default function HomePage() {
 
       {/* Shelter Spotlight */}
       {featuredShelters.length > 0 && (
-        <section className="py-10 md:py-16">
+        <section className="py-10 md:py-16 overflow-x-hidden min-w-0">
           <CTASection
             title={t('sheltersTitle')}
             subtitle={t('sheltersSubtitle')}
@@ -283,7 +294,24 @@ export default function HomePage() {
             linkColor="text-emerald-600 hover:text-emerald-700"
             decorated
           >
-            <div ref={sheltersGridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Carrusel en móvil */}
+            <div className="md:hidden -mx-1 min-w-0 overflow-x-hidden px-1">
+              <Swiper
+                modules={[Pagination]}
+                spaceBetween={12}
+                slidesPerView={1.1}
+                pagination={{ clickable: true }}
+                className="pb-10"
+              >
+                {featuredShelters.map((shelter) => (
+                  <SwiperSlide key={shelter.id}>
+                    <ShelterCard shelter={shelter} />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </div>
+            {/* Grid en desktop */}
+            <div ref={sheltersGridRef} className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredShelters.map((shelter) => (
                 <ShelterCard key={shelter.id} shelter={shelter} />
               ))}

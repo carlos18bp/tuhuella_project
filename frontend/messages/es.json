@@ -32,6 +32,10 @@
     "workWithUs": "Trabaja con Nosotros",
     "strategicAllies": "Aliados Estratégicos"
   },
+  "faqPage": {
+    "title": "Preguntas Frecuentes",
+    "subtitle": "Resolvemos tus dudas sobre Tu Huella"
+  },
   "home": {
     "badge": "Plataforma de adopción y apadrinamiento animal",
     "title": "Cada huella cuenta.",
@@ -40,6 +44,7 @@
     "ctaAnimals": "Ver Animales",
     "ctaAdopt": "Busco Adoptar",
     "ctaDonate": "Donar",
+    "ctaWork": "Trabaja con Nosotros",
     "statAdoptionLabel": "Adopción",
     "statAdoption": "Proceso guiado y seguro",
     "statSponsorshipLabel": "Apadrinamiento",
@@ -103,6 +108,7 @@
     "signInToAdopt": "Inicia sesión para adoptar o apadrinar",
     "noResults": "No se encontraron animales con estos filtros.",
     "page": "Página",
+    "pageOfTotal": "Página {page} de {total}",
     "previous": "Anterior",
     "next": "Siguiente",
     "backToAnimals": "Volver a animales",
@@ -133,7 +139,9 @@
     "adoptionInProgress": "En proceso de adopción",
     "publishedAgo": "Publicado hace {days} días",
     "inShelterSince": "En el refugio hace {months} meses",
-    "similarAnimals": "Animales similares"
+    "similarAnimals": "Animales similares",
+    "share": "Compartir",
+    "shareCopied": "¡Enlace copiado!"
   },
   "shelters": {
     "title": "Refugios verificados",
@@ -161,7 +169,37 @@
     "evidenceTitle": "Evidencia y resultados",
     "evidenceSubtitle": "Fotos de la entrega y cumplimiento de la campaña",
     "faqTitle": "Preguntas frecuentes sobre campañas",
-    "faqSubtitle": "Todo sobre donaciones y campañas de recaudación"
+    "faqSubtitle": "Todo sobre donaciones y campañas de recaudación",
+    "pageOfTotal": "Página {page} de {total}",
+    "previous": "Anterior",
+    "next": "Siguiente"
+  },
+  "blog": {
+    "title": "Blog Mi Huella",
+    "subtitle": "Artículos sobre adopción, cuidado animal, historias inspiradoras y mucho más.",
+    "searchPlaceholder": "Buscar artículos...",
+    "empty": "No se encontraron artículos.",
+    "pageOfTotal": "Página {page} de {total}",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "readMinutes": "{minutes} min",
+    "readMinutesLong": "{minutes} min de lectura",
+    "catAll": "Todos",
+    "catAdopcion": "Adopción",
+    "catCuidado": "Cuidado Animal",
+    "catSalud": "Salud Animal",
+    "catHistorias": "Historias",
+    "catConsejos": "Consejos",
+    "catEventos": "Eventos",
+    "catVoluntariado": "Voluntariado",
+    "catNutricion": "Nutrición",
+    "catEntrenamiento": "Entrenamiento",
+    "catLegislacion": "Legislación"
+  },
+  "shelterForm": {
+    "privacyTitle": "Privacidad de tus datos",
+    "privacyBody": "Esta información la usa el equipo de Mi Huella para verificar tu refugio y contactarte. En el listado público de refugios se muestran nombre, ciudad y descripción; otros datos pueden verse en la ficha completa cuando tu perfil esté verificado. Si no quieres exponer algo, déjalo vacío o ajústalo después en configuración.",
+    "websiteOptional": "Sitio web (opcional)"
   },
   "auth": {
     "signInTitle": "Iniciar sesión",
@@ -646,6 +684,8 @@
       "translator": "Traductor",
       "dog_walker": "Paseador de Perros"
     },
+    "searchPlaceholder": "Buscar ofertas por título o descripción...",
+    "searchNoResults": "Ninguna oferta coincide con tu búsqueda.",
     "apply": "Postularme",
     "applyTitle": "Formulario de Postulación",
     "applySubtitle": "Completa el formulario para postularte como voluntario en esta posición",
@@ -707,6 +747,28 @@
     "contactTitle": "10. Contacto",
     "contactContent": "Para consultas, sugerencias o reclamos relacionados con estos términos y condiciones, puede contactarnos a través de los canales disponibles en la plataforma."
   },
+  "contact": {
+    "title": "Contáctanos",
+    "subtitle": "Escríbenos desde el formulario o por WhatsApp. Te responderemos lo antes posible.",
+    "name": "Nombre",
+    "email": "Correo electrónico",
+    "subject": "Asunto",
+    "message": "Mensaje",
+    "messageHint": "Máximo {max} caracteres",
+    "submit": "Enviar mensaje",
+    "submitting": "Enviando…",
+    "fieldRequired": "Este campo es obligatorio",
+    "captchaRequired": "Completa la verificación",
+    "submitError": "No se pudo enviar el mensaje. Intenta de nuevo.",
+    "sendUnavailable": "El envío de correo no está disponible en este momento. Intenta más tarde.",
+    "successTitle": "Mensaje enviado",
+    "successBody": "Gracias por escribirnos. Revisaremos tu mensaje y te contactaremos pronto.",
+    "whatsappTitle": "WhatsApp",
+    "whatsappIntro": "Líneas de contacto de ejemplo para consultas rápidas (números de demostración, no reales).",
+    "whatsappGeneral": "Consultas generales",
+    "whatsappAdoptions": "Adopciones y refugios",
+    "whatsappHours": "Horario orientativo: lunes a viernes, 9:00–18:00"
+  },
   "footer": {
     "description": "Conectamos refugios con personas que quieren dar un hogar o apoyar a un animal.",
     "rights": "Todos los derechos reservados.",
@@ -721,6 +783,7 @@
     "myDonations": "Mis Donaciones",
     "mySponsorships": "Mis Apadrinamientos",
     "workWithUs": "Trabaja con Nosotros",
+    "contactUs": "Contáctanos",
     "strategicAllies": "Aliados Estratégicos",
     "terms": "Términos y Condiciones",
     "designedBy": "Diseñado por",

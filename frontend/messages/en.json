@@ -32,6 +32,10 @@
     "workWithUs": "Work with Us",
     "strategicAllies": "Strategic Allies"
   },
+  "faqPage": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "We answer your questions about Tu Huella"
+  },
   "home": {
     "badge": "Animal adoption and sponsorship platform",
     "title": "Every paw print matters.",
@@ -40,6 +44,7 @@
     "ctaAnimals": "View Animals",
     "ctaAdopt": "Looking to Adopt",
     "ctaDonate": "Donate",
+    "ctaWork": "Work with Us",
     "statAdoptionLabel": "Adoption",
     "statAdoption": "Guided and safe process",
     "statSponsorshipLabel": "Sponsorship",
@@ -103,6 +108,7 @@
     "signInToAdopt": "Sign in to adopt or sponsor",
     "noResults": "No animals found with these filters.",
     "page": "Page",
+    "pageOfTotal": "Page {page} of {total}",
     "previous": "Previous",
     "next": "Next",
     "backToAnimals": "Back to animals",
@@ -133,7 +139,9 @@
     "adoptionInProgress": "Adoption in progress",
     "publishedAgo": "Published {days} days ago",
     "inShelterSince": "In shelter for {months} months",
-    "similarAnimals": "Similar animals"
+    "similarAnimals": "Similar animals",
+    "share": "Share",
+    "shareCopied": "Link copied!"
   },
   "shelters": {
     "title": "Verified shelters",
@@ -161,7 +169,37 @@
     "evidenceTitle": "Evidence and results",
     "evidenceSubtitle": "Photos of the delivery and fulfillment of the campaign",
     "faqTitle": "Frequently asked questions about campaigns",
-    "faqSubtitle": "All about donations and fundraising campaigns"
+    "faqSubtitle": "All about donations and fundraising campaigns",
+    "pageOfTotal": "Page {page} of {total}",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "blog": {
+    "title": "Mi Huella Blog",
+    "subtitle": "Articles on adoption, animal care, inspiring stories, and more.",
+    "searchPlaceholder": "Search articles...",
+    "empty": "No articles found.",
+    "pageOfTotal": "Page {page} of {total}",
+    "previous": "Previous",
+    "next": "Next",
+    "readMinutes": "{minutes} min",
+    "readMinutesLong": "{minutes} min read",
+    "catAll": "All",
+    "catAdopcion": "Adoption",
+    "catCuidado": "Animal care",
+    "catSalud": "Animal health",
+    "catHistorias": "Stories",
+    "catConsejos": "Tips",
+    "catEventos": "Events",
+    "catVoluntariado": "Volunteering",
+    "catNutricion": "Nutrition",
+    "catEntrenamiento": "Training",
+    "catLegislacion": "Legislation"
+  },
+  "shelterForm": {
+    "privacyTitle": "Privacy of your data",
+    "privacyBody": "This information is used by the Mi Huella team to verify your shelter and contact you. The public shelter directory shows name, city, and description; other details may appear on your full profile once verified. If you prefer not to share something, leave it blank or update it later in settings.",
+    "websiteOptional": "Website (optional)"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -629,6 +667,8 @@
     "positionsSubtitle": "Find how you can contribute",
     "requirements": "Requirements",
     "noPositions": "No positions available at the moment.",
+    "searchPlaceholder": "Search roles by title or description...",
+    "searchNoResults": "No roles match your search.",
     "alliesTitle": "Strategic Allies",
     "alliesSubtitle": "Meet the organizations and companies that support our cause",
     "viewAllAllies": "View all allies",
@@ -707,6 +747,28 @@
     "contactTitle": "10. Contact",
     "contactContent": "For inquiries, suggestions, or complaints related to these terms and conditions, you can contact us through the channels available on the platform."
   },
+  "contact": {
+    "title": "Contact us",
+    "subtitle": "Reach us using the form or WhatsApp. We will get back to you as soon as we can.",
+    "name": "Name",
+    "email": "Email",
+    "subject": "Subject",
+    "message": "Message",
+    "messageHint": "Up to {max} characters",
+    "submit": "Send message",
+    "submitting": "Sending…",
+    "fieldRequired": "This field is required",
+    "captchaRequired": "Please complete the verification",
+    "submitError": "We could not send your message. Please try again.",
+    "sendUnavailable": "Email delivery is temporarily unavailable. Please try again later.",
+    "successTitle": "Message sent",
+    "successBody": "Thank you for reaching out. We will review your message and contact you soon.",
+    "whatsappTitle": "WhatsApp",
+    "whatsappIntro": "Sample contact lines for quick questions (demo numbers, not real).",
+    "whatsappGeneral": "General inquiries",
+    "whatsappAdoptions": "Adoptions and shelters",
+    "whatsappHours": "Indicative hours: Mon–Fri 9:00–18:00"
+  },
   "footer": {
     "description": "We connect shelters with people who want to provide a home or support an animal.",
     "rights": "All rights reserved.",
@@ -721,6 +783,7 @@
     "myDonations": "My Donations",
     "mySponsorships": "My Sponsorships",
     "workWithUs": "Work with Us",
+    "contactUs": "Contact us",
     "strategicAllies": "Strategic Allies",
     "terms": "Terms and Conditions",
     "designedBy": "Designed by",

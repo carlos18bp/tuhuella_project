@@ -63,11 +63,11 @@ export default function MisDonacionesPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
+    <div className="mx-auto max-w-[1400px] px-6 py-10 min-w-0 overflow-x-hidden">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
-          <HandCoins className="h-5 w-5 text-amber-600" />
+        <div className="h-10 w-10 rounded-xl bg-amber-50 dark:bg-amber-950/35 ring-1 ring-amber-200/50 dark:ring-amber-700/30 flex items-center justify-center">
+          <HandCoins className="h-5 w-5 text-amber-600 dark:text-amber-400" />
         </div>
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">
@@ -98,10 +98,10 @@ export default function MisDonacionesPage() {
               key={opt.value}
               type="button"
               onClick={() => setStatusFilter(opt.value)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors min-h-11 sm:min-h-0 inline-flex items-center justify-center ${
                 statusFilter === opt.value
                   ? 'bg-amber-600 text-white'
-                  : 'bg-surface-primary border border-border-primary text-text-secondary hover:bg-surface-hover'
+                  : 'bg-surface-primary border border-border-primary text-text-secondary hover:bg-surface-hover dark:hover:bg-surface-hover'
               }`}
             >
               {opt.label}
@@ -129,7 +129,11 @@ export default function MisDonacionesPage() {
         <div className="mt-10 text-center py-12">
           <HandCoins className="h-10 w-10 text-stone-300 dark:text-stone-600 mx-auto" />
           <p className="mt-3 text-text-quaternary">{t('noResults')}</p>
-          <button type="button" onClick={() => setStatusFilter('')} className="mt-3 text-sm text-amber-600 hover:text-amber-700 font-medium">
+          <button
+            type="button"
+            onClick={() => setStatusFilter('')}
+            className="mt-3 inline-flex items-center justify-center min-h-11 text-sm text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 font-medium"
+          >
             {t('clearFilter')}
           </button>
         </div>
@@ -139,7 +143,7 @@ export default function MisDonacionesPage() {
           <div className="rounded-2xl bg-gradient-to-br from-amber-50 via-surface-primary to-orange-50/30 dark:from-amber-900/10 dark:via-surface-primary dark:to-orange-900/10 border border-border-primary p-8 md:p-12">
             <div className="max-w-lg mx-auto text-center">
               <div className="h-16 w-16 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mx-auto">
-                <HandCoins className="h-8 w-8 text-amber-600" />
+                <HandCoins className="h-8 w-8 text-amber-600 dark:text-amber-400" />
               </div>
               <h2 className="mt-5 text-xl font-bold text-text-primary">{t('empty')}</h2>
               <p className="mt-2 text-sm text-text-tertiary leading-relaxed">{t('emptyDesc')}</p>
@@ -160,7 +164,10 @@ export default function MisDonacionesPage() {
                 ))}
               </div>
 
-              <Link href={ROUTES.CAMPAIGNS} className="mt-6 inline-block bg-amber-600 text-white rounded-full px-8 py-3 text-sm font-medium hover:bg-amber-700 shadow-md hover:shadow-lg transition-all">
+              <Link
+                href={ROUTES.CAMPAIGNS}
+                className="mt-6 inline-flex items-center justify-center min-h-11 w-full sm:w-auto bg-amber-600 text-white rounded-full px-8 py-3 text-sm font-medium hover:bg-amber-700 shadow-md hover:shadow-lg transition-all"
+              >
                 {t('exploreCampaigns')} &rarr;
               </Link>
             </div>
@@ -168,7 +175,7 @@ export default function MisDonacionesPage() {
 
           {/* Active campaigns carousel */}
           {campaigns.length > 0 && (
-            <div className="mt-10">
+            <div className="mt-10 min-w-0 overflow-x-hidden">
               <h2 className="text-lg font-semibold text-text-primary mb-4">{t('activeCampaigns')}</h2>
               <Swiper
                 modules={[Navigation, Pagination, Autoplay]}

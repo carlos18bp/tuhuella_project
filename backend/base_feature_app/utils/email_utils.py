@@ -4,9 +4,9 @@ Centralized email utility functions for Mi Huella.
 All outbound email logic lives here. Each function renders a branded HTML
 template and sends both HTML and plain-text versions via Django's send_mail.
 """
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives, send_mail
+from django.template.loader import render_to_string
 
 
 TEAM_EMAIL = 'team@proyectapps.co'
@@ -113,4 +113,43 @@ def send_volunteer_application_notification(application):
         return True
     except Exception as e:
         print(f"Error sending volunteer application notification: {e}")
+        return False
+
+
+def send_contact_form_email(*, name: str, email: str, subject: str, message: str) -> bool:
+    """
+    Notify team inbox of a public contact form submission.
+
+    Uses EmailMultiAlternatives with reply_to set to the visitor's address.
+    """
+    recipient = getattr(settings, 'CONTACT_FORM_RECIPIENT_EMAIL', 'team@projectapp.co')
+    mail_subject = f'Mi Huella - Contacto: {subject}'
+    text_message = (
+        f'Mensaje desde el formulario de contacto web.\n\n'
+        f'Nombre: {name}\n'
+        f'Email: {email}\n'
+        f'Asunto: {subject}\n\n'
+        f'Mensaje:\n{message}\n\n'
+        f'— Mi Huella'
+    )
+
+    try:
+        html_message = render_to_string('emails/contact_form_notification.html', {
+            'name': name,
+            'email': email,
+            'subject_line': subject,
+            'message': message,
+        })
+        msg = EmailMultiAlternatives(
+            mail_subject,
+            text_message,
+            settings.DEFAULT_FROM_EMAIL,
+            [recipient],
+            reply_to=[email],
+        )
+        msg.attach_alternative(html_message, 'text/html')
+        msg.send(fail_silently=False)
+        return True
+    except Exception as e:
+        print(f"Error sending contact form email: {e}")
         return False

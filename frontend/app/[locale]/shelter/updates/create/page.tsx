@@ -77,11 +77,15 @@ export default function ShelterUpdateCreatePage() {
     }
   };
 
-  const inputClasses = 'mt-1 w-full rounded-xl border border-border-primary shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] p-3 text-sm text-text-primary focus:border-teal-500 focus:ring-2 focus:ring-teal-500/10 outline-none';
+  const inputClasses =
+    'mt-1 w-full rounded-xl border border-border-primary bg-surface-primary shadow-[inset_0_1px_2px_rgb(0,0,0,0.04)] dark:shadow-none p-3 text-sm text-text-primary focus:border-teal-500 focus:ring-2 focus:ring-teal-500/10 dark:focus:border-teal-500/60 dark:focus:ring-teal-500/20 outline-none';
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-10">
-      <Link href={ROUTES.SHELTER_UPDATES} className="inline-flex items-center gap-1.5 text-sm text-teal-600 hover:text-teal-700 transition-colors mb-6">
+    <div className="mx-auto max-w-2xl px-6 py-10 min-w-0 overflow-x-hidden">
+      <Link
+        href={ROUTES.SHELTER_UPDATES}
+        className="inline-flex items-center justify-center gap-1.5 min-h-11 text-sm text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 transition-colors mb-6 -ml-1 pl-1 pr-2 rounded-lg hover:bg-surface-hover/80 dark:hover:bg-surface-hover/50"
+      >
         <ArrowLeft className="h-4 w-4" />
         {t('backToUpdates')}
       </Link>
@@ -129,13 +133,15 @@ export default function ShelterUpdateCreatePage() {
         </div>
 
         {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:bg-red-950/25 dark:border-red-800/40 dark:text-red-300">
+            {error}
+          </div>
         )}
 
         <button
           type="submit"
           disabled={submitting || !titleEs.trim() || !contentEs.trim()}
-          className="w-full bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600 shadow-sm hover:shadow-md text-white rounded-full py-3 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full inline-flex items-center justify-center min-h-11 bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600 shadow-sm hover:shadow-md text-white rounded-full py-3 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {submitting ? t('publishing') : t('publishButton')}
         </button>

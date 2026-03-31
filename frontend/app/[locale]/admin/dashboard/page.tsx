@@ -8,6 +8,7 @@ import { useRequireAuth } from '@/lib/hooks/useRequireAuth';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { api } from '@/lib/services/http';
 import { API_ENDPOINTS, ROUTES } from '@/lib/constants';
+import AdminAccessDenied from '@/components/ui/AdminAccessDenied';
 
 type DashboardMetrics = {
   total_users: number;
@@ -45,24 +46,24 @@ export default function AdminDashboardPage() {
 
   if (user && user.role !== 'admin' && !user.is_staff) {
     return (
-      <div className="mx-auto max-w-[1400px] px-6 py-10">
-        <p className="text-red-600 font-medium">Acceso denegado. Solo administradores pueden acceder a este panel.</p>
-      </div>
+      <AdminAccessDenied>
+        Acceso denegado. Solo administradores pueden acceder a este panel.
+      </AdminAccessDenied>
     );
   }
 
   const cards = metrics ? [
     { label: 'Usuarios', value: metrics.total_users, color: 'text-text-primary' },
     { label: 'Refugios', value: metrics.total_shelters, color: 'text-text-primary' },
-    { label: 'Refugios verificados', value: metrics.verified_shelters, color: 'text-emerald-700' },
-    { label: 'Pendientes de aprobación', value: metrics.pending_shelters, color: 'text-amber-700' },
+    { label: 'Refugios verificados', value: metrics.verified_shelters, color: 'text-emerald-700 dark:text-emerald-400' },
+    { label: 'Pendientes de aprobación', value: metrics.pending_shelters, color: 'text-amber-700 dark:text-amber-400' },
     { label: 'Animales', value: metrics.total_animals, color: 'text-text-primary' },
-    { label: 'Animales publicados', value: metrics.published_animals, color: 'text-teal-700' },
-    { label: 'Adoptados', value: metrics.adopted_animals, color: 'text-emerald-700' },
+    { label: 'Animales publicados', value: metrics.published_animals, color: 'text-teal-700 dark:text-teal-400' },
+    { label: 'Adoptados', value: metrics.adopted_animals, color: 'text-emerald-700 dark:text-emerald-400' },
     { label: 'Solicitudes', value: metrics.total_applications, color: 'text-text-primary' },
-    { label: 'Campañas activas', value: metrics.active_campaigns, color: 'text-amber-700' },
-    { label: 'Donaciones pagadas', value: metrics.total_donations, color: 'text-emerald-700' },
-    { label: 'Apadrinamientos activos', value: metrics.total_sponsorships, color: 'text-teal-700' },
+    { label: 'Campañas activas', value: metrics.active_campaigns, color: 'text-amber-700 dark:text-amber-400' },
+    { label: 'Donaciones pagadas', value: metrics.total_donations, color: 'text-emerald-700 dark:text-emerald-400' },
+    { label: 'Apadrinamientos activos', value: metrics.total_sponsorships, color: 'text-teal-700 dark:text-teal-400' },
   ] : [];
 
   const navItems = [
@@ -110,8 +111,8 @@ export default function AdminDashboardPage() {
               <Link key={item.href} href={item.href}
                 className="rounded-2xl border border-border-primary bg-surface-primary p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-text-primary group-hover:text-amber-700 transition-colors">{item.label}</h3>
-                  <ChevronRight className="h-4 w-4 text-text-quaternary group-hover:text-amber-600 group-hover:translate-x-0.5 transition-all" />
+                  <h3 className="font-semibold text-text-primary group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors">{item.label}</h3>
+                  <ChevronRight className="h-4 w-4 text-text-quaternary group-hover:text-amber-600 dark:group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all" />
                 </div>
                 <p className="text-sm text-text-tertiary mt-1">{item.description}</p>
               </Link>

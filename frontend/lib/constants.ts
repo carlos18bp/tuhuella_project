@@ -24,6 +24,7 @@ export const ROUTES = {
   VOLUNTEER_APPLY: (positionId: number | string) => `/work-with-us/apply/${positionId}`,
   STRATEGIC_ALLIES: '/strategic-allies',
   TERMS: '/terms',
+  CONTACTANOS: '/contactanos',
   ADOPT: (id: number | string) => `/adopt/${id}`,
 
   MY_PROFILE: '/my-profile',
@@ -158,6 +159,7 @@ export const API_ENDPOINTS = {
   VOLUNTEER_POSITIONS: '/volunteer-positions/',
   VOLUNTEER_APPLICATIONS: '/volunteer-applications/',
   STRATEGIC_ALLIES: '/strategic-allies/',
+  CONTACT: '/contact/',
 } as const;
 
 export const COOKIE_KEYS = {

@@ -59,8 +59,11 @@ export default function ShelterUpdatesPage() {
   };
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
-      <Link href={ROUTES.SHELTER_DASHBOARD} className="inline-flex items-center gap-1.5 text-sm text-teal-600 hover:text-teal-700 transition-colors mb-6">
+    <div className="mx-auto max-w-[1400px] px-6 py-10 min-w-0 overflow-x-hidden">
+      <Link
+        href={ROUTES.SHELTER_DASHBOARD}
+        className="inline-flex items-center justify-center gap-1.5 min-h-11 text-sm text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 transition-colors mb-6 -ml-1 pl-1 pr-2 rounded-lg hover:bg-surface-hover/80 dark:hover:bg-surface-hover/50"
+      >
         <ArrowLeft className="h-4 w-4" />
         {t('backToDashboard')}
       </Link>
@@ -72,7 +75,7 @@ export default function ShelterUpdatesPage() {
         </div>
         <Link
           href={ROUTES.SHELTER_UPDATES_CREATE}
-          className="bg-teal-600 text-white rounded-full px-5 py-2.5 text-sm font-medium hover:bg-teal-700 transition-colors text-center"
+          className="inline-flex items-center justify-center min-h-11 w-full sm:w-auto bg-teal-600 text-white rounded-full px-5 py-2.5 text-sm font-medium hover:bg-teal-700 transition-colors text-center"
         >
           + {t('createNew')}
         </Link>
@@ -106,8 +109,9 @@ export default function ShelterUpdatesPage() {
                 </div>
                 <button
                   onClick={() => handleDelete(update.id)}
-                  className="text-text-quaternary hover:text-red-500 transition-colors self-start p-2"
+                  className="min-h-11 min-w-11 inline-flex items-center justify-center text-text-quaternary hover:text-red-500 dark:hover:text-red-400 transition-colors self-start rounded-lg hover:bg-surface-hover/80 dark:hover:bg-surface-hover/50"
                   title={t('delete')}
+                  type="button"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>

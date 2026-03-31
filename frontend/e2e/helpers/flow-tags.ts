@@ -67,6 +67,7 @@ export const ADOPTER_PROFILE = ['@flow:adopter-profile', '@module:adopter', '@pr
 
 // ── Public ──
 export const PUBLIC_FAQ = ['@flow:public-faq', '@module:public', '@priority:P4'];
+export const PUBLIC_CONTACT = ['@flow:public-contact', '@module:public', '@priority:P4'];
 
 // ── Shelter Panel ──
 export const SHELTER_PANEL_DASHBOARD = ['@flow:shelter-panel-dashboard', '@module:shelter-panel', '@priority:P1'];

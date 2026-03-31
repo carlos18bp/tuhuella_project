@@ -26,7 +26,7 @@ export default function ShelterDetailPage() {
 
   if (loading || !shelter) {
     return (
-      <Container className="py-10">
+      <Container className="py-10 min-w-0 overflow-x-hidden">
         <div role="status" aria-label="loading" className="space-y-4">
           <div className="h-64 animate-shimmer rounded-2xl" />
           <div className="h-8 animate-shimmer rounded w-1/3" />
@@ -44,9 +44,12 @@ export default function ShelterDetailPage() {
   const galleryUrls = shelter.gallery_urls ?? [];
 
   return (
-    <Container className="py-10">
-      <Link href={ROUTES.SHELTERS} className="inline-flex items-center gap-1.5 text-sm text-teal-600 hover:text-teal-700 transition-colors">
-        <ArrowLeft className="h-4 w-4" />
+    <Container className="py-10 min-w-0 overflow-x-hidden">
+      <Link
+        href={ROUTES.SHELTERS}
+        className="inline-flex items-center justify-center gap-1.5 min-h-11 text-sm text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 transition-colors -ml-1 pl-1 pr-2 rounded-lg hover:bg-surface-hover/80 dark:hover:bg-surface-hover/50"
+      >
+        <ArrowLeft className="h-4 w-4 shrink-0" />
         {t('backToShelters')}
       </Link>
 
@@ -64,7 +67,7 @@ export default function ShelterDetailPage() {
             />
           </div>
         ) : (
-          <div className="rounded-2xl h-64 md:h-80 bg-gradient-to-br from-teal-500 to-teal-600" />
+          <div className="rounded-2xl h-64 md:h-80 bg-gradient-to-br from-teal-500 to-teal-600 dark:from-teal-800 dark:to-teal-950" />
         )}
 
         {/* Logo as profile avatar */}
@@ -73,7 +76,7 @@ export default function ShelterDetailPage() {
             {shelter.logo_url ? (
               <Image src={shelter.logo_url} alt={`${shelter.name} logo`} fill sizes="96px" className="object-cover" />
             ) : (
-              <span className="text-2xl font-bold text-teal-700">
+              <span className="text-2xl font-bold text-teal-700 dark:text-teal-300">
                 {shelter.name?.[0]?.toUpperCase()}
               </span>
             )}
@@ -97,7 +100,7 @@ export default function ShelterDetailPage() {
           {shelter.phone && (
             <div className="rounded-xl border border-border-primary p-4 shadow-sm">
               <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-text-quaternary" />
+                <Phone className="h-4 w-4 text-teal-600 dark:text-teal-400 shrink-0" />
                 <p className="text-xs text-text-tertiary">{t('phone')}</p>
               </div>
               <p className="text-sm font-medium text-text-secondary mt-1.5">{shelter.phone}</p>
@@ -106,7 +109,7 @@ export default function ShelterDetailPage() {
           {shelter.email && (
             <div className="rounded-xl border border-border-primary p-4 shadow-sm">
               <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-text-quaternary" />
+                <Mail className="h-4 w-4 text-teal-600 dark:text-teal-400 shrink-0" />
                 <p className="text-xs text-text-tertiary">{t('email')}</p>
               </div>
               <p className="text-sm font-medium text-text-secondary mt-1.5">{shelter.email}</p>
@@ -115,10 +118,10 @@ export default function ShelterDetailPage() {
           {shelter.website && (
             <div className="rounded-xl border border-border-primary p-4 shadow-sm">
               <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4 text-text-quaternary" />
+                <Globe className="h-4 w-4 text-teal-600 dark:text-teal-400 shrink-0" />
                 <p className="text-xs text-text-tertiary">{t('website')}</p>
               </div>
-              <a href={shelter.website} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-teal-600 mt-1.5 hover:underline block">
+              <a href={shelter.website} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-teal-600 dark:text-teal-400 mt-1.5 hover:underline block break-all">
                 {shelter.website}
               </a>
             </div>
@@ -136,7 +139,7 @@ export default function ShelterDetailPage() {
         <div className="mt-8">
           <Link
             href={`${ROUTES.ANIMALS}?shelter=${shelter.id}`}
-            className="bg-teal-600 text-white rounded-full px-6 py-3 font-medium hover:bg-teal-700 btn-base shadow-sm inline-block"
+            className="inline-flex items-center justify-center min-h-11 bg-teal-600 text-white rounded-full px-6 py-3 font-medium hover:bg-teal-700 btn-base shadow-sm"
           >
             {t('viewAnimals')}
           </Link>

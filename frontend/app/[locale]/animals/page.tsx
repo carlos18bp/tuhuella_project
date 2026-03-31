@@ -84,83 +84,99 @@ export default function AnimalesPage() {
     const end = Math.min(totalPages, page + 2);
     for (let i = start; i <= end; i++) pages.push(i);
 
+    const navBtn =
+      'min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 flex items-center justify-center p-2 rounded-lg border border-border-primary text-text-secondary hover:bg-surface-hover disabled:opacity-30 disabled:cursor-not-allowed transition-colors';
+
     return (
-      <div className="mt-10 flex items-center justify-center gap-2">
-        <button
-          onClick={() => setPage(page - 1)}
-          disabled={page <= 1}
-          className="p-2 rounded-lg border border-border-primary text-text-secondary hover:bg-surface-hover disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </button>
-        {start > 1 && (
-          <>
-            <button onClick={() => setPage(1)} className="px-3 py-1.5 rounded-lg text-sm text-text-secondary hover:bg-surface-hover transition-colors">1</button>
-            {start > 2 && <span className="text-text-quaternary">...</span>}
-          </>
-        )}
-        {pages.map((p) => (
-          <button
-            key={p}
-            onClick={() => setPage(p)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              p === page
-                ? 'bg-teal-600 text-white'
-                : 'text-text-secondary hover:bg-surface-hover'
-            }`}
-          >
-            {p}
+      <>
+        {/* Compact: mobile */}
+        <div className="mt-10 flex sm:hidden items-center justify-center gap-3">
+          <button type="button" onClick={() => setPage(page - 1)} disabled={page <= 1} className={navBtn} aria-label={t('previous')}>
+            <ChevronLeft className="h-4 w-4" />
           </button>
-        ))}
-        {end < totalPages && (
-          <>
-            {end < totalPages - 1 && <span className="text-text-quaternary">...</span>}
-            <button onClick={() => setPage(totalPages)} className="px-3 py-1.5 rounded-lg text-sm text-text-secondary hover:bg-surface-hover transition-colors">{totalPages}</button>
-          </>
-        )}
-        <button
-          onClick={() => setPage(page + 1)}
-          disabled={page >= totalPages}
-          className="p-2 rounded-lg border border-border-primary text-text-secondary hover:bg-surface-hover disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </button>
-      </div>
+          <span className="text-sm text-text-secondary tabular-nums min-w-[8rem] text-center">
+            {t('pageOfTotal', { page, total: totalPages })}
+          </span>
+          <button type="button" onClick={() => setPage(page + 1)} disabled={page >= totalPages} className={navBtn} aria-label={t('next')}>
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+        {/* Full window: sm+ */}
+        <div className="mt-10 hidden sm:flex items-center justify-center gap-2 flex-wrap">
+          <button type="button" onClick={() => setPage(page - 1)} disabled={page <= 1} className={navBtn} aria-label={t('previous')}>
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          {start > 1 && (
+            <>
+              <button type="button" onClick={() => setPage(1)} className="min-h-9 min-w-9 px-2 rounded-lg text-sm text-text-secondary hover:bg-surface-hover transition-colors">1</button>
+              {start > 2 && <span className="text-text-quaternary">...</span>}
+            </>
+          )}
+          {pages.map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => setPage(p)}
+              className={`min-h-9 min-w-9 px-2 rounded-lg text-sm font-medium transition-colors ${
+                p === page
+                  ? 'bg-teal-600 text-white'
+                  : 'text-text-secondary hover:bg-surface-hover'
+              }`}
+            >
+              {p}
+            </button>
+          ))}
+          {end < totalPages && (
+            <>
+              {end < totalPages - 1 && <span className="text-text-quaternary">...</span>}
+              <button type="button" onClick={() => setPage(totalPages)} className="min-h-9 min-w-9 px-2 rounded-lg text-sm text-text-secondary hover:bg-surface-hover transition-colors">{totalPages}</button>
+            </>
+          )}
+          <button type="button" onClick={() => setPage(page + 1)} disabled={page >= totalPages} className={navBtn} aria-label={t('next')}>
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      </>
     );
   };
 
   return (
-    <Container className="py-10">
+    <Container className="py-10 min-w-0 overflow-x-hidden">
       <h1 className="text-2xl sm:text-3xl font-bold text-text-primary heading-decorated">{t('title')}</h1>
       <p className="mt-2 text-text-tertiary">{t('subtitle')}</p>
 
       {/* Filters */}
-      <div className="mt-8 flex flex-wrap gap-3 rounded-2xl bg-surface-secondary/80 border border-border-primary/60 p-4">
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap rounded-2xl bg-surface-secondary/80 border border-border-primary/60 p-4 min-w-0">
         <MultiSelectDropdown
+          className="w-full sm:w-auto"
           label={t('speciesFilter')}
           options={speciesOptions}
           selected={species}
           onChange={setSpecies}
         />
         <MultiSelectDropdown
+          className="w-full sm:w-auto"
           label={t('sizeFilter')}
           options={sizeOptions}
           selected={size}
           onChange={setSize}
         />
         <MultiSelectDropdown
+          className="w-full sm:w-auto"
           label={t('ageFilter')}
           options={ageOptions}
           selected={ageRange}
           onChange={setAgeRange}
         />
         <MultiSelectDropdown
+          className="w-full sm:w-auto"
           label={t('energyFilter')}
           options={energyOptions}
           selected={energyLevel}
           onChange={setEnergyLevel}
         />
         <MultiSelectDropdown
+          className="w-full sm:w-auto"
           label={t('compatibilityFilter')}
           options={goodWithOptions}
           selected={goodWith}
@@ -170,7 +186,7 @@ export default function AnimalesPage() {
 
       {/* Grid */}
       {loading ? (
-        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-7">
+        <div className="mt-10 grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5 md:gap-7 min-w-0">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="rounded-2xl border border-border-primary bg-surface-primary overflow-hidden">
               <div className="aspect-[4/3] animate-shimmer" />
@@ -183,9 +199,11 @@ export default function AnimalesPage() {
         </div>
       ) : (
         <>
-          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-7">
+          <div className="mt-10 grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5 md:gap-7 min-w-0">
             {animals.length === 0 && (
-              <EmptyState message={t('noResults')} />
+              <div className="col-span-1 min-[400px]:col-span-2 lg:col-span-3">
+                <EmptyState message={t('noResults')} />
+              </div>
             )}
             {animals.map((animal) => (
               <AnimalCard key={animal.id} animal={animal} />

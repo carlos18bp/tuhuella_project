@@ -151,7 +151,7 @@ function FavoriteNote({ favoriteId, initialNote }: { favoriteId: number; initial
         type="button"
         aria-label="Nota"
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(!open); }}
-        className={`flex items-center gap-1 text-xs transition-colors ${note ? 'text-teal-600' : 'text-text-quaternary hover:text-text-tertiary'}`}
+        className={`flex items-center gap-1 text-xs transition-colors min-h-11 sm:min-h-0 ${note ? 'text-teal-600 dark:text-teal-400' : 'text-text-quaternary hover:text-text-tertiary'}`}
       >
         <StickyNote className="h-3 w-3" fill={note ? 'currentColor' : 'none'} />
         {!open && note && <span className="truncate max-w-[120px]">{note}</span>}
@@ -161,7 +161,7 @@ function FavoriteNote({ favoriteId, initialNote }: { favoriteId: number; initial
           value={note}
           onChange={(e) => handleChange(e.target.value)}
           placeholder={t('addNote')}
-          className="mt-1 w-full text-xs p-2 rounded-lg border border-border-primary bg-surface-secondary text-text-secondary placeholder:text-text-quaternary resize-none focus:ring-1 focus:ring-teal-500/30 focus:border-teal-500 transition-all"
+          className="mt-1 w-full text-xs p-2 rounded-lg border border-border-primary bg-surface-secondary text-text-secondary placeholder:text-text-quaternary resize-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 dark:focus:border-teal-500/60 dark:focus:ring-teal-500/20 transition-all"
           rows={2}
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
         />
@@ -250,10 +250,14 @@ function FavoriteListRow({ fav, fadingOut }: { fav: Favorite; fadingOut: number 
       {/* Health badges */}
       <div className="hidden md:flex items-center gap-1 shrink-0">
         {fav.is_vaccinated && (
-          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60">{tAnimals('vaccinated')}</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60 dark:bg-emerald-950/35 dark:text-emerald-300 dark:ring-emerald-700/40">
+            {tAnimals('vaccinated')}
+          </span>
         )}
         {fav.is_sterilized && (
-          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60">{tAnimals('sterilized')}</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60 dark:bg-emerald-950/35 dark:text-emerald-300 dark:ring-emerald-700/40">
+            {tAnimals('sterilized')}
+          </span>
         )}
       </div>
 
@@ -299,7 +303,11 @@ function CompareModal({ favorites, selected, onClose }: { favorites: Favorite[];
       <div className="bg-surface-primary rounded-2xl border border-border-primary shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-5 border-b border-border-primary">
           <h2 className="text-lg font-bold text-text-primary">{t('comparePlural', { count: items.length })}</h2>
-          <button type="button" onClick={onClose} className="p-1 rounded-lg hover:bg-surface-hover transition-colors">
+          <button
+            type="button"
+            onClick={onClose}
+            className="min-h-11 min-w-11 inline-flex items-center justify-center p-1 rounded-lg hover:bg-surface-hover dark:hover:bg-surface-hover transition-colors"
+          >
             <X className="h-5 w-5 text-text-tertiary" />
           </button>
         </div>
@@ -311,7 +319,10 @@ function CompareModal({ favorites, selected, onClose }: { favorites: Favorite[];
                 <th className="p-3 text-left text-text-quaternary font-medium w-32" />
                 {items.map((f) => (
                   <th key={f.animal} className="p-3 text-center">
-                    <Link href={ROUTES.ANIMAL_DETAIL(f.animal)} className="font-semibold text-teal-700 hover:text-teal-600">
+                    <Link
+                      href={ROUTES.ANIMAL_DETAIL(f.animal)}
+                      className="font-semibold text-teal-700 hover:text-teal-600 dark:text-teal-400 dark:hover:text-teal-300"
+                    >
                       {f.animal_name}
                     </Link>
                   </th>
@@ -436,7 +447,7 @@ export default function FavoritosPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
+    <div className="mx-auto max-w-[1400px] px-6 py-10 min-w-0 overflow-x-hidden">
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="h-10 w-10 rounded-xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
@@ -471,14 +482,14 @@ export default function FavoritosPage() {
             <p className="mt-3 text-text-quaternary text-lg">{t('empty')}</p>
             <Link
               href={ROUTES.ANIMALS}
-              className="mt-4 inline-block bg-teal-600 text-white rounded-full px-6 py-2.5 text-sm font-medium hover:bg-teal-700 btn-base shadow-sm"
+              className="mt-4 inline-flex items-center justify-center min-h-11 w-full sm:w-auto bg-teal-600 text-white rounded-full px-6 py-2.5 text-sm font-medium hover:bg-teal-700 btn-base shadow-sm"
             >
               {t('exploreAnimals')} &rarr;
             </Link>
           </div>
           {/* Popular animals carousel */}
           {animals.length > 0 && (
-            <div className="mt-8">
+            <div className="mt-8 min-w-0 overflow-x-hidden">
               <h2 className="text-lg font-semibold text-text-primary mb-4">{t('popularAnimals')}</h2>
               <Swiper
                 modules={[Navigation, Pagination, Autoplay]}
@@ -514,10 +525,10 @@ export default function FavoritosPage() {
                   key={opt.value}
                   type="button"
                   onClick={() => setSpeciesFilter(opt.value)}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                  className={`flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-colors min-h-11 sm:min-h-0 ${
                     speciesFilter === opt.value
                       ? 'bg-teal-600 text-white'
-                      : 'bg-surface-primary border border-border-primary text-text-secondary hover:bg-surface-hover'
+                      : 'bg-surface-primary border border-border-primary text-text-secondary hover:bg-surface-hover dark:hover:bg-surface-hover'
                   }`}
                 >
                   {opt.icon && <opt.icon className="h-3 w-3" />}
@@ -533,10 +544,10 @@ export default function FavoritosPage() {
                   key={opt.value}
                   type="button"
                   onClick={() => setSizeFilter(opt.value)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors min-h-11 sm:min-h-0 inline-flex items-center justify-center ${
                     sizeFilter === opt.value
                       ? 'bg-teal-600 text-white'
-                      : 'bg-surface-primary border border-border-primary text-text-secondary hover:bg-surface-hover'
+                      : 'bg-surface-primary border border-border-primary text-text-secondary hover:bg-surface-hover dark:hover:bg-surface-hover'
                   }`}
                 >
                   {opt.label}
@@ -552,7 +563,7 @@ export default function FavoritosPage() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="appearance-none pl-3 pr-8 py-1.5 rounded-lg border border-border-primary bg-surface-primary text-xs text-text-secondary focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all cursor-pointer"
+                className="appearance-none pl-3 pr-8 py-1.5 rounded-lg border border-border-primary bg-surface-primary text-xs text-text-secondary focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 dark:focus:border-teal-500/60 dark:focus:ring-teal-500/20 transition-all cursor-pointer min-h-11 sm:min-h-0"
               >
                 {sortOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -586,7 +597,11 @@ export default function FavoritosPage() {
           {hasActiveFilters && (
             <div className="mt-3 flex items-center gap-2 text-xs text-text-quaternary">
               <span>{t('results', { count: filteredFavorites.length })}</span>
-              <button type="button" onClick={clearFilters} className="text-teal-600 hover:text-teal-700 font-medium">
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="inline-flex items-center min-h-11 sm:min-h-0 text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 font-medium"
+              >
                 {t('clearFilters')}
               </button>
             </div>

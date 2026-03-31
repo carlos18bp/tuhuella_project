@@ -7,13 +7,20 @@ import { useRequireAuth } from '@/lib/hooks/useRequireAuth';
 import { useAnimalStore } from '@/lib/stores/animalStore';
 import { ROUTES } from '@/lib/constants';
 import type { Animal } from '@/lib/types';
+import {
+  shelterPillAmber,
+  shelterPillEmerald,
+  shelterPillNeutralSecondary,
+  shelterPillNeutralTertiary,
+  shelterPillTeal,
+} from '@/lib/ui/shelterPanelBadges';
 
 const statusLabels: Record<string, { label: string; color: string }> = {
-  draft: { label: 'Borrador', color: 'bg-surface-tertiary text-text-secondary' },
-  published: { label: 'Publicado', color: 'bg-teal-50 text-teal-700' },
-  in_process: { label: 'En proceso', color: 'bg-amber-50 text-amber-700' },
-  adopted: { label: 'Adoptado', color: 'bg-emerald-50 text-emerald-700' },
-  archived: { label: 'Archivado', color: 'bg-surface-tertiary text-text-tertiary' },
+  draft: { label: 'Borrador', color: shelterPillNeutralSecondary },
+  published: { label: 'Publicado', color: shelterPillTeal },
+  in_process: { label: 'En proceso', color: shelterPillAmber },
+  adopted: { label: 'Adoptado', color: shelterPillEmerald },
+  archived: { label: 'Archivado', color: shelterPillNeutralTertiary },
 };
 
 export default function ShelterAnimalsPage() {
@@ -30,7 +37,7 @@ export default function ShelterAnimalsPage() {
   const filtered = filter === 'all' ? animals : animals.filter((a) => a.status === filter);
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
+    <div className="mx-auto max-w-[1400px] px-6 py-10 min-w-0 overflow-x-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Gestión de Animales</h1>
@@ -44,10 +51,15 @@ export default function ShelterAnimalsPage() {
 
       <div className="mt-6 flex flex-wrap gap-2">
         {['all', 'draft', 'published', 'in_process', 'adopted', 'archived'].map((s) => (
-          <button key={s} onClick={() => setFilter(s)}
-            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
-              filter === s ? 'bg-teal-600 text-white border-teal-600' : 'border-border-primary text-text-secondary hover:bg-surface-hover'
-            }`}>
+          <button
+            key={s}
+            onClick={() => setFilter(s)}
+            className={`text-xs px-3 py-1.5 rounded-full border transition-colors min-h-11 sm:min-h-0 inline-flex items-center justify-center ${
+              filter === s
+                ? 'bg-teal-600 text-white border-teal-600'
+                : 'border-border-primary text-text-secondary hover:bg-surface-hover dark:hover:bg-surface-hover'
+            }`}
+          >
             {s === 'all' ? 'Todos' : statusLabels[s]?.label ?? s}
           </button>
         ))}

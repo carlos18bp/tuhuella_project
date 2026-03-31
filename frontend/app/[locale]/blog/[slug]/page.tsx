@@ -53,7 +53,7 @@ function ShareButton({ title, slug }: { title: string; slug: string }) {
     <button
       type="button"
       onClick={handleShare}
-      className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border-primary text-sm text-text-secondary hover:bg-surface-hover transition-colors"
+      className="inline-flex items-center justify-center gap-2 min-h-11 px-4 py-2 rounded-full border border-border-primary text-sm text-text-secondary hover:bg-surface-hover dark:hover:bg-surface-hover transition-colors"
     >
       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -77,7 +77,7 @@ export default function BlogDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-surface-secondary">
+      <div className="min-h-screen min-w-0 overflow-x-hidden flex items-center justify-center bg-surface-secondary">
         <div role="status" className="w-8 h-8 border-2 border-teal-500/30 border-t-teal-500 rounded-full animate-spin" />
       </div>
     );
@@ -85,11 +85,11 @@ export default function BlogDetailPage() {
 
   if (error || !post) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-surface-secondary gap-4">
+      <div className="min-h-screen min-w-0 overflow-x-hidden flex flex-col items-center justify-center bg-surface-secondary gap-4 px-4">
         <p className="text-text-tertiary">{error || 'Artículo no encontrado.'}</p>
         <Link
           href={ROUTES.BLOG}
-          className="text-teal-600 hover:text-teal-700 text-sm font-medium"
+          className="inline-flex items-center justify-center min-h-11 text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 text-sm font-medium px-2 rounded-lg hover:bg-surface-hover/80 dark:hover:bg-surface-hover/50"
         >
           ← Volver al blog
         </Link>
@@ -101,15 +101,15 @@ export default function BlogDetailPage() {
   const categoryLabel = CATEGORIES[post.category] || post.category;
 
   return (
-    <div className="min-h-screen bg-surface-secondary">
+    <div className="min-h-screen bg-surface-secondary min-w-0 overflow-x-hidden">
       <ReadingProgressBar readTimeMinutes={post.read_time_minutes} lang="es" />
 
       {/* Header */}
-      <section className="bg-gradient-to-b from-teal-50 to-background pt-12 pb-8">
-        <div className="mx-auto max-w-[800px] px-6">
+      <section className="bg-gradient-to-b from-teal-50 to-background dark:from-teal-950/30 dark:to-background pt-12 pb-8">
+        <div className="mx-auto max-w-[800px] px-6 min-w-0">
           <Link
             href={ROUTES.BLOG}
-            className="inline-flex items-center gap-1 text-sm text-text-tertiary hover:text-text-secondary transition-colors mb-6"
+            className="inline-flex items-center justify-center gap-1 min-h-11 -ml-1 pl-1 pr-2 text-sm text-text-tertiary hover:text-text-secondary dark:text-teal-400 dark:hover:text-teal-300 transition-colors mb-6 rounded-lg hover:bg-surface-hover/80 dark:hover:bg-surface-hover/50"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -118,7 +118,7 @@ export default function BlogDetailPage() {
           </Link>
 
           {categoryLabel && (
-            <span className="inline-block text-xs font-medium text-teal-600 uppercase tracking-wider mb-3">
+            <span className="inline-block text-xs font-medium text-teal-600 dark:text-teal-400 uppercase tracking-wider mb-3">
               {categoryLabel}
             </span>
           )}
@@ -179,7 +179,7 @@ export default function BlogDetailPage() {
       )}
 
       {/* Content */}
-      <div className="mx-auto max-w-[800px] px-6 pb-10 md:pb-16">
+      <div className="mx-auto max-w-[800px] px-6 pb-10 md:pb-16 min-w-0">
         <BlogContentRenderer
           contentJson={post.content_json}
           contentHtml={post.content}
@@ -198,7 +198,7 @@ export default function BlogDetailPage() {
                     href={source.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-teal-600 hover:text-teal-700 transition-colors"
+                    className="text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 transition-colors"
                   >
                     {source.name}
                   </a>
@@ -213,7 +213,7 @@ export default function BlogDetailPage() {
           <ShareButton title={post.title} slug={post.slug} />
           <Link
             href={ROUTES.BLOG}
-            className="text-sm text-teal-600 hover:text-teal-700 font-medium transition-colors"
+            className="inline-flex items-center min-h-11 text-sm text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 font-medium transition-colors"
           >
             Ver todos los artículos →
           </Link>

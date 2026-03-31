@@ -1,6 +1,6 @@
 {
   "version": "5.0.0",
-  "lastUpdated": "2026-03-28",
+  "lastUpdated": "2026-03-31",
   "flows": {
     "home-loads": {
       "name": "Home page loads",
@@ -377,6 +377,14 @@
       "priority": "P4",
       "description": "User navigates to /faq and sees frequently asked questions",
       "expectedSpecs": 1
+    },
+    "public-contact": {
+      "name": "Contact page",
+      "module": "public",
+      "roles": ["shared"],
+      "priority": "P4",
+      "description": "User opens contact page with form and WhatsApp; can submit message via API",
+      "expectedSpecs": 2
     },
     "adopter-profile": {
       "name": "User profile management",

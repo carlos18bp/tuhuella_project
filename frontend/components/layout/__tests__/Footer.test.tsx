@@ -34,6 +34,7 @@ describe('Footer', () => {
   it('renders info section links', () => {
     render(<Footer />);
     expect(screen.getByRole('link', { name: 'Preguntas Frecuentes' })).toHaveAttribute('href', '/faq');
+    expect(screen.getByRole('link', { name: 'Contáctanos' })).toHaveAttribute('href', '/contactanos');
     expect(screen.getByRole('link', { name: 'Registrar Refugio' })).toHaveAttribute('href', '/shelter/onboarding');
   });
 

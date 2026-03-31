@@ -56,9 +56,12 @@ function calcCompleteness(user: UserData, hasIntent: boolean) {
 
 function IntentStatusBadge({ status }: { status: string }) {
   const colorMap: Record<string, string> = {
-    active: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
-    paused: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-    matched: 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300',
+    active:
+      'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60 dark:bg-emerald-950/35 dark:text-emerald-300 dark:ring-emerald-700/40',
+    paused:
+      'bg-amber-50 text-amber-700 ring-1 ring-amber-200/60 dark:bg-amber-950/35 dark:text-amber-300 dark:ring-amber-700/40',
+    matched:
+      'bg-teal-50 text-teal-700 ring-1 ring-teal-200/60 dark:bg-teal-950/35 dark:text-teal-300 dark:ring-teal-700/40',
   }
   const cls = colorMap[status] || colorMap.active
 
@@ -166,7 +169,7 @@ export default function EditProfilePage() {
 
   if (!user) {
     return (
-      <div data-testid="loading-skeleton" className="mx-auto max-w-3xl px-6 py-10">
+      <div data-testid="loading-skeleton" className="mx-auto max-w-3xl px-6 py-10 min-w-0 overflow-x-hidden">
         <div className="h-8 w-48 rounded-lg animate-shimmer mb-8" />
         <div className="space-y-6">
           <div className="rounded-2xl border border-border-primary p-8 h-80 animate-shimmer" />
@@ -192,7 +195,11 @@ export default function EditProfilePage() {
   const completenessColor =
     completeness < 50 ? 'bg-red-500' : completeness < 80 ? 'bg-amber-500' : 'bg-emerald-500'
   const completenessTextColor =
-    completeness < 50 ? 'text-red-600' : completeness < 80 ? 'text-amber-600' : 'text-emerald-600'
+    completeness < 50
+      ? 'text-red-600 dark:text-red-400'
+      : completeness < 80
+        ? 'text-amber-600 dark:text-amber-400'
+        : 'text-emerald-600 dark:text-emerald-400'
   const completenessItems = getCompletenessItems(user, hasIntent, t)
 
   const memberSince = user.date_joined
@@ -201,21 +208,22 @@ export default function EditProfilePage() {
 
   const isAdopter = user.role === 'adopter'
 
-  const inputClasses = 'w-full px-3 py-2.5 rounded-lg border border-border-primary bg-surface-secondary text-sm text-text-primary focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-colors'
+  const inputClasses =
+    'w-full px-3 py-2.5 rounded-lg border border-border-primary bg-surface-primary text-sm text-text-primary focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 dark:focus:border-teal-500/60 dark:focus:ring-teal-500/20 transition-colors'
 
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
+    <div className="mx-auto max-w-3xl px-6 py-10 min-w-0 overflow-x-hidden">
       {/* ----------------------------------------------------------------- */}
       {/* Section 1 — Header                                                */}
       {/* ----------------------------------------------------------------- */}
       <div className="mb-8">
         <Link
           href={ROUTES.MY_PROFILE}
-          className="inline-flex items-center gap-1.5 text-sm text-text-tertiary hover:text-teal-600 transition-colors mb-4"
+          className="inline-flex items-center justify-center gap-1.5 min-h-11 -ml-1 pl-1 pr-2 rounded-lg text-sm text-text-tertiary hover:text-teal-600 dark:hover:text-teal-400 transition-colors mb-4 hover:bg-surface-hover/80 dark:hover:bg-surface-hover/50"
         >
           <ArrowLeft className="h-4 w-4" />
           {t('backToProfile')}
@@ -233,7 +241,7 @@ export default function EditProfilePage() {
         <div className="rounded-2xl border border-border-primary bg-surface-primary shadow-sm overflow-hidden">
           {/* Avatar */}
           <div className="flex justify-center pt-8 pb-4">
-            <div className="h-20 w-20 rounded-full bg-gradient-to-br from-teal-500 to-teal-600 flex items-center justify-center shadow-md">
+            <div className="h-20 w-20 rounded-full bg-gradient-to-br from-teal-500 to-teal-600 dark:from-teal-700 dark:to-teal-900 flex items-center justify-center shadow-md">
               {initials ? (
                 <span className="text-2xl font-bold text-white">{initials}</span>
               ) : (
@@ -331,7 +339,7 @@ export default function EditProfilePage() {
         {isAdopter && (
           <div className="rounded-2xl border border-border-primary bg-surface-primary shadow-sm p-6">
             <h2 className="text-base font-semibold text-text-primary mb-4 flex items-center gap-2">
-              <Users className="h-5 w-5 text-teal-600" />
+              <Users className="h-5 w-5 text-teal-600 dark:text-teal-400" />
               {t('sectionIntent')}
             </h2>
 
@@ -350,7 +358,7 @@ export default function EditProfilePage() {
                 </div>
                 <Link
                   href={ROUTES.MY_INTENT}
-                  className="inline-flex items-center gap-1 text-sm font-medium text-teal-600 hover:text-teal-700 transition-colors"
+                  className="inline-flex items-center justify-center min-h-11 sm:min-h-0 gap-1 text-sm font-medium text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 transition-colors"
                 >
                   {t('editIntent')}
                   <ChevronRight className="h-4 w-4" />
@@ -359,7 +367,7 @@ export default function EditProfilePage() {
             ) : (
               <div className="rounded-xl bg-gradient-to-br from-teal-50 to-teal-100/50 dark:from-teal-900/20 dark:to-teal-800/10 p-6 text-center">
                 <div className="h-12 w-12 rounded-xl bg-teal-100/80 dark:bg-teal-900/40 flex items-center justify-center mx-auto mb-3">
-                  <Users className="h-6 w-6 text-teal-600" />
+                  <Users className="h-6 w-6 text-teal-600 dark:text-teal-400" />
                 </div>
                 <p className="text-sm font-medium text-text-primary">{t('intentCtaTitle')}</p>
                 <p className="text-xs text-text-tertiary mt-1 max-w-sm mx-auto leading-relaxed">
@@ -367,7 +375,7 @@ export default function EditProfilePage() {
                 </p>
                 <Link
                   href={ROUTES.MY_INTENT}
-                  className="mt-4 inline-flex items-center gap-1 text-sm font-medium bg-teal-600 text-white rounded-full px-5 py-2 hover:bg-teal-700 transition-colors shadow-sm"
+                  className="mt-4 inline-flex items-center justify-center min-h-11 w-full sm:w-auto gap-1 text-sm font-medium bg-teal-600 text-white rounded-full px-5 py-2 hover:bg-teal-700 transition-colors shadow-sm"
                 >
                   {t('intentCtaButton')}
                   <ChevronRight className="h-4 w-4" />
@@ -420,7 +428,7 @@ export default function EditProfilePage() {
                   <button
                     type="button"
                     onClick={() => focusField(item.fieldRef)}
-                    className="text-xs text-teal-600 hover:text-teal-700 font-medium transition-colors"
+                    className="text-xs text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 font-medium transition-colors min-h-11 sm:min-h-0 inline-flex items-center"
                   >
                     {t('completeNow')}
                   </button>
@@ -428,7 +436,7 @@ export default function EditProfilePage() {
                 {!item.done && item.key === 'intent' && (
                   <Link
                     href={ROUTES.MY_INTENT}
-                    className="text-xs text-teal-600 hover:text-teal-700 font-medium transition-colors"
+                    className="text-xs text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 font-medium transition-colors min-h-11 sm:min-h-0 inline-flex items-center"
                   >
                     {t('completeNow')}
                   </Link>
@@ -479,7 +487,7 @@ export default function EditProfilePage() {
               <div className="min-w-0 flex-1">
                 <p className="text-[11px] text-text-quaternary uppercase tracking-wider">{t('role')}</p>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 capitalize">
+                  <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-700 ring-1 ring-teal-200/60 dark:bg-teal-950/35 dark:text-teal-300 dark:ring-teal-700/40 capitalize">
                     {user.role.replace('_', ' ')}
                   </span>
                 </div>
@@ -514,14 +522,14 @@ export default function EditProfilePage() {
         <div className="flex items-center justify-end gap-3 pt-2 pb-8">
           <Link
             href={ROUTES.MY_PROFILE}
-            className="px-5 py-2.5 text-sm rounded-lg border border-border-primary text-text-secondary hover:bg-surface-hover transition-colors font-medium"
+            className="inline-flex items-center justify-center min-h-11 px-5 py-2.5 text-sm rounded-lg border border-border-primary text-text-secondary hover:bg-surface-hover dark:hover:bg-surface-hover transition-colors font-medium"
           >
             {t('cancel')}
           </Link>
           <button
             type="submit"
             disabled={saving}
-            className="px-6 py-2.5 text-sm rounded-lg bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium shadow-sm"
+            className="inline-flex items-center justify-center min-h-11 px-6 py-2.5 text-sm rounded-lg bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium shadow-sm"
           >
             {saving ? t('saving') : t('save')}
           </button>

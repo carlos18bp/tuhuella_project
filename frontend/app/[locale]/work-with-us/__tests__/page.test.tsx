@@ -12,6 +12,11 @@ jest.mock('lucide-react', () => ({
   Home: () => <span data-testid="icon-home" />,
   HandCoins: () => <span data-testid="icon-handcoins" />,
   ArrowRight: () => <span data-testid="icon-arrowright" />,
+  GraduationCap: () => <span data-testid="icon-graduationcap" />,
+  Palette: () => <span data-testid="icon-palette" />,
+  Languages: () => <span data-testid="icon-languages" />,
+  Dog: () => <span data-testid="icon-dog" />,
+  Search: () => <span data-testid="icon-search" />,
 }));
 
 jest.mock('@/lib/services/http', () => ({

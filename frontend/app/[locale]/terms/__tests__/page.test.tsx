@@ -6,9 +6,13 @@ import userEvent from '@testing-library/user-event';
 import TermsPage from '../page';
 
 jest.mock('@/components/ui', () => ({
-  TermsModal: ({ open, onClose }: any) =>
+  Container: ({ children }: { children: React.ReactNode }) =>
+    React.createElement('div', { 'data-testid': 'page-container' }, children),
+  TermsModal: ({ open, onClose }: { open: boolean; onClose: () => void }) =>
     open
-      ? React.createElement('div', { 'data-testid': 'terms-modal' },
+      ? React.createElement(
+          'div',
+          { 'data-testid': 'terms-modal' },
           React.createElement('button', { 'data-testid': 'close-modal', onClick: onClose }, 'Close'),
         )
       : null,
