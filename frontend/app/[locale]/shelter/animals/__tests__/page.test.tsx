@@ -43,7 +43,9 @@ describe('ShelterAnimalsPage', () => {
   it('renders animal count', () => {
     setupMock({ animals: mockAnimals });
     render(<ShelterAnimalsPage />);
-    expect(screen.getByText('3 animales registrados')).toBeInTheDocument();
+    expect(
+      screen.getByText(`${mockAnimals.length} animales registrados`),
+    ).toBeInTheDocument();
   });
 
   it('renders loading skeleton when loading', () => {

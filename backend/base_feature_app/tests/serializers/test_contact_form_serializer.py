@@ -25,6 +25,30 @@ def test_contact_form_rejects_blank_name():
     assert 'name' in ser.errors
 
 
+def test_contact_form_rejects_blank_subject():
+    """Blank subject after trim fails validation."""
+    ser = ContactFormSerializer(data={
+        'name': 'Ana',
+        'email': 'ana@example.com',
+        'subject': '   ',
+        'message': 'Texto valido.',
+    })
+    assert ser.is_valid() is False
+    assert 'subject' in ser.errors
+
+
+def test_contact_form_rejects_blank_message():
+    """Blank message after trim fails validation."""
+    ser = ContactFormSerializer(data={
+        'name': 'Ana',
+        'email': 'ana@example.com',
+        'subject': 'Hola',
+        'message': '   ',
+    })
+    assert ser.is_valid() is False
+    assert 'message' in ser.errors
+
+
 def test_contact_form_rejects_message_over_max_length():
     """Message longer than 5000 characters fails."""
     ser = ContactFormSerializer(data={

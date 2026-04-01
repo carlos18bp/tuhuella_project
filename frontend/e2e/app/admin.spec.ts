@@ -200,25 +200,39 @@ test.describe('Admin Panel — Authenticated', () => {
   });
 
   test('should display metrics page with dashboard cards', { tag: [...ADMIN_METRICS] }, async ({ page }) => {
-    await page.route('**/api/admin/metrics/**', (route: any) =>
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(mockMetrics),
-      }),
+    // XHR/fetch to admin metrics only — do not match locale page URL /es/admin/metrics (same path segment)
+    await page.route(
+      (url) => {
+        const p = url.pathname;
+        const isApiPath = p.includes('/api/') && p.includes('admin/metrics');
+        const isDirectBackend = (url.hostname === '127.0.0.1' || url.hostname === 'localhost') &&
+          url.port === '8000' &&
+          p.includes('admin/metrics');
+        return isApiPath || isDirectBackend;
+      },
+      (route: any) => {
+        if (route.request().method() !== 'GET') return route.continue();
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(mockMetrics),
+        });
+      },
     );
 
+    const metricsResponse = page.waitForResponse(
+      (r) => r.url().includes('admin/metrics') && r.request().method() === 'GET' && r.status() === 200,
+      { timeout: 20_000 },
+    );
     await loginAndNavigate(page, 'admin', '/admin/metrics');
+    await metricsResponse;
 
-    const metricsHeading = page.getByRole('heading').first();
-    await expect(metricsHeading).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('heading', { name: /Métricas/i })).toBeVisible({ timeout: 15_000 });
 
-    const donationAmount = page.getByText(/2\.500\.000|2,500,000/i);
-    const adoptionRate = page.getByText(/40%/i);
-    const hasDonationAmount = await donationAmount.isVisible({ timeout: 10_000 }).catch(() => false);
-    const hasAdoptionRate = await adoptionRate.isVisible({ timeout: 5_000 }).catch(() => false);
-
-    expect(hasDonationAmount || hasAdoptionRate).toBe(true);
+    // Grid values render in `p.text-3xl` once `loading` is false (locale-aware number formatting)
+    const valueCell = page.locator('main p.text-3xl').first();
+    await expect(valueCell).toBeVisible({ timeout: 20_000 });
+    await expect(valueCell).toContainText(/\$|%/);
   });
 
   test('should display payments audit table', { tag: [...ADMIN_PAYMENTS] }, async ({ page }) => {

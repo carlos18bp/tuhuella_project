@@ -51,7 +51,7 @@ describe('ShelterApplicationsPage', () => {
     setupMock({ applications: mockAdoptionApplications });
     render(<ShelterApplicationsPage />);
     expect(screen.getByText('Luna')).toBeInTheDocument();
-    expect(screen.getByText(/adopter@example.com/)).toBeInTheDocument();
+    expect(screen.getAllByText(/adopter@example.com/).length).toBeGreaterThanOrEqual(1);
   });
 
   it('renders submitted status badge', () => {

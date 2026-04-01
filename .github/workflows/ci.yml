@@ -97,6 +97,9 @@ jobs:
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
 
+      - name: Check E2E flow-definitions vs @flow: tags
+        run: node scripts/check-e2e-flow-definitions-sync.cjs
+
       - name: Run Jest tests with coverage
         run: |
           NODE_OPTIONS='--no-deprecation' npx jest --config jest.config.cjs --coverage --ci --forceExit --json --outputFile=jest-results.json || true

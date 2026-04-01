@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 import pytest
 
 from base_feature_app.serializers.update_post_create_update import (
@@ -51,3 +53,27 @@ def test_update_post_create_update_serializer_rejects_missing_title(shelter):
 
     assert not serializer.is_valid()
     assert 'title_es' in serializer.errors
+
+
+@pytest.mark.django_db
+def test_update_post_create_update_serializer_image_url_is_null_without_image(update_post):
+    """Read representation sets image_url to null when the post has no image."""
+    data = UpdatePostCreateUpdateSerializer(update_post).data
+
+    assert data['image_url'] is None
+
+
+def test_update_post_create_update_get_image_url_returns_none_when_image_missing():
+    """SerializerMethodField returns None when the instance has no image."""
+    serializer = UpdatePostCreateUpdateSerializer()
+    obj = SimpleNamespace(image=None)
+
+    assert serializer.get_image_url(obj) is None
+
+
+def test_update_post_create_update_get_image_url_returns_url_when_image_present():
+    """SerializerMethodField returns the storage URL when image exposes url."""
+    serializer = UpdatePostCreateUpdateSerializer()
+    obj = SimpleNamespace(image=SimpleNamespace(url='/media/update/photo.jpg'))
+
+    assert serializer.get_image_url(obj) == '/media/update/photo.jpg'

@@ -14,6 +14,7 @@ import {
   SHELTER_PANEL_APPLICATIONS,
   SHELTER_PANEL_UPDATES,
   SHELTER_PANEL_UPDATE_CREATE,
+  ADOPTION_MANAGE,
 } from '../helpers/flow-tags';
 import {
   mockShelterAnimals,
@@ -286,6 +287,49 @@ test.describe('Shelter Panel — Authenticated', () => {
     const hasApplications = page.getByRole('article').first();
     const emptyState = page.getByText(/No hay solicitudes de adopción/i);
     await expect(hasApplications.or(emptyState)).toBeVisible({ timeout: 10_000 });
+  });
+
+  test('should move submitted adoption application to reviewing status', { tag: [...ADOPTION_MANAGE] }, async ({ page }) => {
+    const baseApp = {
+      id: 501,
+      animal: 1,
+      animal_name: 'Luna',
+      animal_species: 'dog',
+      user: 2,
+      user_email: 'adopter@example.com',
+      status: 'submitted' as const,
+      form_answers: {},
+      created_at: '2026-03-01T10:00:00Z',
+    };
+    let apps: typeof baseApp[] = [baseApp];
+
+    await page.route('**/api/adoptions/**', (route: any) => {
+      const url = route.request().url();
+      const method = route.request().method();
+      if (method === 'PATCH' && /\/adoptions\/\d+\/status\//.test(url)) {
+        apps = [{ ...apps[0], status: 'reviewing' }];
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(apps[0]),
+        });
+      }
+      if (method === 'GET') {
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(apps),
+        });
+      }
+      return route.continue();
+    });
+
+    await loginAndNavigate(page, 'shelter_admin', '/shelter/applications');
+
+    await expect(page.getByRole('button', { name: 'Revisar' })).toBeVisible({ timeout: 15_000 });
+    await page.getByRole('button', { name: 'Revisar' }).click();
+
+    await expect(page.getByText('En revisión')).toBeVisible({ timeout: 10_000 });
   });
 
   test('should display shelter updates page with heading', { tag: [...SHELTER_PANEL_UPDATES] }, async ({ page }) => {
