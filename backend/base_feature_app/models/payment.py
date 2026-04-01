@@ -45,7 +45,7 @@ class Payment(ArchivableModel):
         ordering = ['-created_at']
         constraints = [
             models.CheckConstraint(
-                check=(
+                condition=(
                     models.Q(donation__isnull=False, sponsorship__isnull=True)
                     | models.Q(donation__isnull=True, sponsorship__isnull=False)
                 ),
