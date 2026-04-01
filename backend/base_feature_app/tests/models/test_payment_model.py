@@ -79,8 +79,9 @@ def test_payment_status_choices():
 def test_payment_clean_rejects_missing_parent():
     """Payment must link to exactly one of donation or sponsorship."""
     p = Payment(amount=Decimal('1.00'))
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError) as exc_info:
         p.full_clean()
+    assert exc_info.value is not None
 
 
 @pytest.mark.django_db
@@ -91,5 +92,6 @@ def test_payment_clean_rejects_both_parents(donation, sponsorship):
         sponsorship=sponsorship,
         amount=Decimal('1.00'),
     )
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError) as exc_info:
         p.full_clean()
+    assert exc_info.value is not None

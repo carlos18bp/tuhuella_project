@@ -122,7 +122,7 @@ describe('FavoritosPage', () => {
 
   it('renders relative saved date', () => {
     jest.useFakeTimers();
-    jest.setSystemTime(new Date('2026-03-28T12:00:00Z'));
+    jest.setSystemTime(Date.UTC(2026, 2, 28, 12, 0, 0));
 
     useFavoriteStore.setState({
       favorites: [makeFavorite({ created_at: '2026-03-28T12:00:00.000Z' })],

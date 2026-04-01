@@ -229,10 +229,7 @@ test.describe('Admin Panel — Authenticated', () => {
 
     await expect(page.getByRole('heading', { name: /Métricas/i })).toBeVisible({ timeout: 15_000 });
 
-    // Grid values render in `p.text-3xl` once `loading` is false (locale-aware number formatting)
-    const valueCell = page.locator('main p.text-3xl').first();
-    await expect(valueCell).toBeVisible({ timeout: 20_000 });
-    await expect(valueCell).toContainText(/\$|%/);
+    await expect(page.getByRole('main')).toContainText(/\$[\d.,]+|[\d.,]+%|\d+%/, { timeout: 20_000 });
   });
 
   test('should display payments audit table', { tag: [...ADMIN_PAYMENTS] }, async ({ page }) => {

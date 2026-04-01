@@ -151,7 +151,7 @@ describe('MisApadrinamientosPage', () => {
     });
 
     render(<MisApadrinamientosPage />);
-    // The sponsorship card should render (link with animal name)
+    // Card shows animal name link
     expect(screen.getByText('Milo')).toBeInTheDocument();
   });
 });

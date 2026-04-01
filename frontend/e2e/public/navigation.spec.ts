@@ -121,7 +121,9 @@ test.describe('Navigation', () => {
 
     // Wait for navigation first (routing.localePrefix is "always") — avoids flaky heading under load
     await expect(page).toHaveURL(/\/en(\/|$)/, { timeout: 25_000 });
-    await expect(page.locator('h1').first()).toContainText('Every paw print matters');
+    await expect(
+      page.getByRole('heading', { level: 1, name: /Every paw print matters/i }),
+    ).toBeVisible();
     await expect(localeSwitcher.getByRole('radio', { name: 'EN' })).toHaveAttribute('aria-checked', 'true');
   });
 });

@@ -40,6 +40,58 @@ const mockAnimalForFavoriteToggle = {
   created_at: '2026-01-10T12:00:00Z',
 };
 
+async function setupFavoriteToggleRoutes(page: any) {
+  await page.route('**/api/animals/**', (route: any) => {
+    const url = route.request().url();
+    if (url.includes('/similar')) {
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    }
+    const isDetail = Boolean(url.match(/\/api\/animals\/\d+/));
+    const body = isDetail
+      ? mockAnimalForFavoriteToggle
+      : { results: [mockAnimalForFavoriteToggle], count: 1, page: 1, page_size: 12, total_pages: 1 };
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(body),
+    });
+  });
+  await page.route('**/api/favorites/**', (route: any) => {
+    const url = route.request().url();
+    if (route.request().method() === 'GET') {
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    }
+    if (url.includes('toggle') && route.request().method() === 'POST') {
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          status: 'added',
+          favorite: {
+            id: 99,
+            animal: 1,
+            animal_name: 'Luna',
+            animal_species: 'dog',
+            breed: 'Mestizo',
+            age_range: 'adult',
+            size: 'medium',
+            gender: 'female',
+            is_vaccinated: true,
+            is_sterilized: true,
+            status: 'published',
+            shelter_name: 'Patitas Felices',
+            shelter_city: 'Bogotá',
+            thumbnail_url: null,
+            note: '',
+            created_at: '2026-03-20T10:00:00Z',
+          },
+        }),
+      });
+    }
+    return route.continue();
+  });
+}
+
 function mockFavoritesRoute(page: any, data: any[] = mockFavorites) {
   return page.route('**/favorites/**', (route: any) => {
     if (route.request().method() === 'GET') {
@@ -371,55 +423,7 @@ test.describe('Favorite Toggle', () => {
 
 test.describe('Favorite toggle — authenticated', () => {
   test('should favorite an animal when authenticated user clicks heart', { tag: [...FAVORITE_TOGGLE] }, async ({ page }) => {
-    await page.route('**/api/animals/**', (route: any) => {
-      const url = route.request().url();
-      if (url.includes('/similar')) {
-        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
-      }
-      const isDetail = /\/api\/animals\/\d+/.test(url);
-      const body = isDetail
-        ? mockAnimalForFavoriteToggle
-        : { results: [mockAnimalForFavoriteToggle], count: 1, page: 1, page_size: 12, total_pages: 1 };
-      return route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(body),
-      });
-    });
-    await page.route('**/api/favorites/**', (route: any) => {
-      const url = route.request().url();
-      if (route.request().method() === 'GET') {
-        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
-      }
-      if (url.includes('toggle') && route.request().method() === 'POST') {
-        return route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            status: 'added',
-            favorite: {
-              id: 99,
-              animal: 1,
-              animal_name: 'Luna',
-              animal_species: 'dog',
-              breed: 'Mestizo',
-              age_range: 'adult',
-              size: 'medium',
-              gender: 'female',
-              is_vaccinated: true,
-              is_sterilized: true,
-              status: 'published',
-              shelter_name: 'Patitas Felices',
-              shelter_city: 'Bogotá',
-              thumbnail_url: null,
-              note: '',
-              created_at: '2026-03-20T10:00:00Z',
-            },
-          }),
-        });
-      }
-      return route.continue();
-    });
+    await setupFavoriteToggleRoutes(page);
 
     await loginAndNavigate(page, 'adopter', '/animals/1');
 

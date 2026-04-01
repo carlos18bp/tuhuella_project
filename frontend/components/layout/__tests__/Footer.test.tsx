@@ -40,7 +40,7 @@ describe('Footer', () => {
 
   it('renders copyright text with current year', () => {
     jest.useFakeTimers();
-    jest.setSystemTime(new Date('2026-01-15'));
+    jest.setSystemTime(Date.UTC(2026, 0, 15));
     render(<Footer />);
     expect(screen.getByText(/2026.*Tu Huella/)).toBeInTheDocument();
     jest.useRealTimers();
