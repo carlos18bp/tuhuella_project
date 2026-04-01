@@ -121,13 +121,15 @@ def test_admin_update_blog_post(admin_client, blog_post):
 
 @pytest.mark.django_db
 def test_admin_delete_blog_post(admin_client, blog_post):
-    """Admin can delete a post."""
+    """Admin archives a post (soft-delete, unpublishes)."""
     post_id = blog_post.id
     url = reverse('delete-blog-post', kwargs={'post_id': post_id})
     response = admin_client.delete(url)
 
     assert response.status_code == 204
-    assert not BlogPost.objects.filter(id=post_id).exists()
+    blog_post.refresh_from_db()
+    assert blog_post.archived_at is not None
+    assert blog_post.is_published is False
 
 
 @pytest.mark.django_db

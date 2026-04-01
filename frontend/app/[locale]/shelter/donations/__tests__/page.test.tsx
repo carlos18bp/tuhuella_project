@@ -48,7 +48,7 @@ describe('ShelterDonationsPage', () => {
   it('renders donation details when donations are loaded', () => {
     setupMock({ donations: mockDonations });
     render(<ShelterDonationsPage />);
-    expect(screen.getByText('adopter@example.com')).toBeInTheDocument();
+    expect(screen.getAllByText('adopter@example.com').length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText(/50,000/).length).toBeGreaterThanOrEqual(1);
   });
 
@@ -84,8 +84,7 @@ describe('ShelterDonationsPage', () => {
   });
 
   it('hides campaign when donation has no campaign', () => {
-    const noCampaign = [{ ...mockDonations[0], campaign_title: null }];
-    setupMock({ donations: noCampaign });
+    setupMock({ donations: [mockDonations[1]] });
     render(<ShelterDonationsPage />);
     expect(screen.queryByText(/Campaña:/)).not.toBeInTheDocument();
   });

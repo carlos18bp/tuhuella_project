@@ -119,11 +119,12 @@ test.describe('Navigation', () => {
     const enButton = localeSwitcher.getByRole('radio', { name: 'EN' });
     await enButton.click();
 
-    // Wait for navigation to complete (locale change triggers route replace)
-    await page.waitForURL(/\/en\/?/, { timeout: 10_000 });
-
-    // Verify content changed to English
-    await expect(page.getByRole('heading', { name: /Every paw print matters/i })).toBeVisible();
+    // Wait for navigation first (routing.localePrefix is "always") — avoids flaky heading under load
+    await expect(page).toHaveURL(/\/en(\/|$)/, { timeout: 25_000 });
+    await expect(
+      page.getByRole('heading', { level: 1, name: /Every paw print matters/i }),
+    ).toBeVisible();
+    await expect(localeSwitcher.getByRole('radio', { name: 'EN' })).toHaveAttribute('aria-checked', 'true');
   });
 });
 

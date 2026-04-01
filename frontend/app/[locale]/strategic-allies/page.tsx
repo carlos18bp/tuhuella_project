@@ -39,16 +39,16 @@ export default function StrategicAlliesPage() {
       ) : (
         <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {allies.map((ally) => (
-            <div key={ally.id} className="rounded-2xl border border-border-primary bg-surface-primary p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-4 mb-4">
+            <div key={ally.id} className="rounded-2xl border border-border-primary bg-surface-primary p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow min-w-0">
+              <div className="flex items-center gap-4 mb-4 min-w-0">
                 {ally.logo_url ? (
-                  <img src={ally.logo_url} alt={ally.name} className="h-14 w-14 rounded-xl object-cover flex-shrink-0" />
+                  <img src={ally.logo_url} alt={ally.name} className="h-14 w-14 rounded-xl object-cover shrink-0" />
                 ) : (
-                  <div className="h-14 w-14 rounded-xl bg-teal-50 flex items-center justify-center flex-shrink-0">
-                    <span className="text-xl font-bold text-teal-600">{ally.name[0]}</span>
+                  <div className="h-14 w-14 rounded-xl bg-teal-50 dark:bg-teal-950/50 dark:ring-1 dark:ring-teal-500/20 flex items-center justify-center shrink-0">
+                    <span className="text-xl font-bold text-teal-600 dark:text-teal-400">{ally.name[0]}</span>
                   </div>
                 )}
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <h3 className="font-semibold text-text-primary truncate">{ally.name}</h3>
                   <span className="inline-block mt-0.5 text-xs px-2 py-0.5 rounded-full bg-surface-tertiary text-text-tertiary capitalize">
                     {t(`types.${ally.ally_type}`)}
@@ -63,7 +63,7 @@ export default function StrategicAlliesPage() {
                   href={ally.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-4 inline-flex items-center gap-1.5 text-sm text-teal-600 hover:text-teal-700 font-medium transition-colors"
+                  className="mt-4 inline-flex items-center gap-1.5 min-h-11 py-1 text-sm text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 font-medium transition-colors"
                 >
                   {t('visitWebsite')}
                   <ExternalLink className="h-3.5 w-3.5" />

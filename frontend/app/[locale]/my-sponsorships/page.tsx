@@ -65,11 +65,11 @@ export default function MisApadrinamientosPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
+    <div className="mx-auto max-w-[1400px] px-6 py-10 min-w-0 overflow-x-hidden">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
-          <HeartHandshake className="h-5 w-5 text-red-500" />
+        <div className="h-10 w-10 rounded-xl bg-red-50 dark:bg-red-950/30 ring-1 ring-red-200/50 dark:ring-red-800/40 flex items-center justify-center">
+          <HeartHandshake className="h-5 w-5 text-red-500 dark:text-red-400" />
         </div>
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">
@@ -113,10 +113,10 @@ export default function MisApadrinamientosPage() {
               key={opt.value}
               type="button"
               onClick={() => setStatusFilter(opt.value)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors min-h-11 sm:min-h-0 inline-flex items-center justify-center ${
                 statusFilter === opt.value
                   ? 'bg-red-500 text-white'
-                  : 'bg-surface-primary border border-border-primary text-text-secondary hover:bg-surface-hover'
+                  : 'bg-surface-primary border border-border-primary text-text-secondary hover:bg-surface-hover dark:hover:bg-surface-hover'
               }`}
             >
               {opt.label}
@@ -144,7 +144,11 @@ export default function MisApadrinamientosPage() {
         <div className="mt-10 text-center py-12">
           <HeartHandshake className="h-10 w-10 text-stone-300 dark:text-stone-600 mx-auto" />
           <p className="mt-3 text-text-quaternary">{t('noResults')}</p>
-          <button type="button" onClick={() => setStatusFilter('')} className="mt-3 text-sm text-red-500 hover:text-red-600 font-medium">
+          <button
+            type="button"
+            onClick={() => setStatusFilter('')}
+            className="mt-3 inline-flex items-center justify-center min-h-11 text-sm text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 font-medium"
+          >
             {t('clearFilter')}
           </button>
         </div>
@@ -154,7 +158,7 @@ export default function MisApadrinamientosPage() {
           <div className="rounded-2xl bg-gradient-to-br from-red-50/60 via-surface-primary to-pink-50/30 dark:from-red-900/10 dark:via-surface-primary dark:to-pink-900/10 border border-border-primary p-8 md:p-12">
             <div className="max-w-lg mx-auto text-center">
               <div className="h-16 w-16 rounded-2xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto">
-                <HeartHandshake className="h-8 w-8 text-red-500" />
+                <HeartHandshake className="h-8 w-8 text-red-500 dark:text-red-400" />
               </div>
               <h2 className="mt-5 text-xl font-bold text-text-primary">{t('empty')}</h2>
               <p className="mt-2 text-sm text-text-tertiary leading-relaxed">{t('emptyDesc')}</p>
@@ -175,7 +179,10 @@ export default function MisApadrinamientosPage() {
                 ))}
               </div>
 
-              <Link href={ROUTES.ANIMALS} className="mt-6 inline-block bg-red-500 text-white rounded-full px-8 py-3 text-sm font-medium hover:bg-red-600 shadow-md hover:shadow-lg transition-all">
+              <Link
+                href={ROUTES.ANIMALS}
+                className="mt-6 inline-flex items-center justify-center min-h-11 w-full sm:w-auto bg-red-500 text-white rounded-full px-8 py-3 text-sm font-medium hover:bg-red-600 shadow-md hover:shadow-lg transition-all"
+              >
                 {t('exploreAnimals')} &rarr;
               </Link>
             </div>
@@ -183,7 +190,7 @@ export default function MisApadrinamientosPage() {
 
           {/* Featured animals carousel */}
           {animals.length > 0 && (
-            <div className="mt-10">
+            <div className="mt-10 min-w-0 overflow-x-hidden">
               <h2 className="text-lg font-semibold text-text-primary mb-4">{t('featuredAnimals')}</h2>
               <Swiper
                 modules={[Navigation, Pagination, Autoplay]}
@@ -227,7 +234,7 @@ export default function MisApadrinamientosPage() {
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <h3 className="font-semibold text-text-primary group-hover:text-teal-600 transition-colors truncate">
+                    <h3 className="font-semibold text-text-primary group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors truncate">
                       {sp.animal_name}
                     </h3>
                     <div className="flex items-center gap-2 shrink-0">

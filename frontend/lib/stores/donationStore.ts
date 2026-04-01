@@ -3,14 +3,14 @@
 import { create } from 'zustand';
 import { api } from '@/lib/services/http';
 import { API_ENDPOINTS } from '@/lib/constants';
-import type { Donation } from '@/lib/types';
+import type { Donation, DonationCreatePayload } from '@/lib/types';
 
 type DonationState = {
   donations: Donation[];
   loading: boolean;
   error: string | null;
   fetchDonations: () => Promise<void>;
-  createDonation: (data: { shelter?: number; campaign?: number; amount: number; message?: string }) => Promise<Donation>;
+  createDonation: (data: DonationCreatePayload) => Promise<Donation>;
 };
 
 export const useDonationStore = create<DonationState>((set) => ({

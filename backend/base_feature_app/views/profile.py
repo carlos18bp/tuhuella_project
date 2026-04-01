@@ -36,7 +36,7 @@ def profile_stats(request):
     user = request.user
 
     # Applications — total + breakdown by status
-    app_qs = AdoptionApplication.objects.filter(user=user)
+    app_qs = AdoptionApplication.objects.filter(user=user, archived_at__isnull=True)
     app_total = app_qs.count()
     app_by_status = dict(
         app_qs.values_list('status')
@@ -50,13 +50,17 @@ def profile_stats(request):
     sp_active = sp_qs.filter(status='active').count()
 
     # Donations (only paid)
-    don_agg = Donation.objects.filter(user=user, status='paid').aggregate(
+    don_agg = Donation.objects.filter(
+        user=user, status='paid', archived_at__isnull=True,
+    ).aggregate(
         total_amount=Sum('amount'),
         count=Count('id'),
     )
 
     # Favorites — count + preview of first 4 with thumbnail
-    fav_qs = Favorite.objects.filter(user=user).select_related('animal', 'animal__shelter')
+    fav_qs = Favorite.objects.filter(
+        user=user, archived_at__isnull=True,
+    ).select_related('animal', 'animal__shelter')
     fav_count = fav_qs.count()
     fav_preview = []
     for fav in fav_qs[:4]:
@@ -142,7 +146,7 @@ def user_activity(request):
 
     for app in (
         AdoptionApplication.objects
-        .filter(user=user)
+        .filter(user=user, archived_at__isnull=True)
         .select_related('animal')
         .order_by('-created_at')[:10]
     ):
@@ -155,7 +159,7 @@ def user_activity(request):
 
     for don in (
         Donation.objects
-        .filter(user=user, status='paid')
+        .filter(user=user, status='paid', archived_at__isnull=True)
         .select_related('shelter')
         .order_by('-created_at')[:10]
     ):
@@ -168,7 +172,7 @@ def user_activity(request):
 
     for sp in (
         Sponsorship.objects
-        .filter(user=user)
+        .filter(user=user, archived_at__isnull=True)
         .select_related('animal')
         .order_by('-created_at')[:10]
     ):

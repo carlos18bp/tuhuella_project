@@ -6,7 +6,7 @@ import { CreditCard, Building2, Smartphone } from 'lucide-react';
 
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth';
 import { useFAQsByTopic } from '@/lib/hooks/useFAQs';
-import { FAQAccordion } from '@/components/ui';
+import { Container, FAQAccordion } from '@/components/ui';
 import { api } from '@/lib/services/http';
 import { API_ENDPOINTS, ROUTES } from '@/lib/constants';
 
@@ -48,27 +48,32 @@ export default function CheckoutApadrinamientoPage() {
   };
 
   return (
-    <div className="mx-auto max-w-xl px-6 py-10">
+    <Container className="py-10 min-w-0">
+      <div className="mx-auto max-w-xl">
       <h1 className="text-2xl sm:text-3xl font-bold text-text-primary heading-decorated">Apadrinar</h1>
       <p className="mt-2 text-text-tertiary">Apadrina un animal y apoya su cuidado continuo</p>
 
-      <div className="mt-6 rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-700">
+      <div className="mt-6 rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-700 dark:border-teal-500/25 dark:bg-teal-950/30 dark:text-teal-300">
         Pagos en modo placeholder — la integración con Wompi aún no está activa.
       </div>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-6">
         <div>
           <label className="block text-sm font-medium text-text-secondary">Frecuencia</label>
-          <div className="mt-2 flex gap-2">
+          <div className="mt-2 flex flex-col sm:flex-row gap-2">
             <button type="button" onClick={() => setFrequency('monthly')}
-              className={`px-4 py-2.5 rounded-full text-sm border font-medium btn-base ${
-                frequency === 'monthly' ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-offset-1' : 'border-border-primary text-text-secondary hover:bg-surface-hover'
+              className={`min-h-11 w-full sm:w-auto px-4 py-2 rounded-full text-sm border font-medium btn-base ${
+                frequency === 'monthly'
+                  ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-offset-1 dark:ring-offset-background'
+                  : 'border-border-primary text-text-secondary hover:bg-surface-hover dark:hover:bg-surface-hover'
               }`}>
               Mensual
             </button>
             <button type="button" onClick={() => setFrequency('one_time')}
-              className={`px-4 py-2.5 rounded-full text-sm border font-medium btn-base ${
-                frequency === 'one_time' ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-offset-1' : 'border-border-primary text-text-secondary hover:bg-surface-hover'
+              className={`min-h-11 w-full sm:w-auto px-4 py-2 rounded-full text-sm border font-medium btn-base ${
+                frequency === 'one_time'
+                  ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-offset-1 dark:ring-offset-background'
+                  : 'border-border-primary text-text-secondary hover:bg-surface-hover dark:hover:bg-surface-hover'
               }`}>
               Pago único
             </button>
@@ -81,10 +86,10 @@ export default function CheckoutApadrinamientoPage() {
             {amountOptions.map((opt) => (
               <button key={opt.id} type="button"
                 onClick={() => setAmount(String(opt.amount))}
-                className={`px-4 py-2.5 rounded-full text-sm border font-medium btn-base ${
+                className={`min-h-11 px-4 py-2 rounded-full text-sm border font-medium btn-base ${
                   amount === String(opt.amount)
-                    ? 'bg-teal-600 text-white border-teal-600 shadow-sm scale-105 ring-2 ring-offset-1'
-                    : 'border-border-primary text-text-secondary hover:bg-surface-hover'
+                    ? 'bg-teal-600 text-white border-teal-600 shadow-sm scale-105 ring-2 ring-offset-1 dark:ring-offset-background'
+                    : 'border-border-primary text-text-secondary hover:bg-surface-hover dark:hover:bg-surface-hover'
                 }`}>
                 ${opt.amount.toLocaleString()}{frequency === 'monthly' ? '/mes' : ''}
               </button>
@@ -100,8 +105,10 @@ export default function CheckoutApadrinamientoPage() {
               { value: 'pse', label: 'PSE (transferencia bancaria)', icon: Building2 },
               { value: 'nequi', label: 'Nequi', icon: Smartphone },
             ].map((opt) => (
-              <label key={opt.value} className={`flex items-center gap-3 rounded-xl border p-3.5 cursor-pointer transition-all duration-200 ${
-                method === opt.value ? 'border-teal-500 bg-teal-50 shadow-sm ring-1 ring-teal-500' : 'border-border-primary hover:bg-surface-hover'
+              <label key={opt.value} className={`flex min-h-11 items-center gap-3 rounded-xl border p-3.5 cursor-pointer transition-all duration-200 ${
+                method === opt.value
+                  ? 'border-teal-500 bg-teal-50 shadow-sm ring-1 ring-teal-500 dark:bg-teal-950/30 dark:border-teal-500/50'
+                  : 'border-border-primary hover:bg-surface-hover dark:hover:bg-surface-hover/80'
               }`}>
                 <input type="radio" name="method" value={opt.value} checked={method === opt.value}
                   onChange={() => setMethod(opt.value)} className="accent-teal-600" />
@@ -113,7 +120,7 @@ export default function CheckoutApadrinamientoPage() {
         </div>
 
         <button type="submit" disabled={submitting || !amount || Number(amount) <= 0}
-          className="w-full bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600 shadow-sm hover:shadow-md text-white rounded-full py-3 text-sm font-medium btn-base disabled:opacity-50">
+          className="w-full min-h-11 inline-flex items-center justify-center bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600 shadow-sm hover:shadow-md text-white rounded-full py-3 text-sm font-medium btn-base disabled:opacity-50">
           {submitting ? 'Procesando...' : `Apadrinar — $${Number(amount || 0).toLocaleString()}${frequency === 'monthly' ? '/mes' : ''}`}
         </button>
       </form>
@@ -127,6 +134,7 @@ export default function CheckoutApadrinamientoPage() {
           />
         </div>
       )}
-    </div>
+      </div>
+    </Container>
   );
 }

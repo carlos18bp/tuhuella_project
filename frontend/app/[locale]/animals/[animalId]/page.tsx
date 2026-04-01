@@ -1,12 +1,12 @@
 'use client';
 
 import { Link } from '@/i18n/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import {
   Heart, ArrowLeft, Weight, Zap, BatteryLow, Flame,
-  Palette, Home, Cpu, Baby, Dog, Cat,
+  Palette, Home, Cpu, Baby, Dog, Cat, Share2, Check,
 } from 'lucide-react';
 
 import { useAnimalStore } from '@/lib/stores/animalStore';
@@ -15,6 +15,16 @@ import { useAuthStore } from '@/lib/stores/authStore';
 import { useFAQsByTopic } from '@/lib/hooks/useFAQs';
 import { AnimalGallery, Container, FAQAccordion, SimilarAnimals } from '@/components/ui';
 import { ROUTES } from '@/lib/constants';
+import {
+  animalAmberStatusBadgeClass,
+  animalCompatibilityYesClass,
+  animalEmeraldHealthPillClass,
+  animalHouseTrainedRowClass,
+  animalSpecialNeedsBodyClass,
+  animalSpecialNeedsCalloutClass,
+  animalSpecialNeedsTitleClass,
+  ctaAmberOutlineClass,
+} from '@/lib/ui/pastelAccent';
 import type { AnimalCompatibility } from '@/lib/types';
 
 function daysAgo(dateStr: string): number {
@@ -42,6 +52,22 @@ export default function AnimalDetailPage() {
   const toggleFavorite = useFavoriteStore((s) => s.toggleFavorite);
   const fetchFavorites = useFavoriteStore((s) => s.fetchFavorites);
   const { items: adoptionFaqs } = useFAQsByTopic('adoption');
+  const [shareCopied, setShareCopied] = useState(false);
+
+  const handleShare = useCallback(async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: animal?.name ?? '', url });
+      } catch {
+        // user cancelled or error — no action needed
+      }
+    } else {
+      await navigator.clipboard.writeText(url);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    }
+  }, [animal?.name]);
 
   useEffect(() => {
     if (animalId) void fetchAnimal(animalId, locale);
@@ -70,9 +96,11 @@ export default function AnimalDetailPage() {
   const EnergyIcon = energyIcons[animal.energy_level] ?? Zap;
 
   const compatibilityColor = (v: AnimalCompatibility) =>
-    v === 'yes' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200/60'
-      : v === 'no' ? 'bg-red-50 text-red-700 ring-red-200/60'
-        : 'bg-stone-100 text-stone-500 ring-stone-200/60';
+    v === 'yes'
+      ? animalCompatibilityYesClass
+      : v === 'no'
+        ? 'bg-red-50 text-red-700 ring-red-200/60 dark:bg-red-950/30 dark:text-red-300 dark:ring-red-800/40'
+        : 'bg-stone-100 text-stone-500 ring-stone-200/60 dark:bg-surface-tertiary dark:text-text-tertiary dark:ring-border-primary';
 
   const compatibilityLabel = (v: AnimalCompatibility) =>
     v === 'yes' ? t('compatibilityYes') : v === 'no' ? t('compatibilityNo') : t('compatibilityUnknown');
@@ -87,8 +115,11 @@ export default function AnimalDetailPage() {
     animal.is_house_trained || animal.microchip_id;
 
   return (
-    <Container className="py-10">
-      <Link href={ROUTES.ANIMALS} className="inline-flex items-center gap-1.5 text-sm text-teal-600 hover:text-teal-700 transition-colors">
+    <Container className="py-10 min-w-0 overflow-x-hidden">
+      <Link
+        href={ROUTES.ANIMALS}
+        className="inline-flex items-center justify-center gap-1.5 min-h-11 text-sm text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 transition-colors -ml-1 pl-1 pr-2 rounded-lg hover:bg-surface-hover/80 dark:hover:bg-surface-hover/50"
+      >
         <ArrowLeft className="h-4 w-4" />
         {t('backToAnimals')}
       </Link>
@@ -108,13 +139,28 @@ export default function AnimalDetailPage() {
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-[-0.02em] text-text-primary">{animal.name}</h1>
                 {animal.status === 'in_process' && (
-                  <span data-testid="status-badge" className="text-xs px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200/60 font-medium">
+                  <span data-testid="status-badge" className={animalAmberStatusBadgeClass}>
                     {t('adoptionInProgress')}
+                  </span>
+                )}
+                {(animal.status === 'adopted' || animal.adopted_at) && (
+                  <span
+                    data-testid="adopted-badge"
+                    className="text-xs px-2.5 py-1 rounded-full font-medium bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200/60 dark:bg-emerald-950/30 dark:text-emerald-200 dark:ring-emerald-800/40"
+                  >
+                    {animal.adopted_at
+                      ? t('adoptedOn', {
+                          date: new Date(animal.adopted_at).toLocaleDateString(
+                            locale === 'es' ? 'es-CO' : 'en-US',
+                            { day: 'numeric', month: 'long', year: 'numeric' },
+                          ),
+                        })
+                      : t('adoptedBadge')}
                   </span>
                 )}
               </div>
               <p className="text-text-tertiary mt-1">
-                <Link href={`/shelter/${animal.shelter}`} className="hover:text-teal-600 transition-colors underline-offset-2 hover:underline">
+                <Link href={`/shelter/${animal.shelter}`} className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors underline-offset-2 hover:underline">
                   {animal.shelter_name}
                 </Link>
                 {' · '}{animal.shelter_city}
@@ -128,21 +174,35 @@ export default function AnimalDetailPage() {
                 </p>
               )}
             </div>
-            {isAuthenticated && (() => {
-              const favorited = favorites.some((f) => f.animal === animal.id);
-              return (
-                <button
-                  type="button"
-                  aria-label="favorite"
-                  onClick={() => toggleFavorite(animal.id)}
-                  className={`p-2.5 rounded-full transition-all duration-200 shadow-sm ${
-                    favorited ? 'bg-red-50 text-red-500' : 'bg-surface-tertiary text-text-quaternary hover:bg-surface-hover'
-                  }`}
-                >
-                  <Heart className={`h-5 w-5 ${favorited ? 'fill-current' : ''}`} />
-                </button>
-              );
-            })()}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                aria-label={t('share')}
+                onClick={() => { void handleShare(); }}
+                className="min-h-11 min-w-11 p-2.5 rounded-full bg-surface-tertiary text-text-quaternary hover:bg-surface-hover transition-all duration-200 shadow-sm relative inline-flex items-center justify-center"
+              >
+                {shareCopied
+                  ? <Check className="h-5 w-5 text-emerald-500" />
+                  : <Share2 className="h-5 w-5" />}
+              </button>
+              {isAuthenticated && (() => {
+                const favorited = favorites.some((f) => f.animal === animal.id);
+                return (
+                  <button
+                    type="button"
+                    aria-label="favorite"
+                    onClick={() => toggleFavorite(animal.id)}
+                    className={`min-h-11 min-w-11 p-2.5 rounded-full transition-all duration-200 shadow-sm inline-flex items-center justify-center ${
+                      favorited
+                        ? 'bg-red-50 text-red-500 dark:bg-red-950/35 dark:text-red-400'
+                        : 'bg-surface-tertiary text-text-quaternary hover:bg-surface-hover'
+                    }`}
+                  >
+                    <Heart className={`h-5 w-5 ${favorited ? 'fill-current' : ''}`} />
+                  </button>
+                );
+              })()}
+            </div>
           </div>
 
           <div className="mt-6 flex flex-wrap gap-2">
@@ -156,10 +216,10 @@ export default function AnimalDetailPage() {
 
           <div className="mt-4 flex flex-wrap gap-2">
             {animal.is_vaccinated && (
-              <span className="text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60">{t('vaccinated')}</span>
+              <span className={animalEmeraldHealthPillClass}>{t('vaccinated')}</span>
             )}
             {animal.is_sterilized && (
-              <span className="text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60">{t('sterilized')}</span>
+              <span className={animalEmeraldHealthPillClass}>{t('sterilized')}</span>
             )}
           </div>
 
@@ -168,9 +228,9 @@ export default function AnimalDetailPage() {
           )}
 
           {animal.special_needs && (
-            <div className="mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 ring-1 ring-amber-200/60">
-              <p className="text-sm font-medium text-amber-800">{t('specialNeeds')}</p>
-              <p className="text-sm text-amber-700 mt-1">{animal.special_needs}</p>
+            <div className={animalSpecialNeedsCalloutClass}>
+              <p className={animalSpecialNeedsTitleClass}>{t('specialNeeds')}</p>
+              <p className={animalSpecialNeedsBodyClass}>{animal.special_needs}</p>
             </div>
           )}
 
@@ -181,7 +241,7 @@ export default function AnimalDetailPage() {
               <div className="grid grid-cols-2 gap-3">
                 {animal.weight && (
                   <div className="flex items-center gap-2.5 p-3 rounded-xl bg-surface-secondary">
-                    <Weight className="h-4 w-4 text-teal-600 shrink-0" />
+                    <Weight className="h-4 w-4 text-teal-600 dark:text-teal-400 shrink-0" />
                     <div>
                       <p className="text-xs text-text-tertiary">{t('weight')}</p>
                       <p className="text-sm font-medium text-text-primary">{t('weightUnit', { value: animal.weight })}</p>
@@ -189,7 +249,7 @@ export default function AnimalDetailPage() {
                   </div>
                 )}
                 <div className="flex items-center gap-2.5 p-3 rounded-xl bg-surface-secondary">
-                  <EnergyIcon className="h-4 w-4 text-teal-600 shrink-0" />
+                  <EnergyIcon className="h-4 w-4 text-teal-600 dark:text-teal-400 shrink-0" />
                   <div>
                     <p className="text-xs text-text-tertiary">{t('energyLevel')}</p>
                     <p className="text-sm font-medium text-text-primary">{energyLabels[animal.energy_level]}</p>
@@ -197,7 +257,7 @@ export default function AnimalDetailPage() {
                 </div>
                 {animal.coat_color && (
                   <div className="flex items-center gap-2.5 p-3 rounded-xl bg-surface-secondary">
-                    <Palette className="h-4 w-4 text-teal-600 shrink-0" />
+                    <Palette className="h-4 w-4 text-teal-600 dark:text-teal-400 shrink-0" />
                     <div>
                       <p className="text-xs text-text-tertiary">{t('coatColor')}</p>
                       <p className="text-sm font-medium text-text-primary">{animal.coat_color}</p>
@@ -205,14 +265,14 @@ export default function AnimalDetailPage() {
                   </div>
                 )}
                 {animal.is_house_trained && (
-                  <div className="flex items-center gap-2.5 p-3 rounded-xl bg-emerald-50">
-                    <Home className="h-4 w-4 text-emerald-600 shrink-0" />
-                    <p className="text-sm font-medium text-emerald-700">{t('houseTrained')}</p>
+                  <div className={animalHouseTrainedRowClass}>
+                    <Home className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">{t('houseTrained')}</p>
                   </div>
                 )}
                 {animal.microchip_id && (
                   <div className="flex items-center gap-2.5 p-3 rounded-xl bg-surface-secondary">
-                    <Cpu className="h-4 w-4 text-teal-600 shrink-0" />
+                    <Cpu className="h-4 w-4 text-teal-600 dark:text-teal-400 shrink-0" />
                     <div>
                       <p className="text-xs text-text-tertiary">{t('microchip')}</p>
                       <p className="text-sm font-medium text-text-primary">{animal.microchip_id}</p>
@@ -244,18 +304,18 @@ export default function AnimalDetailPage() {
             </div>
           )}
 
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-col sm:flex-row flex-wrap gap-3">
             {isAuthenticated ? (
               <>
                 <Link
                   href={ROUTES.ADOPT(animal.id)}
-                  className="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600 shadow-sm hover:shadow-md text-white rounded-full px-6 py-3 font-medium btn-base"
+                  className="inline-flex items-center justify-center min-h-11 w-full sm:w-auto bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600 shadow-sm hover:shadow-md text-white rounded-full px-6 py-3 font-medium btn-base"
                 >
                   {t('adoptButton')}
                 </Link>
                 <Link
                   href={`${ROUTES.CHECKOUT_SPONSORSHIP}?animal=${animal.id}`}
-                  className="border border-amber-300 text-amber-700 rounded-full px-6 py-3 font-medium hover:bg-amber-50 btn-base"
+                  className={ctaAmberOutlineClass}
                 >
                   {t('sponsorButton')}
                 </Link>
@@ -263,7 +323,7 @@ export default function AnimalDetailPage() {
             ) : (
               <Link
                 href={ROUTES.SIGN_IN}
-                className="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600 shadow-sm hover:shadow-md text-white rounded-full px-6 py-3 font-medium btn-base"
+                className="inline-flex items-center justify-center min-h-11 w-full sm:w-auto bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600 shadow-sm hover:shadow-md text-white rounded-full px-6 py-3 font-medium btn-base"
               >
                 {t('signInToAdopt')}
               </Link>

@@ -2,8 +2,10 @@ from django.db import models
 from django_attachments.fields import SingleImageField, GalleryField
 from django_attachments.models import Library
 
+from base_feature_app.models.mixins import ArchivableModel
 
-class Campaign(models.Model):
+
+class Campaign(ArchivableModel):
     class Status(models.TextChoices):
         DRAFT = 'draft', 'Draft'
         ACTIVE = 'active', 'Active'

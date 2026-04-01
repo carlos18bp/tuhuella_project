@@ -7,10 +7,16 @@ jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: jest.fn() }),
 }));
 
+
+jest.mock('@/lib/hooks/useRequireAuth', () => ({ useRequireAuth: jest.fn() }));
+
+jest.mock('@/lib/stores/authStore', () => ({ useAuthStore: jest.fn() }));
+
 jest.mock('@/lib/stores/blogStore', () => ({ useBlogStore: jest.fn() }));
 
 import AdminBlogCreatePage from '../page';
 import { useBlogStore } from '@/lib/stores/blogStore';
+import { useAuthStore } from '@/lib/stores/authStore';
 
 const mockUseBlogStore = useBlogStore as unknown as jest.Mock;
 
@@ -27,6 +33,11 @@ function setupMock() {
 describe('AdminBlogCreatePage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    const mockUseAuthStore = useAuthStore as unknown as jest.Mock;
+    mockUseAuthStore.mockImplementation((selector: (s: { user: { id: number; role: string; is_staff: boolean } }) => unknown) =>
+      selector({ user: { id: 1, role: 'admin', is_staff: true } }),
+    );
+
   });
 
   it('renders "Nuevo Blog Post" heading', () => {

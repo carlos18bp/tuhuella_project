@@ -12,11 +12,43 @@ This document applies to:
 
 | Test Type | Location | Runner |
 |-----------|----------|--------|
-| Backend unit/integration | `backend/core_app/tests/**` | pytest |
-| Frontend unit/component | `frontend/app/__tests__/**` | Jest |
+| Backend unit/integration | `backend/base_feature_app/tests/**` | pytest |
+| Frontend unit/component | `frontend/**/__tests__/**` (p. ej. `app/`, `components/`, `lib/`) | Jest |
 | Frontend E2E flows | `frontend/e2e/**` | Playwright |
 
 > **Note:** These standards focus on test quality and maintainability only. They do not change production business logic.
+
+### Umbrales de cobertura (CI vs objetivos por capa)
+
+- **Jest** ([frontend/jest.config.cjs](frontend/jest.config.cjs)): umbral **global** actual de statements/branches/functions/lines (**50%**). Falla el job si el global cae por debajo.
+- **Objetivos por capa** (orientación del equipo, p. ej. stores ~75%, componentes ~60%): conviene vigilarlos en revisiones y con reportes puntuales (`--collectCoverageFrom`); no están forzados por separado en CI salvo que se añadan scripts o umbrales adicionales.
+
+### Formato para describir cobertura en un PR
+
+Tras añadir o ampliar tests, incluye bloques breves como estos (sustituye valores reales).
+
+**Backend**
+
+```
+### File: base_feature_app/tests/path/test_file.py
+- Tests added: <n>
+- Coverage before: <X%>
+- Coverage after: <Y%>
+- Command executed: pytest base_feature_app/tests/path/test_file.py -v
+```
+
+**Frontend**
+
+```
+### Layer: State Management | Shared Logic | UI Component
+### File: lib/stores/exampleStore.ts
+### Test File: lib/stores/__tests__/exampleStore.test.ts
+**Coverage before:** X% statements, Y% branches
+**Coverage after:** …
+**Tests added:** (lista breve)
+**Command executed:** npm test -- lib/stores/__tests__/exampleStore.test.ts
+**Result:** Pass
+```
 
 ---
 
@@ -110,23 +142,14 @@ Tests must be organized by domain/layer, not by coverage goals.
 **Backend Structure:**
 
 ```
-backend/core_app/tests/
+backend/base_feature_app/tests/
 ├── models/           # Model unit tests (validation, properties, methods)
-│   ├── test_user.py
-│   ├── test_product.py
-│   └── test_order.py
 ├── serializers/      # Serializer unit tests (validation, transformation)
-│   ├── test_user_serializers.py
-│   └── test_product_serializers.py
 ├── views/            # API endpoint tests (integration-light)
-│   ├── test_auth_views.py
-│   └── test_product_views.py
 ├── services/         # Business logic service tests
-│   └── test_email_service.py
 ├── utils/            # Utility function tests
-│   └── test_helpers.py
-└── tasks/            # Background task tests (Celery, jobs)
-    └── test_notification_tasks.py
+├── commands/         # Management command tests
+└── …                 # tasks, factories, conftest, etc.
 ```
 
 **Frontend Structure:**
@@ -414,7 +437,8 @@ Consider using `factory_boy` for models or custom builders for API payloads.
 @pytest.fixture
 def mock_payment_gateway(mocker):
     return mocker.patch(
-        'core_app.services.payment_service.stripe.Charge.create',
+        # Patch the symbol as imported by **your** calling module (import path matters).
+        'your_app.services.billing.stripe_client.create_charge',
         return_value={'id': 'ch_test123', 'status': 'succeeded'}
     )
 

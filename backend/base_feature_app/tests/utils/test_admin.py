@@ -30,19 +30,20 @@ def test_password_code_admin_disables_add_permission():
 
 
 @pytest.mark.django_db
-def test_shelter_admin_delete_queryset_removes_objects():
-    """Verifies ShelterAdmin.delete_queryset removes the shelter and its associated image libraries."""
+def test_shelter_admin_delete_queryset_archives_objects():
+    """ShelterAdmin.delete_queryset soft-archives shelters (no CASCADE)."""
     shelter = make_shelter(name='Delete Test Shelter')
 
     admin = ShelterAdmin(Shelter, admin_site)
     admin.delete_queryset(RequestFactory().get('/admin/'), Shelter.objects.filter(id=shelter.id))
 
-    assert Shelter.objects.filter(id=shelter.id).count() == 0
+    shelter.refresh_from_db()
+    assert shelter.archived_at is not None
 
 
 @pytest.mark.django_db
-def test_animal_admin_delete_queryset_removes_gallery():
-    """Verifies AnimalAdmin.delete_queryset removes the animal and its associated gallery library."""
+def test_animal_admin_delete_queryset_archives_animal():
+    """AnimalAdmin.delete_queryset archives animals without deleting gallery libraries."""
     shelter = make_shelter(name='Animal Admin Shelter')
     gallery = Library.objects.create(title='Animal Gallery')
     animal = Animal.objects.create(
@@ -60,24 +61,27 @@ def test_animal_admin_delete_queryset_removes_gallery():
     admin = AnimalAdmin(Animal, admin_site)
     admin.delete_queryset(RequestFactory().get('/admin/'), Animal.objects.filter(id=animal.id))
 
-    assert Animal.objects.filter(id=animal.id).count() == 0
-    assert Library.objects.filter(id=gallery.id).count() == 0
+    animal.refresh_from_db()
+    assert animal.archived_at is not None
+    assert animal.status == Animal.Status.ARCHIVED
+    assert Library.objects.filter(id=gallery.id).count() == 1
 
 
 @pytest.mark.django_db
-def test_campaign_admin_delete_queryset_removes_cover():
-    """Verifies CampaignAdmin.delete_queryset removes the campaign and its cover image library."""
+def test_campaign_admin_delete_queryset_archives_campaign():
+    """CampaignAdmin.delete_queryset soft-archives campaigns."""
     campaign = make_campaign(title='Delete Test Campaign')
 
     admin = CampaignAdmin(Campaign, admin_site)
     admin.delete_queryset(RequestFactory().get('/admin/'), Campaign.objects.filter(id=campaign.id))
 
-    assert Campaign.objects.filter(id=campaign.id).count() == 0
+    campaign.refresh_from_db()
+    assert campaign.archived_at is not None
 
 
 @pytest.mark.django_db
-def test_update_post_admin_delete_queryset_removes_image():
-    """Verifies UpdatePostAdmin.delete_queryset removes the post and its image library."""
+def test_update_post_admin_delete_queryset_archives_post():
+    """UpdatePostAdmin.delete_queryset archives posts without removing image libraries."""
     shelter = make_shelter(name='Post Admin Shelter')
     image = Library.objects.create(title='Post Image')
     post = UpdatePost.objects.create(
@@ -90,8 +94,9 @@ def test_update_post_admin_delete_queryset_removes_image():
     admin = UpdatePostAdmin(UpdatePost, admin_site)
     admin.delete_queryset(RequestFactory().get('/admin/'), UpdatePost.objects.filter(id=post.id))
 
-    assert UpdatePost.objects.filter(id=post.id).count() == 0
-    assert Library.objects.filter(id=image.id).count() == 0
+    post.refresh_from_db()
+    assert post.archived_at is not None
+    assert Library.objects.filter(id=image.id).count() == 1
 
 
 @pytest.mark.django_db
@@ -106,9 +111,11 @@ def test_admin_site_custom_sections():
     object_names = {model['object_name'] for section in app_list for model in section['models']}
 
     expected_models = {
-        'User', 'PasswordCode', 'Shelter', 'Animal', 'Favorite',
+        'User', 'PasswordCode', 'Shelter', 'ShelterMembership', 'Animal', 'Favorite',
+        'AnimalStatusHistory',
         'AdoptionApplication', 'AdopterIntent', 'ShelterInvite',
-        'Campaign', 'Donation', 'Sponsorship', 'Payment', 'Subscription',
+        'Campaign', 'Donation', 'Sponsorship', 'Payment', 'PaymentHistory', 'Subscription',
         'UpdatePost', 'NotificationPreference', 'NotificationLog',
+        'BlogPost',
     }
     assert expected_models.issubset(object_names)

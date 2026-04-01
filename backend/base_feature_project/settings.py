@@ -251,6 +251,8 @@ EMAIL_BACKEND = os.getenv('DJANGO_EMAIL_BACKEND') or (
     else 'django.core.mail.backends.console.EmailBackend'
 )
 
+CONTACT_FORM_RECIPIENT_EMAIL = os.getenv('CONTACT_FORM_RECIPIENT_EMAIL', 'team@projectapp.co')
+
 # ---------------------------------------------------------------------------
 # Google reCAPTCHA
 # ---------------------------------------------------------------------------

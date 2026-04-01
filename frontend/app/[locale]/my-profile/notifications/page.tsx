@@ -53,15 +53,18 @@ export default function NotificationPreferencesPage() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
-      <Link href={ROUTES.MY_PROFILE} className="inline-flex items-center gap-1.5 text-sm text-teal-600 hover:text-teal-700 transition-colors mb-6">
+    <div className="mx-auto max-w-3xl px-6 py-10 min-w-0 overflow-x-hidden">
+      <Link
+        href={ROUTES.MY_PROFILE}
+        className="inline-flex items-center justify-center gap-1.5 min-h-11 -ml-1 pl-1 pr-2 rounded-lg text-sm text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 transition-colors mb-6 hover:bg-surface-hover/80 dark:hover:bg-surface-hover/50"
+      >
         <ArrowLeft className="h-4 w-4" />
         {t('backToProfile')}
       </Link>
 
       <div className="flex items-center gap-3 mb-8">
-        <div className="h-10 w-10 rounded-xl bg-teal-50 flex items-center justify-center">
-          <Bell className="h-5 w-5 text-teal-600" />
+        <div className="h-10 w-10 rounded-xl bg-teal-50 dark:bg-teal-950/40 ring-1 ring-teal-200/50 dark:ring-teal-700/30 flex items-center justify-center">
+          <Bell className="h-5 w-5 text-teal-600 dark:text-teal-400" />
         </div>
         <div>
           <h1 className="text-2xl font-bold text-text-primary">{t('preferencesTitle')}</h1>
@@ -94,7 +97,7 @@ export default function NotificationPreferencesPage() {
                           type="button"
                           onClick={() => handleToggle(eventKey, ch)}
                           className={`w-10 h-5 rounded-full transition-colors relative ${
-                            pref?.enabled ? 'bg-teal-500' : 'bg-stone-200'
+                            pref?.enabled ? 'bg-teal-500' : 'bg-stone-200 dark:bg-stone-600'
                           }`}
                           data-testid={`toggle-${eventKey}-${ch}`}
                           aria-label={`${t(`events.${eventKey}`)} ${t(`channel_${ch}`)}`}

@@ -28,6 +28,12 @@ describe('CampanasPage', () => {
       error: null,
       fetchCampaigns: jest.fn(),
     });
+    window.matchMedia = jest.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+    }));
   });
 
   it('renders page title', () => {

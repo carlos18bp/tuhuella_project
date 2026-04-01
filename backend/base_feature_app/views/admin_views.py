@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from django.db.models import Avg, Count, F, Sum
+from django.db.models import Avg, Count, F, Q, Sum
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -11,6 +11,7 @@ from base_feature_app.models import (
     Animal, Shelter, AdoptionApplication, Campaign, Donation, Sponsorship,
     UpdatePost, User,
 )
+from base_feature_app.utils.shelter_access import shelters_managed_by_user
 
 
 def is_superadmin(user):
@@ -159,13 +160,13 @@ def shelter_metrics(request):
     if user.role != 'shelter_admin':
         return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
 
-    shelters = Shelter.objects.filter(owner=user)
+    shelters = shelters_managed_by_user(user).filter(archived_at__isnull=True)
     if not shelters.exists():
         return Response({'error': 'No shelter found'}, status=status.HTTP_404_NOT_FOUND)
 
     shelter_ids = list(shelters.values_list('id', flat=True))
 
-    animals = Animal.objects.filter(shelter_id__in=shelter_ids)
+    animals = Animal.objects.filter(shelter_id__in=shelter_ids, archived_at__isnull=True)
     total_animals = animals.count()
     published_animals = animals.filter(status='published').count()
     adopted_animals = animals.filter(status='adopted').count()
@@ -180,7 +181,10 @@ def shelter_metrics(request):
         avg_apps = round(total_applications / active_animals, 1)
 
     donation_stats = Donation.objects.filter(
-        shelter_id__in=shelter_ids, status='paid',
+        archived_at__isnull=True,
+        status='paid',
+    ).filter(
+        Q(shelter_id__in=shelter_ids) | Q(campaign__shelter_id__in=shelter_ids),
     ).aggregate(
         total_amount=Sum('amount'),
         total_count=Count('id'),

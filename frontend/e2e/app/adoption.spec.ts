@@ -116,7 +116,7 @@ test.describe.serial('Adoption Flows — Authenticated', () => {
     });
   });
 
-  test('should display my applications list or empty state', { tag: [...MY_APPLICATIONS_LIST] }, async ({ page }) => {
+  test('should display my applications list or empty state', { tag: [...MY_APPLICATIONS_LIST, '@flow:adoption-track'] }, async ({ page }) => {
     await loginAndNavigate(page, 'adopter', '/my-applications');
 
     // Verify heading is visible

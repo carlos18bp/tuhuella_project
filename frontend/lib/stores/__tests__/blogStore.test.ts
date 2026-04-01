@@ -18,7 +18,7 @@ const mockApi = api as jest.Mocked<typeof api>;
 
 const PAGINATED_RESPONSE = {
   results: mockBlogPosts,
-  count: 2,
+  count: mockBlogPosts.length,
   page: 1,
   page_size: 6,
   total_pages: 1,
@@ -47,9 +47,9 @@ describe('blogStore', () => {
     });
 
     const state = useBlogStore.getState();
-    expect(state.posts).toHaveLength(2);
+    expect(state.posts).toHaveLength(mockBlogPosts.length);
     expect(state.posts[0].title).toBe('Guía de adopción responsable');
-    expect(state.pagination.count).toBe(2);
+    expect(state.pagination.count).toBe(mockBlogPosts.length);
     expect(state.pagination.totalPages).toBe(1);
     expect(state.loading).toBe(false);
     expect(state.error).toBeNull();
@@ -112,7 +112,7 @@ describe('blogStore', () => {
     });
 
     const state = useBlogStore.getState();
-    expect(state.posts).toHaveLength(2);
+    expect(state.posts).toHaveLength(mockBlogPosts.length);
     expect(state.adminPagination.pageSize).toBe(15);
     expect(state.loading).toBe(false);
   });
@@ -269,6 +269,31 @@ describe('blogStore', () => {
     });
 
     expect(useBlogStore.getState().error).toBe('Failed to fetch blog post');
+  });
+
+  it('sets error when fetchAdminPost fails with Error', async () => {
+    mockApi.get.mockRejectedValueOnce(new Error('Admin detail forbidden'));
+
+    await act(async () => {
+      await useBlogStore.getState().fetchAdminPost(99);
+    });
+
+    expect(useBlogStore.getState().error).toBe('Admin detail forbidden');
+    expect(useBlogStore.getState().adminPost).toBeNull();
+    expect(useBlogStore.getState().loading).toBe(false);
+  });
+
+  it('uploads cover image with multipart form data', async () => {
+    mockApi.post.mockResolvedValueOnce({ data: mockBlogPostAdmin });
+    const file = new File(['binary'], 'cover.jpg', { type: 'image/jpeg' });
+
+    const result = await useBlogStore.getState().uploadCoverImage(7, file);
+
+    expect(result.title_es).toBe('Guía de adopción responsable');
+    expect(mockApi.post).toHaveBeenCalledTimes(1);
+    const [, body, config] = mockApi.post.mock.calls[0];
+    expect(body).toBeInstanceOf(FormData);
+    expect(config?.headers?.['Content-Type']).toBe('multipart/form-data');
   });
 
   it('sets fallback error when fetchCalendarPosts rejects with non-Error', async () => {

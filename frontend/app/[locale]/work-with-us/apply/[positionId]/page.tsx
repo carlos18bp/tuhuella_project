@@ -118,14 +118,8 @@ export default function VolunteerApplyPage() {
     setError('');
     setFieldErrors({});
 
-    // Client-side validation
+    // Profile fields come from the authenticated user; only motivation is submitted to the API.
     const errors: Record<string, string[]> = {};
-    if (!form.first_name.trim()) errors.first_name = [t('fieldRequired')];
-    if (!form.last_name.trim()) errors.last_name = [t('fieldRequired')];
-    if (!form.email.trim()) errors.email = [t('fieldRequired')];
-    if (!form.phone.trim()) errors.phone = [t('fieldRequired')];
-    if (!form.city.trim()) errors.city = [t('fieldRequired')];
-    if (!form.country.trim()) errors.country = [t('fieldRequired')];
     if (!form.motivation.trim()) errors.motivation = [t('fieldRequired')];
     else if (form.motivation.trim().length < 20) errors.motivation = [t('motivationMinLength')];
 
@@ -146,7 +140,7 @@ export default function VolunteerApplyPage() {
     try {
       await api.post(API_ENDPOINTS.VOLUNTEER_APPLICATIONS, {
         position: positionId,
-        ...form,
+        motivation: form.motivation,
         captcha_token: captchaToken ?? undefined,
       });
       setSubmitted(true);
@@ -170,7 +164,7 @@ export default function VolunteerApplyPage() {
 
   if (!isAuthReady || (!isAuthenticated && isAuthReady)) {
     return (
-      <div className="mx-auto max-w-[800px] px-6 py-10">
+      <div className="mx-auto max-w-[800px] px-6 py-10 min-w-0 overflow-x-hidden">
         <div className="h-64 animate-shimmer rounded-2xl" />
       </div>
     );
@@ -178,7 +172,7 @@ export default function VolunteerApplyPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-[800px] px-6 py-10 space-y-4">
+      <div className="mx-auto max-w-[800px] px-6 py-10 min-w-0 overflow-x-hidden space-y-4">
         <div className="h-8 animate-shimmer rounded w-1/3" />
         <div className="h-64 animate-shimmer rounded-2xl" />
       </div>
@@ -187,7 +181,7 @@ export default function VolunteerApplyPage() {
 
   if (!position) {
     return (
-      <div className="mx-auto max-w-[800px] px-6 py-10 text-center">
+      <div className="mx-auto max-w-[800px] px-6 py-10 min-w-0 overflow-x-hidden text-center">
         <p className="text-text-tertiary">{t('positionNotFound')}</p>
         <Link href={ROUTES.WORK_WITH_US} className="mt-4 inline-block text-teal-600 hover:text-teal-700 font-medium">
           {t('backToPositions')}
@@ -198,14 +192,14 @@ export default function VolunteerApplyPage() {
 
   if (submitted) {
     return (
-      <div className="mx-auto max-w-[800px] px-6 py-10">
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 md:p-10 text-center">
+      <div className="mx-auto max-w-[800px] px-6 py-10 min-w-0 overflow-x-hidden">
+        <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50 dark:bg-emerald-950/25 p-6 md:p-10 text-center">
           <CheckCircle className="h-12 w-12 md:h-16 md:w-16 text-emerald-500 mx-auto" />
           <h2 className="mt-4 text-2xl font-bold text-text-primary">{t('successTitle')}</h2>
           <p className="mt-2 text-text-secondary">{t('successMessage')}</p>
           <Link
             href={ROUTES.WORK_WITH_US}
-            className="mt-6 inline-block bg-teal-600 text-white rounded-full px-6 py-3 font-medium hover:bg-teal-700 btn-base"
+            className="mt-6 inline-flex items-center justify-center min-h-11 bg-teal-600 text-white rounded-full px-6 py-3 font-medium hover:bg-teal-700 dark:hover:bg-teal-500 btn-base"
           >
             {t('backToPositions')}
           </Link>
@@ -215,10 +209,10 @@ export default function VolunteerApplyPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[800px] px-6 py-10">
+    <div className="mx-auto max-w-[800px] px-6 py-10 min-w-0 overflow-x-hidden">
       <Link
         href={ROUTES.WORK_WITH_US}
-        className="inline-flex items-center gap-1.5 text-sm text-teal-600 hover:text-teal-700 transition-colors"
+        className="inline-flex items-center justify-center gap-1.5 min-h-11 text-sm text-teal-600 hover:text-teal-700 dark:hover:text-teal-400 transition-colors rounded-lg -ml-1 px-1"
       >
         <ArrowLeft className="h-4 w-4" />
         {t('backToPositions')}
@@ -230,15 +224,15 @@ export default function VolunteerApplyPage() {
         <p className="mt-1 text-text-tertiary">{t('applySubtitle')}</p>
 
         <div className="mt-4 rounded-xl bg-teal-50 p-4">
-          <h3 className="font-semibold text-teal-800">{position.title}</h3>
-          <p className="mt-1 text-sm text-teal-700">{position.description}</p>
+          <h3 className="font-semibold text-teal-800 dark:text-teal-200">{position.title}</h3>
+          <p className="mt-1 text-sm text-teal-700 dark:text-teal-300">{position.description}</p>
         </div>
       </div>
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="mt-6 space-y-5">
         {error && (
-          <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-700">
+          <div className="rounded-xl bg-red-50 dark:bg-red-950/25 border border-red-200 dark:border-red-800/40 p-4 text-sm text-red-700 dark:text-red-300">
             {error}
           </div>
         )}
@@ -373,7 +367,7 @@ export default function VolunteerApplyPage() {
         <button
           type="submit"
           disabled={submitting || (Boolean(siteKey) && !captchaToken)}
-          className="w-full sm:w-auto bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-400 hover:to-teal-500 text-white rounded-full px-8 py-3 font-medium btn-base shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full sm:w-auto min-h-11 inline-flex items-center justify-center bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-400 hover:to-teal-500 dark:hover:from-teal-500 dark:hover:to-teal-600 text-white rounded-full px-8 py-3 font-medium btn-base shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed gap-2"
         >
           <Send className="h-4 w-4" />
           {submitting ? t('submitting') : t('submitApplication')}

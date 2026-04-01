@@ -18,6 +18,7 @@ class AnimalDetailSerializer(serializers.ModelSerializer):
             'good_with_kids', 'good_with_dogs', 'good_with_cats',
             'energy_level', 'coat_color', 'intake_date', 'microchip_id',
             'shelter', 'shelter_name', 'shelter_city',
+            'adopted_at', 'adoption_application', 'archived_at',
             'created_at', 'updated_at',
         ]
 

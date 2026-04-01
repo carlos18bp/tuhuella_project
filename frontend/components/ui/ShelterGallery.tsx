@@ -22,36 +22,39 @@ export default function ShelterGallery({ images, shelterName }: ShelterGalleryPr
 
   return (
     <>
-      <div className="rounded-2xl overflow-hidden shadow-sm">
-        <Swiper
-          modules={[Navigation, Pagination]}
-          navigation
-          pagination={{ clickable: true }}
-          spaceBetween={16}
-          slidesPerView={1}
-          breakpoints={{
-            640: { slidesPerView: 2 },
-            1024: { slidesPerView: 3 },
-          }}
-          className="shelter-gallery"
-        >
-          {images.map((src, i) => (
-            <SwiperSlide key={i}>
-              <button
-                onClick={() => setLightboxIndex(i)}
-                className="relative w-full aspect-square rounded-xl overflow-hidden hover:opacity-90 transition-opacity"
-              >
-                <Image
-                  src={src}
-                  alt={`${shelterName} - ${i + 1}`}
-                  fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  className="object-cover"
-                />
-              </button>
-            </SwiperSlide>
-          ))}
-        </Swiper>
+      <div className="overflow-x-hidden min-w-0 -mx-1 px-1 sm:mx-0 sm:px-0">
+        <div className="rounded-2xl overflow-hidden shadow-sm">
+          <Swiper
+            modules={[Navigation, Pagination]}
+            navigation
+            pagination={{ clickable: true }}
+            spaceBetween={16}
+            slidesPerView={1}
+            breakpoints={{
+              640: { slidesPerView: 2 },
+              1024: { slidesPerView: 3 },
+            }}
+            className="shelter-gallery"
+          >
+            {images.map((src, i) => (
+              <SwiperSlide key={i}>
+                <button
+                  type="button"
+                  onClick={() => setLightboxIndex(i)}
+                  className="relative w-full aspect-square rounded-xl overflow-hidden hover:opacity-90 transition-opacity"
+                >
+                  <Image
+                    src={src}
+                    alt={`${shelterName} - ${i + 1}`}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover"
+                  />
+                </button>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
       </div>
 
       {/* Lightbox — uses img for full-res viewing */}
@@ -61,8 +64,9 @@ export default function ShelterGallery({ images, shelterName }: ShelterGalleryPr
           onClick={() => setLightboxIndex(null)}
         >
           <button
+            type="button"
             aria-label="Cerrar"
-            className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+            className="absolute top-4 right-4 z-10 min-h-11 min-w-11 inline-flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
             onClick={() => setLightboxIndex(null)}
           >
             <X className="h-6 w-6" />
@@ -74,8 +78,9 @@ export default function ShelterGallery({ images, shelterName }: ShelterGalleryPr
 
           {images.length > 1 && (
             <button
+              type="button"
               aria-label="Anterior"
-              className="absolute left-3 md:left-6 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+              className="absolute left-3 md:left-6 min-h-11 min-w-11 inline-flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
                 setLightboxIndex((lightboxIndex - 1 + images.length) % images.length);
@@ -95,8 +100,9 @@ export default function ShelterGallery({ images, shelterName }: ShelterGalleryPr
 
           {images.length > 1 && (
             <button
+              type="button"
               aria-label="Siguiente"
-              className="absolute right-3 md:right-6 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+              className="absolute right-3 md:right-6 min-h-11 min-w-11 inline-flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
                 setLightboxIndex((lightboxIndex + 1) % images.length);

@@ -6,6 +6,7 @@ import { useRequireAuth } from '@/lib/hooks/useRequireAuth';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { api } from '@/lib/services/http';
 import { API_ENDPOINTS } from '@/lib/constants';
+import AdminAccessDenied from '@/components/ui/AdminAccessDenied';
 
 type PendingShelter = {
   id: number;
@@ -51,15 +52,11 @@ export default function AdminApproveSheltarsPage() {
   };
 
   if (user && user.role !== 'admin' && !user.is_staff) {
-    return (
-      <div className="mx-auto max-w-[1400px] px-6 py-10">
-        <p className="text-red-600 font-medium">Acceso denegado.</p>
-      </div>
-    );
+    return <AdminAccessDenied>Acceso denegado.</AdminAccessDenied>;
   }
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
+    <div className="mx-auto max-w-[1400px] px-6 py-10 min-w-0 overflow-x-hidden">
       <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Aprobar Refugios</h1>
       <p className="mt-1 text-text-tertiary">Revisa y aprueba solicitudes de nuevos refugios</p>
 
@@ -92,16 +89,18 @@ export default function AdminApproveSheltarsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <button
+                    type="button"
                     onClick={() => handleAction(shelter.id, 'approve')}
                     disabled={actionLoading === shelter.id}
-                    className="text-sm px-4 py-2 rounded-full bg-emerald-600 text-white hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                    className="inline-flex items-center justify-center min-h-11 sm:min-h-9 text-sm px-4 py-2 rounded-full bg-emerald-600 text-white hover:bg-emerald-700 dark:hover:bg-emerald-500 transition-colors disabled:opacity-50"
                   >
                     Aprobar
                   </button>
                   <button
+                    type="button"
                     onClick={() => handleAction(shelter.id, 'reject')}
                     disabled={actionLoading === shelter.id}
-                    className="text-sm px-4 py-2 rounded-full border border-red-300 text-red-700 hover:bg-red-50 transition-colors disabled:opacity-50"
+                    className="inline-flex items-center justify-center min-h-11 sm:min-h-9 text-sm px-4 py-2 rounded-full border border-red-300 dark:border-red-700/60 text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/35 transition-colors disabled:opacity-50"
                   >
                     Rechazar
                   </button>

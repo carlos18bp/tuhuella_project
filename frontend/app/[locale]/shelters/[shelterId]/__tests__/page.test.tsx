@@ -101,7 +101,8 @@ describe('ShelterDetailPage', () => {
   });
 
   it('hides website when not provided', () => {
-    setupMock({ loading: false, shelter: mockShelter });
+    const noWebsite = { ...mockShelter, website: undefined };
+    setupMock({ loading: false, shelter: noWebsite });
     render(<ShelterDetailPage />);
     expect(screen.queryByText('Sitio web')).not.toBeInTheDocument();
   });

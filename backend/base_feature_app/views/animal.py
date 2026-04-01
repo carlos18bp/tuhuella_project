@@ -5,8 +5,11 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from django.utils import timezone
+
 from base_feature_app.models import Animal
 from base_feature_app.serializers.animal_list import AnimalListSerializer
+from base_feature_app.utils.shelter_access import user_can_manage_shelter
 from base_feature_app.serializers.animal_detail import AnimalDetailSerializer
 from base_feature_app.serializers.animal_create_update import AnimalCreateUpdateSerializer
 
@@ -14,7 +17,10 @@ from base_feature_app.serializers.animal_create_update import AnimalCreateUpdate
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def animal_list(request):
-    queryset = Animal.objects.filter(status=Animal.Status.PUBLISHED)
+    queryset = Animal.objects.filter(
+        status=Animal.Status.PUBLISHED,
+        archived_at__isnull=True,
+    )
 
     species = request.query_params.get('species')
     if species:
@@ -98,7 +104,7 @@ def animal_update(request, pk):
     except Animal.DoesNotExist:
         return Response({'error': 'Animal not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    if animal.shelter.owner != request.user:
+    if not user_can_manage_shelter(request.user, animal.shelter):
         return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
 
     serializer = AnimalCreateUpdateSerializer(
@@ -129,6 +135,7 @@ def animal_similar(request, pk):
         species=animal.species,
         size=animal.size,
         status=Animal.Status.PUBLISHED,
+        archived_at__isnull=True,
     ).exclude(pk=pk).select_related('shelter')
 
     # Prioritize same shelter by ordering: same shelter first, then by created_at
@@ -155,8 +162,10 @@ def animal_delete(request, pk):
     except Animal.DoesNotExist:
         return Response({'error': 'Animal not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    if animal.shelter.owner != request.user:
+    if not user_can_manage_shelter(request.user, animal.shelter):
         return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
 
-    animal.delete()
+    animal.archived_at = timezone.now()
+    animal.status = Animal.Status.ARCHIVED
+    animal.save(update_fields=['archived_at', 'status', 'updated_at'])
     return Response(status=status.HTTP_204_NO_CONTENT)

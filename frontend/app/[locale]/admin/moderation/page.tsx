@@ -6,7 +6,9 @@ import { useRequireAuth } from '@/lib/hooks/useRequireAuth';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { api } from '@/lib/services/http';
 import { API_ENDPOINTS } from '@/lib/constants';
+import AdminAccessDenied from '@/components/ui/AdminAccessDenied';
 import type { Animal, Shelter } from '@/lib/types';
+import { shelterPillTeal, shelterVerificationPillClass } from '@/lib/ui/shelterPanelBadges';
 
 export default function AdminModeracionPage() {
   useRequireAuth();
@@ -34,15 +36,11 @@ export default function AdminModeracionPage() {
   }, []);
 
   if (user && user.role !== 'admin' && !user.is_staff) {
-    return (
-      <div className="mx-auto max-w-[1400px] px-6 py-10">
-        <p className="text-red-600 font-medium">Acceso denegado.</p>
-      </div>
-    );
+    return <AdminAccessDenied>Acceso denegado.</AdminAccessDenied>;
   }
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
+    <div className="mx-auto max-w-[1400px] px-6 py-10 min-w-0 overflow-x-hidden">
       <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Moderación</h1>
       <p className="mt-1 text-text-tertiary">Revisa contenido publicado en la plataforma</p>
 
@@ -70,7 +68,7 @@ export default function AdminModeracionPage() {
                         {animal.species === 'dog' ? 'Perro' : animal.species === 'cat' ? 'Gato' : 'Otro'} · {animal.shelter_name}
                       </p>
                     </div>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 self-start sm:self-auto">{animal.status}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full self-start sm:self-auto ${shelterPillTeal}`}>{animal.status}</span>
                   </div>
                 ))}
               </div>
@@ -89,11 +87,7 @@ export default function AdminModeracionPage() {
                       <p className="font-medium text-text-primary">{shelter.name}</p>
                       <p className="text-sm text-text-tertiary truncate">{shelter.city} · {shelter.owner_email}</p>
                     </div>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${
-                      shelter.verification_status === 'verified' ? 'bg-emerald-50 text-emerald-700' :
-                      shelter.verification_status === 'pending' ? 'bg-amber-50 text-amber-700' :
-                      'bg-red-50 text-red-700'
-                    }`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${shelterVerificationPillClass(shelter.verification_status)}`}>
                       {shelter.verification_status === 'verified' ? 'Verificado' :
                        shelter.verification_status === 'pending' ? 'Pendiente' : 'Rechazado'}
                     </span>

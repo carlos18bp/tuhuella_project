@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 import pytest
+from django.core.exceptions import ValidationError
 
 from base_feature_app.models import Payment
 
@@ -72,3 +73,25 @@ def test_payment_status_choices():
     """Status contains expected choices."""
     values = {c.value for c in Payment.Status}
     assert values == {'pending', 'approved', 'declined', 'voided', 'error'}
+
+
+@pytest.mark.django_db
+def test_payment_clean_rejects_missing_parent():
+    """Payment must link to exactly one of donation or sponsorship."""
+    p = Payment(amount=Decimal('1.00'))
+    with pytest.raises(ValidationError) as exc_info:
+        p.full_clean()
+    assert exc_info.value is not None
+
+
+@pytest.mark.django_db
+def test_payment_clean_rejects_both_parents(donation, sponsorship):
+    """Payment cannot link to both donation and sponsorship."""
+    p = Payment(
+        donation=donation,
+        sponsorship=sponsorship,
+        amount=Decimal('1.00'),
+    )
+    with pytest.raises(ValidationError) as exc_info:
+        p.full_clean()
+    assert exc_info.value is not None

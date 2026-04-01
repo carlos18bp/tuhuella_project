@@ -21,7 +21,7 @@ export default function RefugiosPage() {
   }, [fetchShelters, locale]);
 
   return (
-    <Container className="py-10">
+    <Container className="py-10 min-w-0 overflow-x-hidden">
       <h1 className="text-2xl sm:text-3xl font-bold text-text-primary heading-decorated">{t('title')}</h1>
       <p className="mt-2 text-text-tertiary">{t('subtitle')}</p>
 
@@ -37,7 +37,9 @@ export default function RefugiosPage() {
               <ShelterCard key={shelter.id} shelter={shelter} />
             ))}
         {!loading && shelters.length === 0 && (
-          <EmptyState message={t('noResults')} />
+          <div className="md:col-span-2 lg:col-span-3 min-w-0">
+            <EmptyState message={t('noResults')} />
+          </div>
         )}
       </div>
 

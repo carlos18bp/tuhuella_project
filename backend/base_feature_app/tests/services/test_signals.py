@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
+from base_feature_app.models import Donation
 from base_feature_app.tests.factories import (
     AdoptionApplicationFactory,
     CampaignFactory,
@@ -71,7 +72,12 @@ def test_sponsorship_active_dispatches_to_user(mock_dispatch):
 def test_campaign_goal_reached_dispatches(mock_dispatch):
     """Campaign reaching its goal dispatches campaign_goal_reached."""
     campaign = CampaignFactory(goal_amount=Decimal('100000'), raised_amount=Decimal('0'))
-    DonationFactory(campaign=campaign, shelter=campaign.shelter, status='paid')
+    DonationFactory(
+        campaign=campaign,
+        shelter=campaign.shelter,
+        destination=Donation.Destination.CAMPAIGN,
+        status='paid',
+    )
     mock_dispatch.reset_mock()
     campaign.raised_amount = Decimal('100000')
     campaign.save()

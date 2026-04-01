@@ -41,7 +41,10 @@ function ActivityTimeline({ events }: { events: ActivityEvent[] }) {
         </div>
         <p className="mt-3 text-sm font-medium text-text-secondary">{t('noActivity')}</p>
         <p className="mt-1 text-xs text-text-quaternary leading-relaxed max-w-xs mx-auto">{t('noActivityDesc')}</p>
-        <Link href={ROUTES.ANIMALS} className="mt-4 inline-block text-xs bg-teal-600 text-white rounded-full px-5 py-2 font-medium hover:bg-teal-700 transition-colors shadow-sm">
+        <Link
+          href={ROUTES.ANIMALS}
+          className="mt-4 inline-flex items-center justify-center min-h-11 text-xs bg-teal-600 text-white rounded-full px-5 py-2 font-medium hover:bg-teal-700 transition-colors shadow-sm"
+        >
           {t('exploreToStart')} &rarr;
         </Link>
       </div>
@@ -49,10 +52,10 @@ function ActivityTimeline({ events }: { events: ActivityEvent[] }) {
   }
 
   const iconMap: Record<string, { icon: typeof FileText; color: string }> = {
-    application: { icon: FileText, color: 'text-teal-600 bg-teal-50 dark:bg-teal-900/30' },
-    donation: { icon: DollarSign, color: 'text-amber-600 bg-amber-50 dark:bg-amber-900/30' },
-    sponsorship: { icon: HandHeart, color: 'text-red-500 bg-red-50 dark:bg-red-900/30' },
-    favorite: { icon: Heart, color: 'text-pink-500 bg-pink-50 dark:bg-pink-900/30' },
+    application: { icon: FileText, color: 'text-teal-600 bg-teal-50 dark:bg-teal-900/30 dark:text-teal-400' },
+    donation: { icon: DollarSign, color: 'text-amber-600 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400' },
+    sponsorship: { icon: HandHeart, color: 'text-red-500 bg-red-50 dark:bg-red-900/30 dark:text-red-400' },
+    favorite: { icon: Heart, color: 'text-pink-500 bg-pink-50 dark:bg-pink-900/30 dark:text-pink-400' },
   };
 
   function getDescription(event: ActivityEvent) {
@@ -126,7 +129,7 @@ export default function MiPerfilPage() {
 
   if (!user) {
     return (
-      <div data-testid="loading-skeleton" className="mx-auto max-w-[1200px] px-6 py-10">
+      <div data-testid="loading-skeleton" className="mx-auto max-w-[1200px] px-6 py-10 min-w-0 overflow-x-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           <div className="rounded-2xl border border-border-primary p-8 h-72 animate-shimmer" />
           <div className="lg:col-span-2 space-y-4">
@@ -148,7 +151,11 @@ export default function MiPerfilPage() {
   const completenessColor =
     completeness < 50 ? 'bg-red-500' : completeness < 80 ? 'bg-amber-500' : 'bg-emerald-500';
   const completenessTextColor =
-    completeness < 50 ? 'text-red-600' : completeness < 80 ? 'text-amber-600' : 'text-emerald-600';
+    completeness < 50
+      ? 'text-red-600 dark:text-red-400'
+      : completeness < 80
+        ? 'text-amber-600 dark:text-amber-400'
+        : 'text-emerald-600 dark:text-emerald-400';
 
   const memberSince = user.date_joined
     ? new Date(user.date_joined).toLocaleDateString('es-CO', { month: 'long', year: 'numeric' })
@@ -162,7 +169,7 @@ export default function MiPerfilPage() {
       desc: stats ? t('applicationsCount', { total: stats.applications.total, approved: stats.applications.by_status.approved || 0 }) : t('applicationsDesc'),
       href: ROUTES.MY_APPLICATIONS,
       icon: FileText,
-      color: 'text-teal-600 bg-teal-50 dark:bg-teal-900/20',
+      color: 'text-teal-600 bg-teal-50 dark:bg-teal-900/20 dark:text-teal-400',
       badge: stats?.applications.total ?? null,
     },
     {
@@ -170,7 +177,7 @@ export default function MiPerfilPage() {
       desc: stats ? t('donationsCount', { amount: stats.donations.total_amount, count: stats.donations.count }) : t('donationsDesc'),
       href: ROUTES.MY_DONATIONS,
       icon: DollarSign,
-      color: 'text-amber-600 bg-amber-50 dark:bg-amber-900/20',
+      color: 'text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400',
       badge: stats?.donations.count ?? null,
     },
     {
@@ -178,7 +185,7 @@ export default function MiPerfilPage() {
       desc: stats ? t('sponsorshipsCount', { active: stats.sponsorships.active_count }) : t('sponsorshipsDesc'),
       href: ROUTES.MY_SPONSORSHIPS,
       icon: HandHeart,
-      color: 'text-red-500 bg-red-50 dark:bg-red-900/20',
+      color: 'text-red-500 bg-red-50 dark:bg-red-900/20 dark:text-red-400',
       badge: stats?.sponsorships.active_count ?? null,
     },
     {
@@ -186,7 +193,7 @@ export default function MiPerfilPage() {
       desc: stats ? t('favoritesCount', { count: stats.favorites.count }) : t('favoritesDesc'),
       href: ROUTES.FAVORITES,
       icon: Heart,
-      color: 'text-pink-500 bg-pink-50 dark:bg-pink-900/20',
+      color: 'text-pink-500 bg-pink-50 dark:bg-pink-900/20 dark:text-pink-400',
       badge: stats?.favorites.count ?? null,
       preview: stats?.favorites.preview,
     },
@@ -195,7 +202,7 @@ export default function MiPerfilPage() {
       desc: stats?.adopter_intent ? t('intentStatus', { status: stats.adopter_intent.status }) : t('intentCreate'),
       href: ROUTES.MY_INTENT,
       icon: Users,
-      color: 'text-teal-600 bg-teal-50 dark:bg-teal-900/20',
+      color: 'text-teal-600 bg-teal-50 dark:bg-teal-900/20 dark:text-teal-400',
       intentStatus: stats?.adopter_intent?.status,
     },
     {
@@ -203,35 +210,35 @@ export default function MiPerfilPage() {
       desc: t('notificationsDesc'),
       href: ROUTES.MY_NOTIFICATIONS,
       icon: Bell,
-      color: 'text-violet-600 bg-violet-50 dark:bg-violet-900/20',
+      color: 'text-violet-600 bg-violet-50 dark:bg-violet-900/20 dark:text-violet-400',
     },
     {
       label: t('campaigns'),
       desc: t('campaignsDesc'),
       href: ROUTES.CAMPAIGNS,
       icon: Megaphone,
-      color: 'text-orange-500 bg-orange-50 dark:bg-orange-900/20',
+      color: 'text-orange-500 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400',
     },
     {
       label: t('workWithUs'),
       desc: t('workWithUsDesc'),
       href: ROUTES.WORK_WITH_US,
       icon: Briefcase,
-      color: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20',
+      color: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 dark:text-indigo-400',
     },
     {
       label: t('faq'),
       desc: t('faqDesc'),
       href: ROUTES.FAQ,
       icon: HelpCircle,
-      color: 'text-sky-600 bg-sky-50 dark:bg-sky-900/20',
+      color: 'text-sky-600 bg-sky-50 dark:bg-sky-900/20 dark:text-sky-400',
     },
     {
       label: t('terms'),
       desc: t('termsDesc'),
       href: ROUTES.TERMS,
       icon: ScrollText,
-      color: 'text-slate-500 bg-slate-50 dark:bg-slate-800/40',
+      color: 'text-slate-500 bg-slate-50 dark:bg-slate-800/40 dark:text-slate-400',
     },
   ];
 
@@ -243,7 +250,7 @@ export default function MiPerfilPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-[1200px] px-6 py-10">
+    <div className="mx-auto max-w-[1200px] px-6 py-10 min-w-0 overflow-x-hidden">
       {/* Shelter invite banner */}
       {stats && stats.shelter_invites.pending_count > 0 && (
         <div className="mb-6 flex items-center gap-3 px-5 py-3.5 rounded-xl bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800">
@@ -251,7 +258,10 @@ export default function MiPerfilPage() {
           <p className="text-sm text-teal-700 dark:text-teal-300 flex-1">
             {t('shelterInvites', { count: stats.shelter_invites.pending_count })}
           </p>
-          <Link href={ROUTES.MY_INTENT} className="text-sm font-medium text-teal-700 dark:text-teal-300 hover:underline shrink-0">
+          <Link
+            href={ROUTES.MY_INTENT}
+            className="inline-flex items-center justify-center min-h-11 sm:min-h-0 text-sm font-medium text-teal-700 dark:text-teal-300 hover:underline shrink-0"
+          >
             {t('viewInvites')} &rarr;
           </Link>
         </div>
@@ -271,11 +281,11 @@ export default function MiPerfilPage() {
             </Link>
 
             {/* Header gradient */}
-            <div className="h-24 bg-gradient-to-br from-teal-500 to-teal-600 relative">
+            <div className="h-24 bg-gradient-to-br from-teal-500 to-teal-600 dark:from-teal-800 dark:to-teal-950 relative">
               <div className="absolute -bottom-10 left-1/2 -translate-x-1/2">
                 <div className="h-20 w-20 rounded-full bg-surface-primary border-4 border-surface-primary shadow-md flex items-center justify-center">
                   {initials ? (
-                    <span className="text-2xl font-bold text-teal-700">{initials}</span>
+                    <span className="text-2xl font-bold text-teal-700 dark:text-teal-300">{initials}</span>
                   ) : (
                     <UserIcon className="h-8 w-8 text-text-quaternary" />
                   )}
@@ -314,7 +324,7 @@ export default function MiPerfilPage() {
               {completeness < 100 && (
                 <Link
                   href={ROUTES.MY_PROFILE_EDIT}
-                  className="mt-2 inline-block text-xs text-teal-600 hover:text-teal-700 font-medium"
+                  className="mt-2 inline-flex items-center min-h-11 sm:min-h-0 text-xs text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 font-medium"
                 >
                   {t('completeNow')} &rarr;
                 </Link>
@@ -369,11 +379,15 @@ export default function MiPerfilPage() {
                       )}
                       {/* Intent status badge */}
                       {'intentStatus' in item && item.intentStatus && (
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                          item.intentStatus === 'active' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' :
-                          item.intentStatus === 'paused' ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' :
-                          'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300'
-                        }`}>
+                        <span
+                          className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ring-1 ${
+                            item.intentStatus === 'active'
+                              ? 'bg-emerald-50 text-emerald-700 ring-emerald-200/60 dark:bg-emerald-950/35 dark:text-emerald-300 dark:ring-emerald-700/40'
+                              : item.intentStatus === 'paused'
+                                ? 'bg-amber-50 text-amber-700 ring-amber-200/60 dark:bg-amber-950/35 dark:text-amber-300 dark:ring-amber-700/40'
+                                : 'bg-teal-50 text-teal-700 ring-teal-200/60 dark:bg-teal-950/35 dark:text-teal-300 dark:ring-teal-700/40'
+                          }`}
+                        >
                           {item.intentStatus}
                         </span>
                       )}

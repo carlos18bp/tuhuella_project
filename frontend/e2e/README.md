@@ -33,7 +33,7 @@ e2e/
 These directories are generated after runs and are gitignored:
 
 - `playwright-report/` — HTML report
-- `e2e-results/` — `flow-coverage.json` and `results.json`
+- `e2e-results/` — `flow-coverage.json` and `playwright-results.json` (aligned with CI `PLAYWRIGHT_JSON_OUTPUT_NAME`)
 - `test-results/` — traces/attachments (only on retries)
 
 ## Running Tests
@@ -88,6 +88,8 @@ npx playwright show-report
 
 > `--grep @module:<name>` runs only tests tagged with that module. The flow coverage report will still list other modules as missing because the subset was not executed.
 
+> **CLI `--reporter`**: overrides the entire reporter list from `playwright.config.ts`. To always write `e2e-results/flow-coverage.json` with the default `npm run e2e`, keep the flow reporter in config (it runs before `html`/`json`). For a JSON-only run, match CI: `npx playwright test --reporter='json,./e2e/reporters/flow-coverage-reporter.mjs'` with `PLAYWRIGHT_JSON_OUTPUT_NAME=e2e-results/playwright-results.json`.
+
 ## Local web servers (automatic)
 
 Playwright starts (or reuses) the following servers from `playwright.config.ts`:
@@ -139,7 +141,7 @@ Example output (values vary per run):
 JSON artifacts:
 
 - `e2e-results/flow-coverage.json`
-- `e2e-results/results.json`
+- `e2e-results/playwright-results.json`
 
 ### Adding a new flow
 

@@ -84,9 +84,9 @@ export const mockMetrics = {
 // ── Payments (PaymentListSerializer) ──
 
 export const mockPayments = [
-  { id: 1, provider: 'wompi', provider_reference: 'ref-abc-123', amount: '50000.00', status: 'approved', paid_at: '2026-03-20T10:05:00Z', created_at: '2026-03-20T10:00:00Z' },
-  { id: 2, provider: 'wompi', provider_reference: 'ref-def-456', amount: '30000.00', status: 'pending', paid_at: null, created_at: '2026-03-19T14:30:00Z' },
-  { id: 3, provider: 'wompi', provider_reference: 'ref-ghi-789', amount: '100000.00', status: 'declined', paid_at: null, created_at: '2026-03-18T08:15:00Z' },
+  { id: 1, donation: 1, sponsorship: null, modality: 'donation', provider: 'wompi', provider_reference: 'ref-abc-123', amount: '50000.00', status: 'approved', paid_at: '2026-03-20T10:05:00Z', created_at: '2026-03-20T10:00:00Z' },
+  { id: 2, donation: null, sponsorship: 2, modality: 'sponsorship', provider: 'wompi', provider_reference: 'ref-def-456', amount: '30000.00', status: 'pending', paid_at: null, created_at: '2026-03-19T14:30:00Z' },
+  { id: 3, donation: 3, sponsorship: null, modality: 'donation', provider: 'wompi', provider_reference: 'ref-ghi-789', amount: '100000.00', status: 'declined', paid_at: null, created_at: '2026-03-18T08:15:00Z' },
 ];
 
 // ── Profile Stats ──
@@ -125,8 +125,38 @@ export const mockShelterCampaigns = [
 ];
 
 export const mockShelterDonations = [
-  { id: 1, user: 2, user_email: 'donor1@example.com', shelter: 1, shelter_name: 'Refugio E2E', shelter_city: 'Bogotá', campaign: 1, campaign_title: 'Campaña de vacunación', amount: '50000.00', message: 'Mucha fuerza', status: 'paid', paid_at: '2026-03-20T10:05:00Z', created_at: '2026-03-20T10:00:00Z' },
-  { id: 2, user: 3, user_email: 'donor2@example.com', shelter: 1, shelter_name: 'Refugio E2E', shelter_city: 'Bogotá', campaign: null, campaign_title: null, amount: '30000.00', message: null, status: 'paid', paid_at: '2026-03-18T14:35:00Z', created_at: '2026-03-18T14:30:00Z' },
+  {
+    id: 1,
+    user: 2,
+    user_email: 'donor1@example.com',
+    destination: 'campaign',
+    shelter: 1,
+    shelter_name: 'Refugio E2E',
+    shelter_city: 'Bogotá',
+    campaign: 1,
+    campaign_title: 'Campaña de vacunación',
+    amount: '50000.00',
+    message: 'Mucha fuerza',
+    status: 'paid',
+    paid_at: '2026-03-20T10:05:00Z',
+    created_at: '2026-03-20T10:00:00Z',
+  },
+  {
+    id: 2,
+    user: 3,
+    user_email: 'donor2@example.com',
+    destination: 'shelter',
+    shelter: 1,
+    shelter_name: 'Refugio E2E',
+    shelter_city: 'Bogotá',
+    campaign: null,
+    campaign_title: null,
+    amount: '30000.00',
+    message: null,
+    status: 'paid',
+    paid_at: '2026-03-18T14:35:00Z',
+    created_at: '2026-03-18T14:30:00Z',
+  },
 ];
 
 export const mockShelterData = [

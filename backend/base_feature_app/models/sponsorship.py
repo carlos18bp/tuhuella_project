@@ -1,8 +1,10 @@
-from django.db import models
 from django.conf import settings
+from django.db import models
+
+from base_feature_app.models.mixins import ArchivableModel
 
 
-class Sponsorship(models.Model):
+class Sponsorship(ArchivableModel):
     class Frequency(models.TextChoices):
         MONTHLY = 'monthly', 'Monthly'
         ONE_TIME = 'one_time', 'One Time'

@@ -1,3 +1,4 @@
+from .mixins import ArchivableModel
 from .user import User
 from .password_code import PasswordCode
 from .shelter import Shelter
@@ -19,3 +20,6 @@ from .amount_option import DonationAmountOption, SponsorshipAmountOption
 from .volunteer_position import VolunteerPosition
 from .volunteer_application import VolunteerApplication
 from .strategic_ally import StrategicAlly
+from .animal_status_history import AnimalStatusHistory
+from .payment_history import PaymentHistory
+from .shelter_membership import ShelterMembership

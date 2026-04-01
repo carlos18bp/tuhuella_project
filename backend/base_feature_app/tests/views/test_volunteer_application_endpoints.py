@@ -8,12 +8,6 @@ from base_feature_app.tests.factories import VolunteerPositionFactory
 
 VALID_VOLUNTEER_DATA = {
     'captcha_token': 'valid-token',
-    'first_name': 'Maria',
-    'last_name': 'Garcia',
-    'email': 'maria@example.com',
-    'phone': '3001234567',
-    'city': 'Bogota',
-    'country': 'Colombia',
     'motivation': 'I want to help animals in shelters and make a difference.',
 }
 
@@ -60,7 +54,7 @@ def test_volunteer_create_rejects_invalid_data(mock_captcha, authenticated_clien
     url = reverse('volunteer-application-create')
     response = authenticated_client.post(url, {
         'captcha_token': 'valid',
-        'first_name': 'Maria',
+        'motivation': 'x',
     }, format='json')
     assert response.status_code == 400
 

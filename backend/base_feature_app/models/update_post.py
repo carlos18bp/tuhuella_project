@@ -2,8 +2,10 @@ from django.db import models
 from django_attachments.fields import SingleImageField
 from django_attachments.models import Library
 
+from base_feature_app.models.mixins import ArchivableModel
 
-class UpdatePost(models.Model):
+
+class UpdatePost(ArchivableModel):
     shelter = models.ForeignKey(
         'base_feature_app.Shelter',
         on_delete=models.CASCADE,

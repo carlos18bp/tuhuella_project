@@ -20,6 +20,78 @@ import {
   mockFavoritesBella,
 } from '../helpers/mock-data';
 
+const mockAnimalForFavoriteToggle = {
+  id: 1,
+  name: 'Luna',
+  slug: 'luna',
+  species: 'dog',
+  breed: 'Mestizo',
+  age_range: 'adult',
+  gender: 'female',
+  size: 'medium',
+  status: 'published',
+  description: 'Una perrita cariñosa.',
+  is_vaccinated: true,
+  is_sterilized: true,
+  shelter: 1,
+  shelter_name: 'Patitas Felices',
+  shelter_city: 'Bogotá',
+  gallery_urls: [],
+  created_at: '2026-01-10T12:00:00Z',
+};
+
+async function setupFavoriteToggleRoutes(page: any) {
+  await page.route('**/api/animals/**', (route: any) => {
+    const url = route.request().url();
+    if (url.includes('/similar')) {
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    }
+    const isDetail = Boolean(url.match(/\/api\/animals\/\d+/));
+    const body = isDetail
+      ? mockAnimalForFavoriteToggle
+      : { results: [mockAnimalForFavoriteToggle], count: 1, page: 1, page_size: 12, total_pages: 1 };
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(body),
+    });
+  });
+  await page.route('**/api/favorites/**', (route: any) => {
+    const url = route.request().url();
+    if (route.request().method() === 'GET') {
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    }
+    if (url.includes('toggle') && route.request().method() === 'POST') {
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          status: 'added',
+          favorite: {
+            id: 99,
+            animal: 1,
+            animal_name: 'Luna',
+            animal_species: 'dog',
+            breed: 'Mestizo',
+            age_range: 'adult',
+            size: 'medium',
+            gender: 'female',
+            is_vaccinated: true,
+            is_sterilized: true,
+            status: 'published',
+            shelter_name: 'Patitas Felices',
+            shelter_city: 'Bogotá',
+            thumbnail_url: null,
+            note: '',
+            created_at: '2026-03-20T10:00:00Z',
+          },
+        }),
+      });
+    }
+    return route.continue();
+  });
+}
+
 function mockFavoritesRoute(page: any, data: any[] = mockFavorites) {
   return page.route('**/favorites/**', (route: any) => {
     if (route.request().method() === 'GET') {
@@ -346,5 +418,124 @@ test.describe('Favorite Toggle', () => {
         expect(page.url()).toMatch(/sign-in|animals/);
       }
     }
+  });
+});
+
+test.describe('Favorite toggle — authenticated', () => {
+  test('should favorite an animal when authenticated user clicks heart', { tag: [...FAVORITE_TOGGLE] }, async ({ page }) => {
+    await setupFavoriteToggleRoutes(page);
+
+    await loginAndNavigate(page, 'adopter', '/animals/1');
+
+    const favBtn = page.getByRole('button', { name: 'favorite' });
+    await expect(favBtn).toBeVisible({ timeout: 15_000 });
+    await favBtn.click();
+
+    await expect(favBtn).toHaveClass(/bg-red-50/);
+  });
+});
+
+test.describe('Donation history — authenticated', () => {
+  test('should display donation history when adopter has donations', { tag: [...DONATION_HISTORY] }, async ({ page }) => {
+    const mockDonation = {
+      id: 1,
+      user: 1,
+      user_email: 'adopter-e2e@example.com',
+      destination: 'shelter' as const,
+      shelter: 1,
+      amount: '50000',
+      status: 'paid' as const,
+      shelter_name: 'Refugio Amor',
+      shelter_city: 'Bogotá',
+      campaign: null,
+      campaign_title: null,
+      paid_at: '2026-02-01T12:00:00Z',
+      created_at: '2026-02-01T12:00:00Z',
+    };
+    await page.route('**/api/donations/**', (route: any) => {
+      if (route.request().method() === 'GET') {
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify([mockDonation]),
+        });
+      }
+      return route.continue();
+    });
+
+    await loginAndNavigate(page, 'adopter', '/my-donations');
+
+    await expect(page.getByRole('heading', { name: /Mis Donaciones/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/Refugio Amor/i).first()).toBeVisible({ timeout: 10_000 });
+  });
+});
+
+test.describe('Sponsorship history — authenticated', () => {
+  test('should display sponsorship history when adopter has sponsorships', { tag: [...SPONSORSHIP_HISTORY] }, async ({ page }) => {
+    const mockSponsorship = {
+      id: 1,
+      user: 1,
+      animal: 2,
+      animal_name: 'Milo',
+      animal_species: 'cat',
+      shelter_name: 'Patitas Felices',
+      shelter_city: 'Medellín',
+      thumbnail_url: null,
+      amount: '30000',
+      frequency: 'monthly' as const,
+      status: 'active' as const,
+      started_at: '2026-02-01T12:00:00Z',
+      created_at: '2026-02-01T12:00:00Z',
+    };
+    await page.route('**/api/sponsorships/**', (route: any) => {
+      if (route.request().method() === 'GET') {
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify([mockSponsorship]),
+        });
+      }
+      return route.continue();
+    });
+
+    await loginAndNavigate(page, 'adopter', '/my-sponsorships');
+
+    await expect(page.getByRole('heading', { name: /Mis Apadrinamientos/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/Milo/i).first()).toBeVisible({ timeout: 10_000 });
+  });
+});
+
+test.describe('Adopter intent — authenticated', () => {
+  test('should create adoption intent when adopter saves the form', { tag: [...ADOPTER_INTENT_CREATE] }, async ({ page }) => {
+    await page.route('**/api/adopter-intents/**', (route: any) => {
+      const url = route.request().url();
+      if (url.includes('/me/') && route.request().method() === 'GET') {
+        return route.fulfill({ status: 404, contentType: 'application/json', body: '{}' });
+      }
+      if (url.includes('/create/') && route.request().method() === 'POST') {
+        return route.fulfill({
+          status: 201,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            id: 8,
+            user: 1,
+            preferences: {},
+            description: 'Busco un compañero tranquilo',
+            status: 'active',
+            visibility: 'public',
+            created_at: '2026-03-31T10:00:00Z',
+          }),
+        });
+      }
+      return route.continue();
+    });
+
+    await loginAndNavigate(page, 'adopter', '/my-intent');
+
+    await expect(page.getByRole('heading', { name: /Mi Intención de Adopción/i })).toBeVisible({ timeout: 15_000 });
+    await page.getByLabel(/Cuéntanos qué buscas/i).fill('Busco un compañero tranquilo');
+    await page.getByRole('button', { name: /Crear intención/i }).click();
+
+    await expect(page.getByRole('button', { name: /Actualizar intención/i })).toBeVisible({ timeout: 10_000 });
   });
 });

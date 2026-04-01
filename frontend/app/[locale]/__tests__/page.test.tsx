@@ -30,6 +30,10 @@ jest.mock('@/components/ui', () => ({
     React.createElement('div', { 'data-testid': `campaign-${campaign.id}` }, campaign.title),
   ShelterCard: ({ shelter }: any) =>
     React.createElement('div', { 'data-testid': `shelter-${shelter.id}` }, shelter.name),
+  CTASection: ({ children, title }: any) =>
+    React.createElement('section', {}, title && React.createElement('h2', {}, title), children),
+  Container: ({ children, className }: any) =>
+    React.createElement('div', { className }, children),
   FAQAccordion: () => null,
 }));
 jest.mock('@/lib/hooks/useFAQs', () => ({
@@ -71,6 +75,7 @@ describe('HomePage', () => {
     expect(screen.getByText('Ver Animales')).toBeInTheDocument();
     expect(screen.getByText('Busco Adoptar')).toBeInTheDocument();
     expect(screen.getByText('Donar')).toBeInTheDocument();
+    expect(screen.getByText('Trabaja con Nosotros')).toBeInTheDocument();
   });
 
   it('renders how it works section', () => {
@@ -112,7 +117,7 @@ describe('HomePage', () => {
     setupMocks({ shelters: mockShelters });
     render(<HomePage />);
     expect(screen.getByText('Refugios destacados')).toBeInTheDocument();
-    expect(screen.getByTestId('shelter-1')).toBeInTheDocument();
+    expect(screen.getAllByTestId('shelter-1').length).toBeGreaterThanOrEqual(1);
   });
 
   it('hides shelter section when no shelters', () => {

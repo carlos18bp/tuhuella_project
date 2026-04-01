@@ -20,7 +20,7 @@ export default function ShelterCard({ shelter }: ShelterCardProps) {
       href={ROUTES.SHELTER_DETAIL(shelter.id)}
       className="group h-full flex flex-col rounded-2xl border border-border-primary/80 bg-surface-primary overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 hover:border-border-secondary/80 transition-all duration-300 card-emerald"
     >
-      <div className="aspect-[16/9] bg-gradient-to-br from-teal-50 to-stone-100 relative overflow-hidden">
+      <div className="aspect-[16/9] bg-gradient-to-br from-teal-50 to-stone-100 dark:from-teal-950/35 dark:to-surface-tertiary relative overflow-hidden">
         {imageUrl ? (
           <img
             src={imageUrl}
@@ -28,7 +28,7 @@ export default function ShelterCard({ shelter }: ShelterCardProps) {
             className="absolute inset-0 w-full h-full object-cover"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-stone-300">
+          <div className="absolute inset-0 flex items-center justify-center text-stone-300 dark:text-teal-600/45">
             <Home className="h-12 w-12" strokeWidth={1.2} />
           </div>
         )}
@@ -36,9 +36,9 @@ export default function ShelterCard({ shelter }: ShelterCardProps) {
       </div>
       <div className="p-6 flex-1 flex flex-col">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-text-primary group-hover:text-teal-700 transition-colors">{shelter.name}</h3>
+          <h3 className="font-semibold text-text-primary group-hover:text-teal-700 dark:group-hover:text-teal-300 transition-colors">{shelter.name}</h3>
           {shelter.is_verified && (
-            <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-medium shrink-0 ring-1 ring-emerald-200/60">
+            <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300 font-medium shrink-0 ring-1 ring-emerald-200/60 dark:ring-emerald-700/40">
               <BadgeCheck className="h-3.5 w-3.5" />
               {t('verified')}
             </span>

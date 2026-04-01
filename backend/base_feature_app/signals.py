@@ -10,8 +10,18 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
 from base_feature_app.models import (
-    AdoptionApplication, Campaign, Donation, ShelterInvite,
-    Sponsorship, UpdatePost,
+    AdoptionApplication,
+    Animal,
+    AnimalStatusHistory,
+    Campaign,
+    Donation,
+    Payment,
+    PaymentHistory,
+    Shelter,
+    ShelterInvite,
+    ShelterMembership,
+    Sponsorship,
+    UpdatePost,
 )
 
 logger = logging.getLogger(__name__)
@@ -67,6 +77,78 @@ def sponsorship_track_prev_status(sender, instance, **kwargs):
         instance._prev_status = None
 
 
+@receiver(pre_save, sender=Animal)
+def animal_track_prev_status(sender, instance, **kwargs):
+    if instance.pk:
+        try:
+            instance._prev_animal_status = Animal.objects.values_list(
+                'status', flat=True,
+            ).get(pk=instance.pk)
+        except Animal.DoesNotExist:
+            instance._prev_animal_status = None
+    else:
+        instance._prev_animal_status = None
+
+
+@receiver(post_save, sender=Animal)
+def animal_record_status_history(sender, instance, created, **kwargs):
+    prev = getattr(instance, '_prev_animal_status', None)
+    if created:
+        AnimalStatusHistory.objects.create(
+            animal=instance,
+            previous_status='',
+            new_status=instance.status,
+        )
+    elif prev is not None and prev != instance.status:
+        AnimalStatusHistory.objects.create(
+            animal=instance,
+            previous_status=prev,
+            new_status=instance.status,
+        )
+
+
+@receiver(pre_save, sender=Payment)
+def payment_track_prev_status(sender, instance, **kwargs):
+    if instance.pk:
+        try:
+            instance._prev_payment_status = Payment.objects.values_list(
+                'status', flat=True,
+            ).get(pk=instance.pk)
+        except Payment.DoesNotExist:
+            instance._prev_payment_status = None
+    else:
+        instance._prev_payment_status = None
+
+
+@receiver(post_save, sender=Payment)
+def payment_record_status_history(sender, instance, created, **kwargs):
+    prev = getattr(instance, '_prev_payment_status', None)
+    source = getattr(instance, '_history_source', PaymentHistory.Source.SYSTEM)
+    if created:
+        PaymentHistory.objects.create(
+            payment=instance,
+            previous_status='',
+            new_status=instance.status,
+            source=source,
+        )
+    elif prev is not None and prev != instance.status:
+        PaymentHistory.objects.create(
+            payment=instance,
+            previous_status=prev,
+            new_status=instance.status,
+            source=source,
+        )
+
+
+@receiver(post_save, sender=Shelter)
+def shelter_ensure_owner_membership(sender, instance, created, **kwargs):
+    ShelterMembership.objects.get_or_create(
+        shelter=instance,
+        user=instance.owner,
+        defaults={'role': ShelterMembership.Role.OWNER},
+    )
+
+
 @receiver(pre_save, sender=Campaign)
 def campaign_track_prev_raised(sender, instance, **kwargs):
     if instance.pk:
@@ -119,6 +201,22 @@ def on_adoption_application_save(sender, instance, created, **kwargs):
                     'status': app.status,
                     'link': f'/my-applications',
                 })
+
+    # Sync animal adoption outcome when application is approved
+    if not created:
+        prev = getattr(app, '_prev_status', None)
+        if (
+            app.status == AdoptionApplication.Status.APPROVED
+            and prev != AdoptionApplication.Status.APPROVED
+            and app.animal_id
+        ):
+            from django.utils import timezone as tz
+            animal = app.animal
+            animal.status = Animal.Status.ADOPTED
+            animal.adopted_by = app.user
+            animal.adopted_at = tz.now()
+            animal.adoption_application = app
+            animal.save()
 
 
 @receiver(post_save, sender=UpdatePost)

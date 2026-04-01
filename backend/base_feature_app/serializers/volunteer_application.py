@@ -6,16 +6,7 @@ from base_feature_app.models import VolunteerApplication, VolunteerPosition
 class VolunteerApplicationCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = VolunteerApplication
-        fields = [
-            'position',
-            'first_name',
-            'last_name',
-            'email',
-            'phone',
-            'city',
-            'country',
-            'motivation',
-        ]
+        fields = ['position', 'motivation']
 
     def validate_position(self, value):
         if not value.is_active:

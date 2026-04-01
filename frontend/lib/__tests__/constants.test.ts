@@ -52,6 +52,10 @@ describe('constants', () => {
       expect(API_ENDPOINTS.SPONSORSHIP_UPDATE_STATUS(10)).toBe('/sponsorships/10/status/');
     });
 
+    it('PAYMENTS exposes the list endpoint path', () => {
+      expect(API_ENDPOINTS.PAYMENTS).toBe('/payments/');
+    });
+
     it('PAYMENT_STATUS returns the correct API path for a given id', () => {
       expect(API_ENDPOINTS.PAYMENT_STATUS(15)).toBe('/payments/15/status/');
     });

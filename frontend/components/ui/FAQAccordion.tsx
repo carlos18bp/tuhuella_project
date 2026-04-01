@@ -18,13 +18,19 @@ function AccordionItem({ faq }: { faq: FAQItem }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className={`rounded-xl border border-border-primary bg-surface-primary overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 ${open ? 'border-l-2 border-l-teal-500' : ''}`}>
+    <div
+      className={`rounded-xl border border-border-primary bg-surface-primary overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 ${
+        open ? 'border-l-2 border-l-teal-500 dark:border-l-teal-400' : ''
+      }`}
+    >
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className={`flex w-full items-center justify-between p-5 text-left transition-colors ${open ? 'bg-surface-secondary/50' : 'hover:bg-surface-hover'}`}
+        className={`flex w-full min-h-11 items-center justify-between gap-3 p-5 text-left transition-colors ${
+          open ? 'bg-surface-secondary/50' : 'hover:bg-surface-hover'
+        }`}
       >
-        <h3 className="font-semibold text-text-primary pr-4">{faq.question}</h3>
+        <h3 className="font-semibold text-text-primary pr-2 min-w-0 flex-1 break-words">{faq.question}</h3>
         <ChevronDown
           className={`h-5 w-5 shrink-0 transition-transform duration-200 ${
             open ? 'rotate-180 text-teal-500' : 'text-text-quaternary'
@@ -48,7 +54,7 @@ function AccordionItem({ faq }: { faq: FAQItem }) {
 
 export default function FAQAccordion({ items, title, subtitle }: FAQAccordionProps) {
   return (
-    <section className="py-16">
+    <section className="py-10 md:py-12">
       <div className="mx-auto max-w-3xl px-6">
         {title && (
           <div className="text-center mb-10">

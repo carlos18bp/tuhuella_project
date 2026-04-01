@@ -128,7 +128,7 @@ def test_create_favorites_creates_records():
 
 @pytest.mark.django_db
 def test_delete_fake_data_clears_records():
-    """delete_fake_data command removes all non-superuser data."""
+    """delete_fake_data --confirm removes all non-superuser fake data."""
     call_command('create_users', '--count', '4')
     call_command('create_shelters', '--count', '2')
     call_command('create_animals', '--count', '5')

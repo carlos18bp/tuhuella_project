@@ -1,7 +1,10 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 
+from base_feature_app.models.mixins import ArchivableModel
 
-class Payment(models.Model):
+
+class Payment(ArchivableModel):
     class Status(models.TextChoices):
         PENDING = 'pending', 'Pending'
         APPROVED = 'approved', 'Approved'
@@ -40,6 +43,33 @@ class Payment(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    models.Q(donation__isnull=False, sponsorship__isnull=True)
+                    | models.Q(donation__isnull=True, sponsorship__isnull=False)
+                ),
+                name='payment_exactly_one_parent',
+            ),
+        ]
+
+    def clean(self):
+        super().clean()
+        d_ok = self.donation_id is not None
+        s_ok = self.sponsorship_id is not None
+        if d_ok == s_ok:
+            raise ValidationError(
+                'Payment must be linked to exactly one of donation or sponsorship.',
+            )
+
+    @property
+    def modality(self):
+        """Business modality derived from FK (donation vs sponsorship)."""
+        if self.donation_id:
+            return 'donation'
+        if self.sponsorship_id:
+            return 'sponsorship'
+        return ''
 
     def __str__(self):
         return f'Payment {self.provider_reference or self.pk} ({self.get_status_display()})'

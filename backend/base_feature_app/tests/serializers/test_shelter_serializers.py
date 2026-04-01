@@ -57,3 +57,17 @@ def test_shelter_create_update_serializer_rejects_missing_name():
 
     assert not serializer.is_valid()
     assert 'name' in serializer.errors
+
+
+@pytest.mark.django_db
+def test_shelter_create_update_serializer_accepts_blank_website():
+    """Website is optional; empty string is valid."""
+    serializer = ShelterCreateUpdateSerializer(data={
+        'name': 'No Web Shelter',
+        'city': 'Medellín',
+        'description_es': 'Sin sitio web',
+        'phone': '3001112233',
+        'website': '',
+    })
+
+    assert serializer.is_valid(), serializer.errors

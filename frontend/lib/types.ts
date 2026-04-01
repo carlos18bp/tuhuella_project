@@ -100,6 +100,9 @@ export type Animal = {
   shelter_name: string;
   shelter_city?: string;
   gallery_urls?: string[];
+  adopted_at?: string | null;
+  adoption_application?: number | null;
+  archived_at?: string | null;
   created_at: string;
   updated_at?: string;
 };
@@ -165,15 +168,19 @@ export type VolunteerPosition = {
 
 export type VolunteerApplicationStatus = 'pending' | 'reviewed' | 'accepted' | 'rejected';
 
+/** Cuerpo enviado al crear postulación (VolunteerApplicationCreateSerializer). */
+export type VolunteerApplicationCreatePayload = {
+  position: number;
+  motivation: string;
+};
+
+/**
+ * Postulación en API: datos de contacto vienen del usuario autenticado, no del modelo.
+ * Ampliar si se añade un serializer de listado con más campos.
+ */
 export type VolunteerApplication = {
   id: number;
   position: number;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  city: string;
-  country: string;
   motivation: string;
   status: VolunteerApplicationStatus;
   created_at: string;
@@ -191,10 +198,13 @@ export type StrategicAlly = {
 
 export type DonationStatus = 'pending' | 'paid' | 'failed' | 'refunded';
 
+export type DonationDestination = 'platform' | 'shelter' | 'campaign';
+
 export type Donation = {
   id: number;
   user: number;
   user_email: string;
+  destination: DonationDestination;
   shelter?: number | null;
   shelter_name?: string | null;
   shelter_city?: string | null;
@@ -207,6 +217,12 @@ export type Donation = {
   created_at: string;
   updated_at?: string;
 };
+
+/** Payload alineado con DonationCreateUpdateSerializer (XOR por destino). */
+export type DonationCreatePayload =
+  | { destination: 'platform'; amount: number; message?: string }
+  | { destination: 'shelter'; shelter: number; amount: number; message?: string }
+  | { destination: 'campaign'; campaign: number; amount: number; message?: string; shelter?: number };
 
 export type SponsorshipFrequency = 'monthly' | 'one_time';
 export type SponsorshipStatus = 'pending' | 'active' | 'paused' | 'canceled';
@@ -231,16 +247,19 @@ export type Sponsorship = {
 
 export type PaymentStatus = 'pending' | 'approved' | 'declined' | 'voided' | 'error';
 
+export type PaymentModality = 'donation' | 'sponsorship' | '';
+
 export type Payment = {
   id: number;
   donation?: number | null;
   sponsorship?: number | null;
+  modality?: PaymentModality;
   provider: string;
   provider_reference: string;
   amount: string;
   status: PaymentStatus;
   paid_at?: string | null;
-  metadata: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
   created_at: string;
   updated_at?: string;
 };

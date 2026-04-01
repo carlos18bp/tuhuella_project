@@ -130,12 +130,14 @@ def test_animal_update_denied_for_non_owner(authenticated_client, animal):
 
 @pytest.mark.django_db
 def test_animal_delete_by_shelter_owner(shelter_admin_client, animal):
-    """Shelter owner can delete their animal."""
+    """Shelter owner archives their animal (soft-delete, no CASCADE)."""
     pk = animal.pk
     response = shelter_admin_client.delete(reverse('animal-delete', args=[pk]))
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
-    assert not Animal.objects.filter(pk=pk).exists()
+    animal.refresh_from_db()
+    assert animal.archived_at is not None
+    assert animal.status == animal.Status.ARCHIVED
 
 
 @pytest.mark.django_db

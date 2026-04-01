@@ -34,12 +34,13 @@ describe('Footer', () => {
   it('renders info section links', () => {
     render(<Footer />);
     expect(screen.getByRole('link', { name: 'Preguntas Frecuentes' })).toHaveAttribute('href', '/faq');
+    expect(screen.getByRole('link', { name: 'Contáctanos' })).toHaveAttribute('href', '/contactanos');
     expect(screen.getByRole('link', { name: 'Registrar Refugio' })).toHaveAttribute('href', '/shelter/onboarding');
   });
 
   it('renders copyright text with current year', () => {
     jest.useFakeTimers();
-    jest.setSystemTime(new Date('2026-01-15'));
+    jest.setSystemTime(Date.UTC(2026, 0, 15));
     render(<Footer />);
     expect(screen.getByText(/2026.*Tu Huella/)).toBeInTheDocument();
     jest.useRealTimers();

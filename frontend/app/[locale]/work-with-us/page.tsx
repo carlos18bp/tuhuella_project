@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from '@/i18n/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import {
   Camera, Heart, Truck, Stethoscope, Share2,
   CalendarCheck, Home, HandCoins, ArrowRight,
-  GraduationCap, Palette, Languages, Dog,
+  GraduationCap, Palette, Languages, Dog, Search,
 } from 'lucide-react';
 
 import { api } from '@/lib/services/http';
@@ -35,6 +35,21 @@ export default function WorkWithUsPage() {
   const [positions, setPositions] = useState<VolunteerPosition[]>([]);
   const [allies, setAllies] = useState<StrategicAlly[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredPositions = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return positions;
+    return positions.filter((pos) => {
+      const blob = [
+        pos.title,
+        pos.description ?? '',
+        pos.requirements ?? '',
+        pos.category,
+      ].join(' ').toLowerCase();
+      return blob.includes(q);
+    });
+  }, [positions, searchQuery]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,7 +70,7 @@ export default function WorkWithUsPage() {
   }, [locale]);
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
+    <div className="mx-auto max-w-[1400px] px-6 py-10 min-w-0 overflow-x-hidden">
       <h1 className="text-2xl sm:text-3xl font-bold text-text-primary heading-decorated">{t('title')}</h1>
       <p className="mt-2 text-text-tertiary max-w-2xl">{t('subtitle')}</p>
 
@@ -63,6 +78,19 @@ export default function WorkWithUsPage() {
       <div className="mt-8 md:mt-12">
         <h2 className="text-xl font-semibold text-text-primary">{t('positionsTitle')}</h2>
         <p className="text-sm text-text-tertiary mt-1">{t('positionsSubtitle')}</p>
+
+        {!loading && positions.length > 0 && (
+          <div className="relative mt-4 max-w-md">
+            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-text-quaternary pointer-events-none" aria-hidden />
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t('searchPlaceholder')}
+              className="w-full min-h-11 rounded-xl border border-border-primary bg-surface-primary py-2.5 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-quaternary focus:border-teal-500 dark:focus:border-teal-500/60 focus:outline-none focus:ring-1 focus:ring-teal-500 dark:focus:ring-teal-500/20"
+            />
+          </div>
+        )}
 
         {loading ? (
           <div role="status" aria-label="loading" className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
@@ -72,13 +100,15 @@ export default function WorkWithUsPage() {
           </div>
         ) : positions.length === 0 ? (
           <p className="mt-6 text-text-tertiary">{t('noPositions')}</p>
+        ) : filteredPositions.length === 0 ? (
+          <p className="mt-6 text-text-tertiary">{t('searchNoResults')}</p>
         ) : (
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {positions.map((pos) => {
+            {filteredPositions.map((pos) => {
               const Icon = categoryIcons[pos.category] || Heart;
               return (
                 <div key={pos.id} className="rounded-2xl border border-border-primary bg-surface-primary p-6 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="h-10 w-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+                  <div className="h-10 w-10 rounded-lg bg-teal-50 dark:bg-teal-950/35 text-teal-600 dark:text-teal-400 ring-1 ring-teal-200/50 dark:ring-teal-700/30 flex items-center justify-center">
                     <Icon className="h-5 w-5" />
                   </div>
                   <h3 className="mt-3 font-semibold text-text-primary">{pos.title}</h3>
@@ -91,7 +121,7 @@ export default function WorkWithUsPage() {
                   )}
                   <Link
                     href={ROUTES.VOLUNTEER_APPLY(pos.id)}
-                    className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-teal-600 hover:text-teal-700 transition-colors"
+                    className="mt-4 inline-flex items-center justify-center gap-1.5 min-h-11 text-sm font-medium text-teal-600 hover:text-teal-700 dark:hover:text-teal-400 transition-colors"
                   >
                     {t('apply')}
                     <ArrowRight className="h-4 w-4" />
@@ -113,7 +143,7 @@ export default function WorkWithUsPage() {
             </div>
             <Link
               href={ROUTES.STRATEGIC_ALLIES}
-              className="text-sm text-teal-600 hover:text-teal-700 font-medium flex items-center gap-1 transition-colors"
+              className="text-sm text-teal-600 hover:text-teal-700 dark:hover:text-teal-400 font-medium inline-flex items-center justify-center min-h-11 gap-1 transition-colors"
             >
               {t('viewAllAllies')}
               <ArrowRight className="h-4 w-4" />

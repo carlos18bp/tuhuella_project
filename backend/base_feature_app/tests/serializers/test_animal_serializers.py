@@ -6,6 +6,21 @@ from base_feature_app.serializers.animal_create_update import (
 from base_feature_app.serializers.animal_detail import AnimalDetailSerializer
 from base_feature_app.serializers.animal_list import AnimalListSerializer
 
+ANIMAL_DETAIL_EXTRA_FIELD_NAMES = (
+    'weight',
+    'is_house_trained',
+    'good_with_kids',
+    'good_with_dogs',
+    'good_with_cats',
+    'energy_level',
+    'coat_color',
+    'intake_date',
+    'microchip_id',
+    'adopted_at',
+    'adoption_application',
+    'archived_at',
+)
+
 
 @pytest.mark.django_db
 def test_animal_list_serializer_fields(animal):
@@ -48,10 +63,7 @@ def test_animal_detail_serializer_includes_new_fields(animal):
     """Detail serializer returns all new animal fields."""
     data = AnimalDetailSerializer(animal).data
 
-    for field in [
-        'weight', 'is_house_trained', 'good_with_kids', 'good_with_dogs',
-        'good_with_cats', 'energy_level', 'coat_color', 'intake_date', 'microchip_id',
-    ]:
+    for field in ANIMAL_DETAIL_EXTRA_FIELD_NAMES:
         assert field in data, f'Missing field: {field}'
 
 

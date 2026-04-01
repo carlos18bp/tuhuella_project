@@ -6,13 +6,20 @@ import { Link } from '@/i18n/navigation';
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth';
 import { useCampaignStore } from '@/lib/stores/campaignStore';
 import { ROUTES } from '@/lib/constants';
+import {
+  shelterPillAmber,
+  shelterPillEmerald,
+  shelterPillNeutralSecondary,
+  shelterPillNeutralTertiary,
+  shelterPillTeal,
+} from '@/lib/ui/shelterPanelBadges';
 
 const statusLabels: Record<string, { label: string; color: string }> = {
-  draft: { label: 'Borrador', color: 'bg-surface-tertiary text-text-secondary' },
-  active: { label: 'Activa', color: 'bg-teal-50 text-teal-700' },
-  completed: { label: 'Completada', color: 'bg-emerald-50 text-emerald-700' },
-  paused: { label: 'Pausada', color: 'bg-amber-50 text-amber-700' },
-  archived: { label: 'Archivada', color: 'bg-surface-tertiary text-text-tertiary' },
+  draft: { label: 'Borrador', color: shelterPillNeutralSecondary },
+  active: { label: 'Activa', color: shelterPillTeal },
+  completed: { label: 'Completada', color: shelterPillEmerald },
+  paused: { label: 'Pausada', color: shelterPillAmber },
+  archived: { label: 'Archivada', color: shelterPillNeutralTertiary },
 };
 
 export default function ShelterCampaignsPage() {
@@ -26,14 +33,16 @@ export default function ShelterCampaignsPage() {
   }, [fetchCampaigns]);
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
+    <div className="mx-auto max-w-[1400px] px-6 py-10 min-w-0 overflow-x-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Mis Campañas</h1>
           <p className="mt-1 text-text-tertiary">Crea y gestiona campañas de recaudación</p>
         </div>
-        <Link href={ROUTES.SHELTER_CAMPAIGNS + '/nueva'}
-          className="bg-amber-600 text-white rounded-full px-5 py-2.5 text-sm font-medium hover:bg-amber-700 transition-colors text-center">
+        <Link
+          href={ROUTES.SHELTER_CAMPAIGNS + '/nueva'}
+          className="inline-flex items-center justify-center min-h-11 w-full sm:w-auto bg-amber-600 text-white rounded-full px-5 py-2.5 text-sm font-medium hover:bg-amber-700 transition-colors text-center"
+        >
           + Nueva campaña
         </Link>
       </div>
@@ -66,7 +75,7 @@ export default function ShelterCampaignsPage() {
                 </div>
                 <div className="mt-3 w-full bg-surface-tertiary rounded-full h-2">
                   <div
-                    className="bg-amber-500 h-2 rounded-full transition-all"
+                    className="bg-amber-500 dark:bg-amber-600 h-2 rounded-full transition-all"
                     style={{ width: `${campaign.progress_percentage}%` }}
                   />
                 </div>

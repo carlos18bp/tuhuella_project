@@ -130,6 +130,7 @@ export const donationListSchema: SchemaDefinition = {
     shelter_city: { type: 'string', nullable: true },
     campaign: { type: 'number', nullable: true },
     campaign_title: { type: 'string', nullable: true },
+    destination: { type: 'string' },
     amount: { type: 'string' },
     message: { type: 'string', nullable: true },
     status: { type: 'string' },
@@ -144,6 +145,9 @@ export const paymentListSchema: SchemaDefinition = {
   source: 'serializers/payment_list.py',
   fields: {
     id: { type: 'number' },
+    donation: { type: 'number', nullable: true },
+    sponsorship: { type: 'number', nullable: true },
+    modality: { type: 'string' },
     provider: { type: 'string' },
     provider_reference: { type: 'string' },
     amount: { type: 'string' },

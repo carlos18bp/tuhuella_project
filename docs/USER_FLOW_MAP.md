@@ -7,7 +7,7 @@ Use this document to understand each flow's steps, branching conditions, role re
 > **Flow IDs in this document match `e2e/flow-definitions.json` and `e2e/helpers/flow-tags.ts` exactly.**
 
 **Version:** 5.0.0
-**Last Updated:** 2026-03-28
+**Last Updated:** 2026-03-31
 
 ---
 
@@ -38,12 +38,14 @@ Use this document to understand each flow's steps, branching conditions, role re
 
 ## Module Index
 
+**Locale:** Rutas de la app viven bajo `[locale]` (`/es/...`, `/en/...`). Los segmentos de la columna **Frontend Route** coinciden con [`frontend/app/[locale]/`](../frontend/app/[locale]/) (sin prefijo de idioma).
+
 | Flow ID | Name | Module | Priority | Roles | Frontend Route |
 |---------|------|--------|----------|-------|----------------|
 | `home-loads` | Home page loads | home | P1 | shared | `/` |
-| `home-to-animals` | Navigate from home to animals | home | P2 | shared | `/` → `/animales` |
-| `home-to-shelters` | Navigate from home to shelters | home | P2 | shared | `/` → `/refugios` |
-| `home-to-campaigns` | Navigate from home to campaigns | home | P3 | shared | `/` → `/campanas` |
+| `home-to-animals` | Navigate from home to animals | home | P2 | shared | `/` → `/animals` |
+| `home-to-shelters` | Navigate from home to shelters | home | P2 | shared | `/` → `/shelters` |
+| `home-to-campaigns` | Navigate from home to campaigns | home | P3 | shared | `/` → `/campaigns` |
 | `auth-sign-in-form` | Sign-in form display and interaction | auth | P1 | guest | `/sign-in` |
 | `auth-login-invalid` | Login with invalid credentials | auth | P1 | guest | `/sign-in` |
 | `auth-sign-up-form` | Sign-up form display and validation | auth | P1 | guest | `/sign-up` |
@@ -53,62 +55,63 @@ Use this document to understand each flow's steps, branching conditions, role re
 | `auth-sign-out` | Sign out | auth | P2 | adopter, shelter_admin, admin | any page |
 | `auth-session-persistence` | Session persistence and token refresh | auth | P2 | adopter, shelter_admin, admin | any protected route |
 | `auth-google-login` | Google OAuth login | auth | P2 | guest | `/sign-in`, `/sign-up` |
-| `animal-browse` | Browse animals listing | animal | P1 | shared | `/animales` |
-| `animal-filter` | Filter animals by species/size/age | animal | P2 | shared | `/animales` |
-| `animal-detail` | View animal detail | animal | P1 | shared | `/animales/[id]` |
-| `animal-gallery` | Animal gallery interaction | animal | P3 | shared | `/animales/[id]` |
-| `shelter-browse` | Browse shelters listing | shelter | P2 | shared | `/refugios` |
-| `shelter-detail` | View shelter profile | shelter | P2 | shared | `/refugios/[id]` |
-| `shelter-onboarding` | Shelter registration form | shelter | P1 | shelter_admin | `/refugio/onboarding` |
-| `campaign-browse` | Browse campaigns | campaign | P2 | shared | `/campanas` |
-| `campaign-detail` | View campaign detail | campaign | P2 | shared | `/campanas/[id]` |
-| `adoption-submit` | Submit adoption application | adoption | P1 | adopter | `/animales/[id]` |
-| `adoption-track` | Track adoption applications | adoption | P2 | adopter | `/mis-solicitudes` |
-| `adoption-manage` | Manage adoption applications (shelter) | adoption | P1 | shelter_admin | `/refugio/solicitudes` |
-| `donation-checkout` | Donation checkout flow | donation | P1 | adopter | `/checkout/donacion` |
-| `donation-history` | View donation history | donation | P2 | adopter | `/mis-donaciones` |
-| `payment-confirmation` | Payment confirmation page | donation | P2 | adopter | `/checkout/confirmacion` |
-| `sponsorship-checkout` | Sponsorship checkout flow | sponsorship | P1 | adopter | `/checkout/apadrinamiento` |
-| `sponsorship-history` | View sponsorships | sponsorship | P2 | adopter | `/mis-apadrinamientos` |
-| `favorite-toggle` | Toggle animal favorite | favorite | P2 | adopter | `/animales/[id]` |
-| `favorite-list` | View favorites list | favorite | P2 | adopter | `/favoritos` |
-| `adopter-intent-create` | Create adopter intent | adopter-intent | P3 | adopter | `/mi-intencion` |
-| `adopter-intent-browse` | Browse adopter intents | adopter-intent | P3 | shared | `/busco-adoptar` |
-| `adopter-profile` | User profile management | adopter | P2 | adopter | `/mi-perfil` |
-| `shelter-panel-dashboard` | Shelter dashboard | shelter-panel | P1 | shelter_admin | `/refugio/dashboard` |
-| `shelter-panel-animals` | Shelter manage animals | shelter-panel | P1 | shelter_admin | `/refugio/animales` |
-| `shelter-panel-campaigns` | Shelter manage campaigns | shelter-panel | P2 | shelter_admin | `/refugio/campanas` |
-| `shelter-panel-donations` | Shelter view donations | shelter-panel | P2 | shelter_admin | `/refugio/donaciones` |
-| `shelter-panel-settings` | Shelter settings | shelter-panel | P2 | shelter_admin | `/refugio/configuracion` |
+| `animal-browse` | Browse animals listing | animal | P1 | shared | `/animals` |
+| `animal-filter` | Filter animals by species/size/age | animal | P2 | shared | `/animals` |
+| `animal-detail` | View animal detail | animal | P1 | shared | `/animals/[animalId]` |
+| `animal-gallery` | Animal gallery interaction | animal | P3 | shared | `/animals/[animalId]` |
+| `shelter-browse` | Browse shelters listing | shelter | P2 | shared | `/shelters` |
+| `shelter-detail` | View shelter profile | shelter | P2 | shared | `/shelters/[shelterId]` |
+| `shelter-onboarding` | Shelter registration form | shelter | P1 | shelter_admin | `/shelter/onboarding` |
+| `campaign-browse` | Browse campaigns | campaign | P2 | shared | `/campaigns` |
+| `campaign-detail` | View campaign detail | campaign | P2 | shared | `/campaigns/[campaignId]` |
+| `adoption-submit` | Submit adoption application | adoption | P1 | adopter | `/animals/[animalId]` |
+| `adoption-track` | Track adoption applications | adoption | P2 | adopter | `/my-applications` |
+| `adoption-manage` | Manage adoption applications (shelter) | adoption | P1 | shelter_admin | `/shelter/applications` |
+| `donation-checkout` | Donation checkout flow | donation | P1 | adopter | `/checkout/donation` |
+| `donation-history` | View donation history | donation | P2 | adopter | `/my-donations` |
+| `payment-confirmation` | Payment confirmation page | donation | P2 | adopter | `/checkout/confirmation` |
+| `sponsorship-checkout` | Sponsorship checkout flow | sponsorship | P1 | adopter | `/checkout/sponsorship` |
+| `sponsorship-history` | View sponsorships | sponsorship | P2 | adopter | `/my-sponsorships` |
+| `favorite-toggle` | Toggle animal favorite | favorite | P2 | adopter | `/animals/[animalId]` |
+| `favorite-list` | View favorites list | favorite | P2 | adopter | `/favorites` |
+| `adopter-intent-create` | Create adopter intent | adopter-intent | P3 | adopter | `/my-intent` |
+| `adopter-intent-browse` | Browse adopter intents | adopter-intent | P3 | shared | `/looking-to-adopt` |
+| `adopter-profile` | User profile management | adopter | P2 | adopter | `/my-profile` |
+| `shelter-panel-dashboard` | Shelter dashboard | shelter-panel | P1 | shelter_admin | `/shelter/dashboard` |
+| `shelter-panel-animals` | Shelter manage animals | shelter-panel | P1 | shelter_admin | `/shelter/animals` |
+| `shelter-panel-campaigns` | Shelter manage campaigns | shelter-panel | P2 | shelter_admin | `/shelter/campaigns` |
+| `shelter-panel-donations` | Shelter view donations | shelter-panel | P2 | shelter_admin | `/shelter/donations` |
+| `shelter-panel-settings` | Shelter settings | shelter-panel | P2 | shelter_admin | `/shelter/settings` |
 | `admin-dashboard` | Admin dashboard metrics | admin | P1 | admin | `/admin/dashboard` |
-| `admin-approve-shelters` | Admin approve/reject shelters | admin | P1 | admin | `/admin/refugios/aprobar` |
-| `admin-moderation` | Admin moderation view | admin | P2 | admin | `/admin/moderacion` |
-| `admin-metrics` | Admin detailed metrics | admin | P2 | admin | `/admin/metricas` |
-| `admin-payments` | Admin payment audit | admin | P2 | admin | `/admin/pagos` |
+| `admin-approve-shelters` | Admin approve/reject shelters | admin | P1 | admin | `/admin/shelters/approve` |
+| `admin-moderation` | Admin moderation view | admin | P2 | admin | `/admin/moderation` |
+| `admin-metrics` | Admin detailed metrics | admin | P2 | admin | `/admin/metrics` |
+| `admin-payments` | Admin payment audit | admin | P2 | admin | `/admin/payments` |
 | `navigation-header` | Header navigation | navigation | P2 | shared | all pages |
 | `navigation-footer` | Footer navigation | navigation | P4 | shared | all pages |
 | `navigation-between-pages` | Cross-page navigation | navigation | P2 | shared | all pages |
 | `public-faq` | FAQ page | public | P4 | shared | `/faq` |
-| `shelter-panel-applications` | Shelter manage adoption applications | shelter-panel | P1 | shelter_admin | `/refugio/solicitudes` |
-| `adoption-form-wizard` | Adoption form wizard completion | adoption | P1 | adopter | `/adopt/[id]` |
-| `donation-checkout-submit` | Donation checkout form submission | donation | P1 | adopter | `/checkout/donacion` |
-| `sponsorship-checkout-submit` | Sponsorship checkout form submission | sponsorship | P1 | adopter | `/checkout/apadrinamiento` |
+| `public-contact` | Contact page | public | P4 | shared | `/contactanos` |
+| `shelter-panel-applications` | Shelter manage adoption applications | shelter-panel | P1 | shelter_admin | `/shelter/applications` |
+| `adoption-form-wizard` | Adoption form wizard completion | adoption | P1 | adopter | `/adopt/[animalId]` |
+| `donation-checkout-submit` | Donation checkout form submission | donation | P1 | adopter | `/checkout/donation` |
+| `sponsorship-checkout-submit` | Sponsorship checkout form submission | sponsorship | P1 | adopter | `/checkout/sponsorship` |
 | `notification-preferences` | Notification preferences management | adopter | P2 | adopter | `/my-profile/notifications` |
 | `notification-bell` | Notification bell interaction | navigation | P2 | adopter, shelter_admin, admin | all pages |
-| `shelter-panel-updates` | Shelter manage update posts | shelter-panel | P2 | shelter_admin | `/refugio/updates` |
-| `shelter-panel-update-create` | Shelter create update post | shelter-panel | P2 | shelter_admin | `/refugio/updates/create` |
-| `shelter-detail-view-animals` | Shelter detail view animals link | shelter | P2 | shared | `/refugios/[id]` |
+| `shelter-panel-updates` | Shelter manage update posts | shelter-panel | P2 | shelter_admin | `/shelter/updates` |
+| `shelter-panel-update-create` | Shelter create update post | shelter-panel | P2 | shelter_admin | `/shelter/updates/create` |
+| `shelter-detail-view-animals` | Shelter detail view animals link | shelter | P2 | shared | `/shelters/[shelterId]` |
 | `locale-switch` | Locale switcher toggle | navigation | P2 | shared | all pages |
-| `campaign-tab-toggle` | Campaign tab toggle | campaign | P3 | shared | `/campanas` |
-| `campaign-donate-cta` | Campaign donate CTA | campaign | P2 | shared | `/campanas/[id]` |
-| `shelter-detail-gallery` | Shelter detail gallery lightbox | shelter | P3 | shared | `/refugios/[id]` |
+| `campaign-tab-toggle` | Campaign tab toggle | campaign | P3 | shared | `/campaigns` |
+| `campaign-donate-cta` | Campaign donate CTA | campaign | P2 | shared | `/campaigns/[campaignId]` |
+| `shelter-detail-gallery` | Shelter detail gallery lightbox | shelter | P3 | shared | `/shelters/[shelterId]` |
 | `home-featured-animals-carousel` | Home featured animals carousel | home | P3 | shared | `/` |
 | `home-active-campaigns-carousel` | Home active campaigns carousel | home | P3 | shared | `/` |
 | `public-about` | About page | public | P4 | shared | `/about` |
 | `public-terms` | Terms page | public | P4 | shared | `/terms` |
 | `public-work-with-us` | Work with us page | public | P4 | shared | `/work-with-us` |
 | `public-strategic-allies` | Strategic allies page | public | P4 | shared | `/strategic-allies` |
-| `my-applications-list` | View my adoption applications | adoption | P2 | adopter | `/mis-solicitudes` |
+| `my-applications-list` | View my adoption applications | adoption | P2 | adopter | `/my-applications` |
 | `blog-browse` | Blog listing page | blog | P2 | shared | `/blog` |
 | `blog-detail` | Blog post detail | blog | P2 | shared | `/blog/[slug]` |
 | `blog-admin-list` | Admin blog list | blog-admin | P2 | admin | `/admin/blog` |
@@ -1719,6 +1722,34 @@ Use this document to understand each flow's steps, branching conditions, role re
 
 ---
 
+### public-contact
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P4 |
+| **Roles** | shared |
+| **Frontend route** | `/contactanos` |
+| **API endpoints** | `GET /api/google-captcha/site-key/`, `POST /api/contact/` |
+
+**Preconditions:** None.
+
+**Steps:**
+
+1. User navigates to `/contactanos`.
+2. Page renders heading (e.g. Contáctanos), contact form fields, and WhatsApp section.
+3. User may submit the form; client requests site key for reCAPTCHA when needed, then `POST /api/contact/` with the message payload.
+4. On success, UI shows a confirmation state.
+
+**E2E traceability:** [`frontend/e2e/public/contact.spec.ts`](../frontend/e2e/public/contact.spec.ts).
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| API error | Inline or toast error; user remains on page |
+
+---
+
 ### public-about
 
 | Field | Value |
@@ -2103,6 +2134,13 @@ Use this document to understand each flow's steps, branching conditions, role re
 | Contract Schemas | `e2e/helpers/contract-schemas.ts` | Backend serializer field definitions for mock validation |
 | Contract Validator | `e2e/helpers/contract-validate.ts` | Utility to detect mock/backend schema drift |
 | Contract Tests | `e2e/contracts/mock-contract.spec.ts` | CI-runnable contract validation suite |
+
+### Flow ID relationships (deduplication notes)
+
+| Flow IDs | Relationship |
+|----------|----------------|
+| `adoption-manage` / `shelter-panel-applications` | Misma pantalla de refugio: gestión de solicitudes en `/shelter/applications`. `adoption-manage` enfatiza el dominio “adopción”; `shelter-panel-applications` el panel del refugio. Los E2E deben cubrir la vista y las acciones de estado en esa ruta (ver specs de shelter + adoption). |
+| `adoption-track` / `my-applications-list` | Ambos referencian el seguimiento del adoptante en `/my-applications`. `adoption-track` incluye la comprobación de acceso (redirect si no hay sesión); `my-applications-list` cubre el listado autenticado. Un mismo test puede llevar ambos tags `@flow:` cuando aplique. |
 
 ### Maintenance Rules
 

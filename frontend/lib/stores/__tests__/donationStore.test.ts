@@ -15,11 +15,19 @@ const mockApi = api as jest.Mocked<typeof api>;
 
 const DONATION_FIXTURE = {
   id: 1,
+  user: 1,
+  user_email: 'u@example.com',
+  destination: 'shelter' as const,
   shelter: 1,
-  campaign: 1,
+  shelter_name: 'R1',
+  shelter_city: 'Bogotá',
+  campaign: null,
+  campaign_title: null,
   amount: '50000.00',
   status: 'pending',
   message: 'Keep going',
+  paid_at: null,
+  created_at: '2026-01-01T00:00:00Z',
 };
 
 describe('donationStore', () => {
@@ -70,13 +78,19 @@ describe('donationStore', () => {
   it('creates a donation via API', async () => {
     mockApi.post.mockResolvedValueOnce({ data: DONATION_FIXTURE });
 
-    const result = await useDonationStore.getState().createDonation({
+    const payload = {
+      destination: 'shelter' as const,
       shelter: 1,
       amount: 50000,
       message: 'Keep going',
-    });
+    };
+    const result = await useDonationStore.getState().createDonation(payload);
 
     expect(result.amount).toBe('50000.00');
     expect(mockApi.post).toHaveBeenCalledTimes(1);
+    expect(mockApi.post).toHaveBeenCalledWith(
+      expect.any(String),
+      payload,
+    );
   });
 });

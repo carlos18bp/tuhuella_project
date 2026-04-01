@@ -3,8 +3,30 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from base_feature_app.models import Payment
+from django.shortcuts import get_object_or_404
+
+from base_feature_app.models import Donation, Payment, Sponsorship
 from base_feature_app.serializers.payment_detail import PaymentDetailSerializer
+from base_feature_app.serializers.payment_list import PaymentListSerializer
+from base_feature_app.views.admin_views import is_superadmin
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def payment_list(request):
+    """List payments for platform audit (matches admin UI: role admin or staff)."""
+    u = request.user
+    if not (is_superadmin(u) or u.is_staff):
+        return Response(
+            {'error': 'Permission denied'},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+    qs = (
+        Payment.objects.filter(archived_at__isnull=True)
+        .select_related('donation', 'sponsorship')
+        .order_by('-created_at')[:500]
+    )
+    return Response(PaymentListSerializer(qs, many=True).data)
 
 
 @api_view(['POST'])
@@ -25,19 +47,31 @@ def create_payment_intent(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    payment = Payment.objects.create(
-        amount=amount,
-        provider='wompi',
-        provider_reference=f'PLACEHOLDER-{payment_type}-{reference_id}',
-        status=Payment.Status.PENDING,
-        metadata={'type': payment_type, 'reference_id': reference_id},
-    )
-
     if payment_type == 'donation':
-        payment.donation_id = reference_id
+        donation = get_object_or_404(Donation, pk=reference_id, user=request.user)
+        payment = Payment.objects.create(
+            donation=donation,
+            amount=amount,
+            provider='wompi',
+            provider_reference=f'PLACEHOLDER-donation-{reference_id}',
+            status=Payment.Status.PENDING,
+            metadata={'type': payment_type, 'reference_id': reference_id},
+        )
     elif payment_type == 'sponsorship':
-        payment.sponsorship_id = reference_id
-    payment.save()
+        sponsorship = get_object_or_404(Sponsorship, pk=reference_id, user=request.user)
+        payment = Payment.objects.create(
+            sponsorship=sponsorship,
+            amount=amount,
+            provider='wompi',
+            provider_reference=f'PLACEHOLDER-sponsorship-{reference_id}',
+            status=Payment.Status.PENDING,
+            metadata={'type': payment_type, 'reference_id': reference_id},
+        )
+    else:
+        return Response(
+            {'error': 'type must be donation or sponsorship'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     return Response({
         'payment_id': payment.pk,
@@ -66,7 +100,7 @@ def payment_webhook(request):
 @permission_classes([IsAuthenticated])
 def payment_status(request, pk):
     try:
-        payment = Payment.objects.get(pk=pk)
+        payment = Payment.objects.prefetch_related('status_history').get(pk=pk)
     except Payment.DoesNotExist:
         return Response({'error': 'Payment not found'}, status=status.HTTP_404_NOT_FOUND)
     serializer = PaymentDetailSerializer(payment, context={'request': request})

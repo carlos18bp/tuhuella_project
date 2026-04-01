@@ -20,12 +20,15 @@ const makeDonation = (overrides = {}) => ({
   id: 1,
   user: 1,
   user_email: 'test@example.com',
-  amount: '50000.00',
-  status: 'paid',
-  created_at: '2026-01-15T00:00:00Z',
-  campaign_title: 'Medical Fund',
+  destination: 'campaign' as const,
+  shelter: 1,
   shelter_name: 'Patitas',
   shelter_city: 'Bogotá',
+  campaign: 1,
+  campaign_title: 'Medical Fund',
+  amount: '50000.00',
+  status: 'paid' as const,
+  created_at: '2026-01-15T00:00:00Z',
   ...overrides,
 });
 
@@ -106,7 +109,14 @@ describe('MisDonacionesPage', () => {
     useDonationStore.setState({
       donations: [
         makeDonation({ id: 1, status: 'paid' }),
-        makeDonation({ id: 2, status: 'pending', amount: '25000.00', campaign_title: 'Other Fund' }),
+        makeDonation({
+          id: 2,
+          status: 'pending',
+          amount: '25000.00',
+          destination: 'campaign',
+          campaign: 2,
+          campaign_title: 'Other Fund',
+        }),
       ],
     });
 

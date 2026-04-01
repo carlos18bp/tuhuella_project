@@ -58,7 +58,7 @@ export default function CampaignDetailPage() {
 
   if (loading || !campaign) {
     return (
-      <Container className="py-10">
+      <Container className="py-10 min-w-0 overflow-x-hidden">
         <div data-testid="loading-skeleton" className="space-y-4">
           <div className="h-8 animate-shimmer rounded w-1/3" />
           <div className="aspect-[21/9] animate-shimmer rounded-2xl" />
@@ -73,9 +73,12 @@ export default function CampaignDetailPage() {
   const endsAt = formatDate(campaign.ends_at);
 
   return (
-    <Container className="py-10">
-      <Link href={ROUTES.CAMPAIGNS} className="inline-flex items-center gap-1.5 text-sm text-amber-600 hover:text-amber-700 transition-colors">
-        <ArrowLeft className="h-4 w-4" />
+    <Container className="py-10 min-w-0 overflow-x-hidden">
+      <Link
+        href={ROUTES.CAMPAIGNS}
+        className="inline-flex items-center justify-center gap-1.5 min-h-11 text-sm text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 transition-colors -ml-1 pl-1 pr-2 rounded-lg hover:bg-surface-hover/80 dark:hover:bg-surface-hover/50"
+      >
+        <ArrowLeft className="h-4 w-4 shrink-0" />
         {t('backToCampaigns')}
       </Link>
 
@@ -92,15 +95,15 @@ export default function CampaignDetailPage() {
           />
         </div>
       ) : (
-        <div className="mt-6 rounded-2xl overflow-hidden border border-border-primary bg-gradient-to-br from-amber-50 to-amber-100 flex items-center justify-center aspect-[21/9]">
-          <Megaphone className="h-16 w-16 text-amber-300" />
+        <div className="mt-6 rounded-2xl overflow-hidden border border-border-primary bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950/40 dark:to-amber-900/25 flex items-center justify-center aspect-[21/9]">
+          <Megaphone className="h-16 w-16 text-amber-300 dark:text-amber-500/80" />
         </div>
       )}
 
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10">
         {/* Content column */}
         <div className="lg:col-span-2">
-          <p className="text-sm text-amber-600 font-medium">{campaign.shelter_name}</p>
+          <p className="text-sm text-amber-600 dark:text-amber-400 font-medium">{campaign.shelter_name}</p>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-[-0.02em] text-text-primary mt-2">{campaign.title}</h1>
 
           {(startsAt || endsAt) && (
@@ -155,14 +158,14 @@ export default function CampaignDetailPage() {
               {isAuthenticated ? (
                 <Link
                   href={`${ROUTES.CHECKOUT_DONATION}?campaign=${campaign.id}`}
-                  className="block w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 shadow-sm hover:shadow-md text-white rounded-full px-6 py-3 font-medium btn-base text-center"
+                  className="inline-flex items-center justify-center min-h-11 w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 shadow-sm hover:shadow-md text-white rounded-full px-6 py-3 font-medium btn-base text-center"
                 >
                   {t('donateButton')}
                 </Link>
               ) : (
                 <Link
                   href={ROUTES.SIGN_IN}
-                  className="block w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 shadow-sm hover:shadow-md text-white rounded-full px-6 py-3 font-medium btn-base text-center"
+                  className="inline-flex items-center justify-center min-h-11 w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 shadow-sm hover:shadow-md text-white rounded-full px-6 py-3 font-medium btn-base text-center"
                 >
                   {t('signInToDonate')}
                 </Link>
@@ -176,7 +179,7 @@ export default function CampaignDetailPage() {
       {campaign.status === 'completed' && campaign.evidence_gallery_urls && campaign.evidence_gallery_urls.length > 0 && (
         <div className="mt-10 md:mt-16 border-t border-border-primary pt-8 md:pt-10">
           <div className="flex items-center gap-2 mb-6">
-            <Camera className="h-5 w-5 text-amber-600" />
+            <Camera className="h-5 w-5 text-amber-600 dark:text-amber-400" />
             <div>
               <h2 className="text-xl font-bold text-text-primary">{t('evidenceTitle')}</h2>
               <p className="text-sm text-text-tertiary">{t('evidenceSubtitle')}</p>
@@ -203,7 +206,8 @@ export default function CampaignDetailPage() {
           onClick={() => setLightboxIndex(null)}
         >
           <button
-            className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+            type="button"
+            className="absolute top-4 right-4 z-10 min-h-11 min-w-11 inline-flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
             onClick={() => setLightboxIndex(null)}
           >
             <X className="h-6 w-6" />
@@ -217,7 +221,8 @@ export default function CampaignDetailPage() {
           {/* Previous */}
           {campaign.evidence_gallery_urls.length > 1 && (
             <button
-              className="absolute left-3 md:left-6 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+              type="button"
+              className="absolute left-3 md:left-6 min-h-11 min-w-11 inline-flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
                 setLightboxIndex((lightboxIndex - 1 + campaign.evidence_gallery_urls!.length) % campaign.evidence_gallery_urls!.length);
@@ -237,7 +242,8 @@ export default function CampaignDetailPage() {
           {/* Next */}
           {campaign.evidence_gallery_urls.length > 1 && (
             <button
-              className="absolute right-3 md:right-6 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+              type="button"
+              className="absolute right-3 md:right-6 min-h-11 min-w-11 inline-flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
                 setLightboxIndex((lightboxIndex + 1) % campaign.evidence_gallery_urls!.length);
@@ -253,7 +259,7 @@ export default function CampaignDetailPage() {
       {campaign.status === 'completed' && updates.length > 0 && (
         <div className="mt-10 md:mt-16 border-t border-border-primary pt-8 md:pt-10">
           <div className="flex items-center gap-2 mb-6">
-            <FileText className="h-5 w-5 text-amber-600" />
+            <FileText className="h-5 w-5 text-amber-600 dark:text-amber-400" />
             <h2 className="text-xl font-bold text-text-primary">{tUpdates('feedTitle')}</h2>
           </div>
           <div className="space-y-4">

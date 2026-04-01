@@ -1,6 +1,6 @@
 {
   "version": "5.0.0",
-  "lastUpdated": "2026-03-28",
+  "lastUpdated": "2026-03-31",
   "flows": {
     "home-loads": {
       "name": "Home page loads",
@@ -15,7 +15,7 @@
       "module": "home",
       "roles": ["shared"],
       "priority": "P2",
-      "description": "User clicks explore animals CTA on home page and navigates to /animales",
+      "description": "User clicks explore animals CTA on home page and navigates to /animals",
       "expectedSpecs": 1
     },
     "home-to-shelters": {
@@ -23,7 +23,7 @@
       "module": "home",
       "roles": ["shared"],
       "priority": "P2",
-      "description": "User clicks shelter spotlight and navigates to /refugios",
+      "description": "User clicks shelter spotlight and navigates to /shelters",
       "expectedSpecs": 1
     },
     "home-to-campaigns": {
@@ -31,7 +31,7 @@
       "module": "home",
       "roles": ["shared"],
       "priority": "P3",
-      "description": "User clicks active campaigns section and navigates to /campanas",
+      "description": "User clicks active campaigns section and navigates to /campaigns",
       "expectedSpecs": 1
     },
     "auth-sign-in-form": {
@@ -87,7 +87,7 @@
       "module": "animal",
       "roles": ["shared"],
       "priority": "P1",
-      "description": "User visits /animales and sees animal cards grid",
+      "description": "User visits /animals and sees animal cards grid",
       "expectedSpecs": 1
     },
     "animal-filter": {
@@ -119,7 +119,7 @@
       "module": "shelter",
       "roles": ["shared"],
       "priority": "P2",
-      "description": "User visits /refugios and sees shelter cards",
+      "description": "User visits /shelters and sees shelter cards",
       "expectedSpecs": 1
     },
     "shelter-detail": {
@@ -135,7 +135,7 @@
       "module": "shelter",
       "roles": ["shelter_admin"],
       "priority": "P1",
-      "description": "User fills out shelter registration form at /refugio/onboarding",
+      "description": "User fills out shelter registration form at /shelter/onboarding",
       "expectedSpecs": 1
     },
     "adoption-submit": {
@@ -151,23 +151,23 @@
       "module": "adoption",
       "roles": ["adopter"],
       "priority": "P2",
-      "description": "User views their adoption applications at /mis-solicitudes with status badges",
-      "expectedSpecs": 1
+      "description": "Adopter accesses /my-applications: unauthenticated users are redirected to sign-in; authenticated list and badges are covered by my-applications-list (same test may carry both flow tags)",
+      "expectedSpecs": 2
     },
     "adoption-manage": {
       "name": "Manage adoption applications (shelter)",
       "module": "adoption",
       "roles": ["shelter_admin"],
       "priority": "P1",
-      "description": "Shelter admin reviews and updates application status at /refugio/solicitudes",
-      "expectedSpecs": 1
+      "description": "Shelter admin reviews and updates application status at /shelter/applications (same screen as shelter-panel-applications; adoption domain framing)",
+      "expectedSpecs": 2
     },
     "campaign-browse": {
       "name": "Browse campaigns",
       "module": "campaign",
       "roles": ["shared"],
       "priority": "P2",
-      "description": "User visits /campanas and sees campaign cards with progress bars",
+      "description": "User visits /campaigns and sees campaign cards with progress bars",
       "expectedSpecs": 1
     },
     "campaign-detail": {
@@ -183,7 +183,7 @@
       "module": "donation",
       "roles": ["adopter"],
       "priority": "P1",
-      "description": "User selects amount, payment method, and submits donation at /checkout/donacion",
+      "description": "User selects amount, payment method, and submits donation at /checkout/donation",
       "expectedSpecs": 1
     },
     "donation-history": {
@@ -191,15 +191,15 @@
       "module": "donation",
       "roles": ["adopter"],
       "priority": "P2",
-      "description": "User views donation history at /mis-donaciones",
-      "expectedSpecs": 1
+      "description": "User views donation history at /my-donations (redirect when guest; authenticated list when signed in)",
+      "expectedSpecs": 2
     },
     "sponsorship-checkout": {
       "name": "Sponsorship checkout flow",
       "module": "sponsorship",
       "roles": ["adopter"],
       "priority": "P1",
-      "description": "User selects amount, frequency, payment method at /checkout/apadrinamiento",
+      "description": "User selects amount, frequency, payment method at /checkout/sponsorship",
       "expectedSpecs": 1
     },
     "sponsorship-history": {
@@ -207,23 +207,23 @@
       "module": "sponsorship",
       "roles": ["adopter"],
       "priority": "P2",
-      "description": "User views active sponsorships at /mis-apadrinamientos",
-      "expectedSpecs": 1
+      "description": "User views sponsorships at /my-sponsorships (redirect when guest; authenticated list when signed in)",
+      "expectedSpecs": 2
     },
     "favorite-toggle": {
       "name": "Toggle animal favorite",
       "module": "favorite",
       "roles": ["adopter"],
       "priority": "P2",
-      "description": "User favorites/unfavorites an animal and sees it in /favoritos",
-      "expectedSpecs": 1
+      "description": "User favorites/unfavorites an animal on /animals/[id] (guest gate + authenticated toggle); list appears at /favorites",
+      "expectedSpecs": 2
     },
     "favorite-list": {
       "name": "View favorites list",
       "module": "favorite",
       "roles": ["adopter"],
       "priority": "P2",
-      "description": "User views their favorited animals at /favoritos",
+      "description": "User views their favorited animals at /favorites",
       "expectedSpecs": 1
     },
     "adopter-intent-create": {
@@ -231,15 +231,15 @@
       "module": "adopter-intent",
       "roles": ["adopter"],
       "priority": "P3",
-      "description": "User creates or updates their adoption intent at /mi-intencion",
-      "expectedSpecs": 1
+      "description": "User creates or updates their adoption intent at /my-intent (redirect when guest; save when authenticated)",
+      "expectedSpecs": 2
     },
     "adopter-intent-browse": {
       "name": "Browse adopter intents",
       "module": "adopter-intent",
       "roles": ["shared"],
       "priority": "P3",
-      "description": "User views public adopter intents at /busco-adoptar",
+      "description": "User views public adopter intents at /looking-to-adopt",
       "expectedSpecs": 1
     },
     "shelter-panel-dashboard": {
@@ -255,7 +255,7 @@
       "module": "shelter-panel",
       "roles": ["shelter_admin"],
       "priority": "P1",
-      "description": "Shelter admin views and filters their animals at /refugio/animales",
+      "description": "Shelter admin views and filters their animals at /shelter/animals",
       "expectedSpecs": 1
     },
     "shelter-panel-campaigns": {
@@ -263,7 +263,7 @@
       "module": "shelter-panel",
       "roles": ["shelter_admin"],
       "priority": "P2",
-      "description": "Shelter admin views campaigns with progress at /refugio/campanas",
+      "description": "Shelter admin views campaigns with progress at /shelter/campaigns",
       "expectedSpecs": 1
     },
     "shelter-panel-donations": {
@@ -271,7 +271,7 @@
       "module": "shelter-panel",
       "roles": ["shelter_admin"],
       "priority": "P2",
-      "description": "Shelter admin views received donations at /refugio/donaciones",
+      "description": "Shelter admin views received donations at /shelter/donations",
       "expectedSpecs": 1
     },
     "shelter-panel-settings": {
@@ -279,7 +279,7 @@
       "module": "shelter-panel",
       "roles": ["shelter_admin"],
       "priority": "P2",
-      "description": "Shelter admin updates shelter info at /refugio/configuracion",
+      "description": "Shelter admin updates shelter info at /shelter/settings",
       "expectedSpecs": 1
     },
     "admin-dashboard": {
@@ -295,7 +295,7 @@
       "module": "admin",
       "roles": ["admin"],
       "priority": "P1",
-      "description": "Admin approves or rejects pending shelters at /admin/refugios/aprobar",
+      "description": "Admin approves or rejects pending shelters at /admin/shelters/approve",
       "expectedSpecs": 1
     },
     "admin-moderation": {
@@ -303,7 +303,7 @@
       "module": "admin",
       "roles": ["admin"],
       "priority": "P2",
-      "description": "Admin reviews published content at /admin/moderacion",
+      "description": "Admin reviews published content at /admin/moderation",
       "expectedSpecs": 1
     },
     "admin-metrics": {
@@ -311,7 +311,7 @@
       "module": "admin",
       "roles": ["admin"],
       "priority": "P2",
-      "description": "Admin views financial and adoption metrics at /admin/metricas",
+      "description": "Admin views financial and adoption metrics at /admin/metrics",
       "expectedSpecs": 1
     },
     "navigation-header": {
@@ -319,7 +319,7 @@
       "module": "navigation",
       "roles": ["shared"],
       "priority": "P2",
-      "description": "Header contains navigation links to Animales, Refugios, Campanas, Busco Adoptar",
+      "description": "Header contains navigation links to animals, shelters, campaigns, and looking-to-adopt (labels depend on locale)",
       "expectedSpecs": 1
     },
     "navigation-footer": {
@@ -335,7 +335,7 @@
       "module": "navigation",
       "roles": ["shared"],
       "priority": "P2",
-      "description": "User navigates across home, animales, refugios, campanas, and sign-in pages",
+      "description": "User navigates across home, /animals, /shelters, /campaigns, and sign-in pages (locale-prefixed URLs)",
       "expectedSpecs": 1
     },
     "payment-confirmation": {
@@ -378,12 +378,20 @@
       "description": "User navigates to /faq and sees frequently asked questions",
       "expectedSpecs": 1
     },
+    "public-contact": {
+      "name": "Contact page",
+      "module": "public",
+      "roles": ["shared"],
+      "priority": "P4",
+      "description": "User opens /contactanos with contact form and WhatsApp; can submit message via POST /api/contact/",
+      "expectedSpecs": 2
+    },
     "adopter-profile": {
       "name": "User profile management",
       "module": "adopter",
       "roles": ["adopter"],
       "priority": "P2",
-      "description": "User views and updates their profile at /mi-perfil",
+      "description": "User views and updates their profile at /my-profile",
       "expectedSpecs": 1
     },
     "admin-payments": {
@@ -391,7 +399,7 @@
       "module": "admin",
       "roles": ["admin"],
       "priority": "P2",
-      "description": "Admin views payment audit table at /admin/pagos",
+      "description": "Admin views payment audit table at /admin/payments",
       "expectedSpecs": 1
     },
     "blog-browse": {
@@ -447,7 +455,7 @@
       "module": "shelter-panel",
       "roles": ["shelter_admin"],
       "priority": "P1",
-      "description": "Shelter admin views received adoption applications and changes status (reviewing/interview/approved/rejected) at /refugio/solicitudes",
+      "description": "Shelter admin views received adoption applications and changes status (reviewing/interview/approved/rejected) at /shelter/applications",
       "expectedSpecs": 1
     },
     "adoption-form-wizard": {
@@ -495,7 +503,7 @@
       "module": "shelter-panel",
       "roles": ["shelter_admin"],
       "priority": "P2",
-      "description": "Shelter admin views and manages update posts at /refugio/updates",
+      "description": "Shelter admin views and manages update posts at /shelter/updates",
       "expectedSpecs": 1
     },
     "shelter-panel-update-create": {
@@ -503,7 +511,7 @@
       "module": "shelter-panel",
       "roles": ["shelter_admin"],
       "priority": "P2",
-      "description": "Shelter admin creates a new update post with content and images at /refugio/updates/create",
+      "description": "Shelter admin creates a new update post with content and images at /shelter/updates/create",
       "expectedSpecs": 1
     },
     "shelter-detail-view-animals": {
@@ -631,7 +639,7 @@
       "module": "favorite",
       "roles": ["adopter"],
       "priority": "P3",
-      "description": "Authenticated user edits the personal note on a favorited animal at /favoritos via inline text input",
+      "description": "Authenticated user edits the personal note on a favorited animal at /favorites via inline text input",
       "expectedSpecs": 1
     },
     "blog-admin-delete": {

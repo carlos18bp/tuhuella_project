@@ -10,11 +10,12 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: 1, // Reduced to 1 for environments with limited resources
+  // Flow reporter must run reliably (writes e2e-results/flow-coverage.json). CI uses json+flow via CLI.
   reporter: [
     ['list'],
-    ['html', { open: 'never' }],
-    ['json', { outputFile: 'e2e-results/results.json' }],
     ['./e2e/reporters/flow-coverage-reporter.mjs', { outputDir: 'e2e-results' }],
+    ['html', { open: 'never' }],
+    ['json', { outputFile: 'e2e-results/playwright-results.json' }],
   ],
   webServer: [
     {
