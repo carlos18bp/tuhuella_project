@@ -3,8 +3,10 @@ from django.conf import settings
 from django_attachments.fields import SingleImageField, GalleryField
 from django_attachments.models import Library
 
+from base_feature_app.models.mixins import ArchivableModel
 
-class Shelter(models.Model):
+
+class Shelter(ArchivableModel):
     class VerificationStatus(models.TextChoices):
         PENDING = 'pending', 'Pending'
         VERIFIED = 'verified', 'Verified'

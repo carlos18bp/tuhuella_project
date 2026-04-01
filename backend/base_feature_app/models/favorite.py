@@ -1,8 +1,10 @@
-from django.db import models
 from django.conf import settings
+from django.db import models
+
+from base_feature_app.models.mixins import ArchivableModel
 
 
-class Favorite(models.Model):
+class Favorite(ArchivableModel):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,

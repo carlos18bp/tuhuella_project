@@ -1,7 +1,9 @@
 from django.db import models
 
+from base_feature_app.models.mixins import ArchivableModel
 
-class Subscription(models.Model):
+
+class Subscription(ArchivableModel):
     class Status(models.TextChoices):
         ACTIVE = 'active', 'Active'
         PAUSED = 'paused', 'Paused'

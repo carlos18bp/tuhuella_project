@@ -118,14 +118,8 @@ export default function VolunteerApplyPage() {
     setError('');
     setFieldErrors({});
 
-    // Client-side validation
+    // Profile fields come from the authenticated user; only motivation is submitted to the API.
     const errors: Record<string, string[]> = {};
-    if (!form.first_name.trim()) errors.first_name = [t('fieldRequired')];
-    if (!form.last_name.trim()) errors.last_name = [t('fieldRequired')];
-    if (!form.email.trim()) errors.email = [t('fieldRequired')];
-    if (!form.phone.trim()) errors.phone = [t('fieldRequired')];
-    if (!form.city.trim()) errors.city = [t('fieldRequired')];
-    if (!form.country.trim()) errors.country = [t('fieldRequired')];
     if (!form.motivation.trim()) errors.motivation = [t('fieldRequired')];
     else if (form.motivation.trim().length < 20) errors.motivation = [t('motivationMinLength')];
 
@@ -146,7 +140,7 @@ export default function VolunteerApplyPage() {
     try {
       await api.post(API_ENDPOINTS.VOLUNTEER_APPLICATIONS, {
         position: positionId,
-        ...form,
+        motivation: form.motivation,
         captcha_token: captchaToken ?? undefined,
       });
       setSubmitted(true);

@@ -143,6 +143,21 @@ export default function AnimalDetailPage() {
                     {t('adoptionInProgress')}
                   </span>
                 )}
+                {(animal.status === 'adopted' || animal.adopted_at) && (
+                  <span
+                    data-testid="adopted-badge"
+                    className="text-xs px-2.5 py-1 rounded-full font-medium bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200/60 dark:bg-emerald-950/30 dark:text-emerald-200 dark:ring-emerald-800/40"
+                  >
+                    {animal.adopted_at
+                      ? t('adoptedOn', {
+                          date: new Date(animal.adopted_at).toLocaleDateString(
+                            locale === 'es' ? 'es-CO' : 'en-US',
+                            { day: 'numeric', month: 'long', year: 'numeric' },
+                          ),
+                        })
+                      : t('adoptedBadge')}
+                  </span>
+                )}
               </div>
               <p className="text-text-tertiary mt-1">
                 <Link href={`/shelter/${animal.shelter}`} className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors underline-offset-2 hover:underline">

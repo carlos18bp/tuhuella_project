@@ -2,8 +2,10 @@ from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
 
+from base_feature_app.models.mixins import ArchivableModel
 
-class BlogPost(models.Model):
+
+class BlogPost(ArchivableModel):
     """
     Model for blog articles.
 

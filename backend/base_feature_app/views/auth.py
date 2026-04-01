@@ -155,6 +155,12 @@ def sign_in(request):
             {'error': 'Account is inactive'},
             status=status.HTTP_403_FORBIDDEN
         )
+
+    if user.archived_at:
+        return Response(
+            {'error': 'Account is no longer available'},
+            status=status.HTTP_403_FORBIDDEN
+        )
     
     # Generate tokens
     tokens = generate_auth_tokens(user)
@@ -259,6 +265,12 @@ def google_login(request):
             user.last_name = family_name
         if user.first_name or user.last_name:
             user.save()
+
+    if user.archived_at or not user.is_active:
+        return Response(
+            {'error': 'Account is no longer available'},
+            status=status.HTTP_403_FORBIDDEN,
+        )
     
     # Generate tokens
     tokens = generate_auth_tokens(user)

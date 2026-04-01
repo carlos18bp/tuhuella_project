@@ -5,6 +5,7 @@ from rest_framework.response import Response
 
 from base_feature_app.models import Campaign
 from base_feature_app.serializers.campaign_list import CampaignListSerializer
+from base_feature_app.utils.shelter_access import user_can_manage_shelter
 from base_feature_app.serializers.campaign_detail import CampaignDetailSerializer
 from base_feature_app.serializers.campaign_create_update import CampaignCreateUpdateSerializer
 
@@ -14,9 +15,15 @@ from base_feature_app.serializers.campaign_create_update import CampaignCreateUp
 def campaign_list(request):
     status_filter = request.query_params.get('status', 'active')
     if status_filter == 'completed':
-        queryset = Campaign.objects.filter(status=Campaign.Status.COMPLETED)
+        queryset = Campaign.objects.filter(
+            status=Campaign.Status.COMPLETED,
+            archived_at__isnull=True,
+        )
     else:
-        queryset = Campaign.objects.filter(status=Campaign.Status.ACTIVE)
+        queryset = Campaign.objects.filter(
+            status=Campaign.Status.ACTIVE,
+            archived_at__isnull=True,
+        )
     serializer = CampaignListSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data)
 
@@ -50,7 +57,7 @@ def campaign_update(request, pk):
     except Campaign.DoesNotExist:
         return Response({'error': 'Campaign not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    if campaign.shelter.owner != request.user:
+    if not user_can_manage_shelter(request.user, campaign.shelter):
         return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
 
     serializer = CampaignCreateUpdateSerializer(

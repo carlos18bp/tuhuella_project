@@ -5,6 +5,7 @@ from rest_framework.response import Response
 
 from base_feature_app.models import Shelter
 from base_feature_app.serializers.shelter_list import ShelterListSerializer
+from base_feature_app.utils.shelter_access import shelters_managed_by_user
 from base_feature_app.serializers.shelter_detail import ShelterDetailSerializer
 from base_feature_app.serializers.shelter_create_update import ShelterCreateUpdateSerializer
 
@@ -12,7 +13,10 @@ from base_feature_app.serializers.shelter_create_update import ShelterCreateUpda
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def shelter_list(request):
-    shelters = Shelter.objects.filter(verification_status=Shelter.VerificationStatus.VERIFIED)
+    shelters = Shelter.objects.filter(
+        verification_status=Shelter.VerificationStatus.VERIFIED,
+        archived_at__isnull=True,
+    )
     serializer = ShelterListSerializer(shelters, many=True, context={'request': request})
     return Response(serializer.data)
 
@@ -21,7 +25,7 @@ def shelter_list(request):
 @permission_classes([AllowAny])
 def shelter_detail(request, pk):
     try:
-        shelter = Shelter.objects.get(pk=pk)
+        shelter = Shelter.objects.get(pk=pk, archived_at__isnull=True)
     except Shelter.DoesNotExist:
         return Response({'error': 'Shelter not found'}, status=status.HTTP_404_NOT_FOUND)
     serializer = ShelterDetailSerializer(shelter, context={'request': request})
@@ -42,7 +46,7 @@ def shelter_create(request):
 @permission_classes([IsAuthenticated])
 def shelter_update(request, pk):
     try:
-        shelter = Shelter.objects.get(pk=pk, owner=request.user)
+        shelter = shelters_managed_by_user(request.user).get(pk=pk)
     except Shelter.DoesNotExist:
         return Response({'error': 'Shelter not found'}, status=status.HTTP_404_NOT_FOUND)
     serializer = ShelterCreateUpdateSerializer(

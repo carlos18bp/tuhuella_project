@@ -1,12 +1,15 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
+import { HandCoins } from 'lucide-react';
 
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth';
 import { useDonationStore } from '@/lib/stores/donationStore';
 
 export default function ShelterDonacionesPage() {
   useRequireAuth();
+  const tCommon = useTranslations('common');
   const donations = useDonationStore((s) => s.donations);
   const loading = useDonationStore((s) => s.loading);
   const fetchDonations = useDonationStore((s) => s.fetchDonations);
@@ -51,6 +54,12 @@ export default function ShelterDonacionesPage() {
                   <p className="text-sm text-text-tertiary mt-0.5 truncate">{donation.user_email}</p>
                   {donation.campaign_title && (
                     <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">Campaña: {donation.campaign_title}</p>
+                  )}
+                  {donation.destination === 'platform' && !donation.campaign_title && !donation.shelter_name && (
+                    <p className="text-xs text-text-tertiary mt-0.5 flex items-center gap-1">
+                      <HandCoins className="h-3 w-3 shrink-0 text-amber-500" />
+                      {tCommon('donationDestinationPlatform')}
+                    </p>
                   )}
                   {donation.message && (
                     <p className="text-sm text-text-secondary mt-2 bg-surface-secondary rounded-lg p-2">&ldquo;{donation.message}&rdquo;</p>

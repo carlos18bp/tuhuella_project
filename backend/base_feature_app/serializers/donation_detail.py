@@ -11,6 +11,7 @@ class DonationDetailSerializer(serializers.ModelSerializer):
         model = Donation
         fields = [
             'id', 'user', 'user_email', 'shelter', 'shelter_name',
-            'campaign', 'campaign_title', 'amount', 'status',
+            'campaign', 'campaign_title', 'destination',
+            'amount', 'status',
             'message', 'paid_at', 'created_at', 'updated_at',
         ]

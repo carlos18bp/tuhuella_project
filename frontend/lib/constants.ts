@@ -102,6 +102,7 @@ export const API_ENDPOINTS = {
   SPONSORSHIP_DETAIL: (id: number) => `/sponsorships/${id}/`,
   SPONSORSHIP_UPDATE_STATUS: (id: number) => `/sponsorships/${id}/status/`,
 
+  PAYMENTS: '/payments/',
   PAYMENT_CREATE_INTENT: '/payments/create-intent/',
   PAYMENT_STATUS: (id: number) => `/payments/${id}/status/`,
 

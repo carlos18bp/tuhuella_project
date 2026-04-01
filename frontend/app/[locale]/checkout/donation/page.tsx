@@ -1,26 +1,62 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from '@/i18n/navigation';
-import { CreditCard, Building2, Smartphone } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
+import { Link, useRouter } from '@/i18n/navigation';
+import { CreditCard, Building2, Smartphone, Megaphone } from 'lucide-react';
 
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth';
 import { useFAQsByTopic } from '@/lib/hooks/useFAQs';
 import { Container, FAQAccordion } from '@/components/ui';
 import { api } from '@/lib/services/http';
 import { API_ENDPOINTS, ROUTES } from '@/lib/constants';
+import { buildDonationCheckoutPayload } from '@/lib/donationCheckoutPayload';
 
 type AmountOption = { id: number; amount: number; label: string };
 
 export default function CheckoutDonacionPage() {
   useRequireAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const locale = useLocale();
+  const tCheckout = useTranslations('donationCheckout');
   const [amount, setAmount] = useState('');
   const [message, setMessage] = useState('');
   const [method, setMethod] = useState('card');
   const [submitting, setSubmitting] = useState(false);
   const [amountOptions, setAmountOptions] = useState<AmountOption[]>([]);
   const { items: checkoutFaqs } = useFAQsByTopic('checkout');
+
+  const campaignIdFromQuery = useMemo(() => {
+    const raw = searchParams.get('campaign');
+    if (raw == null || raw === '') return null;
+    const n = Number(raw);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  }, [searchParams]);
+
+  const [campaignTitle, setCampaignTitle] = useState<string | null>(null);
+  const [campaignLoading, setCampaignLoading] = useState(false);
+
+  useEffect(() => {
+    if (campaignIdFromQuery == null) {
+      setCampaignTitle(null);
+      setCampaignLoading(false);
+      return;
+    }
+    setCampaignLoading(true);
+    api
+      .get(API_ENDPOINTS.CAMPAIGN_DETAIL(campaignIdFromQuery), {
+        params: { lang: locale },
+      })
+      .then((res) => {
+        setCampaignTitle(typeof res.data?.title === 'string' ? res.data.title : null);
+      })
+      .catch(() => {
+        setCampaignTitle(null);
+      })
+      .finally(() => setCampaignLoading(false));
+  }, [campaignIdFromQuery, locale]);
 
   useEffect(() => {
     api.get(API_ENDPOINTS.DONATION_AMOUNTS)
@@ -43,9 +79,22 @@ export default function CheckoutDonacionPage() {
     e.preventDefault();
     if (!amount || Number(amount) <= 0) return;
     setSubmitting(true);
-    // Placeholder — simulate processing
+    const payload = buildDonationCheckoutPayload(
+      Number(amount),
+      message,
+      campaignIdFromQuery,
+    );
+    // Placeholder — simulate processing; al integrar Wompi: createDonation(payload) luego confirmación
     await new Promise((resolve) => setTimeout(resolve, 1500));
-    router.push(ROUTES.CHECKOUT_CONFIRMATION + '?type=donation&status=placeholder');
+    const q = new URLSearchParams({
+      type: 'donation',
+      status: 'placeholder',
+      dest: payload.destination,
+    });
+    if (payload.destination === 'campaign' && 'campaign' in payload) {
+      q.set('campaign', String(payload.campaign));
+    }
+    router.push(`${ROUTES.CHECKOUT_CONFIRMATION}?${q.toString()}`);
   };
 
   return (
@@ -57,6 +106,34 @@ export default function CheckoutDonacionPage() {
       <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700 dark:border-amber-800/40 dark:bg-amber-950/25 dark:text-amber-300">
         Pagos en modo placeholder — la integración con Wompi aún no está activa.
       </div>
+
+      {campaignIdFromQuery != null && (
+        <div className="mt-4 rounded-xl border border-border-primary bg-surface-secondary/80 p-4 text-sm text-text-secondary">
+          <div className="flex items-start gap-2">
+            <Megaphone className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
+            <div className="min-w-0">
+              <p className="font-medium text-text-primary">{tCheckout('campaignContext')}</p>
+              {campaignLoading ? (
+                <p className="mt-1 text-text-tertiary">{tCheckout('campaignLoading')}</p>
+              ) : (
+                <p className="mt-1 text-text-primary truncate">
+                  {campaignTitle ?? tCheckout('campaignFallback', { id: campaignIdFromQuery })}
+                </p>
+              )}
+              <Link
+                href={ROUTES.CAMPAIGN_DETAIL(campaignIdFromQuery)}
+                className="mt-2 inline-block text-xs text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 underline-offset-2 hover:underline"
+              >
+                {tCheckout('viewCampaign')}
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {campaignIdFromQuery == null && (
+        <p className="mt-4 text-sm text-text-tertiary">{tCheckout('platformContext')}</p>
+      )}
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-6">
         <div>

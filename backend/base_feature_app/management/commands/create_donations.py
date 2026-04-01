@@ -29,11 +29,18 @@ class Command(BaseCommand):
         for i in range(count):
             campaign = random.choice(campaigns) if campaigns and random.random() < 0.6 else None
             shelter = campaign.shelter if campaign else (random.choice(shelters) if shelters else None)
+            if campaign:
+                destination = Donation.Destination.CAMPAIGN
+            elif shelter:
+                destination = Donation.Destination.SHELTER
+            else:
+                destination = Donation.Destination.PLATFORM
 
             Donation.objects.create(
                 user=random.choice(adopters),
                 shelter=shelter,
                 campaign=campaign,
+                destination=destination,
                 amount=Decimal(random.randint(10, 500)) * 1000,
                 status=random.choice([
                     Donation.Status.PAID, Donation.Status.PAID,

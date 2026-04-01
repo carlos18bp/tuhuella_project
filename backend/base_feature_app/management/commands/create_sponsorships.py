@@ -15,7 +15,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         count = options['count']
         adopters = list(User.objects.filter(role=User.Role.ADOPTER))
-        animals = list(Animal.objects.filter(status='published'))
+        animals = list(
+            Animal.objects.filter(status='published', archived_at__isnull=True),
+        )
 
         if not adopters or not animals:
             self.stdout.write(self.style.WARNING('Need adopter users and published animals.'))

@@ -3,6 +3,7 @@ import logging
 import math
 
 from django.db.models import Q
+from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_date
 from rest_framework import status
@@ -39,7 +40,7 @@ def list_blog_posts(request):
     Accepts ?lang=es|en, ?page=1, ?page_size=6 query params.
     Returns {results, count, page, page_size, total_pages}.
     """
-    qs = BlogPost.objects.filter(is_published=True)
+    qs = BlogPost.objects.filter(is_published=True, archived_at__isnull=True)
 
     category = request.query_params.get('category', '').strip()
     search = request.query_params.get('search', '').strip()
@@ -90,7 +91,12 @@ def retrieve_blog_post(request, slug):
     Accepts ?lang=es|en query param (default 'es').
     Returns 404 if not found or not published.
     """
-    post = get_object_or_404(BlogPost, slug=slug, is_published=True)
+    post = get_object_or_404(
+        BlogPost,
+        slug=slug,
+        is_published=True,
+        archived_at__isnull=True,
+    )
     serializer = BlogPostDetailSerializer(
         post, context={'request': request}
     )
@@ -183,7 +189,9 @@ def delete_blog_post(request, post_id):
     Delete a blog post.
     """
     post = get_object_or_404(BlogPost, pk=post_id)
-    post.delete()
+    post.archived_at = timezone.now()
+    post.is_published = False
+    post.save(update_fields=['archived_at', 'is_published', 'updated_at'])
     return Response(status=status.HTTP_204_NO_CONTENT)
 
 

@@ -62,12 +62,6 @@ def test_send_volunteer_application_notification_returns_true_on_success(
     application = VolunteerApplication.objects.create(
         position=position,
         user=existing_user,
-        first_name='Ana',
-        last_name='Garcia',
-        email='ana@example.com',
-        phone='+34123456789',
-        city='Madrid',
-        country='ES',
         motivation='Quiero ayudar los fines de semana.',
     )
 
@@ -88,12 +82,6 @@ def test_send_volunteer_application_notification_returns_false_on_failure(
     application = VolunteerApplication.objects.create(
         position=position,
         user=existing_user,
-        first_name='Luis',
-        last_name='Perez',
-        email='luis@example.com',
-        phone='+34999888777',
-        city='Barcelona',
-        country='ES',
         motivation='Tengo experiencia en ofimatica.',
     )
 

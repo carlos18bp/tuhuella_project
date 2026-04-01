@@ -14,6 +14,7 @@
     "signIn": "Iniciar sesión",
     "signUp": "Registrarse",
     "signOut": "Salir",
+    "donationDestinationPlatform": "Plataforma Mi Huella",
     "faq": "Preguntas frecuentes",
     "faqSubtitle": "Todo lo que necesitas saber"
   },
@@ -137,6 +138,8 @@
     "compatibilityNo": "No",
     "compatibilityUnknown": "Desconocido",
     "adoptionInProgress": "En proceso de adopción",
+    "adoptedBadge": "Adoptado",
+    "adoptedOn": "Adopción formalizada el {date}",
     "publishedAgo": "Publicado hace {days} días",
     "inShelterSince": "En el refugio hace {months} meses",
     "similarAnimals": "Animales similares",
@@ -531,6 +534,13 @@
     "paidOn": "Pagada el {date}",
     "createdOn": "Creada el {date}",
     "activeCampaigns": "Campañas activas"
+  },
+  "donationCheckout": {
+    "campaignContext": "Tu donación irá a la campaña:",
+    "campaignLoading": "Cargando campaña…",
+    "campaignFallback": "Campaña #{id}",
+    "viewCampaign": "Ver campaña",
+    "platformContext": "Donación general a la plataforma (no asociada a una campaña concreta)."
   },
   "mySponsorships": {
     "title": "Mis Apadrinamientos",

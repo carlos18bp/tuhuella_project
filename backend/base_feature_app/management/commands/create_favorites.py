@@ -14,7 +14,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         count = options['count']
         adopters = list(User.objects.filter(role=User.Role.ADOPTER))
-        animals = list(Animal.objects.filter(status='published'))
+        animals = list(
+            Animal.objects.filter(status='published', archived_at__isnull=True),
+        )
 
         if not adopters or not animals:
             self.stdout.write(self.style.WARNING('Need adopter users and published animals.'))
@@ -30,7 +32,10 @@ class Command(BaseCommand):
                 continue
             seen.add(key)
 
-            Favorite.objects.get_or_create(user=user, animal=animal)
+            fav, _ = Favorite.objects.get_or_create(user=user, animal=animal)
+            if fav.archived_at:
+                fav.archived_at = None
+                fav.save(update_fields=['archived_at'])
             created += 1
 
         self.stdout.write(self.style.SUCCESS(f'Created {created} favorites'))

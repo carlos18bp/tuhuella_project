@@ -260,6 +260,13 @@ describe('AnimalDetailPage', () => {
     expect(screen.getByTestId('status-badge')).toHaveTextContent('En proceso de adopción');
   });
 
+  it('renders adopted badge when status is adopted', () => {
+    const adopted = { ...mockAnimal, status: 'adopted' as const };
+    setupMocks({ loading: false, animal: adopted });
+    render(<AnimalDetailPage />);
+    expect(screen.getByTestId('adopted-badge')).toHaveTextContent('Adoptado');
+  });
+
   it('does not render status badge for published status', () => {
     setupMocks({ loading: false, animal: mockAnimal });
     render(<AnimalDetailPage />);

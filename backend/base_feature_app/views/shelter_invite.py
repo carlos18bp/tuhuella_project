@@ -5,6 +5,7 @@ from rest_framework.response import Response
 
 from base_feature_app.models import ShelterInvite
 from base_feature_app.serializers.shelter_invite_list import ShelterInviteListSerializer
+from base_feature_app.utils.shelter_access import shelters_managed_by_user
 from base_feature_app.serializers.shelter_invite_create_update import ShelterInviteCreateUpdateSerializer
 
 
@@ -13,7 +14,7 @@ from base_feature_app.serializers.shelter_invite_create_update import ShelterInv
 def shelter_invite_list(request):
     user = request.user
     if user.role == 'shelter_admin':
-        shelters = user.shelters.all()
+        shelters = shelters_managed_by_user(user)
         queryset = ShelterInvite.objects.filter(shelter__in=shelters)
     else:
         queryset = ShelterInvite.objects.filter(adopter_intent__user=user)

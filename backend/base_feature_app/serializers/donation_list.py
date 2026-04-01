@@ -12,7 +12,7 @@ class DonationListSerializer(serializers.ModelSerializer):
         model = Donation
         fields = [
             'id', 'user', 'user_email', 'shelter', 'shelter_name',
-            'shelter_city', 'campaign', 'campaign_title',
+            'shelter_city', 'campaign', 'campaign_title', 'destination',
             'amount', 'message', 'status',
             'paid_at', 'created_at',
         ]

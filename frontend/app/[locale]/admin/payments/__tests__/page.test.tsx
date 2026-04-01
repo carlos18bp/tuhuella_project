@@ -22,6 +22,7 @@ const mockPayments = [
     status: 'approved',
     donation: 1,
     sponsorship: null,
+    modality: 'donation',
     created_at: '2026-01-20T10:00:00Z',
   },
   {
@@ -32,6 +33,7 @@ const mockPayments = [
     status: 'pending',
     donation: null,
     sponsorship: 1,
+    modality: 'sponsorship',
     created_at: '2026-01-21T10:00:00Z',
   },
   {
@@ -40,8 +42,9 @@ const mockPayments = [
     provider_reference: null,
     amount: '10000',
     status: 'custom_status',
-    donation: null,
+    donation: 4,
     sponsorship: null,
+    modality: 'donation',
     created_at: '2026-01-22T10:00:00Z',
   },
 ];
@@ -114,12 +117,13 @@ describe('AdminPagosPage', () => {
     });
   });
 
-  it('renders dash for payment without donation or sponsorship', async () => {
+  it('renders dash for missing provider reference', async () => {
     mockApi.get.mockResolvedValueOnce({ data: [mockPayments[2]] });
     setupMock();
     render(<AdminPagosPage />);
     await waitFor(() => {
       expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByText('Donación')).toBeInTheDocument();
     });
   });
 

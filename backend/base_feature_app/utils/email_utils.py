@@ -86,13 +86,15 @@ def send_volunteer_application_notification(application):
 
     :param application: VolunteerApplication instance
     """
-    subject = f'Mi Huella - Nueva postulacion: {application.first_name} {application.last_name}'
+    u = application.user
+    name = f'{u.first_name} {u.last_name}'.strip() or u.email
+    subject = f'Mi Huella - Nueva postulacion: {name}'
     text_message = (
         f'Nueva postulacion de voluntario recibida:\n\n'
-        f'Nombre: {application.first_name} {application.last_name}\n'
-        f'Email: {application.email}\n'
-        f'Telefono: {application.phone}\n'
-        f'Ciudad: {application.city}, {application.country}\n'
+        f'Nombre: {u.first_name} {u.last_name}\n'
+        f'Email: {u.email}\n'
+        f'Telefono: {u.phone or ""}\n'
+        f'Ciudad: {u.city or ""}\n'
         f'Posicion: {application.position.title_es}\n\n'
         f'Motivacion:\n{application.motivation}\n\n'
         f'--- Mi Huella'

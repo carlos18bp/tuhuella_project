@@ -3,6 +3,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from django.utils import timezone
+
 from base_feature_app.models import Favorite, Animal
 from base_feature_app.serializers.favorite import FavoriteSerializer
 
@@ -12,6 +14,7 @@ from base_feature_app.serializers.favorite import FavoriteSerializer
 def favorite_list(request):
     favorites = Favorite.objects.filter(
         user=request.user,
+        archived_at__isnull=True,
     ).select_related('animal', 'animal__shelter')
     serializer = FavoriteSerializer(favorites, many=True, context={'request': request})
     return Response(serializer.data)
@@ -25,16 +28,24 @@ def favorite_toggle(request):
         return Response({'error': 'animal_id is required'}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        animal = Animal.objects.get(pk=animal_id)
+        animal = Animal.objects.get(pk=animal_id, archived_at__isnull=True)
     except Animal.DoesNotExist:
         return Response({'error': 'Animal not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    favorite, created = Favorite.objects.get_or_create(user=request.user, animal=animal)
-    if not created:
-        favorite.delete()
+    favorite = Favorite.objects.filter(
+        user=request.user,
+        animal=animal,
+    ).first()
+    if favorite is None:
+        favorite = Favorite.objects.create(user=request.user, animal=animal)
+    elif favorite.archived_at:
+        favorite.archived_at = None
+        favorite.save(update_fields=['archived_at'])
+    else:
+        favorite.archived_at = timezone.now()
+        favorite.save(update_fields=['archived_at'])
         return Response({'status': 'removed', 'animal_id': animal_id})
 
-    # Return full serialized favorite so frontend can add it to local state
     fav = Favorite.objects.select_related('animal', 'animal__shelter').get(pk=favorite.pk)
     serializer = FavoriteSerializer(fav, context={'request': request})
     return Response(
@@ -47,7 +58,7 @@ def favorite_toggle(request):
 @permission_classes([IsAuthenticated])
 def favorite_update(request, pk):
     try:
-        favorite = Favorite.objects.get(pk=pk, user=request.user)
+        favorite = Favorite.objects.get(pk=pk, user=request.user, archived_at__isnull=True)
     except Favorite.DoesNotExist:
         return Response({'error': 'Favorite not found'}, status=status.HTTP_404_NOT_FOUND)
 

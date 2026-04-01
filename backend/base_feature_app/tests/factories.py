@@ -140,6 +140,7 @@ class DonationFactory(factory.django.DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
     shelter = factory.SubFactory(ShelterFactory)
     campaign = None
+    destination = Donation.Destination.SHELTER
     amount = Decimal('50000.00')
     status = Donation.Status.PENDING
 

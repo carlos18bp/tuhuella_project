@@ -3,8 +3,11 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from django.db.models import Q
+
 from base_feature_app.models import Donation
 from base_feature_app.serializers.donation_list import DonationListSerializer
+from base_feature_app.utils.shelter_access import shelters_managed_by_user, user_can_manage_shelter
 from base_feature_app.serializers.donation_detail import DonationDetailSerializer
 from base_feature_app.serializers.donation_create_update import DonationCreateUpdateSerializer
 
@@ -14,10 +17,18 @@ from base_feature_app.serializers.donation_create_update import DonationCreateUp
 def donation_list(request):
     user = request.user
     if user.role == 'shelter_admin':
-        shelters = user.shelters.all()
-        queryset = Donation.objects.filter(shelter__in=shelters).select_related('user', 'shelter', 'campaign')
+        shelters = shelters_managed_by_user(user)
+        shelter_ids = list(shelters.values_list('id', flat=True))
+        queryset = Donation.objects.filter(
+            archived_at__isnull=True,
+        ).filter(
+            Q(shelter_id__in=shelter_ids) | Q(campaign__shelter_id__in=shelter_ids),
+        ).select_related('user', 'shelter', 'campaign')
     else:
-        queryset = Donation.objects.filter(user=user).select_related('user', 'shelter', 'campaign')
+        queryset = Donation.objects.filter(
+            user=user,
+            archived_at__isnull=True,
+        ).select_related('user', 'shelter', 'campaign')
     serializer = DonationListSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data)
 
@@ -40,7 +51,12 @@ def donation_detail(request, pk):
     except Donation.DoesNotExist:
         return Response({'error': 'Donation not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    if donation.user != request.user and (not hasattr(donation.shelter, 'owner') or donation.shelter.owner != request.user):
+    can_see = donation.user_id == request.user.id
+    if donation.shelter_id and user_can_manage_shelter(request.user, donation.shelter):
+        can_see = True
+    if donation.campaign_id and user_can_manage_shelter(request.user, donation.campaign.shelter):
+        can_see = True
+    if not can_see:
         return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
 
     serializer = DonationDetailSerializer(donation, context={'request': request})

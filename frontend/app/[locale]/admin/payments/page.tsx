@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { api } from '@/lib/services/http';
+import { API_ENDPOINTS } from '@/lib/constants';
 import type { Payment } from '@/lib/types';
 import {
   shelterPillAmber,
@@ -23,7 +24,7 @@ export default function AdminPagosPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await api.get('/payments/');
+        const res = await api.get(API_ENDPOINTS.PAYMENTS);
         setPayments(res.data);
       } catch {
         // Error

@@ -127,13 +127,14 @@ def test_update_post_patch_not_found(shelter_admin_client):
 
 @pytest.mark.django_db
 def test_update_post_delete_by_owner(shelter_admin_client, update_post):
-    """Shelter owner can delete their post."""
+    """Shelter owner archives their post (soft-delete)."""
     response = shelter_admin_client.delete(
         reverse('update-post-delete', args=[update_post.pk]),
     )
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
-    assert not UpdatePost.objects.filter(pk=update_post.pk).exists()
+    update_post.refresh_from_db()
+    assert update_post.archived_at is not None
 
 
 @pytest.mark.django_db

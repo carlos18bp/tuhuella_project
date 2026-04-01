@@ -5,6 +5,7 @@ from rest_framework.response import Response
 
 from base_feature_app.models import AdoptionApplication
 from base_feature_app.serializers.adoption_list import AdoptionListSerializer
+from base_feature_app.utils.shelter_access import shelters_managed_by_user, user_can_manage_shelter
 from base_feature_app.serializers.adoption_detail import AdoptionDetailSerializer
 from base_feature_app.serializers.adoption_create_update import AdoptionCreateUpdateSerializer
 
@@ -14,10 +15,16 @@ from base_feature_app.serializers.adoption_create_update import AdoptionCreateUp
 def application_list(request):
     user = request.user
     if user.role == 'shelter_admin':
-        shelters = user.shelters.all()
-        queryset = AdoptionApplication.objects.filter(animal__shelter__in=shelters).select_related('animal', 'animal__shelter', 'user')
+        shelters = shelters_managed_by_user(user)
+        queryset = AdoptionApplication.objects.filter(
+            animal__shelter__in=shelters,
+            archived_at__isnull=True,
+        ).select_related('animal', 'animal__shelter', 'user')
     else:
-        queryset = AdoptionApplication.objects.filter(user=user).select_related('animal', 'animal__shelter', 'user')
+        queryset = AdoptionApplication.objects.filter(
+            user=user,
+            archived_at__isnull=True,
+        ).select_related('animal', 'animal__shelter', 'user')
 
     serializer = AdoptionListSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data)
@@ -31,7 +38,9 @@ def application_detail(request, pk):
     except AdoptionApplication.DoesNotExist:
         return Response({'error': 'Application not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    if application.user != request.user and application.animal.shelter.owner != request.user:
+    if application.user != request.user and not user_can_manage_shelter(
+        request.user, application.animal.shelter,
+    ):
         return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
 
     serializer = AdoptionDetailSerializer(application, context={'request': request})
@@ -56,7 +65,7 @@ def application_update_status(request, pk):
     except AdoptionApplication.DoesNotExist:
         return Response({'error': 'Application not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    if application.animal.shelter.owner != request.user:
+    if not user_can_manage_shelter(request.user, application.animal.shelter):
         return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
 
     new_status = request.data.get('status')

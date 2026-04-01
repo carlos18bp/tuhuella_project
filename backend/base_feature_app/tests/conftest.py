@@ -131,11 +131,14 @@ def campaign(shelter):
 
 @pytest.fixture
 def donation(existing_user, shelter, campaign):
-    """Donation from existing_user to shelter/campaign."""
+    """Donation from existing_user to a campaign (and its shelter)."""
+    from base_feature_app.models import Donation
+
     return DonationFactory(
         user=existing_user,
         shelter=shelter,
         campaign=campaign,
+        destination=Donation.Destination.CAMPAIGN,
     )
 
 

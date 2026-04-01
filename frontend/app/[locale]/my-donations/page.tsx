@@ -30,6 +30,7 @@ export default function MisDonacionesPage() {
   const loading = useDonationStore((s) => s.loading);
   const fetchDonations = useDonationStore((s) => s.fetchDonations);
   const t = useTranslations('myDonations');
+  const tCommon = useTranslations('common');
 
   const campaigns = useCampaignStore((s) => s.campaigns);
   const fetchCampaigns = useCampaignStore((s) => s.fetchCampaigns);
@@ -217,6 +218,12 @@ export default function MisDonacionesPage() {
                         <p className="text-sm text-text-tertiary truncate">
                           {donation.shelter_name}{donation.shelter_city ? ` · ${donation.shelter_city}` : ''}
                         </p>
+                      </div>
+                    )}
+                    {donation.destination === 'platform' && !donation.campaign_title && !donation.shelter_name && (
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <HandCoins className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                        <p className="text-sm text-text-tertiary">{tCommon('donationDestinationPlatform')}</p>
                       </div>
                     )}
                     {donation.message && (

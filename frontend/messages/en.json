@@ -14,6 +14,7 @@
     "signIn": "Sign in",
     "signUp": "Sign up",
     "signOut": "Sign out",
+    "donationDestinationPlatform": "Mi Huella platform",
     "faq": "Frequently asked questions",
     "faqSubtitle": "Everything you need to know"
   },
@@ -137,6 +138,8 @@
     "compatibilityNo": "No",
     "compatibilityUnknown": "Unknown",
     "adoptionInProgress": "Adoption in progress",
+    "adoptedBadge": "Adopted",
+    "adoptedOn": "Adoption finalized on {date}",
     "publishedAgo": "Published {days} days ago",
     "inShelterSince": "In shelter for {months} months",
     "similarAnimals": "Similar animals",
@@ -531,6 +534,13 @@
     "paidOn": "Paid on {date}",
     "createdOn": "Created on {date}",
     "activeCampaigns": "Active campaigns"
+  },
+  "donationCheckout": {
+    "campaignContext": "Your donation will go to the campaign:",
+    "campaignLoading": "Loading campaign…",
+    "campaignFallback": "Campaign #{id}",
+    "viewCampaign": "View campaign",
+    "platformContext": "General platform donation (not tied to a specific campaign)."
   },
   "mySponsorships": {
     "title": "My Sponsorships",

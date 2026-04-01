@@ -84,8 +84,7 @@ describe('ShelterDonationsPage', () => {
   });
 
   it('hides campaign when donation has no campaign', () => {
-    const noCampaign = [{ ...mockDonations[0], campaign_title: null }];
-    setupMock({ donations: noCampaign });
+    setupMock({ donations: [mockDonations[1]] });
     render(<ShelterDonationsPage />);
     expect(screen.queryByText(/Campaña:/)).not.toBeInTheDocument();
   });

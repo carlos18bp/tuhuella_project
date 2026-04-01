@@ -1,8 +1,10 @@
-from django.db import models
 from django.conf import settings
+from django.db import models
+
+from base_feature_app.models.mixins import ArchivableModel
 
 
-class AdoptionApplication(models.Model):
+class AdoptionApplication(ArchivableModel):
     class Status(models.TextChoices):
         SUBMITTED = 'submitted', 'Submitted'
         REVIEWING = 'reviewing', 'Reviewing'

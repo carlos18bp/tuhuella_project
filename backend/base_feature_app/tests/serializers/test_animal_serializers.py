@@ -51,6 +51,7 @@ def test_animal_detail_serializer_includes_new_fields(animal):
     for field in [
         'weight', 'is_house_trained', 'good_with_kids', 'good_with_dogs',
         'good_with_cats', 'energy_level', 'coat_color', 'intake_date', 'microchip_id',
+        'adopted_at', 'adoption_application', 'archived_at',
     ]:
         assert field in data, f'Missing field: {field}'
 

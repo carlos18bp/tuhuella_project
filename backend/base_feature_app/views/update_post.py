@@ -3,8 +3,11 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from django.utils import timezone
+
 from base_feature_app.models import UpdatePost
 from base_feature_app.serializers.update_post_list import UpdatePostListSerializer
+from base_feature_app.utils.shelter_access import user_can_manage_shelter
 from base_feature_app.serializers.update_post_detail import UpdatePostDetailSerializer
 from base_feature_app.serializers.update_post_create_update import UpdatePostCreateUpdateSerializer
 
@@ -12,7 +15,7 @@ from base_feature_app.serializers.update_post_create_update import UpdatePostCre
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def update_post_list(request):
-    queryset = UpdatePost.objects.all()
+    queryset = UpdatePost.objects.filter(archived_at__isnull=True)
 
     campaign_id = request.query_params.get('campaign')
     if campaign_id:
@@ -60,7 +63,7 @@ def update_post_update(request, pk):
     except UpdatePost.DoesNotExist:
         return Response({'error': 'Update post not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    if post.shelter.owner != request.user:
+    if not user_can_manage_shelter(request.user, post.shelter):
         return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
 
     serializer = UpdatePostCreateUpdateSerializer(post, data=request.data, partial=True, context={'request': request})
@@ -78,8 +81,9 @@ def update_post_delete(request, pk):
     except UpdatePost.DoesNotExist:
         return Response({'error': 'Update post not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    if post.shelter.owner != request.user:
+    if not user_can_manage_shelter(request.user, post.shelter):
         return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
 
-    post.delete()
+    post.archived_at = timezone.now()
+    post.save(update_fields=['archived_at', 'updated_at'])
     return Response(status=status.HTTP_204_NO_CONTENT)

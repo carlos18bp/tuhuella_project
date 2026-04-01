@@ -437,6 +437,8 @@ test.describe('Donation history — authenticated', () => {
       id: 1,
       user: 1,
       user_email: 'adopter-e2e@example.com',
+      destination: 'shelter' as const,
+      shelter: 1,
       amount: '50000',
       status: 'paid' as const,
       shelter_name: 'Refugio Amor',

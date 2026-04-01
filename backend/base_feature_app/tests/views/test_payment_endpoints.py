@@ -88,3 +88,36 @@ def test_payment_status_not_found(authenticated_client):
     response = authenticated_client.get(reverse('payment-status', args=[99999]))
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+def test_payment_list_requires_superadmin(authenticated_client, payment):
+    """Regular users cannot list payments."""
+    response = authenticated_client.get(reverse('payment-list'))
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@pytest.mark.django_db
+def test_payment_list_returns_rows(admin_client, payment):
+    """Staff/superadmin receives payment list with modality and parent ids."""
+    response = admin_client.get(reverse('payment-list'))
+
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) >= 1
+    row = next(r for r in data if r['id'] == payment.pk)
+    assert row['modality'] == 'donation'
+    assert row['donation'] == payment.donation_id
+
+
+@pytest.mark.django_db
+def test_payment_list_allows_is_staff_user(api_client, payment, existing_user):
+    """Users with is_staff can list payments (aligned with admin UI gate)."""
+    existing_user.is_staff = True
+    existing_user.save(update_fields=['is_staff'])
+    api_client.force_authenticate(user=existing_user)
+    response = api_client.get(reverse('payment-list'))
+    assert response.status_code == status.HTTP_200_OK
+    assert isinstance(response.json(), list)

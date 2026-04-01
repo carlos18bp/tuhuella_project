@@ -1,9 +1,12 @@
+from django.conf import settings
 from django.db import models
 from django_attachments.fields import GalleryField
 from django_attachments.models import Library
 
+from base_feature_app.models.mixins import ArchivableModel
 
-class Animal(models.Model):
+
+class Animal(ArchivableModel):
     class Species(models.TextChoices):
         DOG = 'dog', 'Dog'
         CAT = 'cat', 'Cat'
@@ -60,6 +63,22 @@ class Animal(models.Model):
 
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.DRAFT)
 
+    adopted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='animals_adopted',
+    )
+    adopted_at = models.DateTimeField(null=True, blank=True)
+    adoption_application = models.ForeignKey(
+        'base_feature_app.AdoptionApplication',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='won_adoptions',
+    )
+
     is_vaccinated = models.BooleanField(default=False)
     is_sterilized = models.BooleanField(default=False)
 
@@ -96,6 +115,7 @@ class Animal(models.Model):
         indexes = [
             models.Index(fields=['species', 'size', 'status'], name='animal_species_size_status'),
             models.Index(fields=['status', 'created_at'], name='animal_status_created'),
+            models.Index(fields=['archived_at'], name='animal_archived_at_idx'),
         ]
 
     def __str__(self):
