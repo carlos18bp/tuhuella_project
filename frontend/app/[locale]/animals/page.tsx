@@ -27,7 +27,7 @@ export default function AnimalesPage() {
   const [ageRange, setAgeRange] = useState<string[]>([]);
   const [energyLevel, setEnergyLevel] = useState<string[]>([]);
   const [goodWith, setGoodWith] = useState<string[]>([]);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
 
   const speciesOptions: MultiSelectOption[] = [
     { value: 'dog', label: t('dogs') },
@@ -243,7 +243,7 @@ export default function AnimalesPage() {
           ) : viewMode === 'grid' ? (
             <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 md:gap-7 min-w-0">
               {animals.map((animal) => (
-                <AnimalCard key={animal.id} animal={animal} />
+                <AnimalCard key={animal.id} animal={animal} compact />
               ))}
             </div>
           ) : (

@@ -337,7 +337,7 @@ export default function Header() {
               </Link>
             ))}
             <div className="flex items-center gap-3 px-3 py-2">
-              <LocaleSwitcher />
+              <LocaleSwitcher onSelect={() => setMobileOpen(false)} />
               <ThemeToggle />
             </div>
             <hr className="my-2 border-border-primary" />
