@@ -13,7 +13,8 @@ import LocaleSwitcher from './LocaleSwitcher';
 import ThemeToggle from './ThemeToggle';
 
 export default function Header() {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileState, setMobileState] = useState<'closed' | 'open' | 'closing'>('closed');
+  const closeMobile = () => setMobileState('closing');
   const pathname = usePathname();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const isAuthReady = useAuthStore((s) => s.isAuthReady);
@@ -290,11 +291,11 @@ export default function Header() {
         <button
           type="button"
           className="md:hidden p-2 rounded-lg hover:bg-surface-hover"
-          onClick={() => setMobileOpen(!mobileOpen)}
+          onClick={() => setMobileState(mobileState === 'open' ? 'closing' : 'open')}
           aria-label="Toggle menu"
         >
           <svg className="w-6 h-6 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            {mobileOpen ? (
+            {mobileState === 'open' ? (
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             ) : (
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -304,8 +305,11 @@ export default function Header() {
       </div>
 
       {/* Mobile menu */}
-      {mobileOpen && (
-        <div className="md:hidden border-t border-border-primary bg-surface-secondary/95 backdrop-blur-xl animate-scale-in shadow-lg dark:bg-surface-secondary/90 dark:border-border-secondary">
+      {mobileState !== 'closed' && (
+        <div
+          className={`md:hidden border-t border-border-primary bg-surface-secondary/95 backdrop-blur-xl shadow-lg dark:bg-surface-secondary/90 dark:border-border-secondary ${mobileState === 'closing' ? 'animate-scale-out' : 'animate-scale-in'}`}
+          onAnimationEnd={() => { if (mobileState === 'closing') setMobileState('closed'); }}
+        >
           <nav className="flex flex-col px-6 py-4 gap-1 text-sm font-medium text-text-secondary">
             {publicNav.map((item) => (
               <Link
@@ -316,7 +320,7 @@ export default function Header() {
                     ? 'text-teal-700 dark:text-teal-300 font-semibold'
                     : 'hover:bg-surface-hover'
                 }`}
-                onClick={() => setMobileOpen(false)}
+                onClick={() => closeMobile()}
               >
                 {item.label}
               </Link>
@@ -331,13 +335,13 @@ export default function Header() {
                     ? 'text-teal-700 dark:text-teal-300 font-semibold'
                     : 'hover:bg-surface-hover'
                 }`}
-                onClick={() => setMobileOpen(false)}
+                onClick={() => closeMobile()}
               >
                 {link.label}
               </Link>
             ))}
             <div className="flex items-center gap-3 px-3 py-2">
-              <LocaleSwitcher onSelect={() => setMobileOpen(false)} />
+              <LocaleSwitcher onSelect={() => closeMobile()} />
               <ThemeToggle />
             </div>
             <hr className="my-2 border-border-primary" />
@@ -348,14 +352,14 @@ export default function Header() {
               </div>
             ) : isAuthenticated ? (
               <>
-                <Link href={ROUTES.FAVORITES} className="px-3 py-3 rounded-lg hover:bg-surface-hover" onClick={() => setMobileOpen(false)}>
+                <Link href={ROUTES.FAVORITES} className="px-3 py-3 rounded-lg hover:bg-surface-hover" onClick={() => closeMobile()}>
                   {t('favorites')}
                 </Link>
-                <Link href={ROUTES.MY_PROFILE} className="px-3 py-3 rounded-lg hover:bg-surface-hover" onClick={() => setMobileOpen(false)}>
+                <Link href={ROUTES.MY_PROFILE} className="px-3 py-3 rounded-lg hover:bg-surface-hover" onClick={() => closeMobile()}>
                   {t('myProfile')}
                 </Link>
                 <button
-                  onClick={() => { signOut(); setMobileOpen(false); }}
+                  onClick={() => { signOut(); closeMobile(); }}
                   type="button"
                   className="text-left px-3 py-3 rounded-lg hover:bg-surface-hover text-red-600"
                 >
@@ -364,13 +368,13 @@ export default function Header() {
               </>
             ) : (
               <>
-                <Link href={ROUTES.SIGN_IN} className="px-3 py-3 rounded-lg hover:bg-surface-hover" onClick={() => setMobileOpen(false)}>
+                <Link href={ROUTES.SIGN_IN} className="px-3 py-3 rounded-lg hover:bg-surface-hover" onClick={() => closeMobile()}>
                   {tCommon('signIn')}
                 </Link>
                 <Link
                   href={ROUTES.SIGN_UP}
                   className="px-3 py-3 rounded-lg bg-gradient-to-r from-teal-600 to-teal-700 text-white text-center hover:from-teal-500 hover:to-teal-600"
-                  onClick={() => setMobileOpen(false)}
+                  onClick={() => closeMobile()}
                 >
                   {tCommon('signUp')}
                 </Link>
