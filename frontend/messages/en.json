@@ -144,7 +144,9 @@
     "inShelterSince": "In shelter for {months} months",
     "similarAnimals": "Similar animals",
     "share": "Share",
-    "shareCopied": "Link copied!"
+    "shareCopied": "Link copied!",
+    "viewGrid": "Grid view",
+    "viewList": "List view"
   },
   "shelters": {
     "title": "Verified shelters",

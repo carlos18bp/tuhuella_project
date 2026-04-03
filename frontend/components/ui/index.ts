@@ -1,5 +1,6 @@
 export { default as AdoptionForm } from './AdoptionForm';
 export { default as AnimalCard } from './AnimalCard';
+export { default as AnimalCardList } from './AnimalCardList';
 export { default as AnimalFilters } from './AnimalFilters';
 export { default as AnimalGallery } from './AnimalGallery';
 export { default as AnimalGrid } from './AnimalGrid';

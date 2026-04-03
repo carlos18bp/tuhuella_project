@@ -144,7 +144,9 @@
     "inShelterSince": "En el refugio hace {months} meses",
     "similarAnimals": "Animales similares",
     "share": "Compartir",
-    "shareCopied": "¡Enlace copiado!"
+    "shareCopied": "¡Enlace copiado!",
+    "viewGrid": "Vista cuadrícula",
+    "viewList": "Vista lista"
   },
   "shelters": {
     "title": "Refugios verificados",

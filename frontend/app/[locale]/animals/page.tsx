@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, LayoutGrid, List } from 'lucide-react';
 
 import { useAnimalStore } from '@/lib/stores/animalStore';
-import { AnimalCard, Container, EmptyState, MultiSelectDropdown, FAQAccordion } from '@/components/ui';
+import { AnimalCard, AnimalCardList, Container, EmptyState, MultiSelectDropdown, FAQAccordion } from '@/components/ui';
 import type { MultiSelectOption } from '@/components/ui/MultiSelectDropdown';
 import { useFAQsByTopic } from '@/lib/hooks/useFAQs';
 
@@ -27,6 +27,7 @@ export default function AnimalesPage() {
   const [ageRange, setAgeRange] = useState<string[]>([]);
   const [energyLevel, setEnergyLevel] = useState<string[]>([]);
   const [goodWith, setGoodWith] = useState<string[]>([]);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const speciesOptions: MultiSelectOption[] = [
     { value: 'dog', label: t('dogs') },
@@ -184,31 +185,74 @@ export default function AnimalesPage() {
         />
       </div>
 
-      {/* Grid */}
-      {loading ? (
-        <div className="mt-10 grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5 md:gap-7 min-w-0">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="rounded-2xl border border-border-primary bg-surface-primary overflow-hidden">
-              <div className="aspect-[4/3] animate-shimmer" />
-              <div className="p-4 space-y-2">
-                <div className="h-4 animate-shimmer rounded w-2/3" />
-                <div className="h-3 animate-shimmer rounded w-1/2" />
-              </div>
-            </div>
-          ))}
+      {/* View toggle */}
+      <div className="mt-6 flex justify-end">
+        <div className="flex items-center gap-1 rounded-lg border border-border-primary/60 p-1 bg-surface-secondary/50">
+          <button
+            type="button"
+            onClick={() => setViewMode('grid')}
+            className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-teal-100 text-teal-700 shadow-sm' : 'text-text-tertiary hover:bg-surface-hover'}`}
+            aria-label={t('viewGrid')}
+          >
+            <LayoutGrid className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('list')}
+            className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-teal-100 text-teal-700 shadow-sm' : 'text-text-tertiary hover:bg-surface-hover'}`}
+            aria-label={t('viewList')}
+          >
+            <List className="h-4 w-4" />
+          </button>
         </div>
-      ) : (
-        <>
-          <div className="mt-10 grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5 md:gap-7 min-w-0">
-            {animals.length === 0 && (
-              <div className="col-span-1 min-[400px]:col-span-2 lg:col-span-3">
-                <EmptyState message={t('noResults')} />
+      </div>
+
+      {/* Animals */}
+      {loading ? (
+        viewMode === 'grid' ? (
+          <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 md:gap-7 min-w-0">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="rounded-2xl border border-border-primary bg-surface-primary overflow-hidden">
+                <div className="aspect-[4/3] animate-shimmer" />
+                <div className="p-4 space-y-2">
+                  <div className="h-4 animate-shimmer rounded w-2/3" />
+                  <div className="h-3 animate-shimmer rounded w-1/2" />
+                </div>
               </div>
-            )}
-            {animals.map((animal) => (
-              <AnimalCard key={animal.id} animal={animal} />
             ))}
           </div>
+        ) : (
+          <div className="mt-4 flex flex-col gap-3 min-w-0">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex rounded-2xl border border-border-primary bg-surface-primary overflow-hidden">
+                <div className="w-28 sm:w-36 shrink-0 animate-shimmer" />
+                <div className="flex-1 p-4 space-y-2">
+                  <div className="h-4 animate-shimmer rounded w-2/3" />
+                  <div className="h-3 animate-shimmer rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )
+      ) : (
+        <>
+          {animals.length === 0 ? (
+            <div className="mt-4">
+              <EmptyState message={t('noResults')} />
+            </div>
+          ) : viewMode === 'grid' ? (
+            <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 md:gap-7 min-w-0">
+              {animals.map((animal) => (
+                <AnimalCard key={animal.id} animal={animal} />
+              ))}
+            </div>
+          ) : (
+            <div className="mt-4 flex flex-col gap-3 min-w-0">
+              {animals.map((animal) => (
+                <AnimalCardList key={animal.id} animal={animal} />
+              ))}
+            </div>
+          )}
           {renderPagination()}
         </>
       )}
