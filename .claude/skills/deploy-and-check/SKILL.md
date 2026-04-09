@@ -17,7 +17,7 @@ Run these steps on the production server at `/home/ryzepeck/webapps/tuhuella_pro
 
 1. Quick status snapshot before deploy:
 ```bash
-bash ~/scripts/quick-status.sh
+bash /home/ryzepeck/webapps/ops/vps/scripts/diagnostics/quick-status.sh
 ```
 
 ## Deploy Steps
@@ -52,7 +52,7 @@ sudo systemctl restart tuhuella_project && sudo systemctl restart tuhuella-huey 
 
 7. Run post-deploy check for tuhuella_project:
 ```bash
-bash ~/scripts/post-deploy-check.sh tuhuella_project
+bash /home/ryzepeck/webapps/ops/vps/scripts/deployment/post-deploy-check.sh tuhuella_project
 ```
 Expected: PASS on all checks, FAIL=0.
 
@@ -80,7 +80,7 @@ sudo tail -20 /var/log/nginx/error.log
 
 ## Notes
 
-- `~/scripts` is a symlink to `/home/ryzepeck/webapps/ops/vps/`.
+- VPS operations scripts live in `/home/ryzepeck/webapps/ops/vps/scripts/`.
 - `DJANGO_SETTINGS_MODULE=base_feature_project.settings_prod` must be set for migrate and collectstatic (manage.py defaults to settings_dev).
 - Next.js requires `node_modules` to be present at runtime — do not delete them after build.
 - Node version: 20.19.4 (managed via nvm).

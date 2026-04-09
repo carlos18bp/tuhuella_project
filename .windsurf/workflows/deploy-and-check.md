@@ -68,7 +68,7 @@ curl -s https://tuhuella.projectapp.co/api/health/
 journalctl -u tuhuella_project.service --since "5 minutes ago" --no-pager -n 20
 
 # Run post-deploy check
-bash ~/scripts/post-deploy-check.sh tuhuella_project
+bash /home/ryzepeck/webapps/ops/vps/scripts/deployment/post-deploy-check.sh tuhuella_project
 ```
 
 ### 7. Resource limits verification
