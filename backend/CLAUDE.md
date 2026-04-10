@@ -1,214 +1,52 @@
-# Backend Rules — Django / Python / DRF
+# Backend Rules — Tuhuella
 
-## Django/Python General Principles
+## Stack And Scope
+- Django 6.0.2 + DRF 3.16.1, Python 3.12.
+- **Single business app**: `base_feature_app` — contains all 27 models for the animal-adoption / sponsorship / donation platform (User, Animal, Shelter, AdoptionApplication, Sponsorship, Donation, Campaign, BlogPost, FAQ, Notification, VolunteerPosition, etc.).
+- **Django project module**: `base_feature_project` (a generic boilerplate name **shared with `fernando_aragon_project`** — do not rename).
+- Auxiliary app: `django_attachments` (vendored gallery library).
+- Production settings module: `base_feature_project.settings_prod`.
+- Database: **MySQL 8** (`tuhuella_db`). Cache + queue: Redis. Email: SMTP (env-driven).
+- Auth: **JWT via SimpleJWT only**. No session auth on `/api/`.
+- Environment loading uses **`python-dotenv`** (NOT `python-decouple`) — `load_dotenv(BASE_DIR / '.env')` at the top of `settings.py`. This is the project standard.
 
-You are an expert in Python, Django, and scalable web application development.
+## Project Conventions
+- DRF views are **function-based** with `@api_view`. Pattern: queryset filter → serializer validation → service call (when applicable) → response. Do not convert to CBV/`APIView`/`ViewSets`.
+- **Service layer is real**: `base_feature_app/services/` holds:
+  - `EmailService` — Django mail backend wrapper.
+  - `NotificationService` — manages user notification preferences and `NotificationLog` rows.
+  - `NotificationTemplates` — locale-aware template rendering for emails (default `es`).
+  - **Do not inline email or notification logic into views.** Always go through these services.
+- **Event-driven notifications**: app events (sign-up, donation thank-you, application status change) create `NotificationLog` rows; a Huey task (`send_email_notification(log_id)` in `tasks.py`) processes them, renders the template, sends the email, and updates the log to SENT/FAILED.
+- **Bilingual content via paired fields**: `BlogPost` and similar models use `title_en`/`title_es`, `body_en`/`body_es`, etc. Frontend reads the field matching the active locale. Do not introduce `django.i18n` `.po` files.
+- **Custom AdminSite**: `base_feature_app/admin.py` instantiates a custom `admin_site` (not the default Django admin) for operational dashboard needs.
+- **Archivable mixin**: models with soft-delete inherit `ArchivableModel` (`archived_at` field). Default querysets typically filter out archived rows.
+- Prefer Django ORM. Raw SQL only when strictly necessary, always parameterized.
 
-### Key Principles
-- Write clear, technical responses with precise Django examples.
-- Use Django's built-in features and tools wherever possible to leverage its full capabilities.
-- Prioritize readability and maintainability; follow Django's coding style guide (PEP 8 compliance).
-- Use descriptive variable and function names; adhere to naming conventions (e.g., lowercase with underscores for functions and variables).
-- Structure your project in a modular way using Django apps to promote reusability and separation of concerns.
+## Auth And Security
+- **API auth**: **JWT via SimpleJWT** with a 15-minute access token (configurable). Refresh token has a longer lifetime. There is **no session auth on `/api/`**.
+- **Admin** uses Django session + CSRF (default).
+- reCAPTCHA is verified server-side on signup (`verify_recaptcha()`).
+- `settings_prod.py` enforces HSTS (1y, subdomains, preload), `SECURE_SSL_REDIRECT=True`, secure cookies, NOSNIFF, `X_FRAME_OPTIONS=DENY`. Fail-fast if `DJANGO_SECRET_KEY` or `DJANGO_ALLOWED_HOSTS` are missing.
+- `CORS_ALLOWED_ORIGINS` is configurable via env.
+- Validate input in DRF serializers. Never disable CSRF or hardcode secrets.
 
-### Django/Python
-- Use Django's class-based views (CBVs) for more complex views; prefer function-based views (FBVs) for simpler logic.
-- Leverage Django's ORM for database interactions; avoid raw SQL queries unless necessary for performance.
-- Use Django's built-in user model and authentication framework for user management.
-- Utilize Django's form and model form classes for form handling and validation.
-- Follow the MVT (Model-View-Template) pattern strictly for clear separation of concerns.
-- Use middleware judiciously to handle cross-cutting concerns like authentication, logging, and caching.
+## Commands
+- Activate venv from `backend/`: `cd backend && source venv/bin/activate`
+- Run backend tests: `pytest base_feature_app/tests/path/to/test_file.py -v`
+- Run a focused backend check: `python manage.py check`
+- Run dev server: `python manage.py runserver`
+- Make migrations: `python manage.py makemigrations base_feature_app && python manage.py migrate`
 
-### Error Handling and Validation
-- Implement error handling at the view level and use Django's built-in error handling mechanisms.
-- Use Django's validation framework to validate form and model data.
-- Prefer try-except blocks for handling exceptions in business logic and views.
-- Customize error pages (e.g., 404, 500) to improve user experience and provide helpful information.
-- Use Django signals to decouple error handling and logging from core business logic.
+## Testing Rules
+- Run only the changed test file or a tight regression slice.
+- Never run the full backend suite.
+- Keep test names focused on one observable behavior.
+- Prefer deterministic tests: freeze time, seed data explicitly, and avoid hidden global state.
+- Both `base_feature_app/tests/` and `django_attachments/tests/` have test directories.
 
-### Django-Specific Guidelines
-- Use Django templates for rendering HTML and DRF serializers for JSON responses.
-- Keep business logic in models and forms; keep views light and focused on request handling.
-- Use Django's URL dispatcher (urls.py) to define clear and RESTful URL patterns.
-- Apply Django's security best practices (e.g., CSRF protection, SQL injection protection, XSS prevention).
-- Use Django's built-in tools for testing (unittest and pytest-django) to ensure code quality and reliability.
-- Leverage Django's caching framework to optimize performance for frequently accessed data.
-- Use Django's middleware for common tasks such as authentication, logging, and security.
-
-### Performance Optimization
-- Optimize query performance using Django ORM's select_related and prefetch_related for related object fetching.
-- Use Django's cache framework with backend support (e.g., Redis or Memcached) to reduce database load.
-- Implement database indexing and query optimization techniques for better performance.
-- Use asynchronous views and background tasks (via Celery/Huey) for I/O-bound or long-running operations.
-- Optimize static file handling with Django's static file management system (e.g., WhiteNoise or CDN integration).
-
----
-
-## Django REST Framework (DRF) Development
-
-You are an expert in Python, Django, and scalable RESTful API development.
-
-### Core Principles
-- Django-First Approach: Use Django's built-in features and tools wherever possible
-- Code Quality: Prioritize readability and maintainability; follow PEP 8 compliance
-- Naming Conventions: Use descriptive variable and function names (lowercase with underscores)
-- Modular Architecture: Structure your project using Django apps for reusability and separation of concerns
-- Performance Awareness: Always consider scalability and performance implications
-
-### Project Structure
-
-#### Application Structure
-```
-app_name/
-├── migrations/        # Database migration files
-├── admin.py           # Django admin configuration
-├── apps.py            # App configuration
-├── models.py          # Database models
-├── managers.py        # Custom model managers
-├── signals.py         # Django signals
-├── tasks.py           # Huey tasks
-└── __init__.py
-```
-
-#### API Structure
-```
-api/
-└── v1/
-    ├── app_name/
-    │   ├── urls.py            # URL routing
-    │   ├── serializers.py     # Data serialization
-    │   ├── views.py           # API views
-    │   ├── permissions.py     # Custom permissions
-    │   ├── filters.py         # Custom filters
-    │   └── validators.py      # Custom validators
-    └── urls.py
-```
-
-### Views and API Design
-- Use Class-Based Views: Leverage Django's CBVs with DRF's APIViews (unless project convention is FBV)
-- RESTful Design: Follow RESTful principles strictly with proper HTTP methods and status codes
-- Keep Views Light: Focus views on request handling; keep business logic in models, managers, and services
-- Consistent Response Format: Use unified response structure for both success and error cases
-
-### Models and Database
-- ORM First: Leverage Django's ORM; avoid raw SQL unless necessary for performance
-- Business Logic in Models: Keep business logic in models and custom managers
-- Query Optimization: Use select_related and prefetch_related for related object fetching
-- Database Indexing: Implement proper indexing for frequently queried fields
-- Transactions: Use transaction.atomic() for data consistency in critical operations
-
-### Serializers and Validation
-- Use DRF serializers for data validation and serialization
-- Implement custom validators for complex business rules
-- Use serializer field validation for input sanitization
-- Properly handle nested relationships with appropriate serializers
-
-### Authentication and Permissions
-- JWT Authentication: Use djangorestframework_simplejwt for token-based auth
-- Custom Permissions: Implement granular permission classes for different user roles
-- Security: Implement proper CSRF protection, CORS configuration, and input sanitization
-
-### Performance and Scalability
-- N+1 Problem Prevention: Always use select_related and prefetch_related appropriately
-- Pagination: Standardize pagination across all list endpoints
-- Caching: Use Django's cache framework with Redis for frequently accessed data
-- Response Optimization: Allow field selection to reduce payload size
-
-### Error Handling
-```json
-{
-    "success": false,
-    "message": "Error description",
-    "errors": {
-        "field_name": ["Specific error details"]
-    },
-    "error_code": "SPECIFIC_ERROR_CODE"
-}
-```
-
-- Custom Exception Handler for consistent error responses
-- Django Signals for decoupled error handling
-- Proper HTTP Status Codes (400, 401, 403, 404, 422, 500)
-- Structured Logging for API monitoring and debugging
-
----
-
-## Django i18n
-
-### Setup
-```python
-from django.utils.translation import gettext_lazy as _
-
-LANGUAGE_CODE = 'es'
-USE_I18N = True
-USE_L10N = True
-
-LANGUAGES = [
-    ('es', _('Español')),
-    ('en', _('English')),
-]
-
-LOCALE_PATHS = [BASE_DIR / 'locale']
-
-MIDDLEWARE = [
-    ...
-    'django.middleware.locale.LocaleMiddleware',  # after SessionMiddleware, before CommonMiddleware
-    ...
-]
-```
-
-### Usage
-```python
-from django.utils.translation import gettext as _
-from django.utils.translation import gettext_lazy as _
-
-# In views (runtime translation)
-message = _('Your order has been confirmed')
-
-# In models (lazy translation — evaluated at render time)
-class Product(models.Model):
-    name = models.CharField(_('product name'), max_length=200)
-    class Meta:
-        verbose_name = _('product')
-
-# With variables
-message = _('Hello %(name)s, you have %(count)d items') % {'name': user.name, 'count': cart.item_count}
-
-# ❌ Don't translate then concatenate
-message = _('Hello') + ' ' + user.name  # breaks translation context
-```
-
-### Commands
-```bash
-python manage.py makemessages -l en -l es
-python manage.py compilemessages
-```
-
----
-
-## Backend Testing Standards
-
-### Execution Rules
-1. **Activate virtual environment** before any command: `source venv/bin/activate`
-2. **Run only modified test files**: `pytest path/to/test_file.py -v`
-3. **Maximum per execution**: 20 tests per batch, 3 commands per cycle
-
-### Coverage Prioritization (triage order)
-1. Lowest % coverage (0% first) — maximum impact per test
-2. Highest "Miss" / "Uncovered Lines" count
-3. Core layers: Views → Serializers → Models → Utils → Tasks
-4. Files with partial coverage — complete before polishing
-
-### Per-Test Checklist
-- Test name describes ONE specific behavior
-- No conditionals or loops in test body
-- Assertions verify observable outcomes (not implementation)
-- Test is deterministic (no datetime.now, random without seed)
-- Test is isolated (no dependency on other tests)
-- Mocks have explicit return_value/side_effect
-- Follows AAA pattern (Arrange/Act/Assert)
-
-### Coverage Report
-- Custom reporter in `conftest.py` with Unicode progress bars
-- Run: `source venv/bin/activate && pytest --cov`
-- Full reference: `docs/BACKEND_AND_FRONTEND_COVERAGE_REPORT_STANDARD.md`
+## Quirks to Remember
+- The Django **module is `base_feature_project`** (shared with `fernando_aragon_project`) — `DJANGO_SETTINGS_MODULE=base_feature_project.settings_prod`.
+- Environment loading uses **`python-dotenv`**, not `python-decouple` — preserve this.
+- The frontend runs as **its own systemd service** (`tuhuella-frontend.service` on port 3001) — Django does NOT serve a static-exported Next.js bundle. The frontend is a long-running Node 20 process.
+- Logs live in `backend/logs/` (`django.log`, `gunicorn-*.log`, `backups.log`, `silk-reports/`).
