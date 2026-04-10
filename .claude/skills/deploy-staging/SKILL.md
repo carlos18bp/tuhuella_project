@@ -8,11 +8,11 @@ argument-hint: "[branch-name, e.g. release/march-2026]"
 
 # Deploy to Staging
 
-Run these steps on the staging server at `/home/ryzepeck/webapps/base_django_react_next_feature_staging` to deploy a release branch for client testing/UAT.
+Run these steps on the staging server at `/home/ryzepeck/webapps/tuhuella_project_staging` to deploy a release branch for client testing/UAT.
 
 - **Domain**: https://YOUR_STAGING_DOMAIN
 - **Stack**: Django + Gunicorn + Nginx + MySQL 8 + Redis + Huey
-- **Services**: `base_django_react_next_feature_staging` (Gunicorn), `base_django_react_next_feature-staging-huey` (task queue)
+- **Services**: `tuhuella_project_staging` (Gunicorn), `tuhuella-staging-huey` (task queue), `tuhuella-staging-frontend` (Next.js port 3001)
 
 > **⚠️ How to invoke**: Pass the branch name as an argument when calling this command.
 > Example: `/deploy-staging release/march-2026`
@@ -32,13 +32,13 @@ If any service is down or disk >85%, **stop and fix before deploying**.
 
 2. Check current git status (ensure working directory is clean):
 ```bash
-cd /home/ryzepeck/webapps/base_django_react_next_feature_staging && git status
+cd /home/ryzepeck/webapps/tuhuella_project_staging && git status
 ```
 Expected: `nothing to commit, working tree clean`. If there are uncommitted changes, stash or discard them first.
 
 3. Verify the target branch exists on remote:
 ```bash
-cd /home/ryzepeck/webapps/base_django_react_next_feature_staging && git fetch origin && git branch -r | grep $ARGUMENTS
+cd /home/ryzepeck/webapps/tuhuella_project_staging && git fetch origin && git branch -r | grep $ARGUMENTS
 ```
 If the branch doesn't exist, **stop — wrong branch name or not pushed yet**.
 
@@ -48,37 +48,32 @@ If the branch doesn't exist, **stop — wrong branch name or not pushed yet**.
 
 4. Checkout and pull the release branch:
 ```bash
-cd /home/ryzepeck/webapps/base_django_react_next_feature_staging && git fetch origin && git checkout $ARGUMENTS && git pull origin $ARGUMENTS
+cd /home/ryzepeck/webapps/tuhuella_project_staging && git fetch origin && git checkout $ARGUMENTS && git pull origin $ARGUMENTS
 ```
 
 5. Install backend dependencies and run migrations:
 ```bash
-cd /home/ryzepeck/webapps/base_django_react_next_feature_staging/backend && source venv/bin/activate && pip install -r requirements.txt && python manage.py migrate
+cd /home/ryzepeck/webapps/tuhuella_project_staging/backend && source venv/bin/activate && pip install -r requirements.txt && python manage.py migrate
 ```
 
-6. Build the frontend (requires nvm for Node 22.13.0) and remove node_modules afterwards:
+6. Build the frontend (Next.js standalone build, Node 20):
 ```bash
-bash -c 'export NVM_DIR="$HOME/.nvm"; source "$NVM_DIR/nvm.sh"; nvm use; cd /home/ryzepeck/webapps/base_django_react_next_feature_staging/frontend && npm ci && npm run build && rm -rf node_modules'
+cd /home/ryzepeck/webapps/tuhuella_project_staging/frontend && npm ci && npm run build
 ```
-> `rm -rf node_modules` runs only if the build succeeds. Frees ~200–500 MB of disk space.
-
-6b. (Optional) Verify node_modules were removed:
-```bash
-ls /home/ryzepeck/webapps/base_django_react_next_feature_staging/frontend/node_modules 2>/dev/null && echo "WARNING: node_modules still present" || echo "OK: node_modules removed"
-```
+> Do NOT remove `node_modules` — the Next.js runtime server needs them to run.
 
 7. Collect static files:
 ```bash
-cd /home/ryzepeck/webapps/base_django_react_next_feature_staging/backend && source venv/bin/activate && python manage.py collectstatic --noinput
+cd /home/ryzepeck/webapps/tuhuella_project_staging/backend && source venv/bin/activate && python manage.py collectstatic --noinput
 ```
 
 ---
 
 ## Phase 3 — Restart services
 
-8. Restart Gunicorn and Huey for staging:
+8. Restart all staging services:
 ```bash
-sudo systemctl restart base_django_react_next_feature_staging && sudo systemctl restart base_django_react_next_feature-staging-huey
+sudo systemctl restart tuhuella_project_staging && sudo systemctl restart tuhuella-staging-huey && sudo systemctl restart tuhuella-staging-frontend
 ```
 
 ---
@@ -87,9 +82,9 @@ sudo systemctl restart base_django_react_next_feature_staging && sudo systemctl 
 
 9. Verify staging services are active:
 ```bash
-sudo systemctl is-active base_django_react_next_feature_staging && sudo systemctl is-active base_django_react_next_feature-staging-huey
+sudo systemctl is-active tuhuella_project_staging && sudo systemctl is-active tuhuella-staging-huey && sudo systemctl is-active tuhuella-staging-frontend
 ```
-Expected: `active`, `active`.
+Expected: `active`, `active`, `active`.
 
 10. Verify the staging health endpoint:
 ```bash
@@ -99,7 +94,7 @@ Expected: `{"app": "ok", "database": "ok", "redis": "ok"}` with HTTP 200.
 
 11. Confirm the deployed branch matches the expected release:
 ```bash
-cd /home/ryzepeck/webapps/base_django_react_next_feature_staging && git log --oneline -1
+cd /home/ryzepeck/webapps/tuhuella_project_staging && git log --oneline -1
 ```
 Verify the commit matches the latest on `$ARGUMENTS`.
 
@@ -109,12 +104,12 @@ Verify the commit matches the latest on `$ARGUMENTS`.
 
 12. Check Gunicorn logs:
 ```bash
-sudo journalctl -u base_django_react_next_feature_staging --no-pager -n 50
+sudo journalctl -u tuhuella_project_staging --no-pager -n 50
 ```
 
 13. Check Huey logs:
 ```bash
-sudo journalctl -u base_django_react_next_feature-staging-huey --no-pager -n 50
+sudo journalctl -u tuhuella-staging-huey --no-pager -n 50
 ```
 
 14. Check Nginx error log:
@@ -124,13 +119,19 @@ sudo tail -30 /var/log/nginx/error.log
 
 15. Check Django debug log:
 ```bash
-tail -50 /home/ryzepeck/webapps/base_django_react_next_feature_staging/backend/debug.log
+tail -50 /home/ryzepeck/webapps/tuhuella_project_staging/backend/debug.log
 ```
 
-16. If services won't start, check systemd details:
+16. Check frontend logs:
 ```bash
-sudo systemctl status base_django_react_next_feature_staging --no-pager -l
-sudo systemctl status base_django_react_next_feature-staging-huey --no-pager -l
+sudo journalctl -u tuhuella-staging-frontend --no-pager -n 50
+```
+
+17. If services won't start, check systemd details:
+```bash
+sudo systemctl status tuhuella_project_staging --no-pager -l
+sudo systemctl status tuhuella-staging-huey --no-pager -l
+sudo systemctl status tuhuella-staging-frontend --no-pager -l
 ```
 
 ---

@@ -100,6 +100,6 @@ This runs: `jest --config jest.config.cjs --coverage && node scripts/coverage-su
 ## Interpreting Coverage Output
 
 - **Prioritize** files with lowest % and highest "Miss" count
-- **Priority order**: Views → Serializers → Models → Utils → Tasks (backend); Stores → Composables → Components (frontend)
+- **Priority order**: Views → Serializers → Models → Utils → Tasks (backend); Stores → Hooks → Components (frontend)
 - **Do not** polish near-100% files until low-coverage files are addressed
 - Coverage measures lines executed, **not** behavior verified — a test with no assertions gives coverage but no value

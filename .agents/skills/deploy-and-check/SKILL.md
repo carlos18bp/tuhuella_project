@@ -32,7 +32,7 @@ cd /home/ryzepeck/webapps/tuhuella_project && git pull origin master
 cd /home/ryzepeck/webapps/tuhuella_project/backend && source venv/bin/activate && pip install -r requirements.txt && DJANGO_SETTINGS_MODULE=base_feature_project.settings_prod python manage.py migrate
 ```
 
-4. Build the frontend (Nuxt generate + copy to Django static):
+4. Build the frontend (Next.js standalone build):
 ```bash
 cd /home/ryzepeck/webapps/tuhuella_project/frontend && npm ci && npm run build
 ```
@@ -44,7 +44,7 @@ cd /home/ryzepeck/webapps/tuhuella_project/backend && source venv/bin/activate &
 
 6. Restart services:
 ```bash
-sudo systemctl restart tuhuella_project && sudo systemctl restart tuhuella-huey
+sudo systemctl restart tuhuella_project && sudo systemctl restart tuhuella-huey && sudo systemctl restart tuhuella-frontend
 ```
 
 ## Post-Deploy Verification
@@ -59,6 +59,7 @@ Expected: PASS on all checks, FAIL=0.
 ```bash
 sudo journalctl -u tuhuella_project.service --no-pager -n 30
 sudo journalctl -u tuhuella-huey.service --no-pager -n 30
+sudo journalctl -u tuhuella-frontend.service --no-pager -n 30
 sudo tail -20 /var/log/nginx/error.log
 ```
 
@@ -66,23 +67,16 @@ sudo tail -20 /var/log/nginx/error.log
 
 - **Domain**: `tuhuella.projectapp.co` / `www.tuhuella.projectapp.co`
 - **Backend**: Django (`tuhuella_project` module), settings selected via `DJANGO_SETTINGS_MODULE=base_feature_project.settings_prod` in systemd unit
-- **Frontend**: Nuxt 3 SSG → `backend/static/frontend/` + Django `serve_nuxt` catch-all view
-- **Services**: `tuhuella_project.service` (Gunicorn via socket), `tuhuella_project.socket`, `tuhuella-huey.service`
+- **Frontend**: Next.js 16 runtime server on port 3001 via `tuhuella-frontend.service` (Node 20). Proxies `/api/*` and `/media/*` back to Django via `next.config.ts` rewrites
+- **Services**: `tuhuella_project.service` (Gunicorn), `tuhuella-huey.service`, `tuhuella-frontend.service` (Next.js port 3001) — all three must be running
 - **Nginx**: `/etc/nginx/sites-available/tuhuella_project`
 - **Socket**: `/run/tuhuella_project.sock`
 - **Static**: `/home/ryzepeck/webapps/tuhuella_project/backend/staticfiles/`
 - **Media**: `/home/ryzepeck/webapps/tuhuella_project/backend/media/`
 - **Resource limits**: MemoryMax=300M, CPUQuota=40%, OOMScoreAdjust=300
 
-## Cleanup
-
-9. Remove `node_modules` to save disk space (frontend already compiled):
-```bash
-rm -rf /home/ryzepeck/webapps/tuhuella_project/frontend/node_modules
-```
-
 ## Notes
 
 - VPS operations scripts live in `/home/ryzepeck/webapps/ops/vps/scripts/`.
-- Frontend uses `npm run build` which runs `nuxi generate` with `NUXT_APP_CDN_URL=/static/frontend/` and copies output to `backend/static/frontend/`.
+- Frontend uses `npm run build` which produces a Next.js standalone build. The frontend runs as a long-running Node 20 process on port 3001 via `tuhuella-frontend.service`. Do NOT remove `node_modules` — the runtime server needs them.
 - `DJANGO_SETTINGS_MODULE=base_feature_project.settings_prod` must be set for migrate and collectstatic commands (manage.py defaults to settings_dev).
