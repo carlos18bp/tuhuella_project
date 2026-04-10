@@ -9,9 +9,9 @@
 
 - **Name**: Tuhuella
 - **Domain**: `tuhuella.projectapp.co` / `www.tuhuella.projectapp.co`
-- **Stack**: Django 5 + DRF (backend) / Nuxt 3 + Vue 3 (frontend) / MySQL 8 / Redis / Huey
+- **Stack**: Django 6.0.2 + DRF (backend) / Next.js 16 + React 19 runtime server port 3001 (frontend) / MySQL 8 / Redis / Huey
 - **Server path**: `/home/ryzepeck/webapps/tuhuella_project`
-- **Services**: `tuhuella_project.service` (Gunicorn), `tuhuella_project.socket`, `tuhuella-huey.service`
+- **Services**: `tuhuella_project.service` (Gunicorn), `tuhuella_project.socket`, `tuhuella-huey.service`, `tuhuella-frontend.service` (Next.js port 3001)
 - **Settings module**: `DJANGO_SETTINGS_MODULE=base_feature_project.settings_prod`
 - **Nginx**: `/etc/nginx/sites-available/tuhuella_project`
 - **Static**: `/home/ryzepeck/webapps/tuhuella_project/backend/staticfiles/`
