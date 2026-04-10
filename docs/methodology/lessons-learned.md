@@ -3,9 +3,9 @@ trigger: manual
 description: Project intelligence and lessons learned. Reference for project-specific patterns, preferences, and key insights discovered during development.
 ---
 
-# Lessons Learned — Mi Huella
+# Lessons Learned — Tuhuella
 
-> Last updated: 2026-03-29
+> Last updated: 2026-04-10
 
 This file captures important patterns, preferences, and project intelligence that help work more effectively with this codebase. Updated as new insights are discovered.
 
@@ -14,10 +14,10 @@ This file captures important patterns, preferences, and project intelligence tha
 ## 1. Architecture Patterns
 
 ### Single Django App: `base_feature_app`
-- All 24 model classes (21 files), views, serializers, and services live in `base_feature_app`
+- All 27 model classes (24 files), views, serializers, and services live in `base_feature_app`
 - App name kept from template to avoid migration headaches
 - Models split into individual files under `base_feature_app/models/`
-- URLs split into 20 sub-modules under `base_feature_app/urls/`
+- URLs split into 22 sub-modules under `base_feature_app/urls/`
 
 ### Role-Based Access
 - Three roles: `adopter` (default), `shelter_admin`, `admin`
@@ -60,15 +60,15 @@ This file captures important patterns, preferences, and project intelligence tha
 
 ### Frontend: Zustand Stores
 - **10** Zustand stores with TypeScript types
-- Stores: `authStore`, `animalStore`, `shelterStore`, `campaignStore`, `donationStore`, `sponsorshipStore`, `favoriteStore`, `adoptionStore`, `blogStore`, `notificationStore`
+- Stores: `adoptionStore`, `animalStore`, `authStore`, `blogStore`, `campaignStore`, `donationStore`, `favoriteStore`, `notificationStore`, `shelterStore`, `sponsorshipStore`
 - HTTP requests go through centralized `lib/services/http.ts` Axios instance
 - Token management via `lib/services/tokens.ts` + `js-cookie`
 
 ### i18n Pattern (next-intl)
-- Locale stored in Zustand with `persist` middleware (cookie)
-- `i18n/request.ts` reads locale from cookie on server side
+- URL-prefix routing via `app/[locale]/` dynamic segments (`/es/`, `/en/`)
+- Default locale: `es`
+- `i18n/request.ts` resolves locale from the URL segment
 - Translation files: `messages/en.json`, `messages/es.json`
-- No URL prefix approach — single URL set for all locales
 
 ### Naming Conventions
 - Backend: snake_case for everything (Python standard)

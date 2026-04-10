@@ -1,16 +1,16 @@
-# Mi Huella — Active Context
+# Tuhuella — Active Context
 
-> Last updated: 2026-03-29
+> Last updated: 2026-04-10
 
 ## Current State
 
 The project is a mature animal adoption platform with complete backend and frontend implementations, extensive test coverage, and a methodology system for maintaining context.
 
 ### What's Working
-- **Backend**: 24 model classes (21 files), 44 serializers, 22 view modules, 20 URL modules, 22 admin classes, 21 management commands, 3 services
-- **Frontend**: 49 pages, 10 Zustand stores, 41 components (31 UI + 6 layout + 2 blog + 2 providers), 4 custom hooks, next-intl (en/es)
-- **Tests**: 57 backend test files, 107 frontend unit test files, 16 E2E spec files
-- **E2E**: 75 flow definitions documented across all roles and priorities
+- **Backend**: 27 model classes (24 files), 41 serializers, 22 view modules, 22 URL modules, 24 admin classes, 21 management commands, 3 services
+- **Frontend**: 50 pages, 10 Zustand stores, 84 components (65 UI + 12 layout + 4 blog + 3 providers), 5 custom hooks, next-intl (en/es)
+- **Tests**: 99 backend test files, 289 frontend unit test files, 17 E2E spec files
+- **E2E**: 82 flow definitions documented across all roles and priorities
 - **Design System**: Stone palette + teal/amber/emerald accents, Inter font, glassmorphism header, dark mode
 - **Blog**: Full bilingual blog with public listing/detail, admin CRUD, calendar, JSON content, cover images, SEO
 - **Volunteer Application System**: Full apply flow with model, form, reCAPTCHA, email notification
@@ -60,22 +60,22 @@ The project is a mature animal adoption platform with complete backend and front
 
 | Asset | Count |
 |-------|-------|
-| Backend model classes | 24 (21 files) |
-| Backend serializers | 44 |
+| Backend model classes | 27 (24 files) |
+| Backend serializers | 41 |
 | Backend views | 22 |
-| Backend URL modules | 20 |
-| Backend admin classes | 22 |
+| Backend URL modules | 22 |
+| Backend admin classes | 24 |
 | Management commands | 21 |
-| Frontend pages | 49 |
+| Frontend pages | 50 |
 | Zustand stores | 10 |
-| UI components | 31 |
-| Total frontend components | 41 |
-| Custom hooks | 4 |
-| Exported types | 40 |
-| Backend test files | 57 |
-| Frontend unit test files | 107 |
-| E2E spec files | 16 |
-| E2E flow definitions | 75 |
+| UI components | 65 |
+| Total frontend components | 84 |
+| Custom hooks | 5 |
+| Exported types | 44 |
+| Backend test files | 99 |
+| Frontend unit test files | 289 |
+| E2E spec files | 17 |
+| E2E flow definitions | 82 |
 
 ## Recently Completed: Phase 13a — Enriched Favorites View
 

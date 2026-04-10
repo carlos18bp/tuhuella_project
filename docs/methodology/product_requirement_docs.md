@@ -1,8 +1,8 @@
-# Mi Huella — Product Requirements Document (PRD)
+# Tuhuella — Product Requirements Document (PRD)
 
 ## Product Vision
 
-Mi Huella is an animal adoption, sponsorship, and donation platform that connects verified shelters with adopters and donors. The platform enables transparent, safe processes for animal welfare.
+Tuhuella is an animal adoption, sponsorship, and donation platform that connects verified shelters with adopters and donors. The platform enables transparent, safe processes for animal welfare.
 
 ## Problem Statement
 

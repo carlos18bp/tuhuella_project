@@ -1,6 +1,6 @@
-# Mi Huella — Feature Task Plan
+# Tuhuella — Feature Task Plan
 
-> Last updated: 2026-03-29
+> Last updated: 2026-04-10
 
 ## Status Legend
 - ✅ Done
@@ -8,7 +8,7 @@
 - ⏳ Pending
 - ❌ Blocked
 
-## Phase 1 — Backend Models (24 model classes, 21 files)
+## Phase 1 — Backend Models (27 model classes, 24 files)
 | Task | Status | Notes |
 |------|--------|-------|
 | User model | ✅ | city field, adopter/shelter_admin/admin roles |
@@ -32,17 +32,17 @@
 | StrategicAlly model | ✅ | partner organizations |
 | VolunteerPosition model | ✅ | volunteer opportunities |
 
-## Phase 2 — Backend Serializers (44 files)
+## Phase 2 — Backend Serializers (41 files)
 | Task | Status | Notes |
 |------|--------|-------|
-| 44 serializer files | ✅ | list/detail/create_update pattern + blog + utils |
+| 41 serializer files | ✅ | list/detail/create_update pattern + blog + utils |
 
 ## Phase 3 — Backend Views, URLs, Admin, Commands
 | Task | Status | Notes |
 |------|--------|-------|
 | 22 view modules | ✅ | FBV pattern |
-| 20 URL modules | ✅ | Split under urls/ |
-| Admin (MiHuellaAdminSite, 22 classes) | ✅ | All models registered |
+| 22 URL modules | ✅ | Split under urls/ |
+| Admin (MiHuellaAdminSite, 24 classes) | ✅ | All models registered |
 | 21 management commands | ✅ | Including seed_amount_options |
 | Payment placeholder views | ✅ | Wompi stub |
 | Services (email, notification) | ✅ | 3 service files |
@@ -69,9 +69,9 @@
 ## Phase 6 — Frontend Pages & Components
 | Task | Status | Notes |
 |------|--------|-------|
-| 49 page.tsx files | ✅ | All routes covered |
+| 50 page.tsx files | ✅ | All routes covered |
 | Header + Footer + Sidebar | ✅ | Role-aware, mobile menu, locale switcher, theme toggle |
-| 31 UI components | ✅ | All barrel-exported from components/ui/index.ts |
+| 65 UI components | ✅ | All barrel-exported from components/ui/index.ts |
 | Blog components (2) | ✅ | BlogContentRenderer, ReadingProgressBar |
 | Provider components | ✅ | ThemeProvider |
 
@@ -108,10 +108,10 @@
 ## Phase 10 — Test Coverage Expansion
 | Task | Status | Notes |
 |------|--------|-------|
-| Backend tests: 57 files | ✅ | Models, serializers, views, services, utils, commands |
-| Frontend unit tests: 107 files | ✅ | Pages, components, stores, hooks, services |
-| E2E specs: 16 files | 🔧 | Covers auth, public, app, contract flows |
-| E2E flow definitions: 75 flows | ✅ | P1–P4 priority levels |
+| Backend tests: 99 files | ✅ | Models, serializers, views, services, utils, commands |
+| Frontend unit tests: 289 files | ✅ | Pages, components, stores, hooks, services |
+| E2E specs: 17 files | 🔧 | Covers auth, public, app, contract flows |
+| E2E flow definitions: 82 flows | ✅ | P1–P4 priority levels |
 
 ## Methodology
 | Task | Status | Notes |
