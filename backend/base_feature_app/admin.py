@@ -65,7 +65,7 @@ class MiHuellaUserAdmin(UserAdmin):
             return '—'
         url = reverse('myadmin:base_feature_app_user_login_as', args=[obj.pk])
         return format_html(
-            '<a class="button" href="{}" style="text-decoration:none">Log in as this user</a>',
+            '<a class="button" href="{}" style="text-decoration:none" target="_blank" rel="noopener">Log in as this user</a>',
             url,
         )
     impersonate_link.short_description = 'Impersonate'
