@@ -13,9 +13,11 @@ STEPS = [
     ('create_users', ['--count', '30'], 'Users'),
     ('create_shelters', ['--count', '10'], 'Shelters'),
     ('create_animals', ['--count', '50'], 'Animals'),
+    ('create_animal_health', [], 'Animal health screenings'),
     None,  # section separator
     # --- Financial ---
     ('create_campaigns', ['--count', '15'], 'Campaigns'),
+    ('create_campaign_messages', [], 'Campaign messages'),
     ('create_donations', ['--count', '40'], 'Donations'),
     ('create_sponsorships', ['--count', '25'], 'Sponsorships'),
     ('create_payments', ['--count', '30'], 'Payments'),
@@ -23,6 +25,7 @@ STEPS = [
     None,
     # --- Adoption flow ---
     ('create_adoptions', ['--count', '20'], 'Adoption applications'),
+    ('create_follow_ups', [], 'Post-adoption follow-ups'),
     ('create_adopter_intents', ['--count', '10'], 'Adopter intents'),
     ('create_shelter_invites', ['--count', '15'], 'Shelter invites'),
     ('create_favorites', ['--count', '50'], 'Favorites'),

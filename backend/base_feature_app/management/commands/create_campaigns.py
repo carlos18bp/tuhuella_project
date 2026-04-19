@@ -70,19 +70,42 @@ class Command(BaseCommand):
             title_es, title_en = random.choice(CAMPAIGN_TITLES)
             desc_idx = i % len(CAMPAIGN_DESCRIPTIONS_ES)
 
-            # Make ~30% of campaigns completed
+            now = timezone.now()
+
             if i % 3 == 2:
                 status = Campaign.Status.COMPLETED
-                raised = goal  # completed campaigns reached their goal
-                starts_at = timezone.now() - timezone.timedelta(days=random.randint(60, 120))
-                ends_at = timezone.now() - timezone.timedelta(days=random.randint(1, 30))
+                raised = goal
+                starts_at = now - timezone.timedelta(days=random.randint(60, 120))
+                ends_at = now - timezone.timedelta(days=random.randint(1, 30))
+                approval_status = Campaign.ApprovalStatus.APPROVED
+                reviewed_by = reviewer
+                reviewed_at = now - timezone.timedelta(days=random.randint(5, 10))
+                submitted_at = now - timezone.timedelta(days=random.randint(10, 15))
             else:
-                status = random.choice([Campaign.Status.ACTIVE, Campaign.Status.ACTIVE, Campaign.Status.DRAFT])
-                raised = Decimal(random.randint(0, int(goal)))
-                starts_at = timezone.now()
-                ends_at = timezone.now() + timezone.timedelta(days=random.randint(30, 90))
+                slot = i % 5
+                if slot in (0, 1, 2):
+                    approval_status = Campaign.ApprovalStatus.APPROVED
+                    status = random.choice([Campaign.Status.ACTIVE, Campaign.Status.ACTIVE, Campaign.Status.DRAFT])
+                    reviewed_by = reviewer
+                    reviewed_at = now - timezone.timedelta(days=random.randint(0, 4))
+                    submitted_at = now - timezone.timedelta(days=random.randint(1, 5))
+                elif slot == 3:
+                    approval_status = Campaign.ApprovalStatus.PENDING
+                    status = Campaign.Status.DRAFT
+                    reviewed_by = None
+                    reviewed_at = None
+                    submitted_at = now - timezone.timedelta(days=random.randint(1, 3))
+                else:
+                    approval_status = Campaign.ApprovalStatus.REJECTED
+                    status = Campaign.Status.DRAFT
+                    reviewed_by = reviewer
+                    reviewed_at = now - timezone.timedelta(days=random.randint(0, 2))
+                    submitted_at = now - timezone.timedelta(days=random.randint(3, 7))
 
-            now = timezone.now()
+                raised = Decimal(random.randint(0, int(goal))) if approval_status == Campaign.ApprovalStatus.APPROVED else Decimal(0)
+                starts_at = now
+                ends_at = now + timezone.timedelta(days=random.randint(30, 90))
+
             campaign = Campaign.objects.create(
                 shelter=assignments[i],
                 title_es=title_es,
@@ -94,10 +117,10 @@ class Command(BaseCommand):
                 status=status,
                 starts_at=starts_at,
                 ends_at=ends_at,
-                approval_status=Campaign.ApprovalStatus.APPROVED,
-                submitted_at=now - timezone.timedelta(days=random.randint(1, 5)),
-                reviewed_by=reviewer,
-                reviewed_at=now - timezone.timedelta(days=random.randint(0, 4)),
+                approval_status=approval_status,
+                submitted_at=submitted_at,
+                reviewed_by=reviewed_by,
+                reviewed_at=reviewed_at,
             )
 
             # Add evidence images for completed campaigns

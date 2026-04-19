@@ -54,6 +54,53 @@ FIXED_ADOPTERS = [
     },
 ]
 
+FIXED_WEB_MANAGERS = [
+    {
+        'email': 'manager@tuhuella.com',
+        'first_name': 'Valentina',
+        'last_name': 'Torres',
+        'phone': '+57 302 300 0001',
+        'city': 'Bogotá',
+    },
+]
+
+FIXED_VETERINARIANS = [
+    {
+        'email': 'vet1@tuhuella.com',
+        'first_name': 'Miguel',
+        'last_name': 'Herrera',
+        'phone': '+57 303 400 0001',
+        'city': 'Bogotá',
+    },
+    {
+        'email': 'vet2@tuhuella.com',
+        'first_name': 'Paola',
+        'last_name': 'Sánchez',
+        'phone': '+57 303 400 0002',
+        'city': 'Medellín',
+    },
+]
+
+
+def _create_fixed_users(data_list, role):
+    created = 0
+    for data in data_list:
+        user, was_created = User.objects.get_or_create(
+            email=data['email'],
+            defaults={
+                'first_name': data['first_name'],
+                'last_name': data['last_name'],
+                'phone': data['phone'],
+                'city': data['city'],
+                'role': role,
+            },
+        )
+        if was_created:
+            user.set_password(SEED_PASSWORD)
+            user.save()
+            created += 1
+    return created
+
 
 class Command(BaseCommand):
     help = 'Create User records for Tuhuella (fixed seed accounts + Faker batch)'
@@ -68,7 +115,6 @@ class Command(BaseCommand):
         count = options['count']
         shelters_count = options['shelters_count']
 
-        # 1) Admin superuser (fixed)
         admin, admin_created = User.objects.get_or_create(
             email=FIXED_ADMIN['email'],
             defaults={
@@ -82,59 +128,26 @@ class Command(BaseCommand):
         if admin_created:
             admin.set_password(FIXED_ADMIN['password'])
             admin.save()
-            self.stdout.write(self.style.SUCCESS(f'Created admin: {admin.email}'))
 
-        # 2) Fixed shelter_admin accounts
-        fixed_shelter_admins = 0
-        for data in FIXED_SHELTER_ADMINS:
-            user, was_created = User.objects.get_or_create(
-                email=data['email'],
-                defaults={
-                    'first_name': data['first_name'],
-                    'last_name': data['last_name'],
-                    'phone': data['phone'],
-                    'city': data['city'],
-                    'role': User.Role.SHELTER_ADMIN,
-                },
-            )
-            if was_created:
-                user.set_password(SEED_PASSWORD)
-                user.save()
-                fixed_shelter_admins += 1
+        fixed_shelter_admins = _create_fixed_users(FIXED_SHELTER_ADMINS, User.Role.SHELTER_ADMIN)
+        fixed_adopters = _create_fixed_users(FIXED_ADOPTERS, User.Role.ADOPTER)
+        fixed_web_managers = _create_fixed_users(FIXED_WEB_MANAGERS, User.Role.WEB_MANAGER)
+        fixed_vets = _create_fixed_users(FIXED_VETERINARIANS, User.Role.VETERINARIAN)
 
-        # 3) Fixed adopter accounts
-        fixed_adopters = 0
-        for data in FIXED_ADOPTERS:
-            user, was_created = User.objects.get_or_create(
-                email=data['email'],
-                defaults={
-                    'first_name': data['first_name'],
-                    'last_name': data['last_name'],
-                    'phone': data['phone'],
-                    'city': data['city'],
-                    'role': User.Role.ADOPTER,
-                },
-            )
-            if was_created:
-                user.set_password(SEED_PASSWORD)
-                user.save()
-                fixed_adopters += 1
-
-        # 4) Faker batch — ensure we end up with at least shelters_count total shelter_admins
         existing_shelter_admins = User.objects.filter(role=User.Role.SHELTER_ADMIN).count()
         needed_shelter_admins = max(0, shelters_count - existing_shelter_admins)
 
         created = 0
         for i in range(count):
-            # Alternate so we always meet the minimum shelter_admin quota first
             if i < needed_shelter_admins:
                 role = User.Role.SHELTER_ADMIN
+            elif i % 10 == 9:
+                role = User.Role.VETERINARIAN
             else:
                 role = User.Role.ADOPTER if i % 3 != 0 else User.Role.SHELTER_ADMIN
 
-            email = fake.unique.email()
-            user = User.objects.create_user(
-                email=email,
+            User.objects.create_user(
+                email=fake.unique.email(),
                 password=SEED_PASSWORD,
                 first_name=fake.first_name(),
                 last_name=fake.last_name(),
@@ -145,6 +158,7 @@ class Command(BaseCommand):
             created += 1
 
         self.stdout.write(self.style.SUCCESS(
-            f'Fixed accounts: +{fixed_shelter_admins} shelter_admins, +{fixed_adopters} adopters. '
-            f'Faker batch: {created} users. Seed password: {SEED_PASSWORD}'
+            f'{fixed_shelter_admins} shelter_admins, {fixed_adopters} adopters, '
+            f'{fixed_web_managers} web_managers, {fixed_vets} vets fixed. '
+            f'Faker batch: {created} users'
         ))
