@@ -79,7 +79,7 @@ class MiHuellaUserAdmin(UserAdmin):
             raise PermissionDenied('Only active superusers can use Login-as.')
 
         target = get_object_or_404(User, pk=user_id)
-        change_url = reverse('admin:base_feature_app_user_change', args=[user_id])
+        change_url = reverse('myadmin:base_feature_app_user_change', args=[user_id])
 
         if target.is_superuser and target.pk != request.user.pk:
             messages.error(request, _('No puedes iniciar sesión como otro superusuario.'))
@@ -107,7 +107,7 @@ class MiHuellaUserAdmin(UserAdmin):
         extra_context = extra_context or {}
         if request.user.is_active and request.user.is_superuser and object_id:
             extra_context['login_as_url'] = reverse(
-                'admin:base_feature_app_user_login_as', args=[object_id],
+                'myadmin:base_feature_app_user_login_as', args=[object_id],
             )
         return super().change_view(request, object_id, form_url, extra_context)
 
