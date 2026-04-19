@@ -17,7 +17,7 @@ export default function ShelterOnboardingPage() {
   const [form, setForm] = useState({
     name: '',
     legal_name: '',
-    description: '',
+    description_es: '',
     city: '',
     address: '',
     phone: '',
@@ -33,8 +33,8 @@ export default function ShelterOnboardingPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.city.trim()) {
-      setError('El nombre y la ciudad son obligatorios');
+    if (!form.name.trim() || !form.description_es.trim() || !form.phone.trim()) {
+      setError('El nombre, la descripción y el teléfono son obligatorios');
       return;
     }
     setSubmitting(true);
@@ -85,12 +85,13 @@ export default function ShelterOnboardingPage() {
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-text-secondary">Descripción</label>
+          <label htmlFor="description_es" className="block text-sm font-medium text-text-secondary">Descripción *</label>
           <textarea
-            id="description"
-            name="description"
-            value={form.description}
+            id="description_es"
+            name="description_es"
+            value={form.description_es}
             onChange={handleChange}
+            required
             rows={3}
             className={inputClass}
             placeholder="Cuéntanos sobre tu refugio, misión, historia..."
@@ -110,8 +111,8 @@ export default function ShelterOnboardingPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-text-secondary">Teléfono</label>
-            <input id="phone" name="phone" value={form.phone} onChange={handleChange} className={inputClass} />
+            <label htmlFor="phone" className="block text-sm font-medium text-text-secondary">Teléfono *</label>
+            <input id="phone" name="phone" value={form.phone} onChange={handleChange} required className={inputClass} />
           </div>
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-text-secondary">Email del refugio</label>

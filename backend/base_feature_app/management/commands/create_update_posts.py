@@ -68,9 +68,16 @@ class Command(BaseCommand):
         campaigns = list(Campaign.objects.all())
         animals = list(Animal.objects.all())
 
+        # Guarantee at least 1 post per verified shelter, then random distribution
+        assignments = list(shelters)
+        if count > len(assignments):
+            assignments += [random.choice(shelters) for _ in range(count - len(assignments))]
+        else:
+            assignments = assignments[:count]
+
         created = 0
-        for _ in range(count):
-            shelter = random.choice(shelters)
+        for i in range(len(assignments)):
+            shelter = assignments[i]
             shelter_campaigns = [c for c in campaigns if c.shelter_id == shelter.pk]
             shelter_animals = [a for a in animals if a.shelter_id == shelter.pk]
             idx = random.randrange(len(TITLES_ES))

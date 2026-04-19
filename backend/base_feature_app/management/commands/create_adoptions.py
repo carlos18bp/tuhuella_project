@@ -3,7 +3,7 @@ import random
 from django.core.management.base import BaseCommand
 from faker import Faker
 
-from base_feature_app.models import AdoptionApplication, Animal, User
+from base_feature_app.models import AdoptionApplication, Animal, AnimalStatusHistory, User
 
 fake = Faker()
 
@@ -17,7 +17,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         count = options['count']
         adopters = list(User.objects.filter(role=User.Role.ADOPTER))
-        animals = list(Animal.objects.filter(status='published'))
+        animals = list(
+            Animal.objects.filter(status=Animal.Status.PUBLISHED)
+            .select_related('shelter__owner')
+        )
 
         if not adopters or not animals:
             self.stdout.write(self.style.WARNING('Need adopter users and published animals.'))
@@ -38,15 +41,16 @@ class Command(BaseCommand):
                 continue
             seen.add(key)
 
+            status = random.choice([
+                AdoptionApplication.Status.SUBMITTED,
+                AdoptionApplication.Status.SUBMITTED,
+                AdoptionApplication.Status.APPROVED,
+                AdoptionApplication.Status.REJECTED,
+            ])
             AdoptionApplication.objects.create(
                 user=user,
                 animal=animal,
-                status=random.choice([
-                    AdoptionApplication.Status.SUBMITTED,
-                    AdoptionApplication.Status.SUBMITTED,
-                    AdoptionApplication.Status.APPROVED,
-                    AdoptionApplication.Status.REJECTED,
-                ]),
+                status=status,
                 form_answers={
                     'has_pets': random.choice([True, False]),
                     'housing_type': random.choice(['house', 'apartment']),
@@ -55,6 +59,17 @@ class Command(BaseCommand):
                 },
                 notes=fake.sentence() if random.random() < 0.3 else '',
             )
+
+            # Leave an audit trail when the application was approved
+            if status == AdoptionApplication.Status.APPROVED:
+                AnimalStatusHistory.objects.create(
+                    animal=animal,
+                    previous_status=animal.status,
+                    new_status=Animal.Status.ADOPTED,
+                    reason='Adoption application approved (seed data).',
+                    changed_by=animal.shelter.owner,
+                )
+
             created += 1
 
         self.stdout.write(self.style.SUCCESS(f'Created {created} adoption applications'))

@@ -78,7 +78,7 @@ def _extract_summary(output_text):
 
 
 class Command(BaseCommand):
-    help = 'Create all fake data for Mi Huella in the correct order'
+    help = 'Create all fake data for Tuhuella in the correct order'
 
     def handle(self, *args, **options):
         # Suppress noisy loggers
@@ -102,7 +102,7 @@ class Command(BaseCommand):
 
     def _run_steps(self):
         self.stdout.write('')
-        self.stdout.write(self.style.SUCCESS('  Mi Huella — Creating fake data...'))
+        self.stdout.write(self.style.SUCCESS('  Tuhuella — Creating fake data...'))
         self.stdout.write(self.style.SUCCESS('  ' + '─' * LINE_WIDTH))
 
         for step in STEPS:

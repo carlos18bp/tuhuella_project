@@ -32,7 +32,7 @@ from base_feature_app.models import (
 
 
 class Command(BaseCommand):
-    help = 'Delete all fake Mi Huella data (--confirm required). Superusers are preserved.'
+    help = 'Delete all fake Tuhuella data (--confirm required). Superusers are always preserved.'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -48,7 +48,15 @@ class Command(BaseCommand):
             ))
             return
 
-        self.stdout.write(self.style.WARNING('Deleting all Mi Huella data...'))
+        preserved_superusers = list(
+            User.objects.filter(is_superuser=True).values_list('email', flat=True)
+        )
+        self.stdout.write(self.style.WARNING('Deleting all Tuhuella fake data...'))
+        if preserved_superusers:
+            self.stdout.write(
+                f'  Superusers preserved ({len(preserved_superusers)}): '
+                + ', '.join(preserved_superusers)
+            )
 
         models_to_delete = [
             NotificationLog, NotificationPreference, ShelterInvite,
@@ -64,7 +72,11 @@ class Command(BaseCommand):
             count, _ = model.objects.all().delete()
             self.stdout.write(f'  Deleted {count} {model.__name__} records')
 
-        count, _ = User.objects.filter(is_superuser=False).delete()
-        self.stdout.write(f'  Deleted {count} User records (non-superuser)')
+        # Double safety: exclude both is_superuser AND the 'admin' role
+        count, _ = User.objects.filter(is_superuser=False).exclude(role=User.Role.ADMIN).delete()
+        self.stdout.write(f'  Deleted {count} User records (non-superuser, non-admin)')
 
-        self.stdout.write(self.style.SUCCESS('All fake data deleted!'))
+        remaining_superusers = User.objects.filter(is_superuser=True).count()
+        self.stdout.write(self.style.SUCCESS(
+            f'All fake data deleted. {remaining_superusers} superuser(s) preserved.'
+        ))

@@ -28,18 +28,20 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING('No non-superuser users found.'))
             return
 
-        prefs_created = 0
-        for user in users[:count]:
-            for event_key in random.sample(EVENT_KEYS, k=min(3, len(EVENT_KEYS))):
-                for channel in [NotificationPreference.Channel.EMAIL, NotificationPreference.Channel.IN_APP]:
-                    _, was_created = NotificationPreference.objects.get_or_create(
-                        user=user,
-                        event_key=event_key,
-                        channel=channel,
-                        defaults={'enabled': random.random() < 0.8},
-                    )
-                    if was_created:
-                        prefs_created += 1
+        before = NotificationPreference.objects.count()
+        new_prefs = [
+            NotificationPreference(
+                user=user,
+                event_key=event_key,
+                channel=channel,
+                enabled=random.random() < 0.8,
+            )
+            for user in users
+            for event_key in random.sample(EVENT_KEYS, k=min(3, len(EVENT_KEYS)))
+            for channel in [NotificationPreference.Channel.EMAIL, NotificationPreference.Channel.IN_APP]
+        ]
+        NotificationPreference.objects.bulk_create(new_prefs, ignore_conflicts=True)
+        prefs_created = NotificationPreference.objects.count() - before
 
         logs_created = 0
         for i in range(count):

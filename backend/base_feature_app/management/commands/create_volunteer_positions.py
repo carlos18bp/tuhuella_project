@@ -1,5 +1,11 @@
+import random
+
 from django.core.management.base import BaseCommand
-from base_feature_app.models import VolunteerPosition
+from faker import Faker
+
+from base_feature_app.models import User, VolunteerApplication, VolunteerPosition
+
+fake = Faker('es_CO')
 
 POSITIONS = [
     {
@@ -142,6 +148,8 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--count', type=int, default=12, help='Number of positions to create')
+        parser.add_argument('--applications', type=int, default=8,
+                            help='Number of VolunteerApplication rows to seed (0 to skip)')
 
     def handle(self, *args, **options):
         count = min(options['count'], len(POSITIONS))
@@ -155,3 +163,46 @@ class Command(BaseCommand):
                 created += 1
 
         self.stdout.write(self.style.SUCCESS(f'Created {created} volunteer positions'))
+
+        # Seed VolunteerApplications linking adopters with positions
+        applications_target = options['applications']
+        if applications_target <= 0:
+            return
+
+        adopters = list(User.objects.filter(role=User.Role.ADOPTER))
+        positions = list(VolunteerPosition.objects.filter(is_active=True))
+        if not adopters or not positions:
+            self.stdout.write(self.style.WARNING(
+                'Skipping VolunteerApplications: need adopter users and active positions.'
+            ))
+            return
+
+        existing_pairs = set(
+            VolunteerApplication.objects.values_list('user_id', 'position_id')
+        )
+        statuses = [
+            VolunteerApplication.Status.PENDING,
+            VolunteerApplication.Status.PENDING,
+            VolunteerApplication.Status.REVIEWED,
+            VolunteerApplication.Status.ACCEPTED,
+            VolunteerApplication.Status.REJECTED,
+        ]
+
+        apps_created = 0
+        attempts = 0
+        while apps_created < applications_target and attempts < applications_target * 5:
+            attempts += 1
+            user = random.choice(adopters)
+            position = random.choice(positions)
+            if (user.pk, position.pk) in existing_pairs:
+                continue
+            existing_pairs.add((user.pk, position.pk))
+            VolunteerApplication.objects.create(
+                user=user,
+                position=position,
+                motivation=fake.paragraph(nb_sentences=2),
+                status=random.choice(statuses),
+            )
+            apps_created += 1
+
+        self.stdout.write(self.style.SUCCESS(f'Created {apps_created} volunteer applications'))

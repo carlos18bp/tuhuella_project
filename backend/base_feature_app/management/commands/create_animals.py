@@ -58,17 +58,31 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--count', type=int, default=20)
+        parser.add_argument('--min-per-shelter', type=int, default=3,
+                            help='Minimum animals guaranteed per verified shelter')
 
     def handle(self, *args, **options):
         count = options['count']
+        min_per_shelter = options['min_per_shelter']
         shelters = list(Shelter.objects.filter(verification_status='verified'))
 
         if not shelters:
             self.stdout.write(self.style.WARNING('No verified shelters found. Run create_shelters first.'))
             return
 
+        # Build a shelter assignment list: first guarantee min_per_shelter per shelter,
+        # then fill remaining slots by round-robin / random across all verified shelters.
+        guaranteed = [s for s in shelters for _ in range(min_per_shelter)]
+        if count < len(guaranteed):
+            # If count is too low, at least spread one per shelter
+            guaranteed = guaranteed[:count]
+            remaining = []
+        else:
+            remaining = [random.choice(shelters) for _ in range(count - len(guaranteed))]
+        assignments = guaranteed + remaining
+
         created = 0
-        for i in range(count):
+        for i in range(len(assignments)):
             species = random.choice([Animal.Species.DOG, Animal.Species.CAT, Animal.Species.OTHER])
             if species == Animal.Species.DOG:
                 breed = random.choice(DOG_BREEDS)
@@ -81,7 +95,7 @@ class Command(BaseCommand):
             sn_idx = random.randrange(len(SPECIAL_NEEDS_ES))
 
             Animal.objects.create(
-                shelter=random.choice(shelters),
+                shelter=assignments[i],
                 name=random.choice(NAMES),
                 species=species,
                 breed=breed,

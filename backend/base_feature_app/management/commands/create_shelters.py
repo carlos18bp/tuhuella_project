@@ -1,9 +1,40 @@
 from faker import Faker
 from django.core.management.base import BaseCommand
-from base_feature_app.models import User, Shelter
+from base_feature_app.models import User, Shelter, ShelterMembership
+
+from .create_users import FIXED_SHELTER_ADMINS
 
 fake_es = Faker('es_CO')
 fake_en = Faker('en_US')
+
+FIXED_SHELTER_ADMIN_EMAILS = [entry['email'] for entry in FIXED_SHELTER_ADMINS]
+
+FIXED_SHELTERS = [
+    {
+        'name': 'Refugio Patitas Felices',
+        'legal_name': 'Fundación Patitas Felices',
+        'city': 'Bogotá',
+        'description_es': 'Refugio dedicado al rescate de perros callejeros en Bogotá. Brindamos atención veterinaria, esterilización y adopción responsable.',
+        'description_en': 'Shelter dedicated to rescuing stray dogs in Bogotá. We provide veterinary care, sterilization, and responsible adoption.',
+        'verification_status': Shelter.VerificationStatus.VERIFIED,
+    },
+    {
+        'name': 'Hogar Animal Medellín',
+        'legal_name': 'Asociación Hogar Animal',
+        'city': 'Medellín',
+        'description_es': 'Organización sin ánimo de lucro que rescata, rehabilita y reubica perros y gatos en situación de vulnerabilidad.',
+        'description_en': 'Non-profit organization that rescues, rehabilitates, and relocates vulnerable dogs and cats.',
+        'verification_status': Shelter.VerificationStatus.VERIFIED,
+    },
+    {
+        'name': 'Refugio Cali Animal',
+        'legal_name': 'Fundación Cali Animal',
+        'city': 'Cali',
+        'description_es': 'Nos dedicamos al bienestar animal desde hace más de 8 años. Promovemos adopción, tenencia responsable y jornadas de esterilización.',
+        'description_en': 'We have been dedicated to animal welfare for over 8 years. We promote adoption, responsible ownership, and sterilization drives.',
+        'verification_status': Shelter.VerificationStatus.VERIFIED,
+    },
+]
 
 DESCRIPTIONS_ES = [
     'Somos un refugio dedicado al rescate y rehabilitación de animales en situación de abandono. Trabajamos con amor y compromiso para encontrarles un hogar.',
@@ -23,10 +54,11 @@ DESCRIPTIONS_EN = [
 
 
 class Command(BaseCommand):
-    help = 'Create Shelter records for Tu Huella'
+    help = 'Create Shelter records for Tuhuella (fixed seed shelters + Faker batch)'
 
     def add_arguments(self, parser):
-        parser.add_argument('--count', type=int, default=5)
+        parser.add_argument('--count', type=int, default=5,
+                            help='Total number of shelters to create (fixed seeds count toward the total)')
 
     def handle(self, *args, **options):
         count = options['count']
@@ -36,20 +68,60 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING('No shelter_admin users found. Run create_users first.'))
             return
 
+        fixed_owners_by_email = User.objects.filter(
+            email__in=FIXED_SHELTER_ADMIN_EMAILS,
+            role=User.Role.SHELTER_ADMIN,
+        ).in_bulk(field_name='email')
+
+        used_owner_ids = set()
+        created = 0
+        memberships_created = 0
+
+        for idx, fixed in enumerate(FIXED_SHELTERS[:count]):
+            admin_email = FIXED_SHELTER_ADMIN_EMAILS[idx]
+            owner = fixed_owners_by_email[admin_email]
+
+            shelter, was_created = Shelter.objects.get_or_create(
+                name=fixed['name'],
+                defaults={
+                    'owner': owner,
+                    'legal_name': fixed['legal_name'],
+                    'description_es': fixed['description_es'],
+                    'description_en': fixed['description_en'],
+                    'city': fixed['city'],
+                    'address': fake_es.address(),
+                    'phone': fake_es.phone_number()[:20],
+                    'email': f"contacto+{fixed['name'].lower().replace(' ', '')}@tuhuella.com",
+                    'website': fake_en.url(),
+                    'verification_status': fixed['verification_status'],
+                },
+            )
+            if was_created:
+                created += 1
+            used_owner_ids.add(owner.id)
+
+            _, m_created = ShelterMembership.objects.get_or_create(
+                shelter=shelter,
+                user=owner,
+                defaults={'role': ShelterMembership.Role.OWNER},
+            )
+            if m_created:
+                memberships_created += 1
+
+        # 2) Remaining Faker shelters with distinct owners where possible
         statuses = [
-            Shelter.VerificationStatus.VERIFIED,
-            Shelter.VerificationStatus.VERIFIED,
             Shelter.VerificationStatus.VERIFIED,
             Shelter.VerificationStatus.PENDING,
             Shelter.VerificationStatus.REJECTED,
         ]
+        remaining = max(0, count - len(FIXED_SHELTERS))
+        available_owners = [u for u in shelter_admins if u.id not in used_owner_ids] or shelter_admins
 
-        created = 0
-        for i in range(count):
-            owner = shelter_admins[i % len(shelter_admins)]
+        for i in range(remaining):
+            owner = available_owners[i % len(available_owners)]
             status = statuses[i % len(statuses)]
             desc_idx = i % len(DESCRIPTIONS_ES)
-            Shelter.objects.create(
+            shelter = Shelter.objects.create(
                 owner=owner,
                 name=f'Refugio {fake_es.company()}',
                 legal_name=fake_es.company(),
@@ -63,5 +135,16 @@ class Command(BaseCommand):
                 verification_status=status,
             )
             created += 1
+            used_owner_ids.add(owner.id)
 
-        self.stdout.write(self.style.SUCCESS(f'Created {created} shelters'))
+            _, m_created = ShelterMembership.objects.get_or_create(
+                shelter=shelter,
+                user=owner,
+                defaults={'role': ShelterMembership.Role.OWNER},
+            )
+            if m_created:
+                memberships_created += 1
+
+        self.stdout.write(self.style.SUCCESS(
+            f'Created {created} shelters and {memberships_created} owner memberships'
+        ))

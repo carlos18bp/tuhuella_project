@@ -56,8 +56,15 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING('No verified shelters found. Run create_shelters first.'))
             return
 
+        # Guarantee at least 1 campaign per verified shelter, then round-robin the rest
+        assignments = list(shelters)
+        if count > len(assignments):
+            assignments += [shelters[i % len(shelters)] for i in range(count - len(assignments))]
+        else:
+            assignments = assignments[:count]
+
         created = 0
-        for i in range(count):
+        for i in range(len(assignments)):
             goal = Decimal(random.randint(500, 5000)) * 1000
             title_es, title_en = random.choice(CAMPAIGN_TITLES)
             desc_idx = i % len(CAMPAIGN_DESCRIPTIONS_ES)
@@ -75,7 +82,7 @@ class Command(BaseCommand):
                 ends_at = timezone.now() + timezone.timedelta(days=random.randint(30, 90))
 
             campaign = Campaign.objects.create(
-                shelter=random.choice(shelters),
+                shelter=assignments[i],
                 title_es=title_es,
                 title_en=title_en,
                 description_es=CAMPAIGN_DESCRIPTIONS_ES[desc_idx],

@@ -24,12 +24,15 @@ def verify_recaptcha(token):
     from django.conf import settings as _settings
     if _settings.DEBUG:
         return True
+    secret = getattr(_settings, 'RECAPTCHA_SECRET_KEY', '')
+    if not secret:
+        return True
     if not token:
         return False
     try:
         resp = requests.post(
             'https://www.google.com/recaptcha/api/siteverify',
-            data={'secret': getattr(_settings, 'RECAPTCHA_SECRET_KEY', ''), 'response': token},
+            data={'secret': secret, 'response': token},
             timeout=5,
         )
         return resp.json().get('success', False)
