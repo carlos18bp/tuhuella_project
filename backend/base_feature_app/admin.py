@@ -9,6 +9,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import path, reverse
 from django.utils import timezone
+from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from django_attachments.admin import AttachmentsAdminMixin
 
@@ -38,7 +39,7 @@ class MiHuellaUserAdmin(UserAdmin):
     list_filter = ('role', 'is_staff', 'is_active')
     search_fields = ('email', 'first_name', 'last_name')
     fieldsets = (
-        (None, {'fields': ('email', 'password')}),
+        (None, {'fields': ('email', 'password', 'impersonate_link')}),
         (_('Personal info'), {'fields': ('first_name', 'last_name', 'phone', 'city')}),
         (_('Role'), {'fields': ('role',)}),
         (
@@ -56,8 +57,18 @@ class MiHuellaUserAdmin(UserAdmin):
             },
         ),
     )
-    readonly_fields = ('date_joined', 'terms_accepted_at')
+    readonly_fields = ('date_joined', 'terms_accepted_at', 'impersonate_link')
     filter_horizontal = ('groups', 'user_permissions')
+
+    def impersonate_link(self, obj):
+        if not obj or not obj.pk:
+            return '—'
+        url = reverse('myadmin:base_feature_app_user_login_as', args=[obj.pk])
+        return format_html(
+            '<a class="button" href="{}">Impersonate: Log in as this user</a>',
+            url,
+        )
+    impersonate_link.short_description = ''
 
     def delete_queryset(self, request, queryset):
         now = timezone.now()
@@ -102,14 +113,6 @@ class MiHuellaUserAdmin(UserAdmin):
         return HttpResponseRedirect(
             f'{settings.FRONTEND_URL}/{settings.FRONTEND_DEFAULT_LOCALE}/admin-login?{query}'
         )
-
-    def change_view(self, request, object_id, form_url='', extra_context=None):
-        extra_context = extra_context or {}
-        if request.user.is_active and request.user.is_superuser and object_id:
-            extra_context['login_as_url'] = reverse(
-                'myadmin:base_feature_app_user_login_as', args=[object_id],
-            )
-        return super().change_view(request, object_id, form_url, extra_context)
 
 
 class PasswordCodeAdmin(admin.ModelAdmin):

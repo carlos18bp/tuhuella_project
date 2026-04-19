@@ -11,8 +11,12 @@ const PROTECTED_PREFIXES = [
   '/checkout',
   '/dashboard',
   '/favorites',
-  '/my-',
-  '/shelter/',
+  '/my-applications',
+  '/my-donations',
+  '/my-intent',
+  '/my-profile',
+  '/my-sponsorships',
+  '/shelter',
 ];
 const AUTH_ROUTES = ['/sign-in', '/sign-up', '/forgot-password'];
 const ACCESS_TOKEN_KEY = 'access_token';
@@ -26,14 +30,18 @@ function stripLocalePrefix(pathname: string): string {
   return pathname;
 }
 
+function matchesPrefix(bare: string, prefix: string): boolean {
+  return bare === prefix || bare.startsWith(`${prefix}/`);
+}
+
 function isProtected(pathname: string): boolean {
   const bare = stripLocalePrefix(pathname);
-  return PROTECTED_PREFIXES.some((prefix) => bare.startsWith(prefix));
+  return PROTECTED_PREFIXES.some((prefix) => matchesPrefix(bare, prefix));
 }
 
 function isAuthRoute(pathname: string): boolean {
   const bare = stripLocalePrefix(pathname);
-  return AUTH_ROUTES.some((route) => bare.startsWith(route));
+  return AUTH_ROUTES.some((route) => matchesPrefix(bare, route));
 }
 
 export function proxy(request: NextRequest): NextResponse {
