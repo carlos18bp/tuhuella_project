@@ -29,6 +29,15 @@ def test_campaign_detail_serializer_fields(campaign):
 
 
 @pytest.mark.django_db
+def test_campaign_list_serializer_cover_image_url_empty_when_no_cover(campaign):
+    """List serializer returns empty string for cover_image_url when no image is set."""
+    data = CampaignListSerializer(campaign).data
+
+    assert 'cover_image_url' in data
+    assert data['cover_image_url'] == ''
+
+
+@pytest.mark.django_db
 def test_campaign_create_update_serializer_valid(shelter):
     """Create serializer accepts valid data."""
     serializer = CampaignCreateUpdateSerializer(data={

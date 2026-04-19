@@ -14,11 +14,11 @@ import { useFavoriteStore } from '@/lib/stores/favoriteStore';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { useFAQsByTopic } from '@/lib/hooks/useFAQs';
 import { AnimalGallery, Container, FAQAccordion, SimilarAnimals } from '@/components/ui';
+import AnimalHealthSection from '@/components/animals/AnimalHealthSection';
 import { ROUTES } from '@/lib/constants';
 import {
   animalAmberStatusBadgeClass,
   animalCompatibilityYesClass,
-  animalEmeraldHealthPillClass,
   animalHouseTrainedRowClass,
   animalSpecialNeedsBodyClass,
   animalSpecialNeedsCalloutClass,
@@ -214,14 +214,7 @@ export default function AnimalDetailPage() {
             </span>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            {animal.is_vaccinated && (
-              <span className={animalEmeraldHealthPillClass}>{t('vaccinated')}</span>
-            )}
-            {animal.is_sterilized && (
-              <span className={animalEmeraldHealthPillClass}>{t('sterilized')}</span>
-            )}
-          </div>
+          <AnimalHealthSection animal={animal} />
 
           {animal.description && (
             <p className="mt-6 text-text-secondary leading-relaxed">{animal.description}</p>

@@ -68,6 +68,34 @@ def test_animal_detail_serializer_includes_new_fields(animal):
 
 
 @pytest.mark.django_db
+def test_animal_detail_serializer_includes_health_fields(animal):
+    """Detail serializer exposes new health tracking fields."""
+    data = AnimalDetailSerializer(animal).data
+
+    for field in ('is_dewormed', 'vaccinated_at', 'sterilized_at',
+                  'last_vet_checkup', 'medical_notes_es', 'medical_notes_en'):
+        assert field in data, f'Missing field: {field}'
+
+
+@pytest.mark.django_db
+def test_animal_detail_serializer_gallery_urls_empty_without_gallery(animal):
+    """gallery_urls is an empty list when the animal has no gallery."""
+    data = AnimalDetailSerializer(animal).data
+
+    assert 'gallery_urls' in data
+    assert data['gallery_urls'] == []
+
+
+@pytest.mark.django_db
+def test_animal_detail_serializer_disease_screenings_empty_without_records(animal):
+    """disease_screenings is an empty list when no screenings exist."""
+    data = AnimalDetailSerializer(animal).data
+
+    assert 'disease_screenings' in data
+    assert data['disease_screenings'] == []
+
+
+@pytest.mark.django_db
 def test_animal_create_update_serializer_valid(shelter):
     """Create serializer accepts valid data."""
     serializer = AnimalCreateUpdateSerializer(data={

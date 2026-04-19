@@ -55,6 +55,7 @@ describe('CampanasPage', () => {
           shelter: 1,
           shelter_name: 'Test Shelter',
           status: 'active',
+          approval_status: 'approved',
           goal_amount: '100000.00',
           raised_amount: '25000.00',
           progress_percentage: 25,

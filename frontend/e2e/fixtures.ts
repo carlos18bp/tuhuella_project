@@ -28,6 +28,14 @@ export const testPlatformAdmin = {
   role: 'admin' as const,
 };
 
+export const testWebManager = {
+  email: 'webmanager-e2e@example.com',
+  password: 'testpass123',
+  first_name: 'Laura',
+  last_name: 'Gómez',
+  role: 'web_manager' as const,
+};
+
 export const testDonationData = {
   amount: '50000',
   shelter_id: 1,
@@ -62,8 +70,13 @@ export async function waitForApiResponse(page: any, url: string) {
 /**
  * Build a mock user object for route interception responses.
  */
-function mockUserForRole(role: 'adopter' | 'shelter_admin' | 'admin') {
-  const users = { adopter: testAdopter, shelter_admin: testShelterAdmin, admin: testPlatformAdmin };
+function mockUserForRole(role: 'adopter' | 'shelter_admin' | 'admin' | 'web_manager') {
+  const users = {
+    adopter: testAdopter,
+    shelter_admin: testShelterAdmin,
+    admin: testPlatformAdmin,
+    web_manager: testWebManager,
+  };
   const user = users[role];
   return {
     id: 1,
@@ -81,8 +94,8 @@ function mockUserForRole(role: 'adopter' | 'shelter_admin' | 'admin') {
  * Disables reCAPTCHA and mocks sign-in API to ensure login succeeds
  * even when test users are not seeded in the backend database.
  */
-export async function loginAs(page: any, role: 'adopter' | 'shelter_admin' | 'admin') {
-  const users = { adopter: testAdopter, shelter_admin: testShelterAdmin, admin: testPlatformAdmin };
+export async function loginAs(page: any, role: 'adopter' | 'shelter_admin' | 'admin' | 'web_manager') {
+  const users = { adopter: testAdopter, shelter_admin: testShelterAdmin, admin: testPlatformAdmin, web_manager: testWebManager };
   const user = users[role];
   await page.route('**/google-captcha/site-key/**', (route: any) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ site_key: '' }) }),
@@ -131,8 +144,8 @@ export async function loginAs(page: any, role: 'adopter' | 'shelter_admin' | 'ad
  * This avoids the useRequireAuth race condition that occurs with full page reloads.
  * Use this for pages that use useRequireAuth (shelter panel, adoption, checkout, etc.)
  */
-export async function loginAndNavigate(page: any, role: 'adopter' | 'shelter_admin' | 'admin', targetUrl: string) {
-  const users = { adopter: testAdopter, shelter_admin: testShelterAdmin, admin: testPlatformAdmin };
+export async function loginAndNavigate(page: any, role: 'adopter' | 'shelter_admin' | 'admin' | 'web_manager', targetUrl: string) {
+  const users = { adopter: testAdopter, shelter_admin: testShelterAdmin, admin: testPlatformAdmin, web_manager: testWebManager };
   const user = users[role];
 
   let accessToken = 'e2e-mock-access-token';

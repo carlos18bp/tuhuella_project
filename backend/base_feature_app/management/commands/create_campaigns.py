@@ -8,7 +8,7 @@ from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from base_feature_app.models import Campaign, Shelter
+from base_feature_app.models import Campaign, Shelter, User
 from django_attachments.models import Library, Attachment
 
 fake_es = Faker('es_CO')
@@ -51,6 +51,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         count = options['count']
         shelters = list(Shelter.objects.filter(verification_status='verified'))
+        reviewer = User.objects.filter(role__in=['web_manager', 'admin']).first()
 
         if not shelters:
             self.stdout.write(self.style.WARNING('No verified shelters found. Run create_shelters first.'))
@@ -81,6 +82,7 @@ class Command(BaseCommand):
                 starts_at = timezone.now()
                 ends_at = timezone.now() + timezone.timedelta(days=random.randint(30, 90))
 
+            now = timezone.now()
             campaign = Campaign.objects.create(
                 shelter=assignments[i],
                 title_es=title_es,
@@ -92,6 +94,10 @@ class Command(BaseCommand):
                 status=status,
                 starts_at=starts_at,
                 ends_at=ends_at,
+                approval_status=Campaign.ApprovalStatus.APPROVED,
+                submitted_at=now - timezone.timedelta(days=random.randint(1, 5)),
+                reviewed_by=reviewer,
+                reviewed_at=now - timezone.timedelta(days=random.randint(0, 4)),
             )
 
             # Add evidence images for completed campaigns

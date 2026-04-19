@@ -19,13 +19,15 @@ Animal shelters in Colombia and Latin America lack centralized digital tools to:
 | **Adopter** | End user who browses animals, applies for adoption, sponsors, donates, and manages favorites |
 | **Shelter Admin** | Organization manager who registers a shelter, publishes animals, manages applications, runs campaigns |
 | **Platform Admin** | System administrator who approves shelters, moderates content, views metrics and payments |
+| **Web Manager** | Cross-shelter operator who sees all shelters, all applications, assigns veterinarians to follow-ups, receives stalled-application alerts |
+| **Veterinarian** | Clinical staff assigned per follow-up; sees assigned follow-ups, adds clinical history entries, marks follow-ups complete |
 
 ## Core Features
 
 ### 1. Animal Discovery & Adoption
 - Browse animals with filters (species, size, age, gender)
-- View animal detail with gallery, medical info, special needs
-- Submit adoption application with structured form wizard
+- View animal detail with gallery, medical info, special needs; health section with vaccination/sterilization/deworming status, disease screenings catalog (negative=emerald, positive=red, not_tested=stone), medical notes (bilingual), last vet checkup date
+- Submit adoption application with structured form wizard; pets-at-home section: yes/no toggle → per-type checkboxes (cats/dogs/others) each with numeric count
 - Track application status (pending → reviewing → approved/rejected)
 - Enriched favorites: personal notes, species/size filters, sort, grid/list toggle, compare mode (2–3 animals side-by-side)
 
@@ -78,7 +80,26 @@ Animal shelters in Colombia and Latin America lack centralized digital tools to:
 - Activity timeline showing recent actions across all user activities
 - "Member since" date display
 
-### 9. Supporting Features
+### 9. Post-Adoption Follow-Up & Clinical History
+- `PostAdoptionFollowUp` auto-created when adoption approved (scheduled +30 days)
+- Veterinarian workspace: list of assigned follow-ups, detail with clinical history timeline + entry form, mark-complete action
+- Clinical history per animal: checkup/vaccination/treatment/observation/incident entries with bilingual body, occurred_at, optional attachment_urls
+- Adopter read-only timeline at `/my-applications/[id]/history`
+- Web manager: assigns veterinarians from shelter detail page, tab "Seguimientos"
+- Notification events: `follow_up_assigned_to_vet`, `follow_up_due_soon`, `follow_up_overdue`, `clinical_entry_added`
+
+### 10. Global Operations (Web Manager)
+- Cross-shelter applications board with status, shelter, and date filters
+- Paginated shelter list with verification_status filter chips
+- Shelter detail with Info + Applications tabs; follow-up tab for vet assignment
+- Notification: `adoption_requires_attention` alert to all web_managers on new application submission
+
+### 11. Animal Disease Tracking
+- Structured catalog per species: dogs (distemper, parvovirus, ehrlichia, leptospirosis, heartworm); cats (FIV, FeLV, panleukopenia, FIP, calicivirus)
+- Tri-state result per screening: positive / negative / not_tested
+- Managed via Django admin `AnimalDiseaseScreeningInline` on AnimalAdmin
+
+### 12. Supporting Features
 - FAQ page with accordion
 - Strategic allies page
 - Volunteer positions

@@ -40,7 +40,9 @@ def list_blog_posts(request):
     Accepts ?lang=es|en, ?page=1, ?page_size=6 query params.
     Returns {results, count, page, page_size, total_pages}.
     """
-    qs = BlogPost.objects.filter(is_published=True, archived_at__isnull=True)
+    qs = BlogPost.objects.filter(
+        is_published=True, archived_at__isnull=True,
+    ).select_related('cover_image__primary_attachment')
 
     category = request.query_params.get('category', '').strip()
     search = request.query_params.get('search', '').strip()
@@ -115,7 +117,7 @@ def list_admin_blog_posts(request):
     Supports pagination via ?page=N&page_size=N query params.
     Returns all bilingual fields.
     """
-    qs = BlogPost.objects.all()
+    qs = BlogPost.objects.all().select_related('cover_image__primary_attachment')
 
     page = int(request.query_params.get('page', 1))
     page_size = int(request.query_params.get('page_size', 15))

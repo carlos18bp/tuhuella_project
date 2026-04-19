@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from base_feature_app.models import BlogPost
-from base_feature_app.serializers.utils import get_lang
+from base_feature_app.serializers.utils import get_lang, library_primary_url
 
 
 # ---------------------------------------------------------------------------
@@ -10,9 +10,7 @@ from base_feature_app.serializers.utils import get_lang
 
 def _get_cover_image_display(obj):
     """Return the best available cover image URL: uploaded file first, then external URL."""
-    if obj.cover_image:
-        return obj.cover_image.url
-    return obj.cover_image_url or ''
+    return library_primary_url(obj.cover_image) or obj.cover_image_url or ''
 
 
 class BlogPostListSerializer(serializers.ModelSerializer):

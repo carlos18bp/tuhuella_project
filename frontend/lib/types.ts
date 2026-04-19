@@ -1,4 +1,4 @@
-export type UserRole = 'adopter' | 'shelter_admin' | 'admin';
+export type UserRole = 'adopter' | 'shelter_admin' | 'veterinarian' | 'web_manager' | 'admin';
 
 export type User = {
   id: number;
@@ -66,6 +66,32 @@ export type Shelter = {
   updated_at?: string;
 };
 
+export type ShelterSummary = Pick<
+  Shelter,
+  | 'name'
+  | 'legal_name'
+  | 'description'
+  | 'city'
+  | 'address'
+  | 'phone'
+  | 'email'
+  | 'website'
+  | 'verification_status'
+>;
+
+export type ShelterStats = {
+  animals_count: number;
+  pending_applications: number;
+  active_campaigns: number;
+};
+
+export type AdminStats = {
+  total_users: number;
+  total_shelters: number;
+  total_animals: number;
+  pending_verifications: number;
+};
+
 export type AnimalSpecies = 'dog' | 'cat' | 'other';
 export type AnimalAgeRange = 'puppy' | 'young' | 'adult' | 'senior';
 export type AnimalGender = 'male' | 'female' | 'unknown';
@@ -73,6 +99,16 @@ export type AnimalSize = 'small' | 'medium' | 'large';
 export type AnimalStatus = 'draft' | 'published' | 'in_process' | 'adopted' | 'archived';
 export type AnimalCompatibility = 'yes' | 'no' | 'unknown';
 export type AnimalEnergyLevel = 'low' | 'medium' | 'high';
+
+export type DiseaseResult = 'positive' | 'negative' | 'not_tested';
+
+export type DiseaseScreening = {
+  id?: number;
+  disease_key: string;
+  result: DiseaseResult;
+  tested_on?: string | null;
+  notes?: string;
+};
 
 export type Animal = {
   id: number;
@@ -87,6 +123,12 @@ export type Animal = {
   status: AnimalStatus;
   is_vaccinated: boolean;
   is_sterilized: boolean;
+  is_dewormed?: boolean;
+  vaccinated_at?: string | null;
+  sterilized_at?: string | null;
+  last_vet_checkup?: string | null;
+  medical_notes_es?: string;
+  medical_notes_en?: string;
   weight?: number;
   is_house_trained: boolean;
   good_with_kids: AnimalCompatibility;
@@ -100,9 +142,59 @@ export type Animal = {
   shelter_name: string;
   shelter_city?: string;
   gallery_urls?: string[];
+  disease_screenings?: DiseaseScreening[];
   adopted_at?: string | null;
   adoption_application?: number | null;
   archived_at?: string | null;
+  created_at: string;
+  updated_at?: string;
+};
+
+export type FollowUpStatus = 'pending' | 'in_progress' | 'completed' | 'overdue';
+
+export type ClinicalEntryType =
+  | 'checkup' | 'vaccination' | 'treatment' | 'observation' | 'incident';
+
+export type ClinicalHistoryEntry = {
+  id: number;
+  animal: number;
+  follow_up?: number | null;
+  author?: number | null;
+  author_email?: string;
+  entry_type: ClinicalEntryType;
+  title: string;
+  body_es?: string;
+  body_en?: string;
+  occurred_at: string;
+  attachment_urls?: string[];
+  created_at: string;
+};
+
+export type ClinicalEntryPayload = {
+  follow_up?: number | null;
+  entry_type: ClinicalEntryType;
+  title: string;
+  body_es?: string;
+  body_en?: string;
+  occurred_at: string;
+  attachment_urls?: string[];
+};
+
+export type PostAdoptionFollowUp = {
+  id: number;
+  adoption_application: number;
+  animal: number;
+  animal_name: string;
+  shelter_name?: string;
+  adopter: number;
+  adopter_email?: string;
+  assigned_veterinarian?: number | null;
+  veterinarian_email?: string | null;
+  status: FollowUpStatus;
+  scheduled_date: string;
+  completed_date?: string | null;
+  notes?: string;
+  clinical_entries?: ClinicalHistoryEntry[];
   created_at: string;
   updated_at?: string;
 };
@@ -129,6 +221,7 @@ export type AdoptionApplication = {
 };
 
 export type CampaignStatus = 'draft' | 'active' | 'completed' | 'paused' | 'archived';
+export type CampaignApprovalStatus = 'pending' | 'approved' | 'rejected';
 
 export type Campaign = {
   id: number;
@@ -137,6 +230,11 @@ export type Campaign = {
   shelter: number;
   shelter_name: string;
   status: CampaignStatus;
+  approval_status: CampaignApprovalStatus;
+  submitted_at?: string | null;
+  reviewed_at?: string | null;
+  reviewed_by?: number | null;
+  reviewed_by_name?: string | null;
   goal_amount: string;
   raised_amount: string;
   progress_percentage: number;
@@ -146,6 +244,17 @@ export type Campaign = {
   ends_at?: string | null;
   created_at: string;
   updated_at?: string;
+};
+
+export type CampaignMessage = {
+  id: number;
+  campaign: number;
+  author: number | null;
+  author_name: string;
+  author_role: string;
+  body: string;
+  is_system: boolean;
+  created_at: string;
 };
 
 export type PaginatedResponse<T> = {
@@ -212,7 +321,7 @@ export type Donation = {
   campaign_title?: string | null;
   amount: string;
   status: DonationStatus;
-  message?: string;
+  message?: string | null;
   paid_at?: string | null;
   created_at: string;
   updated_at?: string;

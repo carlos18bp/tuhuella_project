@@ -4,11 +4,12 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { PawPrint, Heart, User, LogOut, LayoutDashboard, Shield, Bell, CheckCheck, ChevronDown } from 'lucide-react';
+import { PawPrint, Heart, User, LogOut, LayoutDashboard, Shield, Bell, CheckCheck, ChevronDown, BookOpen, ClipboardList, Stethoscope } from 'lucide-react';
 
 import { useAuthStore } from '@/lib/stores/authStore';
 import { useNotificationStore } from '@/lib/stores/notificationStore';
 import { ROUTES } from '@/lib/constants';
+import { canAccessStaffArea } from '@/lib/auth/permissions';
 import LocaleSwitcher from './LocaleSwitcher';
 import ThemeToggle from './ThemeToggle';
 
@@ -22,6 +23,9 @@ export default function Header() {
   const signOut = useAuthStore((s) => s.signOut);
   const t = useTranslations('nav');
   const tCommon = useTranslations('common');
+  const tManual = useTranslations('manual');
+
+  const canAccessManual = canAccessStaffArea(user);
 
   const tNotif = useTranslations('notifications');
   const unreadCount = useNotificationStore((s) => s.unreadCount);
@@ -176,6 +180,24 @@ export default function Header() {
                   {t('shelterPanel')}
                 </Link>
               )}
+              {user?.role === 'web_manager' && (
+                <Link
+                  href={ROUTES.WEB_MANAGER_APPLICATIONS}
+                  className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-sky-700 hover:bg-sky-50 transition-colors"
+                >
+                  <ClipboardList className="h-4 w-4" />
+                  {t('webManagerPanel')}
+                </Link>
+              )}
+              {user?.role === 'veterinarian' && (
+                <Link
+                  href={ROUTES.VET_FOLLOW_UPS}
+                  className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-emerald-700 hover:bg-emerald-50 transition-colors"
+                >
+                  <Stethoscope className="h-4 w-4" />
+                  {t('veterinarianPanel')}
+                </Link>
+              )}
               {user?.role === 'admin' && (
                 <Link
                   href={ROUTES.ADMIN_DASHBOARD}
@@ -183,6 +205,15 @@ export default function Header() {
                 >
                   <Shield className="h-4 w-4" />
                   {t('admin')}
+                </Link>
+              )}
+              {canAccessManual && (
+                <Link
+                  href={ROUTES.MANUAL}
+                  className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg text-violet-700 hover:bg-violet-50 transition-colors"
+                >
+                  <BookOpen className="h-4 w-4" />
+                  {tManual('navLabel')}
                 </Link>
               )}
               <Link
@@ -355,6 +386,51 @@ export default function Header() {
                 <Link href={ROUTES.FAVORITES} className="px-3 py-3 rounded-lg hover:bg-surface-hover" onClick={() => closeMobile()}>
                   {t('favorites')}
                 </Link>
+                {user?.role === 'shelter_admin' && (
+                  <Link
+                    href={ROUTES.SHELTER_DASHBOARD}
+                    className="px-3 py-3 rounded-lg hover:bg-surface-hover text-teal-700"
+                    onClick={() => closeMobile()}
+                  >
+                    {t('shelterPanel')}
+                  </Link>
+                )}
+                {user?.role === 'web_manager' && (
+                  <Link
+                    href={ROUTES.WEB_MANAGER_APPLICATIONS}
+                    className="px-3 py-3 rounded-lg hover:bg-surface-hover text-sky-700"
+                    onClick={() => closeMobile()}
+                  >
+                    {t('webManagerPanel')}
+                  </Link>
+                )}
+                {user?.role === 'veterinarian' && (
+                  <Link
+                    href={ROUTES.VET_FOLLOW_UPS}
+                    className="px-3 py-3 rounded-lg hover:bg-surface-hover text-emerald-700"
+                    onClick={() => closeMobile()}
+                  >
+                    {t('veterinarianPanel')}
+                  </Link>
+                )}
+                {user?.role === 'admin' && (
+                  <Link
+                    href={ROUTES.ADMIN_DASHBOARD}
+                    className="px-3 py-3 rounded-lg hover:bg-surface-hover text-amber-700"
+                    onClick={() => closeMobile()}
+                  >
+                    {t('admin')}
+                  </Link>
+                )}
+                {canAccessManual && (
+                  <Link
+                    href={ROUTES.MANUAL}
+                    className="px-3 py-3 rounded-lg hover:bg-surface-hover text-violet-700"
+                    onClick={() => closeMobile()}
+                  >
+                    {tManual('navLabel')}
+                  </Link>
+                )}
                 <Link href={ROUTES.MY_PROFILE} className="px-3 py-3 rounded-lg hover:bg-surface-hover" onClick={() => closeMobile()}>
                   {t('myProfile')}
                 </Link>

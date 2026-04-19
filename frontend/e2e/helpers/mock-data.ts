@@ -120,9 +120,38 @@ export const mockShelterAnimals = [
 ];
 
 export const mockShelterCampaigns = [
-  { id: 1, title: 'Campaña de vacunación', description: 'Vacunas para todos', shelter: 1, shelter_name: 'Refugio E2E', goal_amount: '500000.00', raised_amount: '250000.00', progress_percentage: 50, status: 'active', cover_image_url: '', starts_at: '2026-03-01T00:00:00Z', ends_at: '2026-04-30T00:00:00Z', created_at: '2026-02-28T10:00:00Z' },
-  { id: 2, title: 'Alimento para refugio', description: 'Comida mensual', shelter: 1, shelter_name: 'Refugio E2E', goal_amount: '300000.00', raised_amount: '300000.00', progress_percentage: 100, status: 'completed', cover_image_url: '', starts_at: '2026-01-01T00:00:00Z', ends_at: '2026-02-28T00:00:00Z', created_at: '2025-12-20T10:00:00Z' },
+  { id: 1, title: 'Campaña de vacunación', description: 'Vacunas para todos', shelter: 1, shelter_name: 'Refugio E2E', goal_amount: '500000.00', raised_amount: '250000.00', progress_percentage: 50, status: 'active', approval_status: 'approved', submitted_at: '2026-02-27T10:00:00Z', reviewed_at: '2026-02-28T08:00:00Z', reviewed_by: null, reviewed_by_name: 'Laura Gómez', cover_image_url: '', starts_at: '2026-03-01T00:00:00Z', ends_at: '2026-04-30T00:00:00Z', created_at: '2026-02-28T10:00:00Z' },
+  { id: 2, title: 'Alimento para refugio', description: 'Comida mensual', shelter: 1, shelter_name: 'Refugio E2E', goal_amount: '300000.00', raised_amount: '300000.00', progress_percentage: 100, status: 'completed', approval_status: 'approved', submitted_at: '2025-12-19T10:00:00Z', reviewed_at: '2025-12-20T09:00:00Z', reviewed_by: null, reviewed_by_name: 'Laura Gómez', cover_image_url: '', starts_at: '2026-01-01T00:00:00Z', ends_at: '2026-02-28T00:00:00Z', created_at: '2025-12-20T10:00:00Z' },
+  { id: 3, title: 'Esterilización urgente', description: 'Esterilización masiva', shelter: 1, shelter_name: 'Refugio E2E', goal_amount: '800000.00', raised_amount: '0.00', progress_percentage: 0, status: 'draft', approval_status: 'pending', submitted_at: '2026-04-18T10:00:00Z', reviewed_at: null, reviewed_by: null, reviewed_by_name: null, cover_image_url: '', starts_at: null, ends_at: null, created_at: '2026-04-18T10:00:00Z' },
 ];
+
+export const mockCampaignDetail = {
+  id: 3, title: 'Esterilización urgente', title_es: 'Esterilización urgente', title_en: 'Urgent Sterilization', description: 'Esterilización masiva en nuestra comunidad.', shelter: 1, shelter_name: 'Refugio E2E', goal_amount: '800000.00', raised_amount: '0.00', progress_percentage: 0, status: 'draft', approval_status: 'pending', submitted_at: '2026-04-18T10:00:00Z', reviewed_at: null, reviewed_by: null, reviewed_by_name: null, cover_image_url: '', starts_at: null, ends_at: null, created_at: '2026-04-18T10:00:00Z',
+};
+
+export const mockRejectedCampaignDetail = {
+  id: 4, title: 'Rescate de temporada', title_es: 'Rescate de temporada', title_en: 'Season Rescue', description: 'Campaña de rescate invernal.', shelter: 1, shelter_name: 'Refugio E2E', goal_amount: '600000.00', raised_amount: '0.00', progress_percentage: 0, status: 'draft', approval_status: 'rejected', submitted_at: '2026-04-10T10:00:00Z', reviewed_at: '2026-04-12T09:00:00Z', reviewed_by: 5, reviewed_by_name: 'Laura Gómez', cover_image_url: '', starts_at: null, ends_at: null, created_at: '2026-04-10T10:00:00Z',
+};
+
+export const mockCampaignMessages = {
+  count: 2,
+  page: 1,
+  total_pages: 1,
+  results: [
+    { id: 1, campaign: 4, author: 5, author_name: 'Laura Gómez', author_role: 'web_manager', body: 'Falta imagen de portada para la campaña.', is_system: false, created_at: '2026-04-12T09:00:00Z' },
+    { id: 2, campaign: 4, author: null, author_name: 'Sistema', author_role: '', body: 'Solicitud rechazada. Motivo: Falta imagen de portada.', is_system: true, created_at: '2026-04-12T09:01:00Z' },
+  ],
+};
+
+export const mockAdminCampaigns = {
+  count: 2,
+  page: 1,
+  total_pages: 1,
+  results: [
+    { id: 3, title: 'Esterilización urgente', shelter: 1, shelter_name: 'Refugio E2E', goal_amount: '800000.00', raised_amount: '0.00', progress_percentage: 0, status: 'draft', approval_status: 'pending', submitted_at: '2026-04-18T10:00:00Z', reviewed_at: null, reviewed_by_name: null, cover_image_url: '', starts_at: null, ends_at: null, created_at: '2026-04-18T10:00:00Z' },
+    { id: 4, title: 'Rescate de temporada', shelter: 1, shelter_name: 'Refugio E2E', goal_amount: '600000.00', raised_amount: '0.00', progress_percentage: 0, status: 'draft', approval_status: 'pending', submitted_at: '2026-04-10T10:00:00Z', reviewed_at: null, reviewed_by_name: null, cover_image_url: '', starts_at: null, ends_at: null, created_at: '2026-04-10T10:00:00Z' },
+  ],
+};
 
 export const mockShelterDonations = [
   {
@@ -162,6 +191,104 @@ export const mockShelterDonations = [
 export const mockShelterData = [
   { id: 1, name: 'Refugio E2E', legal_name: 'Refugio E2E SAS', description: 'Test shelter', city: 'Bogotá', address: 'Calle 123', phone: '+57 300 000 0000', email: 'shelter@test.com', website: '', verification_status: 'verified', owner: 1 },
 ];
+
+// ── Follow-Up Mocks (Veterinarian workspace) ──
+
+export const mockFollowUps = [
+  {
+    id: 1,
+    adoption_application: 1,
+    animal: 10,
+    animal_name: 'Luna',
+    shelter_name: 'Refugio E2E',
+    adopter: 2,
+    adopter_email: 'adopter-e2e@example.com',
+    assigned_veterinarian: null,
+    veterinarian_email: null,
+    status: 'pending',
+    scheduled_date: '2026-05-20T00:00:00Z',
+    completed_date: null,
+    notes: '',
+    clinical_entries: [],
+    created_at: '2026-04-20T10:00:00Z',
+  },
+  {
+    id: 2,
+    adoption_application: 2,
+    animal: 20,
+    animal_name: 'Milo',
+    shelter_name: 'Patitas Felices',
+    adopter: 3,
+    adopter_email: 'adopter2-e2e@example.com',
+    assigned_veterinarian: null,
+    veterinarian_email: null,
+    status: 'overdue',
+    scheduled_date: '2026-04-10T00:00:00Z',
+    completed_date: null,
+    notes: '',
+    clinical_entries: [],
+    created_at: '2026-03-11T10:00:00Z',
+  },
+];
+
+export const mockFollowUpDetail = {
+  id: 1,
+  adoption_application: 1,
+  animal: 10,
+  animal_name: 'Luna',
+  shelter_name: 'Refugio E2E',
+  adopter: 2,
+  adopter_email: 'adopter-e2e@example.com',
+  assigned_veterinarian: null,
+  veterinarian_email: null,
+  status: 'pending',
+  scheduled_date: '2026-05-20T00:00:00Z',
+  completed_date: null,
+  notes: '',
+  clinical_entries: [
+    {
+      id: 1,
+      follow_up: 1,
+      entry_type: 'checkup',
+      title: 'Primera revisión',
+      body_es: 'Animal en buen estado general.',
+      body_en: 'Animal in good general condition.',
+      attachment_urls: [],
+      created_at: '2026-04-25T10:00:00Z',
+    },
+  ],
+  created_at: '2026-04-20T10:00:00Z',
+};
+
+// ── Admin Applications (web-manager board) ──
+
+export const mockAdminApplications = {
+  count: 2,
+  page: 1,
+  total_pages: 1,
+  results: [
+    {
+      id: 1,
+      animal_name: 'Luna',
+      animal: 10,
+      shelter_name: 'Refugio E2E',
+      user_email: 'adopter-e2e@example.com',
+      status: 'submitted',
+      created_at: '2026-04-01T10:00:00Z',
+      updated_at: '2026-04-01T10:00:00Z',
+    },
+    {
+      id: 2,
+      animal_name: 'Milo',
+      animal: 20,
+      shelter_name: 'Patitas Felices',
+      user_email: 'adopter2-e2e@example.com',
+      status: 'reviewing',
+      created_at: '2026-03-25T10:00:00Z',
+      updated_at: '2026-03-28T14:00:00Z',
+    },
+  ],
+};
 
 // ── Moderation Mocks ──
 

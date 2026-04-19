@@ -14,6 +14,7 @@
     "signIn": "Iniciar sesión",
     "signUp": "Registrarse",
     "signOut": "Salir",
+    "signingIn": "Iniciando sesión...",
     "donationDestinationPlatform": "Plataforma Mi Huella",
     "faq": "Preguntas frecuentes",
     "faqSubtitle": "Todo lo que necesitas saber"
@@ -26,6 +27,8 @@
     "favorites": "Favoritos",
     "myProfile": "Mi Perfil",
     "shelterPanel": "Panel Refugio",
+    "webManagerPanel": "Panel Web Manager",
+    "veterinarianPanel": "Panel Veterinario",
     "admin": "Admin",
     "blog": "Blog",
     "about": "Nosotros",
@@ -146,7 +149,30 @@
     "share": "Compartir",
     "shareCopied": "¡Enlace copiado!",
     "viewGrid": "Vista cuadrícula",
-    "viewList": "Vista lista"
+    "viewList": "Vista lista",
+    "healthTitle": "Salud",
+    "dewormed": "Desparasitado",
+    "lastVetCheckup": "Último chequeo veterinario",
+    "medicalNotes": "Notas médicas",
+    "diseaseScreenings": "Pruebas de enfermedades",
+    "noScreenings": "Sin pruebas registradas",
+    "result": {
+      "positive": "Positivo",
+      "negative": "Negativo",
+      "not_tested": "No testeado"
+    },
+    "diseases": {
+      "distemper": "Moquillo",
+      "parvovirus": "Parvovirus",
+      "ehrlichia": "Ehrlichia",
+      "leptospirosis": "Leptospirosis",
+      "heartworm": "Dirofilaria (gusano del corazón)",
+      "fiv": "VIF (inmunodeficiencia felina)",
+      "felv": "Leucemia felina (FeLV)",
+      "panleukopenia": "Panleucopenia",
+      "fip": "PIF (peritonitis infecciosa felina)",
+      "calicivirus": "Calicivirus"
+    }
   },
   "shelters": {
     "title": "Refugios verificados",
@@ -300,6 +326,76 @@
     "confirmDelete": "¿Estás seguro de que deseas eliminar esta actualización?",
     "delete": "Eliminar"
   },
+  "veterinarian": {
+    "accessDenied": "Acceso denegado. Solo veterinarios pueden acceder a este panel.",
+    "followUpsTitle": "Seguimientos asignados",
+    "followUpsSubtitle": "Animales con seguimiento pos-adopción a tu cargo.",
+    "loading": "Cargando...",
+    "noFollowUps": "No tienes seguimientos asignados todavía.",
+    "backToFollowUps": "Volver a seguimientos",
+    "backToMyApplications": "Volver a mis solicitudes",
+    "scheduledFor": "Programado para {date}",
+    "markComplete": "Marcar como completado",
+    "clinicalHistoryTitle": "Historia clínica",
+    "noClinicalEntries": "No hay entradas clínicas registradas.",
+    "addEntryTitle": "Agregar entrada clínica",
+    "addEntrySubmit": "Guardar entrada",
+    "submitting": "Guardando...",
+    "fieldEntryType": "Tipo de entrada",
+    "fieldTitle": "Título",
+    "fieldOccurredAt": "Fecha y hora",
+    "fieldBodyEs": "Detalle (español)",
+    "fieldBodyEn": "Detalle (inglés)",
+    "status": {
+      "pending": "Pendiente",
+      "in_progress": "En curso",
+      "completed": "Completado",
+      "overdue": "Vencido"
+    },
+    "entryType": {
+      "checkup": "Chequeo",
+      "vaccination": "Vacunación",
+      "treatment": "Tratamiento",
+      "observation": "Observación",
+      "incident": "Incidente"
+    }
+  },
+  "webManager": {
+    "accessDenied": "Acceso denegado. Solo web managers y administradores pueden acceder a este panel.",
+    "applicationsTitle": "Solicitudes de adopción",
+    "applicationsSubtitle": "Solicitudes recibidas por todos los refugios.",
+    "sheltersTitle": "Refugios",
+    "sheltersSubtitle": "Refugios registrados en la plataforma.",
+    "backToShelters": "Volver a refugios",
+    "tabInfo": "Información",
+    "tabApplications": "Solicitudes",
+    "tabsLabel": "Pestañas del refugio",
+    "filterAll": "Todas",
+    "loading": "Cargando...",
+    "noApplications": "No hay solicitudes.",
+    "noShelters": "No hay refugios.",
+    "resultsCount": "{count} resultado(s)",
+    "tableAnimal": "Animal",
+    "tableShelter": "Refugio",
+    "tableApplicant": "Solicitante",
+    "tableStatus": "Estado",
+    "tableCreatedAt": "Recibida",
+    "infoOwnerEmail": "Correo del responsable",
+    "infoCity": "Ciudad",
+    "infoDescription": "Descripción",
+    "status": {
+      "submitted": "Enviada",
+      "reviewing": "En revisión",
+      "interview": "Entrevista",
+      "approved": "Aprobada",
+      "rejected": "Rechazada"
+    },
+    "shelters": {
+      "pending": "Pendientes",
+      "verified": "Verificados",
+      "rejected": "Rechazados"
+    }
+  },
   "adoption": {
     "title": "Solicitud de adopción para {animalName}",
     "stepsLabel": "Pasos del formulario",
@@ -309,6 +405,7 @@
     "sectionBasicInfo": "Datos básicos",
     "sectionHomeContext": "Hogar y contexto",
     "sectionExperience": "Experiencia con mascotas",
+    "sectionPetsAtHome": "Mascotas actuales en el hogar",
     "sectionCompatibility": "Compatibilidades",
     "sectionCommitment": "Compromiso",
     "sectionLogistics": "Logística y motivación",
@@ -321,12 +418,14 @@
       "has_yard": "¿Tienes patio o jardín?",
       "hours_alone": "¿Cuántas horas al día estará solo el animal?",
       "previous_pets": "¿Has tenido mascotas anteriormente?",
-      "current_pets": "¿Tienes mascotas actualmente?",
       "experience": "¿Cuál es tu nivel de experiencia con mascotas?",
+      "has_pets": "¿Tienes mascotas actualmente en casa?",
+      "pets_cats": "Gatos",
+      "pets_dogs": "Perros",
+      "pets_others": "Otros animales",
+      "pets_count": "Cantidad",
       "has_children": "¿Hay niños en el hogar?",
       "children_ages": "Edades de los niños (si aplica)",
-      "has_cats": "¿Hay gatos en el hogar?",
-      "has_other_dogs": "¿Hay otros perros en el hogar?",
       "accepts_vaccination": "Vacunación",
       "accepts_sterilization": "Esterilización",
       "accepts_followup": "Seguimiento post-adopción",
@@ -342,7 +441,8 @@
       "city": "Ej: Bogotá, Medellín",
       "children_ages": "Ej: 3 y 7 años",
       "availability_date": "Ej: Inmediatamente, en 2 semanas",
-      "motivation": "Cuéntanos por qué quieres adoptar..."
+      "motivation": "Cuéntanos por qué quieres adoptar...",
+      "pets_count": "Ej: 2"
     },
     "checkboxLabels": {
       "accepts_vaccination": "Me comprometo a mantener al día las vacunas del animal",
@@ -370,13 +470,7 @@
         "both": "Perros y gatos",
         "other": "Otros animales"
       },
-      "current_pets": {
-        "none": "Ninguna",
-        "dogs": "Sí, perro(s)",
-        "cats": "Sí, gato(s)",
-        "both": "Perros y gatos",
-        "other": "Otros animales"
-      },
+      "has_pets": { "yes": "Sí", "no": "No" },
       "experience": {
         "none": "Ninguna",
         "little": "Poca",
@@ -384,8 +478,6 @@
         "extensive": "Mucha"
       },
       "has_children": { "yes": "Sí", "no": "No" },
-      "has_cats": { "yes": "Sí", "no": "No" },
-      "has_other_dogs": { "yes": "Sí", "no": "No" },
       "has_transport": { "yes": "Sí", "no": "No" },
       "delivery_preference": {
         "pickup": "Recojo en el refugio",
@@ -397,6 +489,7 @@
     "yes": "Sí",
     "no": "No",
     "reviewDescription": "Revisa tus respuestas antes de continuar:",
+    "reviewPets": "{cats} gato(s), {dogs} perro(s), {others} otro(s)",
     "notesDescription": "¿Deseas agregar algún comentario adicional para el refugio?",
     "notesPlaceholder": "Notas adicionales (opcional)...",
     "back": "Atrás",
@@ -493,7 +586,14 @@
     "campaigns": "Campañas Activas",
     "campaignsDesc": "Apoya las campañas abiertas de los refugios",
     "terms": "Términos y Condiciones",
-    "termsDesc": "Consulta los términos de uso de la plataforma"
+    "termsDesc": "Consulta los términos de uso de la plataforma",
+    "shelterResponsibilities": "Responsabilidades del refugio",
+    "adminResponsibilities": "Responsabilidades de administrador",
+    "shelterPendingWidget": "{count} solicitudes esperando tu revisión",
+    "shelterPendingWidgetZero": "No hay solicitudes pendientes",
+    "adminQueueWidget": "{count} refugios por verificar",
+    "adminQueueWidgetZero": "No hay refugios pendientes de verificación",
+    "viewAll": "Ver todas"
   },
   "myApplications": {
     "title": "Mis Solicitudes de Adopción",
@@ -514,7 +614,12 @@
     "exploreAnimals": "Explorar animales",
     "submittedOn": "Enviada el {date}",
     "reviewedOn": "Revisada el {date}",
-    "featuredAnimals": "Animales esperando por ti"
+    "featuredAnimals": "Animales esperando por ti",
+    "history": {
+      "back": "Volver a mis solicitudes",
+      "loading": "Cargando...",
+      "clinicalHistoryTitle": "Historia clínica"
+    }
   },
   "myDonations": {
     "title": "Mis Donaciones",
@@ -859,5 +964,37 @@
     "switchToDark": "Cambiar a modo oscuro",
     "light": "Claro",
     "dark": "Oscuro"
+  },
+  "manual": {
+    "navLabel": "Manual",
+    "eyebrow": "Solo para web managers y admins",
+    "title": "Manual interactivo de Tuhuella",
+    "subtitle": "Recorre roles, procesos y vistas públicas. Usa la búsqueda para saltar al proceso que necesitas y el índice lateral para moverte por la plataforma.",
+    "startHere": "Empieza aquí",
+    "accessDenied": "Acceso denegado. Solo web managers y administradores pueden consultar el manual.",
+    "search": {
+      "placeholder": "Buscar procesos, roles, rutas...",
+      "clear": "Limpiar búsqueda",
+      "noResults": "Sin resultados. Prueba con otras palabras clave."
+    },
+    "sidebar": {
+      "title": "Índice"
+    },
+    "card": {
+      "why": "¿Por qué importa?",
+      "steps": "¿Cómo funciona?",
+      "route": "Ruta",
+      "endpoints": "Endpoints",
+      "tips": "Tips para web managers"
+    },
+    "audience": {
+      "public": "Público",
+      "adopter": "Adoptante",
+      "shelter_admin": "Refugio",
+      "veterinarian": "Veterinario",
+      "web_manager": "Web Manager",
+      "admin": "Admin",
+      "cross": "Transversal"
+    }
   }
 }

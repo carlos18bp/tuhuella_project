@@ -19,3 +19,19 @@ def user_can_manage_shelter(user, shelter) -> bool:
     if shelter.owner_id == user.id:
         return True
     return shelter.team_memberships.filter(user=user).exists()
+
+
+def is_web_manager(user) -> bool:
+    return bool(user and user.is_authenticated and getattr(user, 'role', None) == 'web_manager')
+
+
+def is_veterinarian(user) -> bool:
+    return bool(user and user.is_authenticated and getattr(user, 'role', None) == 'veterinarian')
+
+
+def is_admin(user) -> bool:
+    return bool(user and user.is_authenticated and (getattr(user, 'role', None) == 'admin' or user.is_superuser))
+
+
+def is_web_manager_or_admin(user) -> bool:
+    return is_web_manager(user) or is_admin(user)

@@ -27,4 +27,5 @@ urlpatterns = [
     path('strategic-allies/', include('base_feature_app.urls.strategic_ally')),
     path('contact/', include('base_feature_app.urls.contact')),
     path('user/', include('base_feature_app.urls.profile')),
+    path('follow-ups/', include('base_feature_app.urls.follow_up')),
 ]

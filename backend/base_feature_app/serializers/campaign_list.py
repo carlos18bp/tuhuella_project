@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from base_feature_app.models import Campaign
-from base_feature_app.serializers.utils import get_lang
+from base_feature_app.serializers.utils import get_lang, library_primary_url
 
 
 class CampaignListSerializer(serializers.ModelSerializer):
@@ -14,6 +14,7 @@ class CampaignListSerializer(serializers.ModelSerializer):
         model = Campaign
         fields = [
             'id', 'title', 'description', 'shelter', 'shelter_name', 'status',
+            'approval_status', 'submitted_at', 'reviewed_at',
             'goal_amount', 'raised_amount', 'progress_percentage',
             'cover_image_url', 'starts_at', 'ends_at', 'created_at',
         ]
@@ -25,6 +26,4 @@ class CampaignListSerializer(serializers.ModelSerializer):
         return getattr(obj, f'description_{get_lang(self)}')
 
     def get_cover_image_url(self, obj):
-        if obj.cover_image:
-            return obj.cover_image.url
-        return ''
+        return library_primary_url(obj.cover_image)

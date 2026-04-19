@@ -15,7 +15,7 @@ const setupMock = (overrides: Record<string, unknown> = {}) => {
   const defaults: Record<string, unknown> = {
     campaigns: [],
     loading: false,
-    fetchCampaigns: jest.fn(),
+    fetchMyCampaigns: jest.fn(),
   };
   const state = { ...defaults, ...overrides };
   mockUseCampaignStore.mockImplementation((sel: any) => sel(state));
@@ -90,9 +90,9 @@ describe('ShelterCampaignsPage', () => {
     expect(screen.getByText('custom_status')).toBeInTheDocument();
   });
 
-  it('calls fetchCampaigns on mount', () => {
+  it('calls fetchMyCampaigns on mount', () => {
     const state = setupMock();
     render(<ShelterCampaignsPage />);
-    expect(state.fetchCampaigns).toHaveBeenCalled();
+    expect(state.fetchMyCampaigns).toHaveBeenCalled();
   });
 });

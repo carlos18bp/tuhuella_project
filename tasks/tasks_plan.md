@@ -1,6 +1,6 @@
 # Tuhuella — Feature Task Plan
 
-> Last updated: 2026-04-10
+> Last updated: 2026-04-19 (Phase 16 added)
 
 ## Status Legend
 - ✅ Done
@@ -111,7 +111,7 @@
 | Backend tests: 99 files | ✅ | Models, serializers, views, services, utils, commands |
 | Frontend unit tests: 289 files | ✅ | Pages, components, stores, hooks, services |
 | E2E specs: 17 files | 🔧 | Covers auth, public, app, contract flows |
-| E2E flow definitions: 82 flows | ✅ | P1–P4 priority levels |
+| E2E flow definitions: 98 flows | ✅ | P1–P4 priority levels |
 
 ## Methodology
 | Task | Status | Notes |
@@ -195,6 +195,112 @@
 | Step 6c: Frontend unit tests | ⏳ | page, modal, timeline, store |
 | Step 6d: E2E flow updates | ⏳ | Edit profile flow |
 
+## Phase 14 — Adoption, Health, Roles & Post-Adoption Follow-Up (2026-04-19)
+| Task | Status | Notes |
+|------|--------|-------|
+| **Fase 1 — Adoption form pets-at-home** | ✅ | has_pets select + per-type checkboxes with counts; buildFormAnswers() reshapes payload; isPetsBlockValid() |
+| Adoption form i18n (sectionPetsAtHome, reviewPets) | ✅ | es + en keys; removed old current_pets/has_cats/has_other_dogs |
+| AdoptionForm unit tests (4 new cases) | ✅ | has_pets=no/yes/invalid/submit payload |
+| **Fase 2 — Animal health + disease screening** | ✅ | |
+| Animal model: is_dewormed, vaccinated_at, sterilized_at, last_vet_checkup, medical_notes_es/en | ✅ | Migration required |
+| AnimalDiseaseScreening model | ✅ | disease_key, result tri-state, unique_together (animal, disease_key) |
+| DiseaseScreeningSerializer | ✅ | new animal_disease.py |
+| animal_detail view: select_related + prefetch_related disease_screenings | ✅ | N+1 fix |
+| AnimalDetailSerializer: disease_screenings embedded | ✅ | |
+| AnimalAdmin: inline + new health fieldset fields | ✅ | |
+| AnimalHealthSection component | ✅ | Color-coded disease grid, health pills, medical notes, vet checkup |
+| Animal page: replaced pills with AnimalHealthSection | ✅ | |
+| Animal health i18n (healthTitle, diseases.*, result.*) | ✅ | |
+| **Fase 3 — Roles + web_manager** | ✅ | |
+| User.Role: veterinarian + web_manager | ✅ | Migration (AlterField choices) |
+| shelter_access.py helpers: is_web_manager, is_veterinarian, is_admin | ✅ | |
+| application_list/detail: web_manager sees all | ✅ | |
+| web_manager_views.py: admin_applications_list, shelter_applications_list, admin_shelters_list | ✅ | |
+| Signal: adoption_submitted dispatched to all web_managers | ✅ | |
+| Notification template: adoption_requires_attention | ✅ | |
+| Frontend types: UserRole with 5 values | ✅ | |
+| webManagerStore: fetchShelters, fetchApplications, fetchShelterApplications | ✅ | |
+| AdminApplicationsTable component | ✅ | |
+| web-manager pages: layout (gate), applications, shelters, shelter detail (Info + Applications tabs) | ✅ | |
+| Web manager i18n (webManager namespace) | ✅ | |
+| **Fase 4 — Post-adoption follow-up + vet workspace** | ✅ | |
+| PostAdoptionFollowUp model (ArchivableModel) | ✅ | auto_created on approval via signal, scheduled +30d |
+| ClinicalHistoryEntry model | ✅ | entry_type choices, body_es/en, attachment_urls |
+| followUpStore: fetchMine, fetchDetail, assignVet, markComplete | ✅ | |
+| clinicalHistoryStore: setEntries, fetchForAnimal, addEntry | ✅ | |
+| follow_up.py views: scoped list, detail (prefetch clinical_entries), assign, complete, veterinarians_list | ✅ | |
+| clinical-history endpoints (GET + POST on /animals/<pk>/clinical-history/) | ✅ | |
+| Notification events: follow_up_assigned_to_vet, follow_up_due_soon, follow_up_overdue, clinical_entry_added | ✅ | |
+| 4 new bilingual notification templates | ✅ | |
+| ClinicalEntryForm component | ✅ | |
+| ClinicalHistoryTimeline component (shared vet + adopter) | ✅ | |
+| Vet pages: layout (gate), follow-ups list, follow-up detail | ✅ | |
+| my-applications/[id]/history page (adopter read-only) | ✅ | |
+| Veterinarian i18n namespace | ✅ | |
+| PostAdoptionFollowUpAdmin + ClinicalHistoryEntry inline | ✅ | |
+| **Pending (deferred)** | ⏳ | |
+| Huey periodic task scan_stalled_applications (F3) | ⏳ | Wait to confirm --periodic on tuhuella-huey.service |
+| Huey periodic task scan_follow_ups (F4) | ⏳ | Same |
+| Web manager shelter detail: "Seguimientos" tab | ⏳ | Follow-up tab wiring to vet assignment |
+| Shelter-side animal create/edit UI form | ⏳ | Backend supports it; UI out of scope |
+
+## Phase 15 — Campaign Approval Workflow (2026-04-19)
+| Task | Status | Notes |
+|------|--------|-------|
+| Campaign model: approval_status + submitted_at + reviewed_by + reviewed_at | ✅ | ApprovalStatus TextChoices (pending/approved/rejected), default pending |
+| CampaignMessage model | ✅ | FK Campaign+User, is_system, created_at; ordering + index on (campaign, created_at) |
+| Migration 0020 + data migration | ✅ | Marks all pre-existing active/completed campaigns as approved |
+| campaign_list: filter approval_status=approved for public | ✅ | |
+| campaign_create: shelter→pending, web_manager→approved | ✅ | |
+| campaign_update: allow web_manager/admin in addition to shelter owner | ✅ | |
+| campaign_submit endpoint (POST /campaigns/<id>/submit/) | ✅ | Moves rejected → pending |
+| campaign_messages endpoint (GET/POST /campaigns/<id>/messages/) | ✅ | Scope-checked; notifies counterparty |
+| campaign_admin.py: admin_campaigns_list, approve, reject | ✅ | Paginated; system message on action |
+| CampaignListSerializer + CampaignDetailSerializer: approval fields | ✅ | reviewed_by_name SerializerMethodField |
+| CampaignMessageSerializer | ✅ | author_name + author_role |
+| 4 notification templates | ✅ | campaign_request_submitted, campaign_approved, campaign_rejected, campaign_new_message |
+| Django signal: notify web_managers on pending | ✅ | post_save + pre_save on Campaign |
+| CampaignAdmin + CampaignMessageAdmin | ✅ | list_display/filter for approval fields |
+| 10 backend tests | ✅ | All passing |
+| Frontend types: CampaignApprovalStatus, CampaignMessage, extended Campaign | ✅ | |
+| Frontend constants: CAMPAIGNS_MINE, CAMPAIGN_SUBMIT, CAMPAIGN_MESSAGES, ADMIN_CAMPAIGNS, ADMIN_CAMPAIGN_APPROVE/REJECT | ✅ | |
+| campaignStore: createCampaign, updateCampaign, submitForApproval, fetchMyCampaigns, fetchMessages, sendMessage | ✅ | messagesByCampaign cache |
+| webManagerStore: campaigns, fetchCampaigns, approveCampaign, rejectCampaign | ✅ | |
+| shelter/campaigns/page.tsx: approval badges + rejection banners | ✅ | Uses fetchMyCampaigns |
+| shelter/campaigns/[id]/page.tsx: edit + resubmit + chat | ✅ | |
+| shelter/campaigns/nueva/page.tsx: request form | ✅ | Fetches shelter via owner=me |
+| web-manager/campaigns/page.tsx: tabs + list | ✅ | |
+| web-manager/campaigns/[id]/page.tsx: approve/reject + chat | ✅ | |
+| web-manager/campaigns/new/page.tsx: direct create with shelter selector | ✅ | |
+| CampaignMessageThread component | ✅ | Shared; cache-aware; bubble styles by role |
+| Frontend TypeScript clean + 20 passing tests | ✅ | |
+| **Pending (deferred)** | ⏳ | |
+| Campaign closure automation: Huey task for ends_at expiry + goal reached | ⏳ | Needs --periodic confirmed on tuhuella-huey.service |
+| i18n extraction for new campaign pages | ⏳ | Hardcoded Spanish strings acceptable for now (consistent with existing patterns) |
+| Shared CampaignForm component (shelter/nueva + web-manager/new dedup) | ⏳ | ~150-line duplication; deferred as larger refactor |
+
+## Phase 16 — Interactive In-App Manual (2026-04-19)
+| Task | Status | Notes |
+|------|--------|-------|
+| `lib/manual/types.ts` — ManualProcess, ManualSection, ManualSearchHit types | ✅ | ManualAudience (7 values), LocalizedText, LocalizedList |
+| `lib/manual/content.ts` — 8 sections, ~37 processes, bilingual | ✅ | Sections: introduction, public-views, adopter, shelter, vet, web-manager (highlighted), admin, cross-cutting |
+| `lib/manual/useManualSearch.ts` — Fuse.js hook with useDeferredValue | ✅ | Weights: title 0.5, keywords 0.25, summary 0.15, steps 0.07, route 0.03; max 12 results |
+| `lib/auth/permissions.ts` — canAccessStaffArea helper | ✅ | Deduplicates role check across layout + Header |
+| `components/manual/RoleBadge.tsx` | ✅ | 7 color-coded audience badges |
+| `components/manual/ProcessCard.tsx` | ✅ | Anchor card: title/badge/why/steps/route/endpoints/tips callout |
+| `components/manual/ManualSidebar.tsx` | ✅ | Collapsible accordion, mobile toggle + desktop sticky |
+| `components/manual/ManualSearch.tsx` | ✅ | Keyboard nav, Cmd/Ctrl+K shortcut, scroll-to-highlight with timer cleanup |
+| `app/[locale]/manual/layout.tsx` — role gate | ✅ | useRequireAuth + canAccessStaffArea → AdminAccessDenied |
+| `app/[locale]/manual/page.tsx` — shell | ✅ | Sticky search + sidebar + ProcessCards |
+| `messages/{es,en}.json` — manual namespace | ✅ | Chrome only (navLabel, search.*, card.*, audience.*) |
+| `package.json` — fuse.js ^7.3.0 | ✅ | |
+| Header conditional "Manual" link | ✅ | Violet, BookOpen icon, web_manager/admin/is_staff only |
+| 11 Jest tests (layout gate, search hook, search component) | ✅ | All passing |
+| Build passes — /[locale]/manual route in output | ✅ | |
+| **Pending (optional)** | ⏳ | |
+| E2E spec `e2e/app/manual.spec.ts` | ⏳ | Login as web_manager → navigate → search → scroll |
+
 ## Known Issues
 - Wompi payment SDK not integrated (placeholder only)
 - Blog posts fake data command fails with `'category'` error (pre-existing, unrelated to Phase 12)
+- Huey periodic worker: confirm `tuhuella-huey.service` runs with `--periodic` before adding scan tasks

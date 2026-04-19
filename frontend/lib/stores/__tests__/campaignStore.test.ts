@@ -7,6 +7,8 @@ import { api } from '../../services/http';
 jest.mock('../../services/http', () => ({
   api: {
     get: jest.fn(),
+    post: jest.fn(),
+    patch: jest.fn(),
   },
 }));
 
@@ -27,7 +29,9 @@ describe('campaignStore', () => {
     useCampaignStore.setState({
       campaigns: [],
       campaign: null,
+      messagesByCampaign: {},
       loading: false,
+      messagesLoading: false,
       error: null,
     });
   });
@@ -123,5 +127,136 @@ describe('campaignStore', () => {
       expect.any(String),
       { params: { lang: 'en' } },
     );
+  });
+
+  it('loads my-campaigns into store', async () => {
+    mockApi.get.mockResolvedValueOnce({ data: [CAMPAIGN_FIXTURE] });
+
+    await act(async () => {
+      await useCampaignStore.getState().fetchMyCampaigns('es');
+    });
+
+    expect(useCampaignStore.getState().campaigns).toHaveLength(1);
+  });
+
+  it('sets error when fetchMyCampaigns fails', async () => {
+    mockApi.get.mockRejectedValueOnce(new Error('Boom'));
+
+    await act(async () => {
+      await useCampaignStore.getState().fetchMyCampaigns();
+    });
+
+    expect(useCampaignStore.getState().error).toBe('Boom');
+  });
+
+  it('sets fallback error when fetchMyCampaigns rejects with non-Error', async () => {
+    mockApi.get.mockRejectedValueOnce({ oops: true });
+
+    await act(async () => {
+      await useCampaignStore.getState().fetchMyCampaigns();
+    });
+
+    expect(useCampaignStore.getState().error).toBe('Failed to fetch campaigns');
+  });
+
+  it('prepends created campaign into list via createCampaign', async () => {
+    useCampaignStore.setState({ campaigns: [CAMPAIGN_FIXTURE] });
+    const created = { ...CAMPAIGN_FIXTURE, id: 2, title: 'New' };
+    mockApi.post.mockResolvedValueOnce({ data: created });
+
+    let result;
+    await act(async () => {
+      result = await useCampaignStore.getState().createCampaign({ title_es: 'New' }, 'es');
+    });
+
+    expect(result).toEqual(created);
+    expect(useCampaignStore.getState().campaign).toEqual(created);
+    expect(useCampaignStore.getState().campaigns[0].id).toBe(2);
+  });
+
+  it('replaces active campaign via updateCampaign', async () => {
+    const updated = { ...CAMPAIGN_FIXTURE, title: 'Updated' };
+    mockApi.patch.mockResolvedValueOnce({ data: updated });
+
+    let result;
+    await act(async () => {
+      result = await useCampaignStore.getState().updateCampaign(1, { title_es: 'Updated' });
+    });
+
+    expect(result).toEqual(updated);
+    expect(useCampaignStore.getState().campaign).toEqual(updated);
+  });
+
+  it('sets campaign to submitted result after submitForApproval', async () => {
+    const submitted = { ...CAMPAIGN_FIXTURE, approval_status: 'pending_review' };
+    mockApi.post.mockResolvedValueOnce({ data: submitted });
+
+    let result;
+    await act(async () => {
+      result = await useCampaignStore.getState().submitForApproval(1, 'es');
+    });
+
+    expect(result).toEqual(submitted);
+    expect(useCampaignStore.getState().campaign).toEqual(submitted);
+  });
+
+  it('stores messages keyed by campaign id via fetchMessages', async () => {
+    const messages = [{ id: 10, body: 'hola' }];
+    mockApi.get.mockResolvedValueOnce({ data: messages });
+
+    await act(async () => {
+      await useCampaignStore.getState().fetchMessages(1);
+    });
+
+    expect(useCampaignStore.getState().messagesByCampaign[1]).toEqual(messages);
+    expect(useCampaignStore.getState().messagesLoading).toBe(false);
+  });
+
+  it('sets error when fetchMessages fails', async () => {
+    mockApi.get.mockRejectedValueOnce(new Error('msg failure'));
+
+    await act(async () => {
+      await useCampaignStore.getState().fetchMessages(1);
+    });
+
+    expect(useCampaignStore.getState().error).toBe('msg failure');
+    expect(useCampaignStore.getState().messagesLoading).toBe(false);
+  });
+
+  it('sets fallback error when fetchMessages rejects with non-Error', async () => {
+    mockApi.get.mockRejectedValueOnce(null);
+
+    await act(async () => {
+      await useCampaignStore.getState().fetchMessages(1);
+    });
+
+    expect(useCampaignStore.getState().error).toBe('Failed to fetch messages');
+  });
+
+  it('appends new message to existing thread via sendMessage', async () => {
+    useCampaignStore.setState({
+      messagesByCampaign: { 1: [{ id: 1, body: 'prev' }] },
+    });
+    const sent = { id: 2, body: 'hola' };
+    mockApi.post.mockResolvedValueOnce({ data: sent });
+
+    let result;
+    await act(async () => {
+      result = await useCampaignStore.getState().sendMessage(1, 'hola');
+    });
+
+    expect(result).toEqual(sent);
+    expect(useCampaignStore.getState().messagesByCampaign[1]).toHaveLength(2);
+  });
+
+  it('creates a new thread with sent message when none exists', async () => {
+    const sent = { id: 5, body: 'first' };
+    mockApi.post.mockResolvedValueOnce({ data: sent });
+
+    await act(async () => {
+      await useCampaignStore.getState().sendMessage(7, 'first', 'en');
+    });
+
+    expect(useCampaignStore.getState().messagesByCampaign[7]).toEqual([sent]);
   });
 });

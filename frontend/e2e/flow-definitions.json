@@ -1,6 +1,6 @@
 {
-  "version": "5.0.0",
-  "lastUpdated": "2026-03-31",
+  "version": "5.4.0",
+  "lastUpdated": "2026-04-19",
   "flows": {
     "home-loads": {
       "name": "Home page loads",
@@ -32,6 +32,14 @@
       "roles": ["shared"],
       "priority": "P3",
       "description": "User clicks active campaigns section and navigates to /campaigns",
+      "expectedSpecs": 1
+    },
+    "auth-admin-token-handoff": {
+      "name": "Admin token handoff redirect",
+      "module": "auth",
+      "roles": ["admin"],
+      "priority": "P3",
+      "description": "Browser lands on /admin-login with access+refresh tokens in URL params; tokens are stored in cookies and user is redirected to the target page (or / if absent). Missing tokens redirect to /sign-in.",
       "expectedSpecs": 1
     },
     "auth-sign-in-form": {
@@ -387,11 +395,27 @@
       "expectedSpecs": 2
     },
     "adopter-profile": {
-      "name": "User profile management",
+      "name": "Adopter profile view",
       "module": "adopter",
       "roles": ["adopter"],
       "priority": "P2",
-      "description": "User views and updates their profile at /my-profile",
+      "description": "Adopter views their role-adaptive profile dashboard at /my-profile with stats, activity timeline, and completeness bar",
+      "expectedSpecs": 1
+    },
+    "shelter-admin-profile": {
+      "name": "Shelter admin profile view",
+      "module": "shelter-panel",
+      "roles": ["shelter_admin"],
+      "priority": "P2",
+      "description": "Shelter admin views their role-adaptive profile at /my-profile with ShelterAdminProfileSection and pending-applications widget",
+      "expectedSpecs": 1
+    },
+    "admin-profile": {
+      "name": "Admin profile view",
+      "module": "admin",
+      "roles": ["admin"],
+      "priority": "P2",
+      "description": "Admin views their role-adaptive profile at /my-profile with AdminProfileSection and moderation-queue widget",
       "expectedSpecs": 1
     },
     "admin-payments": {
@@ -610,6 +634,54 @@
       "description": "Authenticated adopter views submitted applications at /my-applications with status badges and application details",
       "expectedSpecs": 1
     },
+    "vet-follow-ups-list": {
+      "name": "Veterinarian follow-ups list",
+      "module": "veterinarian",
+      "roles": ["veterinarian"],
+      "priority": "P2",
+      "description": "Veterinarian views their assigned follow-up list at /veterinarian/follow-ups with status badges (pending, in_progress, completed, overdue)",
+      "expectedSpecs": 1
+    },
+    "vet-follow-up-detail": {
+      "name": "Veterinarian follow-up detail",
+      "module": "veterinarian",
+      "roles": ["veterinarian"],
+      "priority": "P2",
+      "description": "Veterinarian views a follow-up detail, adds clinical history entries, and marks the follow-up as complete",
+      "expectedSpecs": 1
+    },
+    "web-manager-shelters": {
+      "name": "Web manager shelter list",
+      "module": "web-manager",
+      "roles": ["web_manager"],
+      "priority": "P2",
+      "description": "Web manager browses and filters shelters by verification status at /web-manager/shelters",
+      "expectedSpecs": 1
+    },
+    "web-manager-shelter-detail": {
+      "name": "Web manager shelter detail",
+      "module": "web-manager",
+      "roles": ["web_manager"],
+      "priority": "P2",
+      "description": "Web manager views shelter info and adoption applications for a specific shelter at /web-manager/shelters/[id]",
+      "expectedSpecs": 1
+    },
+    "web-manager-applications": {
+      "name": "Web manager applications list",
+      "module": "web-manager",
+      "roles": ["web_manager"],
+      "priority": "P2",
+      "description": "Web manager views all adoption applications with status filter at /web-manager/applications",
+      "expectedSpecs": 1
+    },
+    "adoption-application-history": {
+      "name": "Adoption application clinical history",
+      "module": "adoption",
+      "roles": ["adopter"],
+      "priority": "P3",
+      "description": "Adopter views clinical history entries for their adoption application's animal at /my-applications/[id]/history",
+      "expectedSpecs": 1
+    },
     "volunteer-apply": {
       "name": "Submit volunteer application",
       "module": "volunteer",
@@ -623,7 +695,7 @@
       "module": "adopter",
       "roles": ["adopter"],
       "priority": "P2",
-      "description": "Authenticated user edits profile fields (name, phone, city, bio, avatar) at /my-profile/edit and saves changes",
+      "description": "Authenticated user edits profile fields (name, phone, city) at /my-profile/edit and saves changes; role-specific sections shown for shelter_admin and admin",
       "expectedSpecs": 1
     },
     "favorites-compare": {
@@ -656,6 +728,62 @@
       "roles": ["admin"],
       "priority": "P3",
       "description": "Admin duplicates a blog post from the admin list, creating a new draft copy",
+      "expectedSpecs": 1
+    },
+    "shelter-panel-campaign-detail": {
+      "name": "Shelter campaign detail and edit",
+      "module": "shelter-panel",
+      "roles": ["shelter_admin"],
+      "priority": "P2",
+      "description": "Shelter admin views campaign detail, edits title/description/goal when pending or rejected, resubmits for approval, and exchanges messages via CampaignMessageThread at /shelter/campaigns/[id]",
+      "expectedSpecs": 1
+    },
+    "shelter-panel-campaign-create": {
+      "name": "Shelter create new campaign",
+      "module": "shelter-panel",
+      "roles": ["shelter_admin"],
+      "priority": "P2",
+      "description": "Shelter admin submits a new campaign request (title ES/EN, description, goal) at /shelter/campaigns/nueva; campaign is created as draft pending review",
+      "expectedSpecs": 1
+    },
+    "web-manager-campaigns": {
+      "name": "Web manager campaigns list",
+      "module": "web-manager",
+      "roles": ["web_manager", "admin"],
+      "priority": "P2",
+      "description": "Web manager browses and filters campaigns by approval status (pending/approved/rejected/all) at /web-manager/campaigns and navigates to campaign detail or new campaign form",
+      "expectedSpecs": 1
+    },
+    "web-manager-campaign-detail": {
+      "name": "Web manager campaign approve/reject",
+      "module": "web-manager",
+      "roles": ["web_manager", "admin"],
+      "priority": "P2",
+      "description": "Web manager views campaign detail, approves or rejects it with a reason, and exchanges messages with the shelter admin via CampaignMessageThread at /web-manager/campaigns/[id]",
+      "expectedSpecs": 1
+    },
+    "web-manager-campaign-create": {
+      "name": "Web manager create campaign",
+      "module": "web-manager",
+      "roles": ["web_manager", "admin"],
+      "priority": "P2",
+      "description": "Web manager creates a campaign on behalf of any shelter (auto-approved) at /web-manager/campaigns/new using the shelter dropdown and bilingual form fields",
+      "expectedSpecs": 1
+    },
+    "manual-browse": {
+      "name": "Interactive manual page load",
+      "module": "manual",
+      "roles": ["web_manager", "admin"],
+      "priority": "P2",
+      "description": "web_manager or admin navigates to /manual; layout gate blocks other roles; page renders sticky search bar and collapsible sidebar with 8 process sections; user expands a section and clicks an anchor link, which scrolls to the ProcessCard and fires a 1.6 s highlight ring",
+      "expectedSpecs": 1
+    },
+    "manual-search": {
+      "name": "Manual search and process navigation",
+      "module": "manual",
+      "roles": ["web_manager", "admin"],
+      "priority": "P2",
+      "description": "Authenticated staff user types a query (or Cmd/Ctrl+K) into the Fuse.js search bar on /manual; dropdown shows ranked results with title, role badge, and summary snippet; user selects a result via keyboard or click; page scrolls to the matching ProcessCard",
       "expectedSpecs": 1
     }
   }

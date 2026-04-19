@@ -11,15 +11,24 @@ class CampaignDetailSerializer(serializers.ModelSerializer):
     description = serializers.SerializerMethodField()
     cover_image_url = serializers.SerializerMethodField()
     evidence_gallery_urls = serializers.SerializerMethodField()
+    reviewed_by_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Campaign
         fields = [
             'id', 'title', 'description', 'shelter', 'shelter_name',
-            'status', 'goal_amount', 'raised_amount', 'progress_percentage',
+            'status', 'approval_status', 'submitted_at', 'reviewed_at',
+            'reviewed_by', 'reviewed_by_name',
+            'goal_amount', 'raised_amount', 'progress_percentage',
             'cover_image_url', 'evidence_gallery_urls',
             'starts_at', 'ends_at', 'created_at', 'updated_at',
         ]
+
+    def get_reviewed_by_name(self, obj):
+        if not obj.reviewed_by:
+            return None
+        full = f'{obj.reviewed_by.first_name} {obj.reviewed_by.last_name}'.strip()
+        return full or obj.reviewed_by.email
 
     def get_title(self, obj):
         return getattr(obj, f'title_{get_lang(self)}')

@@ -15,12 +15,18 @@ import {
   SHELTER_PANEL_UPDATES,
   SHELTER_PANEL_UPDATE_CREATE,
   ADOPTION_MANAGE,
+  SHELTER_ADMIN_PROFILE,
+  SHELTER_PANEL_CAMPAIGN_DETAIL,
+  SHELTER_PANEL_CAMPAIGN_CREATE,
 } from '../helpers/flow-tags';
 import {
   mockShelterAnimals,
   mockShelterCampaigns,
   mockShelterDonations,
   mockShelterData,
+  mockCampaignDetail,
+  mockRejectedCampaignDetail,
+  mockCampaignMessages,
 } from '../helpers/mock-data';
 
 test.describe('Shelter Public Pages', () => {
@@ -349,5 +355,113 @@ test.describe('Shelter Panel — Authenticated', () => {
     await expect(page.getByText(/Título \(Español\)/i)).toBeVisible();
     await expect(page.getByText(/Contenido \(Español\)/i)).toBeVisible();
     await expect(page.getByRole('button', { name: /Publicar/i })).toBeVisible();
+  });
+});
+
+test.describe('Shelter Admin Profile — Authenticated', () => {
+  test.describe.configure({ mode: 'serial' });
+
+  const mockShelterProfile = {
+    id: 1,
+    email: 'shelter-e2e@example.com',
+    first_name: 'Refugio',
+    last_name: 'Admin',
+    phone: '+57 300 000 0000',
+    city: 'Bogotá',
+    role: 'shelter_admin',
+    is_staff: false,
+    is_active: true,
+    date_joined: '2025-01-01T00:00:00Z',
+    shelter: { name: 'Refugio E2E', verification_status: 'verified' },
+    shelter_stats: { animals_count: 5, pending_applications: 3, active_campaigns: 1 },
+  };
+
+  test('should display shelter admin role section and NOT adopter cards', { tag: [...SHELTER_ADMIN_PROFILE] }, async ({ page }) => {
+    await page.route('**/user/profile/**', (route: any) => {
+      if (route.request().method() === 'GET') {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockShelterProfile) });
+      }
+      return route.continue();
+    });
+
+    await loginAndNavigate(page, 'shelter_admin', '/my-profile');
+
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible({ timeout: 15_000 });
+
+    const shelterSection = page.getByText(/Responsabilidades del refugio/i);
+    await expect(shelterSection).toBeVisible({ timeout: 10_000 });
+
+    await expect(page.getByText(/Mis Solicitudes/i)).not.toBeVisible();
+    await expect(page.getByText(/Mis Donaciones/i)).not.toBeVisible();
+  });
+
+  test('should display pending-applications widget with correct count', { tag: [...SHELTER_ADMIN_PROFILE] }, async ({ page }) => {
+    await page.route('**/user/profile/**', (route: any) => {
+      if (route.request().method() === 'GET') {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockShelterProfile) });
+      }
+      return route.continue();
+    });
+
+    await loginAndNavigate(page, 'shelter_admin', '/my-profile');
+
+    await expect(page.getByText(/3 solicitudes esperando tu revisión/i)).toBeVisible({ timeout: 10_000 });
+  });
+});
+
+test.describe('Shelter Campaign Detail & Create', () => {
+  test('should display campaign detail with approval status', { tag: [...SHELTER_PANEL_CAMPAIGN_DETAIL] }, async ({ page }) => {
+    await page.route('**/api/campaigns/3/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockCampaignDetail) }),
+    );
+    await page.route('**/api/campaigns/3/messages/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockCampaignMessages) }),
+    );
+
+    await loginAndNavigate(page, 'shelter_admin', '/shelter/campaigns/3');
+
+    await expect(page.getByText(/Esterilización urgente/i)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/pending/i)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/Conversación/i)).toBeVisible({ timeout: 10_000 });
+  });
+
+  test('should show edit and resubmit buttons on rejected campaign', { tag: [...SHELTER_PANEL_CAMPAIGN_DETAIL] }, async ({ page }) => {
+    await page.route('**/api/campaigns/4/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockRejectedCampaignDetail) }),
+    );
+    await page.route('**/api/campaigns/4/messages/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockCampaignMessages) }),
+    );
+
+    await loginAndNavigate(page, 'shelter_admin', '/shelter/campaigns/4');
+
+    await expect(page.getByText(/Rescate de temporada/i)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/Reenviar a revisión/i)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/Falta imagen de portada/i)).toBeVisible({ timeout: 10_000 });
+  });
+
+  test('should redirect unauthenticated user from campaign detail', { tag: [...SHELTER_PANEL_CAMPAIGN_DETAIL] }, async ({ page }) => {
+    await page.goto('/shelter/campaigns/3');
+    await waitForPageLoad(page);
+
+    await expect(page).toHaveURL(/sign-in|campaigns/);
+  });
+
+  test('should display campaign request form', { tag: [...SHELTER_PANEL_CAMPAIGN_CREATE] }, async ({ page }) => {
+    await page.route('**/api/shelters/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ count: 1, page: 1, total_pages: 1, results: mockShelterData }) }),
+    );
+
+    await loginAndNavigate(page, 'shelter_admin', '/shelter/campaigns/nueva');
+
+    await expect(page.getByRole('heading', { name: /Solicitar nueva campaña/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('button', { name: /Enviar para revisión/i })).toBeVisible({ timeout: 10_000 });
+  });
+
+  test('should redirect unauthenticated user from campaign create', { tag: [...SHELTER_PANEL_CAMPAIGN_CREATE] }, async ({ page }) => {
+    await page.goto('/shelter/campaigns/nueva');
+    await waitForPageLoad(page);
+
+    await expect(page).toHaveURL(/sign-in|nueva/);
   });
 });

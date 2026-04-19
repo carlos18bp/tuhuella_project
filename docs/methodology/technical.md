@@ -1,6 +1,6 @@
 # Tuhuella — Technical Stack & Decisions
 
-> Last updated: 2026-04-10
+> Last updated: 2026-04-19
 
 ## Backend
 
@@ -87,27 +87,30 @@ NEXT_PUBLIC_BACKEND_ORIGIN=http://localhost:8000
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=
 ```
 
-## Verified Counts (2026-04-10)
+## Verified Counts (2026-04-19)
 
 | Asset | Count |
 |-------|-------|
-| Backend model classes | 27 (24 files) |
-| Backend serializers | 41 |
-| Backend views | 22 |
-| Backend URL modules | 22 |
+| Backend model classes | 30 (27 files) |
+| Backend serializers | 43 |
+| Backend views | 24 |
+| Backend URL modules | 23 |
 | Backend services | 3 (email, notification, notification_templates) |
 | Management commands | 21 |
-| Admin classes | 24 (model admins + MiHuellaAdminSite) |
-| Frontend pages | 50 |
-| Zustand stores | 10 |
+| Admin classes | 26 (model admins + MiHuellaAdminSite) |
+| Frontend pages | 56 |
+| Zustand stores | 13 |
 | Custom hooks | 5 (useFAQs, useRequireAuth, useScrollReveal, useAuthSync, useMediaQuery) |
 | UI components | 65 |
+| Animals components | 1 (AnimalHealthSection) |
+| Web-manager components | 1 (AdminApplicationsTable) |
+| Veterinarian components | 2 (ClinicalEntryForm, ClinicalHistoryTimeline) |
 | Layout components | 12 |
 | Blog components | 4 |
 | Provider components | 3 |
-| Total frontend components | 84 |
-| Exported types | 44 |
-| Backend test files | 99 |
-| Frontend unit test files | 289 |
+| Total frontend components | 88 |
+| Exported types | ~52 |
+| Backend test files | 99+ |
+| Frontend unit test files | 289+ |
 | E2E spec files | 17 |
 | E2E flow definitions | 82 |

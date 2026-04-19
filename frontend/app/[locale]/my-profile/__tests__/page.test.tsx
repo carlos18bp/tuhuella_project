@@ -3,8 +3,25 @@ import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 
 import { useAuthStore } from '@/lib/stores/authStore';
+import { useRoleProfileData, type RoleProfileData } from '@/lib/hooks/useRoleProfileData';
+
+jest.mock('@/lib/hooks/useRoleProfileData', () => ({
+  useRoleProfileData: jest.fn(),
+}));
+
+jest.mock('@/components/ui/ShelterAdminProfileSection', () => ({
+  __esModule: true,
+  default: () => <div data-testid="shelter-admin-section" />,
+}));
+
+jest.mock('@/components/ui/AdminProfileSection', () => ({
+  __esModule: true,
+  default: () => <div data-testid="admin-section" />,
+}));
 
 import MiPerfilPage from '../page';
+
+const mockUseRoleProfileData = useRoleProfileData as unknown as jest.Mock;
 
 const mockUser = {
   id: 1,
@@ -27,15 +44,40 @@ const mockStats = {
   shelter_invites: { pending_count: 0 },
 };
 
+const EMPTY_ROLE_DATA: RoleProfileData = {
+  shelter: null,
+  shelterStats: null,
+  adminStats: null,
+  loading: false,
+};
+
+const SHELTER_ROLE_DATA: Partial<RoleProfileData> = {
+  shelter: { name: 'Refugio Uno', verification_status: 'verified' } as RoleProfileData['shelter'],
+  shelterStats: { animals_count: 5, pending_applications: 4, active_campaigns: 2 },
+};
+
+const ADMIN_ROLE_DATA: Partial<RoleProfileData> = {
+  adminStats: { total_users: 10, total_shelters: 5, total_animals: 20, pending_verifications: 3 },
+};
+
+function setRoleData(overrides: Partial<RoleProfileData> = {}) {
+  mockUseRoleProfileData.mockReturnValue({ ...EMPTY_ROLE_DATA, ...overrides });
+}
+
 describe('MiPerfilPage', () => {
+  const fetchProfileStatsMock = jest.fn();
+  const fetchActivityMock = jest.fn();
+
   beforeEach(() => {
+    jest.clearAllMocks();
+    setRoleData();
     useAuthStore.setState({
       user: null,
       profileStats: null,
       activity: [],
       profileLoading: false,
-      fetchProfileStats: jest.fn(),
-      fetchActivity: jest.fn(),
+      fetchProfileStats: fetchProfileStatsMock,
+      fetchActivity: fetchActivityMock,
     });
   });
 
@@ -63,7 +105,7 @@ describe('MiPerfilPage', () => {
     useAuthStore.setState({ user: mockUser });
 
     render(<MiPerfilPage />);
-    // User has name, email, phone, city = 70%, no intent
+    // adopter: name(15) + email(15) + phone(20) + city(20) = 70%, no intent
     expect(screen.getByText('70%')).toBeInTheDocument();
   });
 
@@ -132,16 +174,15 @@ describe('MiPerfilPage', () => {
     useAuthStore.setState({ user: mockUser, profileStats: mockStats });
 
     render(<MiPerfilPage />);
-    // Luna's initial should be visible as preview
     expect(screen.getAllByText('L').length).toBeGreaterThanOrEqual(1);
   });
 
   it('renders red completeness bar when completeness < 50%', () => {
-    const incompleteUser = { ...mockUser, phone: undefined, city: undefined };
+    const incompleteUser = { ...mockUser, phone: '', city: '' };
     useAuthStore.setState({ user: incompleteUser });
 
     render(<MiPerfilPage />);
-    // Only name (15) + email (15) = 30%
+    // adopter: name(15) + email(15) = 30%
     expect(screen.getByText('30%')).toBeInTheDocument();
   });
 
@@ -149,7 +190,7 @@ describe('MiPerfilPage', () => {
     useAuthStore.setState({ user: mockUser, profileStats: mockStats });
 
     render(<MiPerfilPage />);
-    // name(15) + email(15) + phone(20) + city(20) + intent(30) = 100
+    // adopter: name(15) + email(15) + phone(20) + city(20) + intent(30) = 100
     expect(screen.getByText('100%')).toBeInTheDocument();
     expect(screen.getByText('Perfil completo')).toBeInTheDocument();
   });
@@ -192,5 +233,103 @@ describe('MiPerfilPage', () => {
 
     render(<MiPerfilPage />);
     expect(screen.getByText('+4')).toBeInTheDocument();
+  });
+
+  describe('role adaptation', () => {
+    it('renders ShelterAdminProfileSection and hides adopter cards for shelter_admin', () => {
+      useAuthStore.setState({ user: { ...mockUser, role: 'shelter_admin' } });
+      setRoleData(SHELTER_ROLE_DATA);
+
+      render(<MiPerfilPage />);
+
+      expect(screen.getByTestId('shelter-admin-section')).toBeInTheDocument();
+      expect(screen.queryByText('Mis Solicitudes')).not.toBeInTheDocument();
+      expect(screen.queryByText('Mis Apadrinamientos')).not.toBeInTheDocument();
+      expect(screen.queryByText('Mi Intención de Adopción')).not.toBeInTheDocument();
+      expect(screen.getByText('Responsabilidades del refugio')).toBeInTheDocument();
+    });
+
+    it('renders pending-applications widget with correct count and link for shelter_admin', () => {
+      useAuthStore.setState({ user: { ...mockUser, role: 'shelter_admin' } });
+      setRoleData({
+        shelterStats: { animals_count: 0, pending_applications: 4, active_campaigns: 0 },
+      });
+
+      render(<MiPerfilPage />);
+
+      expect(screen.getByText('4 solicitudes esperando tu revisión')).toBeInTheDocument();
+      const widget = screen.getByText('4 solicitudes esperando tu revisión').closest('a');
+      expect(widget).toHaveAttribute('href', '/shelter/applications');
+    });
+
+    it('shows empty-state widget copy when shelter has zero pending applications', () => {
+      useAuthStore.setState({ user: { ...mockUser, role: 'shelter_admin' } });
+      setRoleData({
+        shelterStats: { animals_count: 0, pending_applications: 0, active_campaigns: 0 },
+      });
+
+      render(<MiPerfilPage />);
+      expect(screen.getByText('No hay solicitudes pendientes')).toBeInTheDocument();
+    });
+
+    it('uses role-specific completeness formula for shelter_admin', () => {
+      useAuthStore.setState({ user: { ...mockUser, role: 'shelter_admin' } });
+
+      render(<MiPerfilPage />);
+      // shelter_admin: name(30) + email(30) + phone(40) = 100
+      expect(screen.getByText('100%')).toBeInTheDocument();
+      expect(screen.getByText('Perfil completo')).toBeInTheDocument();
+    });
+
+    it('renders AdminProfileSection and hides adopter cards for admin', () => {
+      useAuthStore.setState({ user: { ...mockUser, role: 'admin' } });
+      setRoleData({
+        adminStats: { total_users: 10, total_shelters: 5, total_animals: 20, pending_verifications: 3 },
+      });
+
+      render(<MiPerfilPage />);
+
+      expect(screen.getByTestId('admin-section')).toBeInTheDocument();
+      expect(screen.queryByText('Mis Solicitudes')).not.toBeInTheDocument();
+      expect(screen.queryByText('Mis Donaciones')).not.toBeInTheDocument();
+      expect(screen.queryByText('Favoritos')).not.toBeInTheDocument();
+      expect(screen.getByText('Responsabilidades de administrador')).toBeInTheDocument();
+    });
+
+    it('renders moderation-queue widget with correct count and link for admin', () => {
+      useAuthStore.setState({ user: { ...mockUser, role: 'admin' } });
+      setRoleData({
+        adminStats: { total_users: 10, total_shelters: 5, total_animals: 20, pending_verifications: 3 },
+      });
+
+      render(<MiPerfilPage />);
+
+      expect(screen.getByText('3 refugios por verificar')).toBeInTheDocument();
+      const widget = screen.getByText('3 refugios por verificar').closest('a');
+      expect(widget).toHaveAttribute('href', '/admin/dashboard');
+    });
+
+    it('does not render adopter timeline for shelter_admin or admin', () => {
+      useAuthStore.setState({ user: { ...mockUser, role: 'admin' } });
+      render(<MiPerfilPage />);
+      expect(screen.queryByText('Actividad reciente')).not.toBeInTheDocument();
+    });
+
+    it('does not trigger fetchActivity/fetchProfileStats for non-adopter roles', () => {
+      useAuthStore.setState({ user: { ...mockUser, role: 'admin' } });
+      render(<MiPerfilPage />);
+      expect(fetchActivityMock).not.toHaveBeenCalled();
+      expect(fetchProfileStatsMock).not.toHaveBeenCalled();
+    });
+
+    it('hides shelter-invite banner for non-adopter even if payload includes it', () => {
+      useAuthStore.setState({
+        user: { ...mockUser, role: 'shelter_admin' },
+        profileStats: { ...mockStats, shelter_invites: { pending_count: 5 } },
+      });
+
+      render(<MiPerfilPage />);
+      expect(screen.queryByText(/5 invitación/)).not.toBeInTheDocument();
+    });
   });
 });

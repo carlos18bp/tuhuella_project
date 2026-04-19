@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
+from django_attachments.fields import SingleImageField
 
 from base_feature_app.models.mixins import ArchivableModel
 
@@ -42,7 +43,12 @@ class BlogPost(ArchivableModel):
     title_es = models.CharField(max_length=255)
     title_en = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True, blank=True)
-    cover_image = models.ImageField(upload_to='blog/covers/', blank=True)
+    cover_image = SingleImageField(
+        related_name='blog_cover',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
     cover_image_url = models.URLField(
         max_length=500, blank=True, default='',
         help_text='External URL for cover image (used when no file is uploaded).',

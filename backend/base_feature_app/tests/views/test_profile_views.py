@@ -2,7 +2,7 @@ import pytest
 from django.urls import reverse
 from rest_framework import status
 
-from base_feature_app.models import AdoptionApplication, Favorite
+from base_feature_app.models import AdoptionApplication, Campaign, Favorite, Shelter
 
 # ---------------------------------------------------------------------------
 # profile-stats
@@ -206,3 +206,82 @@ def test_profile_stats_pending_invites_counted(authenticated_client, shelter_inv
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
     assert data['shelter_invites']['pending_count'] == 1
+
+
+# ---------------------------------------------------------------------------
+# profile — shelter_stats (SHELTER_ADMIN / WEB_MANAGER) and pending_verifications
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_get_profile_shelter_admin_stats_counts_owned_shelter_only(
+    shelter_admin_client, shelter, animal, existing_user,
+):
+    """Shelter admin stats count only their own shelter's records."""
+    AdoptionApplication.objects.create(
+        user=existing_user, animal=animal,
+        status=AdoptionApplication.Status.SUBMITTED, form_answers={},
+    )
+    Campaign.objects.create(
+        shelter=shelter, title_es='Urgente', title_en='Urgent',
+        status=Campaign.Status.ACTIVE,
+        approval_status=Campaign.ApprovalStatus.APPROVED,
+    )
+
+    response = shelter_admin_client.get(reverse('update-profile'))
+
+    data = response.json()
+    assert data['shelter_stats']['animals_count'] == 1
+    assert data['shelter_stats']['pending_applications'] == 1
+    assert data['shelter_stats']['active_campaigns'] == 1
+
+
+@pytest.mark.django_db
+def test_get_profile_shelter_admin_stats_excludes_archived_animals(
+    shelter_admin_client, shelter, animal,
+):
+    """Archived animals do not inflate the shelter_admin animals_count."""
+    from django.utils import timezone
+    from base_feature_app.tests.factories import AnimalFactory
+
+    AnimalFactory(shelter=shelter, archived_at=timezone.now())
+
+    response = shelter_admin_client.get(reverse('update-profile'))
+
+    assert response.json()['shelter_stats']['animals_count'] == 1
+
+
+@pytest.mark.django_db
+def test_get_profile_web_manager_stats_returns_global_counts(
+    api_client, existing_user, shelter, animal,
+):
+    """Web manager role sees platform-wide shelter stats, not per-shelter."""
+    existing_user.role = 'web_manager'
+    existing_user.save(update_fields=['role'])
+    api_client.force_authenticate(user=existing_user)
+    AdoptionApplication.objects.create(
+        user=existing_user, animal=animal,
+        status=AdoptionApplication.Status.SUBMITTED, form_answers={},
+    )
+
+    response = api_client.get(reverse('update-profile'))
+
+    data = response.json()
+    assert data['shelter_stats']['animals_count'] >= 1
+    assert data['shelter_stats']['pending_applications'] >= 1
+
+
+@pytest.mark.django_db
+def test_get_profile_admin_stats_counts_pending_verifications(
+    api_client, admin_user, shelter,
+):
+    """Admin's pending_verifications counts shelters awaiting verification."""
+    admin_user.role = 'admin'
+    admin_user.save(update_fields=['role'])
+    shelter.verification_status = Shelter.VerificationStatus.PENDING
+    shelter.save(update_fields=['verification_status'])
+    api_client.force_authenticate(user=admin_user)
+
+    response = api_client.get(reverse('update-profile'))
+
+    assert response.json()['admin_stats']['pending_verifications'] == 1

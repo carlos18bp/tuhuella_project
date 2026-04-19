@@ -9,12 +9,13 @@ from base_feature_app.serializers.notification import (
     NotificationLogSerializer,
 )
 
-# All 12 planned event keys
+# All planned event keys
 EVENT_KEYS = [
     'adoption_submitted',
     'adoption_status_changed',
     'adoption_info_requested',
     'adoption_interview_scheduled',
+    'adoption_requires_attention',
     'shelter_invite_sent',
     'shelter_invite_responded',
     'donation_paid',
@@ -23,6 +24,10 @@ EVENT_KEYS = [
     'sponsorship_failed',
     'campaign_update_published',
     'campaign_goal_reached',
+    'follow_up_assigned_to_vet',
+    'follow_up_due_soon',
+    'follow_up_overdue',
+    'clinical_entry_added',
 ]
 
 DEFAULT_CHANNELS = ['email', 'in_app']

@@ -33,6 +33,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     class Role(models.TextChoices):
         ADOPTER = 'adopter', 'Adopter'
         SHELTER_ADMIN = 'shelter_admin', 'Shelter Admin'
+        VETERINARIAN = 'veterinarian', 'Veterinarian'
+        WEB_MANAGER = 'web_manager', 'Web Manager'
         ADMIN = 'admin', 'Admin'
 
     email = models.EmailField(unique=True)

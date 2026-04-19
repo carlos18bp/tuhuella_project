@@ -81,6 +81,12 @@ class Animal(ArchivableModel):
 
     is_vaccinated = models.BooleanField(default=False)
     is_sterilized = models.BooleanField(default=False)
+    is_dewormed = models.BooleanField(default=False)
+    vaccinated_at = models.DateField(null=True, blank=True)
+    sterilized_at = models.DateField(null=True, blank=True)
+    last_vet_checkup = models.DateField(null=True, blank=True)
+    medical_notes_es = models.TextField(blank=True)
+    medical_notes_en = models.TextField(blank=True)
 
     weight = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     is_house_trained = models.BooleanField(default=False)

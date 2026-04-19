@@ -79,7 +79,12 @@ def animal_list(request):
 @permission_classes([AllowAny])
 def animal_detail(request, pk):
     try:
-        animal = Animal.objects.get(pk=pk)
+        animal = (
+            Animal.objects
+            .select_related('shelter')
+            .prefetch_related('disease_screenings')
+            .get(pk=pk)
+        )
     except Animal.DoesNotExist:
         return Response({'error': 'Animal not found'}, status=status.HTTP_404_NOT_FOUND)
     serializer = AnimalDetailSerializer(animal, context={'request': request})

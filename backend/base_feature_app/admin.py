@@ -1,18 +1,31 @@
-from django.contrib import admin
+import logging
+from urllib.parse import urlencode
+
+from django.conf import settings
+from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
+from django.core.exceptions import PermissionDenied
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404
+from django.urls import path, reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_attachments.admin import AttachmentsAdminMixin
 
 from .models import (
     User, PasswordCode, Shelter, Animal, AdoptionApplication,
-    Campaign, Donation, Sponsorship, Payment, UpdatePost,
+    Campaign, CampaignMessage, Donation, Sponsorship, Payment, UpdatePost,
     AdopterIntent, ShelterInvite, Subscription, Favorite,
     NotificationPreference, NotificationLog, BlogPost,
     FAQTopic, FAQItem, DonationAmountOption, SponsorshipAmountOption,
     VolunteerPosition, VolunteerApplication, StrategicAlly,
     AnimalStatusHistory, PaymentHistory, ShelterMembership,
+    AnimalDiseaseScreening,
+    PostAdoptionFollowUp, ClinicalHistoryEntry,
 )
+from .utils.auth_utils import generate_auth_tokens
+
+logger = logging.getLogger(__name__)
 
 
 # ============================================================================
@@ -50,6 +63,54 @@ class MiHuellaUserAdmin(UserAdmin):
         now = timezone.now()
         queryset.update(archived_at=now, is_active=False)
 
+    def get_urls(self):
+        urls = super().get_urls()
+        custom = [
+            path(
+                '<int:user_id>/login_as/',
+                self.admin_site.admin_view(self.login_as_user_view),
+                name='base_feature_app_user_login_as',
+            ),
+        ]
+        return custom + urls
+
+    def login_as_user_view(self, request, user_id):
+        if not (request.user.is_active and request.user.is_superuser):
+            raise PermissionDenied('Only active superusers can use Login-as.')
+
+        target = get_object_or_404(User, pk=user_id)
+        change_url = reverse('admin:base_feature_app_user_change', args=[user_id])
+
+        if target.is_superuser and target.pk != request.user.pk:
+            messages.error(request, _('No puedes iniciar sesión como otro superusuario.'))
+            return HttpResponseRedirect(change_url)
+
+        if not target.is_active:
+            messages.error(request, _('Este usuario está inactivo.'))
+            return HttpResponseRedirect(change_url)
+
+        tokens = generate_auth_tokens(target)
+        logger.info(
+            'admin %s logged in as user %s', request.user.email, target.email,
+        )
+
+        query = urlencode({
+            'access': tokens['access'],
+            'refresh': tokens['refresh'],
+            'redirect': '/',
+        })
+        return HttpResponseRedirect(
+            f'{settings.FRONTEND_URL}/{settings.FRONTEND_DEFAULT_LOCALE}/admin-login?{query}'
+        )
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        if request.user.is_active and request.user.is_superuser and object_id:
+            extra_context['login_as_url'] = reverse(
+                'admin:base_feature_app_user_login_as', args=[object_id],
+            )
+        return super().change_view(request, object_id, form_url, extra_context)
+
 
 class PasswordCodeAdmin(admin.ModelAdmin):
     list_display = ('user', 'code', 'created_at', 'used')
@@ -79,15 +140,22 @@ class ShelterAdmin(AttachmentsAdminMixin, admin.ModelAdmin):
 # ANIMAL MANAGEMENT
 # ============================================================================
 
+class AnimalDiseaseScreeningInline(admin.TabularInline):
+    model = AnimalDiseaseScreening
+    extra = 0
+    fields = ('disease_key', 'result', 'tested_on', 'notes')
+
+
 class AnimalAdmin(AttachmentsAdminMixin, admin.ModelAdmin):
     list_display = ('name', 'species', 'breed', 'age_range', 'size', 'status', 'energy_level', 'shelter', 'archived_at')
     search_fields = ('name', 'breed', 'shelter__name', 'microchip_id')
     list_filter = (
         'species', 'age_range', 'size', 'status', 'gender',
-        'is_vaccinated', 'is_sterilized', 'is_house_trained',
+        'is_vaccinated', 'is_sterilized', 'is_dewormed', 'is_house_trained',
         'energy_level', 'good_with_kids', 'good_with_dogs', 'good_with_cats',
     )
     readonly_fields = ('created_at', 'updated_at')
+    inlines = [AnimalDiseaseScreeningInline]
     fieldsets = (
         (None, {
             'fields': ('shelter', 'name', 'species', 'breed', 'age_range', 'gender', 'size', 'status', 'archived_at'),
@@ -98,9 +166,16 @@ class AnimalAdmin(AttachmentsAdminMixin, admin.ModelAdmin):
         (_('Descriptions'), {
             'fields': ('description_es', 'description_en', 'special_needs_es', 'special_needs_en'),
         }),
+        (_('Gallery'), {
+            'fields': ('gallery',),
+        }),
         (_('Health & traits'), {
             'fields': (
-                'is_vaccinated', 'is_sterilized', 'weight', 'is_house_trained',
+                'is_vaccinated', 'vaccinated_at',
+                'is_sterilized', 'sterilized_at',
+                'is_dewormed', 'last_vet_checkup',
+                'medical_notes_es', 'medical_notes_en',
+                'weight', 'is_house_trained',
                 'energy_level', 'coat_color', 'microchip_id',
             ),
         }),
@@ -112,11 +187,34 @@ class AnimalAdmin(AttachmentsAdminMixin, admin.ModelAdmin):
         }),
     )
 
-    def delete_queryset(self, request, queryset):
-        queryset.update(
-            archived_at=timezone.now(),
-            status=Animal.Status.ARCHIVED,
-        )
+
+class AnimalDiseaseScreeningAdmin(admin.ModelAdmin):
+    list_display = ('animal', 'disease_key', 'result', 'tested_on')
+    list_filter = ('disease_key', 'result')
+    search_fields = ('animal__name',)
+    readonly_fields = ('created_at', 'updated_at')
+
+
+class ClinicalHistoryEntryInline(admin.TabularInline):
+    model = ClinicalHistoryEntry
+    extra = 0
+    fields = ('entry_type', 'title', 'occurred_at', 'author')
+    readonly_fields = ('author',)
+
+
+class PostAdoptionFollowUpAdmin(admin.ModelAdmin):
+    list_display = ('id', 'adopter', 'animal', 'assigned_veterinarian', 'status', 'scheduled_date')
+    list_filter = ('status', 'scheduled_date')
+    search_fields = ('adopter__email', 'animal__name', 'assigned_veterinarian__email')
+    readonly_fields = ('created_at', 'updated_at')
+    inlines = [ClinicalHistoryEntryInline]
+
+
+class ClinicalHistoryEntryAdmin(admin.ModelAdmin):
+    list_display = ('animal', 'entry_type', 'title', 'occurred_at', 'author')
+    list_filter = ('entry_type',)
+    search_fields = ('title', 'animal__name', 'author__email')
+    readonly_fields = ('created_at',)
 
 
 class FavoriteAdmin(admin.ModelAdmin):
@@ -188,13 +286,21 @@ class ShelterInviteAdmin(admin.ModelAdmin):
 # ============================================================================
 
 class CampaignAdmin(AttachmentsAdminMixin, admin.ModelAdmin):
-    list_display = ('title_es', 'shelter', 'status', 'goal_amount', 'raised_amount', 'progress_percentage', 'archived_at')
+    list_display = ('title_es', 'shelter', 'status', 'approval_status', 'reviewed_by',
+                    'goal_amount', 'raised_amount', 'progress_percentage', 'archived_at')
     search_fields = ('title_es', 'title_en', 'shelter__name')
-    list_filter = ('status',)
-    readonly_fields = ('created_at', 'updated_at')
+    list_filter = ('status', 'approval_status')
+    readonly_fields = ('created_at', 'updated_at', 'submitted_at', 'reviewed_at', 'reviewed_by')
 
     def delete_queryset(self, request, queryset):
         queryset.update(archived_at=timezone.now())
+
+
+class CampaignMessageAdmin(admin.ModelAdmin):
+    list_display = ('campaign', 'author', 'is_system', 'created_at')
+    list_filter = ('is_system',)
+    search_fields = ('body', 'campaign__title_es', 'author__email')
+    readonly_fields = ('created_at',)
 
 
 class DonationAdmin(admin.ModelAdmin):
@@ -263,7 +369,7 @@ class NotificationLogAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at',)
 
 
-class BlogPostAdmin(admin.ModelAdmin):
+class BlogPostAdmin(AttachmentsAdminMixin, admin.ModelAdmin):
     list_display = ('title_es', 'slug', 'category', 'author', 'is_published', 'is_featured', 'published_at', 'archived_at', 'created_at')
     list_filter = ('is_published', 'is_featured', 'category', 'author')
     search_fields = ('title_es', 'title_en', 'slug', 'excerpt_es', 'excerpt_en')
@@ -473,12 +579,16 @@ admin_site.register(PasswordCode, PasswordCodeAdmin)
 admin_site.register(Shelter, ShelterAdmin)
 admin_site.register(ShelterMembership, ShelterMembershipAdmin)
 admin_site.register(Animal, AnimalAdmin)
+admin_site.register(AnimalDiseaseScreening, AnimalDiseaseScreeningAdmin)
+admin_site.register(PostAdoptionFollowUp, PostAdoptionFollowUpAdmin)
+admin_site.register(ClinicalHistoryEntry, ClinicalHistoryEntryAdmin)
 admin_site.register(AnimalStatusHistory, AnimalStatusHistoryAdmin)
 admin_site.register(Favorite, FavoriteAdmin)
 admin_site.register(AdoptionApplication, AdoptionApplicationAdmin)
 admin_site.register(AdopterIntent, AdopterIntentAdmin)
 admin_site.register(ShelterInvite, ShelterInviteAdmin)
 admin_site.register(Campaign, CampaignAdmin)
+admin_site.register(CampaignMessage, CampaignMessageAdmin)
 admin_site.register(Donation, DonationAdmin)
 admin_site.register(Sponsorship, SponsorshipAdmin)
 admin_site.register(Payment, PaymentAdmin)

@@ -6,6 +6,78 @@ Variables use {variable_name} format for .format() substitution.
 """
 
 TEMPLATES = {
+    'follow_up_assigned_to_vet': {
+        'subject_es': 'Te asignaron un seguimiento pos-adopción para {animal_name}',
+        'subject_en': 'You have been assigned a post-adoption follow-up for {animal_name}',
+        'body_es': (
+            'Hola {user_name},\n\n'
+            'Se te asignó el seguimiento de {animal_name} con fecha programada {scheduled_date}.\n'
+            'Ver detalles: {link}\n\n— Mi Huella'
+        ),
+        'body_en': (
+            'Hi {user_name},\n\n'
+            'You have been assigned the follow-up for {animal_name}, scheduled on {scheduled_date}.\n'
+            'Details: {link}\n\n— Mi Huella'
+        ),
+    },
+    'follow_up_due_soon': {
+        'subject_es': 'Próximo seguimiento para {animal_name}',
+        'subject_en': 'Upcoming follow-up for {animal_name}',
+        'body_es': (
+            'Hola {user_name},\n\n'
+            'El seguimiento de {animal_name} está programado para {scheduled_date}.\n'
+            'Ver: {link}\n\n— Mi Huella'
+        ),
+        'body_en': (
+            'Hi {user_name},\n\n'
+            'The follow-up for {animal_name} is scheduled for {scheduled_date}.\n'
+            'View: {link}\n\n— Mi Huella'
+        ),
+    },
+    'follow_up_overdue': {
+        'subject_es': 'Seguimiento vencido para {animal_name}',
+        'subject_en': 'Overdue follow-up for {animal_name}',
+        'body_es': (
+            'Hola {user_name},\n\n'
+            'El seguimiento de {animal_name} programado para {scheduled_date} está vencido.\n'
+            'Por favor realízalo lo antes posible: {link}\n\n— Mi Huella'
+        ),
+        'body_en': (
+            'Hi {user_name},\n\n'
+            'The follow-up for {animal_name} scheduled on {scheduled_date} is overdue.\n'
+            'Please complete it soon: {link}\n\n— Mi Huella'
+        ),
+    },
+    'clinical_entry_added': {
+        'subject_es': 'Nueva entrada clínica para {animal_name}',
+        'subject_en': 'New clinical entry for {animal_name}',
+        'body_es': (
+            'Hola {user_name},\n\n'
+            'Se registró una nueva entrada en la historia clínica de {animal_name}: {entry_title}.\n'
+            'Ver: {link}\n\n— Mi Huella'
+        ),
+        'body_en': (
+            'Hi {user_name},\n\n'
+            'A new clinical entry was added for {animal_name}: {entry_title}.\n'
+            'View: {link}\n\n— Mi Huella'
+        ),
+    },
+    'adoption_requires_attention': {
+        'subject_es': 'Solicitud de adopción pendiente hace {days_open} días',
+        'subject_en': 'Adoption application pending for {days_open} days',
+        'body_es': (
+            'Hola {user_name},\n\n'
+            'La solicitud para {animal_name} en {shelter_name} lleva {days_open} días '
+            'sin respuesta. Por favor revísala aquí: {link}\n\n'
+            '— Mi Huella'
+        ),
+        'body_en': (
+            'Hi {user_name},\n\n'
+            'The application for {animal_name} at {shelter_name} has been pending for '
+            '{days_open} days. Please review it here: {link}\n\n'
+            '— Mi Huella'
+        ),
+    },
     'adoption_submitted': {
         'subject_es': 'Nueva solicitud de adopción para {animal_name}',
         'subject_en': 'New adoption application for {animal_name}',
@@ -220,6 +292,74 @@ TEMPLATES = {
             '— Mi Huella'
         ),
     },
+    'campaign_request_submitted': {
+        'subject_es': 'Nueva solicitud de campaña: {campaign_title}',
+        'subject_en': 'New campaign request: {campaign_title}',
+        'body_es': (
+            'Hola,\n\n'
+            'El refugio {shelter_name} solicitó la aprobación de la campaña "{campaign_title}".\n'
+            'Revisa la solicitud en el panel de web manager.\n\n'
+            '— Mi Huella'
+        ),
+        'body_en': (
+            'Hi,\n\n'
+            'Shelter {shelter_name} submitted the campaign "{campaign_title}" for approval.\n'
+            'Review it in the web manager dashboard.\n\n'
+            '— Mi Huella'
+        ),
+    },
+    'campaign_approved': {
+        'subject_es': 'Tu solicitud de campaña fue aprobada',
+        'subject_en': 'Your campaign request was approved',
+        'body_es': (
+            'Hola,\n\n'
+            'La campaña "{campaign_title}" de {shelter_name} fue aprobada.\n'
+            'Ya puedes activarla desde tu panel.\n\n'
+            '— Mi Huella'
+        ),
+        'body_en': (
+            'Hi,\n\n'
+            'The campaign "{campaign_title}" by {shelter_name} was approved.\n'
+            'You can now activate it from your dashboard.\n\n'
+            '— Mi Huella'
+        ),
+    },
+    'campaign_rejected': {
+        'subject_es': 'Tu solicitud de campaña fue rechazada',
+        'subject_en': 'Your campaign request was rejected',
+        'body_es': (
+            'Hola,\n\n'
+            'La campaña "{campaign_title}" de {shelter_name} fue rechazada.\n'
+            'Motivo: {reason}\n\n'
+            'Edita la campaña y reenvíala para una nueva revisión.\n\n'
+            '— Mi Huella'
+        ),
+        'body_en': (
+            'Hi,\n\n'
+            'The campaign "{campaign_title}" by {shelter_name} was rejected.\n'
+            'Reason: {reason}\n\n'
+            'Edit the campaign and resubmit for review.\n\n'
+            '— Mi Huella'
+        ),
+    },
+    'campaign_new_message': {
+        'subject_es': 'Nuevo mensaje en la campaña {campaign_title}',
+        'subject_en': 'New message on campaign {campaign_title}',
+        'body_es': (
+            'Hola,\n\n'
+            '{author_name} escribió en la campaña "{campaign_title}":\n\n'
+            '"{body_preview}"\n\n'
+            'Responde desde el panel de la campaña.\n\n'
+            '— Mi Huella'
+        ),
+        'body_en': (
+            'Hi,\n\n'
+            '{author_name} wrote on campaign "{campaign_title}":\n\n'
+            '"{body_preview}"\n\n'
+            'Reply from the campaign panel.\n\n'
+            '— Mi Huella'
+        ),
+    },
 }
 
 
@@ -245,6 +385,9 @@ def render_template(event_key: str, locale: str, context: dict) -> tuple[str, st
         'amount': '0',
         'link': '',
         'status': '',
+        'reason': '',
+        'author_name': '',
+        'body_preview': '',
     }
     safe_context.update(context)
 

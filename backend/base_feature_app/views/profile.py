@@ -15,6 +15,7 @@ from django_attachments.models import Attachment
 from base_feature_app.models import (
     AdoptionApplication,
     Animal,
+    Campaign,
     Donation,
     Shelter,
     Sponsorship,
@@ -249,15 +250,43 @@ def _get_profile(request):
                 'website': shelter.website,
                 'verification_status': shelter.verification_status,
             }
+            data['shelter_stats'] = _shelter_stats(shelter)
+
+    elif user.role == User.Role.WEB_MANAGER:
+        data['shelter_stats'] = _shelter_stats()
 
     elif user.role == User.Role.ADMIN:
         data['admin_stats'] = {
             'total_users': User.objects.count(),
             'total_shelters': Shelter.objects.count(),
             'total_animals': Animal.objects.count(),
+            'pending_verifications': Shelter.objects.filter(
+                verification_status=Shelter.VerificationStatus.PENDING,
+            ).count(),
         }
 
     return Response(data)
+
+
+def _shelter_stats(shelter=None):
+    animals = Animal.objects.filter(archived_at__isnull=True)
+    apps = AdoptionApplication.objects.filter(
+        status=AdoptionApplication.Status.SUBMITTED,
+        archived_at__isnull=True,
+    )
+    campaigns = Campaign.objects.filter(
+        status=Campaign.Status.ACTIVE,
+        archived_at__isnull=True,
+    )
+    if shelter is not None:
+        animals = animals.filter(shelter=shelter)
+        apps = apps.filter(animal__shelter=shelter)
+        campaigns = campaigns.filter(shelter=shelter)
+    return {
+        'animals_count': animals.count(),
+        'pending_applications': apps.count(),
+        'active_campaigns': campaigns.count(),
+    }
 
 
 def _patch_profile(request):

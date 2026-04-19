@@ -6,8 +6,8 @@ Use this document to understand each flow's steps, branching conditions, role re
 
 > **Flow IDs in this document match `e2e/flow-definitions.json` and `e2e/helpers/flow-tags.ts` exactly.**
 
-**Version:** 5.0.0
-**Last Updated:** 2026-03-31
+**Version:** 5.4.0
+**Last Updated:** 2026-04-19
 
 ---
 
@@ -32,7 +32,10 @@ Use this document to understand each flow's steps, branching conditions, role re
 17. [Blog Module](#blog-module)
 18. [Blog Admin Module](#blog-admin-module)
 19. [Volunteer Module](#volunteer-module)
-20. [Cross-Reference](#cross-reference)
+20. [Veterinarian Module](#veterinarian-module)
+21. [Web Manager Module](#web-manager-module)
+22. [Manual Module](#manual-module)
+23. [Cross-Reference](#cross-reference)
 
 ---
 
@@ -46,6 +49,7 @@ Use this document to understand each flow's steps, branching conditions, role re
 | `home-to-animals` | Navigate from home to animals | home | P2 | shared | `/` → `/animals` |
 | `home-to-shelters` | Navigate from home to shelters | home | P2 | shared | `/` → `/shelters` |
 | `home-to-campaigns` | Navigate from home to campaigns | home | P3 | shared | `/` → `/campaigns` |
+| `auth-admin-token-handoff` | Admin token handoff redirect | auth | P3 | admin | `/admin-login` |
 | `auth-sign-in-form` | Sign-in form display and interaction | auth | P1 | guest | `/sign-in` |
 | `auth-login-invalid` | Login with invalid credentials | auth | P1 | guest | `/sign-in` |
 | `auth-sign-up-form` | Sign-up form display and validation | auth | P1 | guest | `/sign-up` |
@@ -76,7 +80,9 @@ Use this document to understand each flow's steps, branching conditions, role re
 | `favorite-list` | View favorites list | favorite | P2 | adopter | `/favorites` |
 | `adopter-intent-create` | Create adopter intent | adopter-intent | P3 | adopter | `/my-intent` |
 | `adopter-intent-browse` | Browse adopter intents | adopter-intent | P3 | shared | `/looking-to-adopt` |
-| `adopter-profile` | User profile management | adopter | P2 | adopter | `/my-profile` |
+| `adopter-profile` | Adopter profile view | adopter | P2 | adopter | `/my-profile` |
+| `shelter-admin-profile` | Shelter admin profile view | shelter-panel | P2 | shelter_admin | `/my-profile` |
+| `admin-profile` | Admin profile view | admin | P2 | admin | `/my-profile` |
 | `shelter-panel-dashboard` | Shelter dashboard | shelter-panel | P1 | shelter_admin | `/shelter/dashboard` |
 | `shelter-panel-animals` | Shelter manage animals | shelter-panel | P1 | shelter_admin | `/shelter/animals` |
 | `shelter-panel-campaigns` | Shelter manage campaigns | shelter-panel | P2 | shelter_admin | `/shelter/campaigns` |
@@ -124,6 +130,19 @@ Use this document to understand each flow's steps, branching conditions, role re
 | `profile-edit` | Edit user profile | adopter | P2 | adopter | `/my-profile/edit` |
 | `favorites-compare` | Compare favorited animals | favorite | P3 | adopter | `/favorites` |
 | `favorite-note-edit` | Edit favorite animal note | favorite | P3 | adopter | `/favorites` |
+| `vet-follow-ups-list` | Veterinarian follow-ups list | veterinarian | P2 | veterinarian | `/veterinarian/follow-ups` |
+| `vet-follow-up-detail` | Veterinarian follow-up detail + entry | veterinarian | P2 | veterinarian | `/veterinarian/follow-ups/[id]` |
+| `web-manager-shelters` | Web manager shelter list | web-manager | P2 | web_manager | `/web-manager/shelters` |
+| `web-manager-shelter-detail` | Web manager shelter detail | web-manager | P2 | web_manager | `/web-manager/shelters/[id]` |
+| `web-manager-applications` | Web manager applications board | web-manager | P2 | web_manager | `/web-manager/applications` |
+| `adoption-application-history` | Adoption application clinical history | adoption | P3 | adopter | `/my-applications/[id]/history` |
+| `shelter-panel-campaign-detail` | Shelter campaign detail and edit | shelter-panel | P2 | shelter_admin | `/shelter/campaigns/[id]` |
+| `shelter-panel-campaign-create` | Shelter create new campaign | shelter-panel | P2 | shelter_admin | `/shelter/campaigns/nueva` |
+| `web-manager-campaigns` | Web manager campaigns list | web-manager | P2 | web_manager, admin | `/web-manager/campaigns` |
+| `web-manager-campaign-detail` | Web manager campaign approve/reject | web-manager | P2 | web_manager, admin | `/web-manager/campaigns/[id]` |
+| `web-manager-campaign-create` | Web manager create campaign | web-manager | P2 | web_manager, admin | `/web-manager/campaigns/new` |
+| `manual-browse` | Interactive manual page load | manual | P2 | web_manager, admin | `/manual` |
+| `manual-search` | Manual search and process navigation | manual | P2 | web_manager, admin | `/manual` |
 
 ---
 
@@ -243,6 +262,34 @@ Use this document to understand each flow's steps, branching conditions, role re
 ---
 
 ## Auth Module
+
+### auth-admin-token-handoff
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P3 |
+| **Roles** | admin |
+| **Frontend route** | `/admin-login` |
+
+**Preconditions:** Caller (e.g. Django admin redirect or a back-channel link) supplies `access`, `refresh`, and optionally `redirect` as URL query params.
+
+**Steps:**
+
+1. Browser navigates to `/admin-login?access=<token>&refresh=<token>&redirect=<path>`.
+2. Page shows "Iniciando sesión..." loading state.
+3. Frontend reads `access` and `refresh` from query params.
+4. Tokens are written to cookies via `setTokens({ access, refresh })`.
+5. Auth store is synced via `useAuthStore.getState().syncFromCookies()`.
+6. Browser is redirected to `redirect` param value, or `/` if absent.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| `access` or `refresh` missing from URL | Redirect to `/sign-in` immediately |
+| `redirect` param absent | Redirect to `/` |
+
+---
 
 ### auth-sign-in-form
 
@@ -1255,18 +1302,82 @@ Use this document to understand each flow's steps, branching conditions, role re
 |-------|-------|
 | **Priority** | P2 |
 | **Roles** | adopter |
-| **Frontend route** | `/mi-perfil` |
-| **API endpoints** | `GET /api/auth/validate_token/`, `PATCH /api/auth/update_profile/` |
+| **Frontend route** | `/my-profile` |
+| **API endpoints** | `GET /api/user/profile-stats/`, `GET /api/user/activity/` |
 
-**Preconditions:** User is authenticated.
+**Preconditions:** User is authenticated as `adopter`.
 
 **Steps:**
 
-1. User navigates to `/mi-perfil`.
-2. Page loads current user info from auth store.
-3. Form displays: first name, last name, phone, city.
-4. User edits fields and submits.
-5. Profile updates and success message shown.
+1. User navigates to `/my-profile`.
+2. Page reads user from auth store; shows loading skeleton until user is available.
+3. Left column: profile card (name, role badge, member-since), completeness bar, and activity timeline.
+4. Right column: adopter activity cards (applications, donations, sponsorships, favorites, intent, etc.).
+5. Banner shown if `shelter_invites.pending_count > 0`.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| No stats loaded | Activity cards show zero/empty states |
+| `adopter_intent` present | Completeness reaches 100% |
+| Pending shelter invites | Invite banner rendered above cards |
+
+---
+
+### shelter-admin-profile
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | shelter_admin |
+| **Frontend route** | `/my-profile` |
+| **API endpoints** | `GET /api/user/profile/` (returns `shelter`, `shelter_stats`) |
+
+**Preconditions:** User is authenticated as `shelter_admin`.
+
+**Steps:**
+
+1. User navigates to `/my-profile`.
+2. Page reads role from auth store; calls `GET /api/user/profile/` for shelter data.
+3. Left column: profile card, completeness bar (name 30 + email 30 + phone 40), pending-applications widget.
+4. Right column: `ShelterAdminProfileSection` with shelter details and quick actions.
+5. Adopter-only cards (applications, donations, favorites) are NOT rendered.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| `pending_applications > 0` | Widget shows count with link to `/shelter/applications` |
+| `pending_applications === 0` | Widget shows "No hay solicitudes pendientes" |
+
+---
+
+### admin-profile
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | admin |
+| **Frontend route** | `/my-profile` |
+| **API endpoints** | `GET /api/user/profile/` (returns `admin_stats`) |
+
+**Preconditions:** User is authenticated as `admin`.
+
+**Steps:**
+
+1. User navigates to `/my-profile`.
+2. Page reads role; calls `GET /api/user/profile/` for admin stats.
+3. Left column: profile card, completeness bar (name 30 + email 30 + phone 40), moderation-queue widget.
+4. Right column: `AdminProfileSection` with platform stats and quick actions.
+5. Adopter-only cards and activity timeline are NOT rendered.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| `pending_verifications > 0` | Widget shows count with link to `/admin/dashboard` |
+| `pending_verifications === 0` | Widget shows "No hay refugios pendientes de verificación" |
 
 ---
 
@@ -1496,6 +1607,67 @@ Use this document to understand each flow's steps, branching conditions, role re
 5. Frontend sends `POST /api/updates/create/` with form data.
 6. Backend creates update post (HTTP 201).
 7. Redirect to `/refugio/updates`.
+
+---
+
+### shelter-panel-campaign-detail
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | shelter_admin |
+| **Frontend route** | `/refugio/campanas/[id]` |
+| **API endpoints** | `GET /api/campaigns/<id>/`, `PATCH /api/campaigns/<id>/update/`, `POST /api/campaigns/<id>/submit-for-approval/` |
+
+**Preconditions:** User is authenticated as shelter_admin and owns the campaign.
+
+**Steps:**
+
+1. Shelter admin navigates to `/refugio/campanas/[id]`.
+2. Page loads campaign info: title, goal, approval status badge.
+3. If `approval_status` is `pending` or `rejected`, an **Edit** button appears.
+4. Admin clicks **Edit** → inline form renders with title, description, goal fields.
+5. Admin saves changes → `PATCH /api/campaigns/<id>/update/` sent; editing mode exits.
+6. If campaign was `rejected`, a **Reenviar a revisión** button also appears.
+7. Admin clicks **Reenviar** → `POST /api/campaigns/<id>/submit-for-approval/` sent; status updates.
+8. `CampaignMessageThread` renders below the detail section showing back-and-forth with the web manager.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| `approval_status = approved` | Edit and Reenviar buttons hidden |
+| `approval_status = rejected` | Both Edit and Reenviar visible |
+| Save fails | Error surfaced; edit form stays open |
+
+---
+
+### shelter-panel-campaign-create
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | shelter_admin |
+| **Frontend route** | `/refugio/campanas/nueva` |
+| **API endpoints** | `GET /api/shelters/?owner=me`, `POST /api/campaigns/create/` |
+
+**Preconditions:** User is authenticated as shelter_admin and owns a shelter.
+
+**Steps:**
+
+1. Shelter admin navigates to `/refugio/campanas/nueva`.
+2. Page auto-fetches the admin's shelter ID via `GET /api/shelters/?owner=me`.
+3. Form renders: Title (ES), Title (EN, optional), Description (ES), Description (EN, optional), Goal (COP).
+4. Admin fills required fields (title and goal) and clicks **Enviar para revisión**.
+5. Frontend sends `POST /api/campaigns/create/` with `{ shelter, title_es, title_en, description_es, description_en, goal_amount, status: 'draft' }`.
+6. On success → redirect to `/refugio/campanas/[newId]`.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| Title or goal missing | Client validation error; no API call |
+| No shelter found | Error: "No encontramos tu refugio" |
 
 ---
 
@@ -1999,7 +2171,7 @@ Use this document to understand each flow's steps, branching conditions, role re
 
 1. User navigates to `/my-profile` and clicks **Edit Profile** button.
 2. Browser navigates to `/my-profile/edit`.
-3. Form loads with current profile data (name, phone, city, bio, avatar).
+3. Form loads with current profile data (name, phone, city); role-specific sections rendered for shelter_admin and admin. Avatar upload is deferred (Phase 13b).
 4. User modifies fields.
 5. User clicks **Save**.
 6. Frontend sends `PATCH /api/user/profile/` with updated fields.
@@ -2118,6 +2290,339 @@ Use this document to understand each flow's steps, branching conditions, role re
 
 - If note is empty → note icon appears in muted style.
 - If note has content → note icon appears in teal with truncated preview.
+
+---
+
+### adoption-application-history
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P3 |
+| **Roles** | adopter |
+| **Frontend route** | `/my-applications/[id]/history` |
+| **API endpoints** | `GET /api/adoptions/<id>/`, `GET /api/animals/<pk>/clinical-history/` |
+
+**Preconditions:** User is authenticated with `adopter` role. Adoption application exists for the user.
+
+**Steps:**
+
+1. User navigates to `/my-applications`.
+2. User clicks a specific application card to open `/my-applications/[id]/history`.
+3. Page fetches adoption application details from `GET /api/adoptions/<id>/`.
+4. Page heading shows the animal's name.
+5. Page fetches clinical history from `GET /api/animals/<pk>/clinical-history/`.
+6. `ClinicalHistoryTimeline` renders each entry with title, type badge, date, and body in the active locale.
+7. If no entries, shows "No hay entradas clínicas registradas." empty state.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| No clinical entries | Empty state text shown |
+| API error | Page renders empty silently |
+| Not authenticated | Redirected to `/sign-in` via `useRequireAuth` |
+
+---
+
+## Veterinarian Module
+
+### vet-follow-ups-list
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | veterinarian |
+| **Frontend route** | `/veterinarian/follow-ups` |
+| **API endpoints** | `GET /api/follow-ups/` |
+
+**Preconditions:** User is authenticated with `role=veterinarian`. At least one follow-up is assigned to them.
+
+**Steps:**
+
+1. User navigates to `/veterinarian/follow-ups`.
+2. Layout gate checks `role=veterinarian`; non-vets are redirected.
+3. Page fetches assigned follow-ups from `GET /api/follow-ups/`.
+4. Each card shows animal name, scheduled date, adopter name, and status badge (pending/in_progress/completed/overdue).
+5. User clicks a card to navigate to `/veterinarian/follow-ups/[id]`.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| No assigned follow-ups | Empty state shown |
+| Role ≠ veterinarian | Redirect to `/` |
+
+---
+
+### vet-follow-up-detail
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | veterinarian |
+| **Frontend route** | `/veterinarian/follow-ups/[id]` |
+| **API endpoints** | `GET /api/follow-ups/<id>/`, `POST /api/animals/<pk>/clinical-history/`, `PATCH /api/follow-ups/<id>/complete/` |
+
+**Preconditions:** User is authenticated with `role=veterinarian`. Follow-up is assigned to them.
+
+**Steps:**
+
+1. User navigates to `/veterinarian/follow-ups/[id]`.
+2. Page fetches follow-up detail from `GET /api/follow-ups/<id>/` (includes embedded `clinical_entries`).
+3. Header shows animal name, scheduled date, and current status.
+4. **Mark complete** button visible when `status !== 'completed'`.
+5. `ClinicalHistoryTimeline` renders existing clinical entries.
+6. `ClinicalEntryForm` is rendered below the timeline.
+7. User fills the form (title, entry type, body_es, body_en) and clicks **Guardar entrada**.
+8. Frontend sends `POST /api/animals/<pk>/clinical-history/` with `{ follow_up: id, ... }`.
+9. New entry appears at the top of the timeline.
+10. User optionally clicks **Mark complete** → `PATCH /api/follow-ups/<id>/complete/` is sent.
+11. Status updates to `completed`; the Mark complete button disappears.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| Follow-up already `completed` | Mark complete button hidden |
+| API error on entry save | Error remains in form; store's `addEntry` propagates the rejection |
+
+---
+
+## Web Manager Module
+
+### web-manager-shelters
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | web_manager, admin |
+| **Frontend route** | `/web-manager/shelters` |
+| **API endpoints** | `GET /api/admin/shelters/all/` |
+
+**Preconditions:** User is authenticated with `role=web_manager` or `admin`.
+
+**Steps:**
+
+1. User navigates to `/web-manager/shelters`.
+2. Layout gate permits only `web_manager` and `admin` roles.
+3. Page fetches shelters from `GET /api/admin/shelters/all/` with optional `verification_status` filter.
+4. Filter chips (Todos / Verificado / Pendiente / Rechazado) appear at the top.
+5. Paginated shelter cards list with name, city, verification badge.
+6. User clicks a shelter card to navigate to `/web-manager/shelters/[id]`.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| No shelters match filter | Empty state shown |
+| Role not authorized | Redirect to `/` |
+
+---
+
+### web-manager-shelter-detail
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | web_manager, admin |
+| **Frontend route** | `/web-manager/shelters/[id]` |
+| **API endpoints** | `GET /api/shelters/<id>/`, `GET /api/admin/shelters/<id>/applications/` |
+
+**Preconditions:** User is authenticated with `role=web_manager` or `admin`. Shelter exists.
+
+**Steps:**
+
+1. User navigates to `/web-manager/shelters/[id]`.
+2. Page renders two tabs: **Info** and **Applications**.
+3. **Info** tab: shelter name, city, verification status, owner email, description.
+4. User clicks **Applications** tab.
+5. `AdminApplicationsTable` renders applications scoped to this shelter from `GET /api/admin/shelters/<id>/applications/`.
+6. Each row shows applicant email, animal name, status badge, and submission date.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| No applications for shelter | Empty state shown in table |
+
+---
+
+### web-manager-applications
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | web_manager, admin |
+| **Frontend route** | `/web-manager/applications` |
+| **API endpoints** | `GET /api/admin/applications/` |
+
+**Preconditions:** User is authenticated with `role=web_manager` or `admin`.
+
+**Steps:**
+
+1. User navigates to `/web-manager/applications`.
+2. Page fetches all applications from `GET /api/admin/applications/` (paginated).
+3. Status filter chips (Todos / submitted / reviewing / approved / rejected) at top.
+4. `AdminApplicationsTable` renders all results.
+5. User clicks a status chip → query param `status` updates and table refetches.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| No applications | Empty state shown |
+| Filter applied with no matches | Empty state shown |
+
+---
+
+### web-manager-campaigns
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | web_manager, admin |
+| **Frontend route** | `/web-manager/campaigns` |
+| **API endpoints** | `GET /api/admin/campaigns/` (with `approval_status` filter) |
+
+**Preconditions:** User is authenticated with `role=web_manager` or `admin`.
+
+**Steps:**
+
+1. User navigates to `/web-manager/campaigns`.
+2. Layout gate permits only `web_manager` and `admin` roles.
+3. Page fetches campaigns from the API with `approval_status` filter (default: `pending`).
+4. Filter tabs (Pendientes / Aprobadas / Rechazadas / Todas) appear at the top.
+5. Paginated campaign cards list with title, shelter name, goal, and approval status.
+6. A **Nueva campaña** button links to `/web-manager/campaigns/new`.
+7. User clicks a campaign card to navigate to `/web-manager/campaigns/[id]`.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| No campaigns in selected tab | "No hay campañas en este estado" empty state |
+| Role not authorized | Redirect to `/` |
+
+---
+
+### web-manager-campaign-detail
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | web_manager, admin |
+| **Frontend route** | `/web-manager/campaigns/[id]` |
+| **API endpoints** | `GET /api/campaigns/<id>/`, `POST /api/admin/campaigns/<id>/approve/`, `POST /api/admin/campaigns/<id>/reject/` |
+
+**Preconditions:** User is authenticated with `role=web_manager` or `admin`. Campaign exists.
+
+**Steps:**
+
+1. User navigates to `/web-manager/campaigns/[id]`.
+2. Page fetches campaign detail; renders title, shelter name, goal, approval status badge.
+3. If `approval_status = pending`, **Aprobar** and **Rechazar** buttons are shown.
+4. User clicks **Aprobar** → `POST /api/admin/campaigns/<id>/approve/` sent; status badge updates to `approved`.
+5. Alternatively, user clicks **Rechazar** → rejection reason textarea expands.
+6. User enters reason and clicks **Confirmar rechazo** → `POST /api/admin/campaigns/<id>/reject/` sent with reason; status updates to `rejected`.
+7. `CampaignMessageThread` renders below for back-and-forth with the shelter admin.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| `approval_status` not `pending` | Approve/Reject buttons hidden |
+| Reject reason empty | Confirm button disabled |
+
+---
+
+### web-manager-campaign-create
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | web_manager, admin |
+| **Frontend route** | `/web-manager/campaigns/new` |
+| **API endpoints** | `GET /api/admin/shelters/all/`, `POST /api/campaigns/create/` |
+
+**Preconditions:** User is authenticated with `role=web_manager` or `admin`.
+
+**Steps:**
+
+1. User navigates to `/web-manager/campaigns/new`.
+2. Page auto-fetches the full shelter list for the dropdown.
+3. Form renders: Shelter selector (required), Title ES (required), Title EN, Description ES, Description EN, Goal (COP, required).
+4. User fills required fields and clicks **Crear campaña**.
+5. Frontend sends `POST /api/campaigns/create/` with `{ shelter, title_es, title_en, ... , status: 'draft' }`.
+6. Campaigns created by web manager are auto-approved.
+7. On success → redirect to `/web-manager/campaigns/[newId]`.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| Shelter, title, or goal missing | Client validation error; no API call |
+
+---
+
+## Manual Module
+
+### manual-browse
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | web_manager, admin |
+| **Frontend route** | `/manual` |
+| **API endpoints** | None (static content) |
+
+**Preconditions:** User is authenticated as `web_manager`, `admin`, or `is_staff`.
+
+**Steps:**
+
+1. User navigates to `/manual`.
+2. Layout checks role via `canAccessStaffArea(user)`. Unauthenticated or unauthorized roles see `AdminAccessDenied` and are redirected to `/sign-in`.
+3. Page renders a sticky search bar (Fuse.js, Cmd/Ctrl+K shortcut) and a collapsible sidebar with 8 sections.
+4. "Rol: Web Manager" section is highlighted as "Empieza aquí".
+5. User expands a section in the sidebar and clicks a process anchor link.
+6. Page scrolls smoothly to the `ProcessCard` with that `id`; a teal ring highlights the card for 1.6 s.
+
+**Branches / error cases:**
+
+| Condition | Outcome |
+|-----------|---------|
+| Unauthenticated | `useRequireAuth` redirects to `/sign-in` |
+| Role = adopter / shelter_admin / veterinarian | `AdminAccessDenied` shown, no content |
+| Role = web_manager / admin, or `is_staff = true` | Full manual rendered |
+
+---
+
+### manual-search
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | web_manager, admin |
+| **Frontend route** | `/manual` |
+| **API endpoints** | None (client-side Fuse.js index) |
+
+**Preconditions:** Manual page is loaded as `web_manager` or `admin`.
+
+**Steps:**
+
+1. User types a query into the search input (or presses Cmd/Ctrl+K to focus it).
+2. `useManualSearch` runs Fuse.js fuzzy search over all processes (title weight 0.5, keywords 0.25, summary 0.15, steps 0.07).
+3. Dropdown appears below the input with up to 12 ranked results showing title, role badge, summary snippet, and route.
+4. User navigates with ↑/↓ keys; highlighted result changes.
+5. User presses Enter (or clicks a result): dropdown closes, page scrolls to the matching `ProcessCard`, ring highlight fires.
+6. User presses Esc: query clears and input loses focus.
+
+**Branches / error cases:**
+
+| Condition | Outcome |
+|-----------|---------|
+| Query produces no matches | "Sin resultados" / "No results" shown in dropdown |
+| Query is cleared | Dropdown disappears; `isSearching = false` |
+| Multiple rapid keystrokes | `useDeferredValue` defers re-indexing; UI stays responsive |
 
 ---
 

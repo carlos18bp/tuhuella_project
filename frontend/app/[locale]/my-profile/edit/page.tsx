@@ -8,14 +8,11 @@ import {
 import { Link } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import { useAuthStore } from '@/lib/stores/authStore'
-import { ROUTES, API_ENDPOINTS } from '@/lib/constants'
-import { api } from '@/lib/services/http'
+import { ROUTES } from '@/lib/constants'
 import ShelterAdminProfileSection from '@/components/ui/ShelterAdminProfileSection'
 import AdminProfileSection from '@/components/ui/AdminProfileSection'
-
-// ---------------------------------------------------------------------------
-// Profile completeness helpers
-// ---------------------------------------------------------------------------
+import { useRoleProfileData } from '@/lib/hooks/useRoleProfileData'
+import { calcCompleteness, formatMemberSince, getUserInitials } from '@/lib/profile'
 
 type UserData = NonNullable<ReturnType<typeof useAuthStore.getState>['user']>
 
@@ -39,20 +36,6 @@ function getCompletenessItems(
     { key: 'intent', label: t('completenessIntent'), done: hasIntent },
   ]
 }
-
-function calcCompleteness(user: UserData, hasIntent: boolean) {
-  let score = 0
-  if (user.first_name && user.last_name) score += 15
-  if (user.email) score += 15
-  if (user.phone) score += 20
-  if (user.city) score += 20
-  if (hasIntent) score += 30
-  return score
-}
-
-// ---------------------------------------------------------------------------
-// Intent status badge
-// ---------------------------------------------------------------------------
 
 function IntentStatusBadge({ status }: { status: string }) {
   const colorMap: Record<string, string> = {
@@ -93,7 +76,7 @@ export default function EditProfilePage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
-  const [roleData, setRoleData] = useState<Record<string, unknown> | null>(null)
+  const { shelter, shelterStats, adminStats } = useRoleProfileData()
 
   // Refs for focus-on-complete-now
   const firstNameRef = useRef<HTMLInputElement>(null)
@@ -122,7 +105,6 @@ export default function EditProfilePage() {
 
   useEffect(() => {
     void fetchProfileStats()
-    api.get(API_ENDPOINTS.UPDATE_PROFILE).then((r) => setRoleData(r.data)).catch(() => {})
   }, [fetchProfileStats])
 
   // Clear success message after a delay
@@ -181,17 +163,10 @@ export default function EditProfilePage() {
     )
   }
 
-  // ---------------------------------------------------------------------------
-  // Derived state
-  // ---------------------------------------------------------------------------
-
-  const initials = [user.first_name?.[0], user.last_name?.[0]]
-    .filter(Boolean)
-    .join('')
-    .toUpperCase()
+  const initials = getUserInitials(user)
 
   const hasIntent = !!profileStats?.adopter_intent
-  const completeness = calcCompleteness(user, hasIntent)
+  const completeness = calcCompleteness(user, user.role, profileStats)
   const completenessColor =
     completeness < 50 ? 'bg-red-500' : completeness < 80 ? 'bg-amber-500' : 'bg-emerald-500'
   const completenessTextColor =
@@ -202,24 +177,15 @@ export default function EditProfilePage() {
         : 'text-emerald-600 dark:text-emerald-400'
   const completenessItems = getCompletenessItems(user, hasIntent, t)
 
-  const memberSince = user.date_joined
-    ? new Date(user.date_joined).toLocaleDateString('es-CO', { month: 'long', year: 'numeric' })
-    : ''
+  const memberSince = formatMemberSince(user.date_joined)
 
   const isAdopter = user.role === 'adopter'
 
   const inputClasses =
     'w-full px-3 py-2.5 rounded-lg border border-border-primary bg-surface-primary text-sm text-text-primary focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 dark:focus:border-teal-500/60 dark:focus:ring-teal-500/20 transition-colors'
 
-  // ---------------------------------------------------------------------------
-  // Render
-  // ---------------------------------------------------------------------------
-
   return (
     <div className="mx-auto max-w-3xl px-6 py-10 min-w-0 overflow-x-hidden">
-      {/* ----------------------------------------------------------------- */}
-      {/* Section 1 — Header                                                */}
-      {/* ----------------------------------------------------------------- */}
       <div className="mb-8">
         <Link
           href={ROUTES.MY_PROFILE}
@@ -451,8 +417,8 @@ export default function EditProfilePage() {
         {/* --------------------------------------------------------------- */}
         {user.role === 'shelter_admin' && (
           <ShelterAdminProfileSection
-            shelter={(roleData as any)?.shelter ?? null}
-            stats={undefined}
+            shelter={shelter}
+            stats={shelterStats ?? undefined}
           />
         )}
 
@@ -460,9 +426,7 @@ export default function EditProfilePage() {
         {/* Admin Section                                                    */}
         {/* --------------------------------------------------------------- */}
         {user.role === 'admin' && (
-          <AdminProfileSection
-            adminStats={(roleData as any)?.admin_stats ?? undefined}
-          />
+          <AdminProfileSection adminStats={adminStats ?? undefined} />
         )}
 
         {/* --------------------------------------------------------------- */}

@@ -3,7 +3,9 @@ from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from base_feature_app.serializers.blog import (
     BlogPostCreateUpdateSerializer,
+    BlogPostListSerializer,
     _validate_content_json,
+    _get_cover_image_display,
 )
 
 # ── Sources validation ───────────────────────────────────────────────────────
@@ -84,3 +86,57 @@ def test_validate_content_json_passes_valid_structure():
         'sections': [{'heading': 'Section 1', 'content': 'Body text'}],
     })
     assert result['intro'] == 'Introduction'
+
+
+# ── _get_cover_image_display ─────────────────────────────────────────────────
+
+def test_get_cover_image_display_returns_empty_when_no_cover():
+    """Returns '' when cover_image is None and cover_image_url is empty."""
+    from unittest.mock import MagicMock
+    obj = MagicMock()
+    obj.cover_image = None
+    obj.cover_image_url = ''
+    assert _get_cover_image_display(obj) == ''
+
+
+def test_get_cover_image_display_falls_back_to_url_field():
+    """Returns cover_image_url when cover_image (Library) is None."""
+    from unittest.mock import MagicMock
+    obj = MagicMock()
+    obj.cover_image = None
+    obj.cover_image_url = 'https://unsplash.com/img.jpg'
+    assert _get_cover_image_display(obj) == 'https://unsplash.com/img.jpg'
+
+
+def test_get_cover_image_display_prefers_uploaded_file():
+    """Uploaded file URL takes priority over cover_image_url."""
+    from unittest.mock import MagicMock
+    library = MagicMock()
+    library.primary_attachment.file.url = '/media/blog/img.jpg'
+
+    obj = MagicMock()
+    obj.cover_image = library
+    obj.cover_image_url = 'https://unsplash.com/img.jpg'
+    assert _get_cover_image_display(obj) == '/media/blog/img.jpg'
+
+
+@pytest.mark.django_db
+def test_blog_list_serializer_cover_image_empty_when_no_attachment(blog_post):
+    """List serializer returns '' for cover_image when no file or URL is set."""
+    blog_post.cover_image = None
+    blog_post.cover_image_url = ''
+    blog_post.save(update_fields=['cover_image', 'cover_image_url'])
+
+    data = BlogPostListSerializer(blog_post, context={}).data
+    assert data['cover_image'] == ''
+
+
+@pytest.mark.django_db
+def test_blog_list_serializer_cover_image_resolves_url_field(blog_post):
+    """List serializer resolves cover_image from cover_image_url fallback."""
+    blog_post.cover_image = None
+    blog_post.cover_image_url = 'https://unsplash.com/photo.jpg'
+    blog_post.save(update_fields=['cover_image', 'cover_image_url'])
+
+    data = BlogPostListSerializer(blog_post, context={}).data
+    assert data['cover_image'] == 'https://unsplash.com/photo.jpg'

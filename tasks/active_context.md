@@ -1,25 +1,33 @@
 # Tuhuella — Active Context
 
-> Last updated: 2026-04-10
+> Last updated: 2026-04-19 (Phase 16)
 
 ## Current State
 
 The project is a mature animal adoption platform with complete backend and frontend implementations, extensive test coverage, and a methodology system for maintaining context.
 
 ### What's Working
-- **Backend**: 27 model classes (24 files), 41 serializers, 22 view modules, 22 URL modules, 24 admin classes, 21 management commands, 3 services
-- **Frontend**: 50 pages, 10 Zustand stores, 84 components (65 UI + 12 layout + 4 blog + 3 providers), 5 custom hooks, next-intl (en/es)
-- **Tests**: 99 backend test files, 289 frontend unit test files, 17 E2E spec files
-- **E2E**: 82 flow definitions documented across all roles and priorities
+- **Backend**: 31 model classes (28 files), 45 serializers, 27 view modules, 24 URL modules, 27 admin classes, 21 management commands, 3 services
+- **Frontend**: 64 pages, 13 Zustand stores, 93 components, 6 custom hooks, next-intl (en/es)
+- **Tests**: 99+ backend test files, 289+ frontend unit test files, 20 E2E spec files
+- **E2E**: 98 flow definitions documented across all roles and priorities
 - **Design System**: Stone palette + teal/amber/emerald accents, Inter font, glassmorphism header, dark mode
 - **Blog**: Full bilingual blog with public listing/detail, admin CRUD, calendar, JSON content, cover images, SEO
 - **Volunteer Application System**: Full apply flow with model, form, reCAPTCHA, email notification
 - **Branded Email Templates**: HTML table-based templates for all transactional emails (reset, verification, volunteer notification)
 - **Shelter Detail**: Cover image with logo overlay + Swiper gallery carousel with lightbox
 - **Campaign Evidence**: Lightbox gallery for completed campaigns + fake data seeding
+- **Adoption Form — Pets at Home**: Conditional pets block (has_pets yes/no → type checkboxes → numeric counts per type); payload reshaped to `{has_pets: bool, pets: {cats, dogs, others}}`
+- **Animal Health Section**: Disease screening catalog (dog/cat specific viruses) with tri-state results (color-coded), health pills with optional dates, bilingual medical notes, last vet checkup date
+- **Roles**: 5 roles (adopter, shelter_admin, admin, veterinarian, web_manager); helpers in `utils/shelter_access.py`
+- **Web Manager workspace**: Global applications board + shelter list + shelter detail (Info + Applications tabs); receives adoption_submitted notifications
+- **Post-Adoption Follow-Up**: Auto-created +30 days on approval; vet workspace (list + detail + clinical entry form + mark complete); adopter read-only clinical history timeline; notification events for assignment/due-soon/overdue/entry-added
 
 ### What's Pending
 - **Wompi payment integration**: Views are placeholder stubs
+- **Huey periodic tasks**: `scan_stalled_applications` + `scan_follow_ups` deferred until `--periodic` flag on `tuhuella-huey.service` is confirmed
+- **Web manager "Seguimientos" tab**: Follow-up tab on shelter detail (vet assignment dropdown) not yet wired
+- **Shelter animal create/edit UI**: Backend supports new health fields; no frontend form yet
 
 ## Recent Focus Areas
 
@@ -60,22 +68,22 @@ The project is a mature animal adoption platform with complete backend and front
 
 | Asset | Count |
 |-------|-------|
-| Backend model classes | 27 (24 files) |
-| Backend serializers | 41 |
-| Backend views | 22 |
-| Backend URL modules | 22 |
-| Backend admin classes | 24 |
+| Backend model classes | 31 (28 files) |
+| Backend serializers | 45 |
+| Backend views | 27 |
+| Backend URL modules | 24 |
+| Backend admin classes | 27 |
 | Management commands | 21 |
-| Frontend pages | 50 |
-| Zustand stores | 10 |
-| UI components | 65 |
-| Total frontend components | 84 |
-| Custom hooks | 5 |
-| Exported types | 44 |
-| Backend test files | 99 |
-| Frontend unit test files | 289 |
-| E2E spec files | 17 |
-| E2E flow definitions | 82 |
+| Frontend pages | 64 |
+| Zustand stores | 13 |
+| UI components | 69 |
+| Total frontend components | 93 |
+| Custom hooks | 6 |
+| Exported types | ~56 |
+| Backend test files | 100+ |
+| Frontend unit test files | 289+ |
+| E2E spec files | 20 |
+| E2E flow definitions | 98 |
 
 ## Recently Completed: Phase 13a — Enriched Favorites View
 
@@ -104,6 +112,91 @@ Complete overhaul of the favorites page with 14 parts implemented:
 - 36 new i18n keys (es + en)
 - 14 frontend unit tests (all passing)
 
+## Recently Completed: Phase 14 — Adoption, Health, Roles & Follow-Up (2026-04-19)
+
+Four phases shipped in one session:
+
+**Fase 1 — Adoption form pets-at-home:**
+- Custom `<fieldset>` injected inside `SECTIONS.map` via `React.Fragment` key wrapper
+- `has_pets` select → conditional checkboxes for cats/dogs/others → numeric count per checked type
+- `buildFormAnswers()` reshapes to `{has_pets: bool, pets: {cats, dogs, others}}`
+- `isPetsBlockValid()` validates at least one type with count ≥ 1 when `has_pets=yes`
+
+**Fase 2 — Animal health + disease screening:**
+- 6 new Animal fields (dewormed, dates, medical notes)
+- `AnimalDiseaseScreening` model with unique_together per animal+disease
+- `AnimalHealthSection` component with color-coded disease grid
+- N+1 fixes: `prefetch_related('disease_screenings')` in `animal_detail` view
+
+**Fase 3 — Roles + web manager:**
+- `veterinarian` + `web_manager` added to `User.Role`
+- `utils/shelter_access.py` helpers (no permission classes, per convention)
+- Global applications board + cross-shelter shelter list for web_manager
+- `adoption_submitted` dispatched to all web_managers on new application
+
+**Fase 4 — Post-adoption + vet workspace:**
+- `PostAdoptionFollowUp` OneToOneField to `AdoptionApplication`; auto-created on approval via signal
+- `ClinicalHistoryEntry` with 5 entry types, bilingual body
+- `ClinicalHistoryTimeline` shared between vet detail and adopter history pages (extracted during /simplify)
+- N+1 fix: `prefetch_related('clinical_entries')` in `follow_up_detail` view
+- 4 new notification event keys + bilingual templates
+
+**Test run post-/simplify:** Backend 12/12, Frontend 20/20 all passing.
+
+## Recently Completed: Phase 15 — Campaign Approval Workflow (2026-04-19)
+
+Full shelter-requests → web_manager-moderates → chat cycle implemented:
+
+**Backend:**
+- `Campaign` model extended: `approval_status` (pending/approved/rejected), `submitted_at`, `reviewed_by` (FK User SET_NULL), `reviewed_at`
+- New `CampaignMessage` model: persistent chat between shelter and web_manager; `is_system` flag for auto-messages on approve/reject
+- Migration 0020 with data-migration: marks all pre-existing active/completed campaigns as `approval_status=approved`
+- Public `campaign_list` now filters `approval_status=approved`
+- `campaign_create`: shelter_admin → pending; web_manager/admin → approved (bypasses workflow)
+- Added `campaign_submit` endpoint: moves rejected campaign back to pending
+- Added `campaign_messages` endpoint (GET/POST): scope-checked (shelter owner or web_manager/admin); notifies counterparty on new message
+- `campaign_admin.py`: `admin_campaigns_list` (paginated + filterable), `admin_campaign_approve`, `admin_campaign_reject`
+- Django signals: `post_save` on Campaign notifies all web_managers when `approval_status` becomes `pending`
+- 4 new notification templates: `campaign_request_submitted`, `campaign_approved`, `campaign_rejected`, `campaign_new_message`
+- 10 new backend tests (all passing)
+
+**Frontend:**
+- `CampaignMessage` type + `CampaignApprovalStatus` in `lib/types.ts`
+- New API endpoints + routes in `lib/constants.ts`
+- `campaignStore`: added `createCampaign`, `updateCampaign`, `submitForApproval`, `fetchMyCampaigns`, `fetchMessages`, `sendMessage`; state `messagesByCampaign`
+- `webManagerStore`: added `campaigns`, `campaignsMeta`, `campaignsLoading`, `fetchCampaigns`, `approveCampaign`, `rejectCampaign`
+- New pages: `web-manager/campaigns/page.tsx` (tabs: Pendientes/Aprobadas/Rechazadas/Todas), `web-manager/campaigns/[id]/page.tsx` (approve/reject with reason), `web-manager/campaigns/new/page.tsx` (direct create with shelter selector), `shelter/campaigns/[id]/page.tsx` (edit + resubmit + chat), `shelter/campaigns/nueva/page.tsx` (request form → pending)
+- `CampaignMessageThread` component: cache-aware, bubble styles by role/author, system message badges
+- `shelter/campaigns/page.tsx` updated: uses `fetchMyCampaigns`, shows approval badges, rejection banners
+
+## Recently Completed: Phase 16 — Interactive In-App Manual (2026-04-19)
+
+Role-gated manual for `web_manager` and `admin` (and `is_staff`), accessible at `/[locale]/manual`.
+
+**Architecture:**
+- `lib/manual/types.ts` — `ManualProcess`, `ManualSection`, `ManualSearchHit`, `ManualAudience`, `LocalizedText`, `LocalizedList`
+- `lib/manual/content.ts` — 8 sections, ~37 processes, fully bilingual (es/en) paired fields (mirrors Django model pattern)
+- `lib/manual/useManualSearch.ts` — Fuse.js fuzzy search hook with `useDeferredValue`, weighted keys (title 0.5 > keywords 0.25 > summary 0.15 > steps 0.07), max 12 results
+- `lib/auth/permissions.ts` — `canAccessStaffArea(user)` deduplicates role check across layout + Header
+
+**Components:**
+- `components/manual/ManualSearch.tsx` — sticky search bar, dropdown with keyboard nav (↑/↓/Enter/Esc), Cmd/Ctrl+K global shortcut, scroll-to-highlight with timer cleanup
+- `components/manual/ManualSidebar.tsx` — collapsible accordion sections, mobile toggle + desktop sticky (mirrors Sidebar.tsx pattern)
+- `components/manual/ProcessCard.tsx` — anchor card with title/badge/why/steps/route/endpoints/tips (amber callout)
+- `components/manual/RoleBadge.tsx` — 7 color-coded audience badges
+
+**Pages/Layout:**
+- `app/[locale]/manual/layout.tsx` — `useRequireAuth()` + `canAccessStaffArea(user)` → `AdminAccessDenied`
+- `app/[locale]/manual/page.tsx` — shell: sticky search + sidebar + section headers + `ProcessCard[]`
+
+**i18n:** `manual` namespace in `messages/es.json` + `en.json` (chrome only; content lives in `content.ts`)
+**Dependencies:** Added `fuse.js ^7.3.0` to `frontend/package.json`
+**Header:** Conditional "Manual" link (violet, BookOpen icon) visible only for web_manager/admin/is_staff
+
+**Tests:** 11/11 Jest tests passing across layout gate, search hook, and search component.
+
+---
+
 ## Pending: Phase 13b — Enriched My-Profile Dashboard
 (Plan documented in tasks_plan.md — waiting to implement)
 
@@ -114,6 +207,8 @@ Complete overhaul of the favorites page with 14 parts implemented:
 
 ## Next Steps
 - Implement Phase 13b (enriched my-profile dashboard)
+- Wire web-manager "Seguimientos" tab on shelter detail (vet assignment dropdown)
+- Add Huey periodic task for campaign closure automation (`ends_at` expiry + `raised_amount >= goal_amount`)
+- Add Huey periodic tasks once `--periodic` confirmed on `tuhuella-huey.service`
 - Integrate Wompi SDK when ready
-- Add tests for new volunteer application system (backend views, serializer, frontend form)
-- Add E2E flow definitions for volunteer application flow
+- Add E2E flow definitions for campaign approval flows + volunteer application + post-adoption flows

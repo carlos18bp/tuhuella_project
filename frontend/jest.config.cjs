@@ -25,6 +25,7 @@ const customJestConfig = {
     '!app/layout.tsx',
     '!app/globals.css',
     '!lib/types.ts',
+    '!lib/manual/types.ts',
   ],
   coverageProvider: 'v8',
   coverageThreshold: {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 export type AdoptionFormData = {
@@ -15,13 +15,18 @@ export type AdoptionFormData = {
   hours_alone: string;
   // Section 3: Experience
   previous_pets: string;
-  current_pets: string;
   experience: string;
+  // Section 3b: Pets at home
+  has_pets: string;
+  pets_cats: boolean;
+  pets_dogs: boolean;
+  pets_others: boolean;
+  pets_cats_count: string;
+  pets_dogs_count: string;
+  pets_others_count: string;
   // Section 4: Compatibility
   has_children: string;
   children_ages: string;
-  has_cats: string;
-  has_other_dogs: string;
   // Section 5: Commitment
   accepts_vaccination: boolean;
   accepts_sterilization: boolean;
@@ -34,9 +39,14 @@ export type AdoptionFormData = {
   motivation: string;
 };
 
+export type AdoptionFormSubmitPayload = {
+  form_answers: Record<string, unknown>;
+  notes: string;
+};
+
 interface AdoptionFormProps {
   animalName: string;
-  onSubmit: (data: { form_answers: AdoptionFormData; notes: string }) => void | Promise<void>;
+  onSubmit: (data: AdoptionFormSubmitPayload) => void | Promise<void>;
   submitting?: boolean;
   defaultValues?: Partial<AdoptionFormData>;
 }
@@ -78,7 +88,6 @@ const SECTIONS: SectionDef[] = [
     titleKey: 'sectionExperience',
     fields: [
       { key: 'previous_pets', type: 'select', optionKeys: ['none', 'dogs', 'cats', 'both', 'other'], required: true },
-      { key: 'current_pets', type: 'select', optionKeys: ['none', 'dogs', 'cats', 'both', 'other'], required: true },
       { key: 'experience', type: 'select', optionKeys: ['none', 'little', 'moderate', 'extensive'], required: true },
     ],
   },
@@ -87,8 +96,6 @@ const SECTIONS: SectionDef[] = [
     fields: [
       { key: 'has_children', type: 'select', optionKeys: ['yes', 'no'], required: true },
       { key: 'children_ages', type: 'text' },
-      { key: 'has_cats', type: 'select', optionKeys: ['yes', 'no'], required: true },
-      { key: 'has_other_dogs', type: 'select', optionKeys: ['yes', 'no'], required: true },
     ],
   },
   {
@@ -119,12 +126,16 @@ const EMPTY_FORM: AdoptionFormData = {
   has_yard: '',
   hours_alone: '',
   previous_pets: '',
-  current_pets: '',
   experience: '',
+  has_pets: '',
+  pets_cats: false,
+  pets_dogs: false,
+  pets_others: false,
+  pets_cats_count: '',
+  pets_dogs_count: '',
+  pets_others_count: '',
   has_children: '',
   children_ages: '',
-  has_cats: '',
-  has_other_dogs: '',
   accepts_vaccination: false,
   accepts_sterilization: false,
   accepts_followup: false,
@@ -144,14 +155,60 @@ export default function AdoptionForm({ animalName, onSubmit, submitting = false,
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  const isQuestionnaireComplete = SECTIONS.every((section) =>
-    section.fields.every((f) => {
-      if (!f.required) return true;
-      const val = formData[f.key];
-      if (f.type === 'checkbox') return val === true;
-      return typeof val === 'string' && val.trim() !== '';
-    })
-  );
+  const petTypes = ['cats', 'dogs', 'others'] as const;
+  type PetType = (typeof petTypes)[number];
+  const petCheckboxKey = (t: PetType) => `pets_${t}` as 'pets_cats' | 'pets_dogs' | 'pets_others';
+  const petCountKey = (t: PetType) =>
+    `pets_${t}_count` as 'pets_cats_count' | 'pets_dogs_count' | 'pets_others_count';
+
+  const isPetsBlockValid = (() => {
+    if (formData.has_pets === '') return false;
+    if (formData.has_pets === 'no') return true;
+    const anyChecked = petTypes.some((pt) => formData[petCheckboxKey(pt)]);
+    if (!anyChecked) return false;
+    return petTypes.every((pt) => {
+      if (!formData[petCheckboxKey(pt)]) return true;
+      const raw = formData[petCountKey(pt)];
+      const n = Number(raw);
+      return raw.trim() !== '' && Number.isInteger(n) && n >= 1;
+    });
+  })();
+
+  const isQuestionnaireComplete =
+    SECTIONS.every((section) =>
+      section.fields.every((f) => {
+        if (!f.required) return true;
+        const val = formData[f.key];
+        if (f.type === 'checkbox') return val === true;
+        return typeof val === 'string' && val.trim() !== '';
+      })
+    ) && isPetsBlockValid;
+
+  const buildFormAnswers = (): Record<string, unknown> => {
+    const {
+      has_pets,
+      pets_cats,
+      pets_dogs,
+      pets_others,
+      pets_cats_count,
+      pets_dogs_count,
+      pets_others_count,
+      ...rest
+    } = formData;
+    const hasPetsBool = has_pets === 'yes';
+    const toCount = (checked: boolean, raw: string) => (checked ? Number(raw) || 0 : 0);
+    return {
+      ...rest,
+      has_pets: hasPetsBool,
+      pets: hasPetsBool
+        ? {
+            cats: toCount(pets_cats, pets_cats_count),
+            dogs: toCount(pets_dogs, pets_dogs_count),
+            others: toCount(pets_others, pets_others_count),
+          }
+        : { cats: 0, dogs: 0, others: 0 },
+    };
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -163,7 +220,7 @@ export default function AdoptionForm({ animalName, onSubmit, submitting = false,
       setStep('submit');
       return;
     }
-    void onSubmit({ form_answers: formData, notes });
+    void onSubmit({ form_answers: buildFormAnswers(), notes });
   };
 
   const stepLabels: Record<FormStep, string> = {
@@ -223,7 +280,8 @@ export default function AdoptionForm({ animalName, onSubmit, submitting = false,
       {step === 'questionnaire' && (
         <div className="space-y-8">
           {SECTIONS.map((section) => (
-            <fieldset key={section.titleKey} className="space-y-4">
+            <Fragment key={section.titleKey}>
+            <fieldset className="space-y-4">
               <legend className="text-sm font-semibold text-teal-700 uppercase tracking-wide border-b border-border-tertiary pb-2 w-full">
                 {t(section.titleKey)}
               </legend>
@@ -289,6 +347,70 @@ export default function AdoptionForm({ animalName, onSubmit, submitting = false,
                 ))}
               </div>
             </fieldset>
+            {section.titleKey === 'sectionExperience' && (
+              <fieldset className="space-y-4">
+                <legend className="text-sm font-semibold text-teal-700 uppercase tracking-wide border-b border-border-tertiary pb-2 w-full">
+                  {t('sectionPetsAtHome')}
+                </legend>
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="adoption-has_pets" className="block text-sm font-medium tracking-[-0.01em] text-text-secondary">
+                      {t('fields.has_pets')}
+                      <span className="text-red-400 ml-0.5">*</span>
+                    </label>
+                    <select
+                      id="adoption-has_pets"
+                      value={formData.has_pets}
+                      onChange={(e) => updateField('has_pets', e.target.value)}
+                      className={inputClasses}
+                    >
+                      <option value="">{t('selectPlaceholder')}</option>
+                      <option value="yes">{t('options.has_pets.yes')}</option>
+                      <option value="no">{t('options.has_pets.no')}</option>
+                    </select>
+                  </div>
+                  {formData.has_pets === 'yes' && (
+                    <div className="space-y-3 rounded-xl border border-border-tertiary bg-surface-secondary/40 p-4">
+                      {petTypes.map((pt) => {
+                        const checkKey = petCheckboxKey(pt);
+                        const countKey = petCountKey(pt);
+                        return (
+                          <div key={pt} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                            <label htmlFor={`adoption-${checkKey}`} className="flex items-center gap-2.5 cursor-pointer sm:min-w-[160px]">
+                              <input
+                                id={`adoption-${checkKey}`}
+                                type="checkbox"
+                                checked={formData[checkKey]}
+                                onChange={(e) => {
+                                  updateField(checkKey, e.target.checked);
+                                  if (!e.target.checked) updateField(countKey, '');
+                                }}
+                                className="h-4 w-4 rounded border-stone-300 text-teal-600 focus:ring-teal-500"
+                              />
+                              <span className="text-sm text-text-secondary">{t(`fields.pets_${pt}`)}</span>
+                            </label>
+                            {formData[checkKey] && (
+                              <input
+                                id={`adoption-${countKey}`}
+                                aria-label={t('fields.pets_count')}
+                                type="number"
+                                inputMode="numeric"
+                                min={1}
+                                value={formData[countKey]}
+                                onChange={(e) => updateField(countKey, e.target.value)}
+                                placeholder={t('placeholders.pets_count')}
+                                className={`${inputClasses} mt-0 sm:w-32`}
+                              />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </fieldset>
+            )}
+            </Fragment>
           ))}
         </div>
       )}
@@ -299,15 +421,36 @@ export default function AdoptionForm({ animalName, onSubmit, submitting = false,
           <p className="text-sm text-text-tertiary">{t('reviewDescription')}</p>
           <div className="space-y-6">
             {SECTIONS.map((section) => (
-              <div key={section.titleKey} className="rounded-2xl border border-border-primary bg-surface-secondary/50 p-5 space-y-3">
-                <h4 className="text-xs font-semibold text-teal-600 uppercase tracking-wide">{t(section.titleKey)}</h4>
-                {section.fields.map((field) => (
-                  <div key={field.key}>
-                    <dt className="text-xs font-medium text-text-quaternary">{t(`fields.${field.key}`)}</dt>
-                    <dd className="text-sm text-text-primary mt-0.5">{getDisplayValue(field)}</dd>
+              <Fragment key={section.titleKey}>
+                <div className="rounded-2xl border border-border-primary bg-surface-secondary/50 p-5 space-y-3">
+                  <h4 className="text-xs font-semibold text-teal-600 uppercase tracking-wide">{t(section.titleKey)}</h4>
+                  {section.fields.map((field) => (
+                    <div key={field.key}>
+                      <dt className="text-xs font-medium text-text-quaternary">{t(`fields.${field.key}`)}</dt>
+                      <dd className="text-sm text-text-primary mt-0.5">{getDisplayValue(field)}</dd>
+                    </div>
+                  ))}
+                </div>
+                {section.titleKey === 'sectionExperience' && (
+                  <div className="rounded-2xl border border-border-primary bg-surface-secondary/50 p-5 space-y-3">
+                    <h4 className="text-xs font-semibold text-teal-600 uppercase tracking-wide">{t('sectionPetsAtHome')}</h4>
+                    <div>
+                      <dt className="text-xs font-medium text-text-quaternary">{t('fields.has_pets')}</dt>
+                      <dd className="text-sm text-text-primary mt-0.5">
+                        {formData.has_pets === 'yes'
+                          ? t('reviewPets', {
+                              cats: formData.pets_cats ? Number(formData.pets_cats_count) || 0 : 0,
+                              dogs: formData.pets_dogs ? Number(formData.pets_dogs_count) || 0 : 0,
+                              others: formData.pets_others ? Number(formData.pets_others_count) || 0 : 0,
+                            })
+                          : formData.has_pets === 'no'
+                            ? t('options.has_pets.no')
+                            : '—'}
+                      </dd>
+                    </div>
                   </div>
-                ))}
-              </div>
+                )}
+              </Fragment>
             ))}
           </div>
         </div>

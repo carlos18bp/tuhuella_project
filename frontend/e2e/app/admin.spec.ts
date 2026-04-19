@@ -6,6 +6,7 @@ import {
   ADMIN_MODERATION,
   ADMIN_METRICS,
   ADMIN_PAYMENTS,
+  ADMIN_PROFILE,
 } from '../helpers/flow-tags';
 import {
   mockPendingShelters,
@@ -248,5 +249,55 @@ test.describe('Admin Panel — Authenticated', () => {
     await expect(page.getByText(/ref-def-456/i)).toBeVisible();
     await expect(page.getByText(/Aprobado/i).first()).toBeVisible();
     await expect(page.getByText(/Pendiente/i).first()).toBeVisible();
+  });
+});
+
+test.describe('Admin Profile — Authenticated', () => {
+  test.describe.configure({ mode: 'serial' });
+
+  const mockAdminProfile = {
+    id: 1,
+    email: 'admin-e2e@example.com',
+    first_name: 'Admin',
+    last_name: 'Plataforma',
+    phone: '+57 301 000 0000',
+    city: 'Bogotá',
+    role: 'admin',
+    is_staff: true,
+    is_active: true,
+    date_joined: '2025-01-01T00:00:00Z',
+    admin_stats: { total_users: 42, total_shelters: 8, total_animals: 120, pending_verifications: 3 },
+  };
+
+  test('should display admin role section and NOT adopter cards', { tag: [...ADMIN_PROFILE] }, async ({ page }) => {
+    await page.route('**/user/profile/**', (route: any) => {
+      if (route.request().method() === 'GET') {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAdminProfile) });
+      }
+      return route.continue();
+    });
+
+    await loginAndNavigate(page, 'admin', '/my-profile');
+
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible({ timeout: 15_000 });
+
+    const adminSection = page.getByText(/Responsabilidades de administrador/i);
+    await expect(adminSection).toBeVisible({ timeout: 10_000 });
+
+    await expect(page.getByText(/Mis Solicitudes/i)).not.toBeVisible();
+    await expect(page.getByText(/Favoritos/i)).not.toBeVisible();
+  });
+
+  test('should display moderation-queue widget with pending count', { tag: [...ADMIN_PROFILE] }, async ({ page }) => {
+    await page.route('**/user/profile/**', (route: any) => {
+      if (route.request().method() === 'GET') {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAdminProfile) });
+      }
+      return route.continue();
+    });
+
+    await loginAndNavigate(page, 'admin', '/my-profile');
+
+    await expect(page.getByText(/3 refugios por verificar/i)).toBeVisible({ timeout: 10_000 });
   });
 });

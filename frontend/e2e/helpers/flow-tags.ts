@@ -15,6 +15,7 @@ export const HOME_TO_SHELTERS = ['@flow:home-to-shelters', '@module:home', '@pri
 export const HOME_TO_CAMPAIGNS = ['@flow:home-to-campaigns', '@module:home', '@priority:P3'];
 
 // ── Auth ──
+export const AUTH_ADMIN_TOKEN_HANDOFF = ['@flow:auth-admin-token-handoff', '@module:auth', '@priority:P3'];
 export const AUTH_SIGN_IN_FORM = ['@flow:auth-sign-in-form', '@module:auth', '@priority:P1'];
 export const AUTH_LOGIN_INVALID = ['@flow:auth-login-invalid', '@module:auth', '@priority:P1'];
 export const AUTH_SIGN_UP_FORM = ['@flow:auth-sign-up-form', '@module:auth', '@priority:P1'];
@@ -64,6 +65,8 @@ export const ADOPTER_INTENT_BROWSE = ['@flow:adopter-intent-browse', '@module:ad
 
 // ── Adopter Profile ──
 export const ADOPTER_PROFILE = ['@flow:adopter-profile', '@module:adopter', '@priority:P2'];
+export const SHELTER_ADMIN_PROFILE = ['@flow:shelter-admin-profile', '@module:shelter-panel', '@priority:P2'];
+export const ADMIN_PROFILE = ['@flow:admin-profile', '@module:admin', '@priority:P2'];
 
 // ── Public ──
 export const PUBLIC_FAQ = ['@flow:public-faq', '@module:public', '@priority:P4'];
@@ -134,6 +137,18 @@ export const PUBLIC_TERMS = ['@flow:public-terms', '@module:public', '@priority:
 export const PUBLIC_WORK_WITH_US = ['@flow:public-work-with-us', '@module:public', '@priority:P4'];
 export const PUBLIC_STRATEGIC_ALLIES = ['@flow:public-strategic-allies', '@module:public', '@priority:P4'];
 
+// ── Veterinarian ──
+export const VET_FOLLOW_UPS_LIST = ['@flow:vet-follow-ups-list', '@module:veterinarian', '@priority:P2'];
+export const VET_FOLLOW_UP_DETAIL = ['@flow:vet-follow-up-detail', '@module:veterinarian', '@priority:P2'];
+
+// ── Web Manager ──
+export const WEB_MANAGER_SHELTERS = ['@flow:web-manager-shelters', '@module:web-manager', '@priority:P2'];
+export const WEB_MANAGER_SHELTER_DETAIL = ['@flow:web-manager-shelter-detail', '@module:web-manager', '@priority:P2'];
+export const WEB_MANAGER_APPLICATIONS = ['@flow:web-manager-applications', '@module:web-manager', '@priority:P2'];
+
+// ── Adoption (application history) ──
+export const ADOPTION_APPLICATION_HISTORY = ['@flow:adoption-application-history', '@module:adoption', '@priority:P3'];
+
 // ── Volunteer ──
 export const VOLUNTEER_APPLY = ['@flow:volunteer-apply', '@module:volunteer', '@priority:P2'];
 
@@ -149,3 +164,16 @@ export const FAVORITE_NOTE_EDIT = ['@flow:favorite-note-edit', '@module:favorite
 // ── Blog Admin (delete & duplicate) ──
 export const BLOG_ADMIN_DELETE = ['@flow:blog-admin-delete', '@module:blog-admin', '@priority:P2'];
 export const BLOG_ADMIN_DUPLICATE = ['@flow:blog-admin-duplicate', '@module:blog-admin', '@priority:P3'];
+
+// ── Shelter Panel (campaign flows) ──
+export const SHELTER_PANEL_CAMPAIGN_DETAIL = ['@flow:shelter-panel-campaign-detail', '@module:shelter-panel', '@priority:P2'];
+export const SHELTER_PANEL_CAMPAIGN_CREATE = ['@flow:shelter-panel-campaign-create', '@module:shelter-panel', '@priority:P2'];
+
+// ── Web Manager (campaign flows) ──
+export const WEB_MANAGER_CAMPAIGNS = ['@flow:web-manager-campaigns', '@module:web-manager', '@priority:P2'];
+export const WEB_MANAGER_CAMPAIGN_DETAIL = ['@flow:web-manager-campaign-detail', '@module:web-manager', '@priority:P2'];
+export const WEB_MANAGER_CAMPAIGN_CREATE = ['@flow:web-manager-campaign-create', '@module:web-manager', '@priority:P2'];
+
+// ── Manual ──
+export const MANUAL_BROWSE = ['@flow:manual-browse', '@module:manual', '@priority:P2'];
+export const MANUAL_SEARCH = ['@flow:manual-search', '@module:manual', '@priority:P2'];

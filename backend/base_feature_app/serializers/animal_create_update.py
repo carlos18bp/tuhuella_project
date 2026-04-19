@@ -18,7 +18,10 @@ class AnimalCreateUpdateSerializer(serializers.ModelSerializer):
             'id', 'shelter', 'name', 'species', 'breed', 'age_range',
             'gender', 'size', 'description_es', 'description_en',
             'special_needs_es', 'special_needs_en', 'status',
-            'is_vaccinated', 'is_sterilized', 'weight', 'is_house_trained',
+            'is_vaccinated', 'is_sterilized', 'is_dewormed',
+            'vaccinated_at', 'sterilized_at', 'last_vet_checkup',
+            'medical_notes_es', 'medical_notes_en',
+            'weight', 'is_house_trained',
             'good_with_kids', 'good_with_dogs', 'good_with_cats',
             'energy_level', 'coat_color', 'intake_date', 'microchip_id',
         ]

@@ -97,6 +97,9 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ALLOW_CREDENTIALS = True
 
+FRONTEND_URL = os.getenv('DJANGO_FRONTEND_URL', 'http://localhost:3000').rstrip('/')
+FRONTEND_DEFAULT_LOCALE = os.getenv('DJANGO_FRONTEND_DEFAULT_LOCALE', 'es')
+
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',

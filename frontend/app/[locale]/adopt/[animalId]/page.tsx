@@ -10,6 +10,7 @@ import { useAnimalStore } from '@/lib/stores/animalStore';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth';
 import { AdoptionForm, Container } from '@/components/ui';
+import type { AdoptionFormSubmitPayload } from '@/components/ui/AdoptionForm';
 import { api } from '@/lib/services/http';
 import { API_ENDPOINTS, ROUTES } from '@/lib/constants';
 
@@ -32,7 +33,7 @@ export default function AdoptPage() {
     if (animalId) void fetchAnimal(animalId);
   }, [animalId, fetchAnimal]);
 
-  const handleSubmit = async (data: { form_answers: Record<string, string | boolean>; notes: string }) => {
+  const handleSubmit = async (data: AdoptionFormSubmitPayload) => {
     setSubmitting(true);
     setError('');
     try {

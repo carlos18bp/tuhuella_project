@@ -22,6 +22,7 @@ from base_feature_app.models import (
     ShelterMembership,
     Sponsorship,
     UpdatePost,
+    User,
 )
 
 logger = logging.getLogger(__name__)
@@ -75,6 +76,43 @@ def sponsorship_track_prev_status(sender, instance, **kwargs):
             instance._prev_status = None
     else:
         instance._prev_status = None
+
+
+@receiver(pre_save, sender=Campaign)
+def campaign_track_prev_approval(sender, instance, **kwargs):
+    if instance.pk:
+        try:
+            instance._prev_approval_status = Campaign.objects.values_list(
+                'approval_status', flat=True,
+            ).get(pk=instance.pk)
+        except Campaign.DoesNotExist:
+            instance._prev_approval_status = None
+    else:
+        instance._prev_approval_status = None
+
+
+@receiver(post_save, sender=Campaign)
+def on_campaign_save(sender, instance, created, **kwargs):
+    prev = getattr(instance, '_prev_approval_status', None)
+    is_new_pending = (created and instance.approval_status == Campaign.ApprovalStatus.PENDING)
+    became_pending = (
+        not created
+        and prev != Campaign.ApprovalStatus.PENDING
+        and instance.approval_status == Campaign.ApprovalStatus.PENDING
+    )
+    if not (is_new_pending or became_pending):
+        return
+
+    shelter = instance.shelter
+    context = {
+        'campaign_title': instance.title_es or instance.title_en,
+        'shelter_name': shelter.name if shelter else '',
+    }
+    for manager in User.objects.filter(role='web_manager'):
+        _dispatch('campaign_request_submitted', manager, {
+            **context,
+            'user_name': manager.first_name or manager.email,
+        })
 
 
 @receiver(pre_save, sender=Animal)
@@ -183,6 +221,14 @@ def on_adoption_application_save(sender, instance, created, **kwargs):
                 'shelter_name': shelter.name,
                 'link': f'/shelter/applications',
             })
+        # Notify every web_manager so they can oversee the pipeline
+        for manager in User.objects.filter(role='web_manager'):
+            _dispatch('adoption_submitted', manager, {
+                'user_name': manager.first_name or manager.email,
+                'animal_name': animal.name if animal else '',
+                'shelter_name': shelter.name if shelter else '',
+                'link': f'/web-manager/applications',
+            })
     else:
         prev = getattr(app, '_prev_status', None)
         if prev and prev != app.status:
@@ -210,13 +256,24 @@ def on_adoption_application_save(sender, instance, created, **kwargs):
             and prev != AdoptionApplication.Status.APPROVED
             and app.animal_id
         ):
+            from datetime import timedelta
             from django.utils import timezone as tz
+            from base_feature_app.models import PostAdoptionFollowUp
             animal = app.animal
             animal.status = Animal.Status.ADOPTED
             animal.adopted_by = app.user
             animal.adopted_at = tz.now()
             animal.adoption_application = app
             animal.save()
+            PostAdoptionFollowUp.objects.get_or_create(
+                adoption_application=app,
+                defaults={
+                    'animal': animal,
+                    'adopter': app.user,
+                    'scheduled_date': tz.now().date() + timedelta(days=30),
+                    'status': PostAdoptionFollowUp.Status.PENDING,
+                },
+            )
 
 
 @receiver(post_save, sender=UpdatePost)

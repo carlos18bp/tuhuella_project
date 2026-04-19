@@ -21,8 +21,10 @@ from base_feature_app.models import (
     AdopterIntent,
     AdoptionApplication,
     Animal,
+    AnimalDiseaseScreening,
     BlogPost,
     Campaign,
+    ClinicalHistoryEntry,
     Donation,
     DonationAmountOption,
     FAQItem,
@@ -31,6 +33,7 @@ from base_feature_app.models import (
     NotificationLog,
     NotificationPreference,
     Payment,
+    PostAdoptionFollowUp,
     Shelter,
     ShelterInvite,
     Sponsorship,
@@ -76,6 +79,16 @@ class AdminUserFactory(UserFactory):
     email = factory.Sequence(lambda n: f'admin{n}@example.com')
     is_staff = True
     is_superuser = True
+
+
+class VeterinarianUserFactory(UserFactory):
+    email = factory.Sequence(lambda n: f'vet{n}@example.com')
+    role = 'veterinarian'
+
+
+class WebManagerUserFactory(UserFactory):
+    email = factory.Sequence(lambda n: f'webmanager{n}@example.com')
+    role = 'web_manager'
 
 
 # ── Shelter & Animal ──────────────────────────────────────────────────────────
@@ -126,6 +139,7 @@ class CampaignFactory(factory.django.DjangoModelFactory):
     goal_amount = Decimal('500000.00')
     raised_amount = Decimal('0.00')
     status = Campaign.Status.ACTIVE
+    approval_status = Campaign.ApprovalStatus.APPROVED
     starts_at = factory.LazyFunction(timezone.now)
     ends_at = factory.LazyFunction(lambda: timezone.now() + timezone.timedelta(days=30))
 
@@ -350,3 +364,41 @@ class StrategicAllyFactory(factory.django.DjangoModelFactory):
     ally_type = StrategicAlly.AllyType.COMPANY
     is_active = True
     order = factory.Sequence(lambda n: n)
+
+
+# ── Health & Follow-Up ────────────────────────────────────────────────────────
+
+
+class AnimalDiseaseScreeningFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = AnimalDiseaseScreening
+
+    animal = factory.SubFactory(AnimalFactory)
+    disease_key = 'parvovirus'
+    result = AnimalDiseaseScreening.Result.NEGATIVE
+
+
+class PostAdoptionFollowUpFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = PostAdoptionFollowUp
+
+    adoption_application = factory.SubFactory(AdoptionApplicationFactory)
+    animal = factory.LazyAttribute(lambda o: o.adoption_application.animal)
+    adopter = factory.LazyAttribute(lambda o: o.adoption_application.user)
+    scheduled_date = factory.LazyFunction(
+        lambda: timezone.now().date() + timezone.timedelta(days=30)
+    )
+    status = PostAdoptionFollowUp.Status.PENDING
+
+
+class ClinicalHistoryEntryFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = ClinicalHistoryEntry
+
+    animal = factory.SubFactory(AnimalFactory)
+    author = factory.SubFactory(VeterinarianUserFactory)
+    entry_type = ClinicalHistoryEntry.EntryType.CHECKUP
+    title = factory.Sequence(lambda n: f'Clinical entry {n}')
+    body_es = 'Revisión general sin novedad.'
+    body_en = 'General checkup, no issues.'
+    occurred_at = factory.LazyFunction(timezone.now)

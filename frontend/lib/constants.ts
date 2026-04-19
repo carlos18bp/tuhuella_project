@@ -53,6 +53,21 @@ export const ROUTES = {
   ADMIN_PAYMENTS: '/admin/payments',
   ADMIN_METRICS: '/admin/metrics',
 
+  MANUAL: '/manual',
+
+  WEB_MANAGER_SHELTERS: '/web-manager/shelters',
+  WEB_MANAGER_SHELTER_DETAIL: (id: number | string) => `/web-manager/shelters/${id}`,
+  WEB_MANAGER_APPLICATIONS: '/web-manager/applications',
+  WEB_MANAGER_CAMPAIGNS: '/web-manager/campaigns',
+  WEB_MANAGER_CAMPAIGN_DETAIL: (id: number | string) => `/web-manager/campaigns/${id}`,
+  WEB_MANAGER_CAMPAIGN_NEW: '/web-manager/campaigns/new',
+  SHELTER_CAMPAIGN_DETAIL: (id: number | string) => `/shelter/campaigns/${id}`,
+  SHELTER_CAMPAIGN_NEW: '/shelter/campaigns/new',
+
+  VET_FOLLOW_UPS: '/veterinarian/follow-ups',
+  VET_FOLLOW_UP_DETAIL: (id: number | string) => `/veterinarian/follow-ups/${id}`,
+  MY_APPLICATION_HISTORY: (id: number | string) => `/my-applications/${id}/history`,
+
   CHECKOUT_DONATION: '/checkout/donation',
   CHECKOUT_SPONSORSHIP: '/checkout/sponsorship',
   CHECKOUT_CONFIRMATION: '/checkout/confirmation',
@@ -89,9 +104,15 @@ export const API_ENDPOINTS = {
   ADOPTION_UPDATE_STATUS: (id: number) => `/adoptions/${id}/status/`,
 
   CAMPAIGNS: '/campaigns/',
+  CAMPAIGNS_MINE: '/campaigns/mine/',
   CAMPAIGN_DETAIL: (id: number) => `/campaigns/${id}/`,
   CAMPAIGN_CREATE: '/campaigns/create/',
   CAMPAIGN_UPDATE: (id: number) => `/campaigns/${id}/update/`,
+  CAMPAIGN_SUBMIT: (id: number) => `/campaigns/${id}/submit/`,
+  CAMPAIGN_MESSAGES: (id: number) => `/campaigns/${id}/messages/`,
+  ADMIN_CAMPAIGNS: '/admin/campaigns/',
+  ADMIN_CAMPAIGN_APPROVE: (id: number) => `/admin/campaigns/${id}/approve/`,
+  ADMIN_CAMPAIGN_REJECT: (id: number) => `/admin/campaigns/${id}/reject/`,
 
   DONATIONS: '/donations/',
   DONATION_CREATE: '/donations/create/',
@@ -125,6 +146,18 @@ export const API_ENDPOINTS = {
   ADMIN_APPROVE_SHELTER: (id: number) => `/admin/shelters/approve/${id}/`,
   ADMIN_METRICS: '/admin/metrics/',
   SHELTER_METRICS: '/admin/shelter/metrics/',
+  ADMIN_APPLICATIONS: '/admin/applications/',
+  ADMIN_SHELTERS_ALL: '/admin/shelters/all/',
+  ADMIN_SHELTER_APPLICATIONS: (id: number) => `/admin/shelters/${id}/applications/`,
+  ADMIN_VETERINARIANS: '/admin/users/veterinarians/',
+
+  FOLLOW_UPS: '/follow-ups/',
+  FOLLOW_UP_DETAIL: (id: number) => `/follow-ups/${id}/`,
+  FOLLOW_UP_ASSIGN: (id: number) => `/follow-ups/${id}/assign/`,
+  FOLLOW_UP_COMPLETE: (id: number) => `/follow-ups/${id}/complete/`,
+
+  ANIMAL_CLINICAL_HISTORY: (id: number) => `/animals/${id}/clinical-history/`,
+  ANIMAL_CLINICAL_HISTORY_CREATE: (id: number) => `/animals/${id}/clinical-history/create/`,
 
   FAVORITES: '/favorites/',
   FAVORITE_TOGGLE: '/favorites/toggle/',

@@ -1,0 +1,94 @@
+import pytest
+from unittest.mock import patch, MagicMock
+
+from base_feature_app.tests.factories import UserFactory, VolunteerPositionFactory
+from base_feature_app.utils.email_utils import (
+    send_password_reset_code,
+    send_verification_code,
+    send_volunteer_application_notification,
+    send_contact_form_email,
+    TEAM_EMAIL,
+)
+
+
+@pytest.mark.django_db
+def test_send_password_reset_code_sends_email():
+    user = UserFactory(first_name='Laura')
+    with patch('base_feature_app.utils.email_utils.send_mail') as mock_send, \
+         patch('base_feature_app.utils.email_utils.render_to_string', return_value='<html/>'):
+        send_password_reset_code(user, '123456')
+    mock_send.assert_called_once()
+    call_args = mock_send.call_args
+    assert user.email in call_args.args[3]
+
+
+@pytest.mark.django_db
+def test_send_password_reset_code_returns_true_on_success():
+    user = UserFactory()
+    with patch('base_feature_app.utils.email_utils.send_mail'), \
+         patch('base_feature_app.utils.email_utils.render_to_string', return_value='<html/>'):
+        result = send_password_reset_code(user, '123456')
+    assert result is True
+
+
+@pytest.mark.django_db
+def test_send_password_reset_code_returns_false_on_smtp_error():
+    user = UserFactory()
+    with patch('base_feature_app.utils.email_utils.send_mail', side_effect=Exception('SMTP error')), \
+         patch('base_feature_app.utils.email_utils.render_to_string', return_value='<html/>'):
+        result = send_password_reset_code(user, '123456')
+    assert result is False
+
+
+def test_send_verification_code_sends_to_correct_email():
+    with patch('base_feature_app.utils.email_utils.send_mail') as mock_send, \
+         patch('base_feature_app.utils.email_utils.render_to_string', return_value='<html/>'):
+        send_verification_code('test@example.com', '654321')
+    call_args = mock_send.call_args
+    assert 'test@example.com' in call_args.args[3]
+
+
+def test_send_verification_code_returns_true_on_success():
+    with patch('base_feature_app.utils.email_utils.send_mail'), \
+         patch('base_feature_app.utils.email_utils.render_to_string', return_value='<html/>'):
+        result = send_verification_code('test@example.com', '654321')
+    assert result is True
+
+
+@pytest.mark.django_db
+def test_send_volunteer_application_notification_sends_to_team():
+    position = VolunteerPositionFactory()
+    user = UserFactory()
+    application = MagicMock()
+    application.user = user
+    application.position = position
+    application.motivation = 'I love animals'
+    with patch('base_feature_app.utils.email_utils.send_mail') as mock_send, \
+         patch('base_feature_app.utils.email_utils.render_to_string', return_value='<html/>'):
+        send_volunteer_application_notification(application)
+    call_args = mock_send.call_args
+    assert TEAM_EMAIL in call_args.args[3]
+
+
+def test_send_contact_form_email_sets_reply_to():
+    mock_msg = MagicMock()
+    with patch('base_feature_app.utils.email_utils.EmailMultiAlternatives', return_value=mock_msg) as mock_cls, \
+         patch('base_feature_app.utils.email_utils.render_to_string', return_value='<html/>'):
+        send_contact_form_email(
+            name='Pedro', email='pedro@example.com',
+            subject='Help', message='I need help',
+        )
+    call_kwargs = mock_cls.call_args.kwargs
+    assert 'pedro@example.com' in call_kwargs.get('reply_to', [])
+
+
+def test_send_contact_form_email_returns_false_on_error():
+    mock_msg = MagicMock()
+    mock_msg.send.side_effect = Exception('connection refused')
+    with patch('base_feature_app.utils.email_utils.EmailMultiAlternatives', return_value=mock_msg), \
+         patch('base_feature_app.utils.email_utils.render_to_string', return_value='<html/>'):
+        result = send_contact_form_email(
+            name='Pedro', email='pedro@example.com',
+            subject='Help', message='I need help',
+        )
+    assert result is False

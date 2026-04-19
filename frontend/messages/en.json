@@ -14,6 +14,7 @@
     "signIn": "Sign in",
     "signUp": "Sign up",
     "signOut": "Sign out",
+    "signingIn": "Signing in...",
     "donationDestinationPlatform": "Mi Huella platform",
     "faq": "Frequently asked questions",
     "faqSubtitle": "Everything you need to know"
@@ -26,6 +27,8 @@
     "favorites": "Favorites",
     "myProfile": "My Profile",
     "shelterPanel": "Shelter Panel",
+    "webManagerPanel": "Web Manager Panel",
+    "veterinarianPanel": "Veterinarian Panel",
     "admin": "Admin",
     "blog": "Blog",
     "about": "About Us",
@@ -146,7 +149,30 @@
     "share": "Share",
     "shareCopied": "Link copied!",
     "viewGrid": "Grid view",
-    "viewList": "List view"
+    "viewList": "List view",
+    "healthTitle": "Health",
+    "dewormed": "Dewormed",
+    "lastVetCheckup": "Last vet checkup",
+    "medicalNotes": "Medical notes",
+    "diseaseScreenings": "Disease screenings",
+    "noScreenings": "No screenings recorded",
+    "result": {
+      "positive": "Positive",
+      "negative": "Negative",
+      "not_tested": "Not tested"
+    },
+    "diseases": {
+      "distemper": "Distemper",
+      "parvovirus": "Parvovirus",
+      "ehrlichia": "Ehrlichia",
+      "leptospirosis": "Leptospirosis",
+      "heartworm": "Heartworm",
+      "fiv": "FIV",
+      "felv": "FeLV (feline leukemia)",
+      "panleukopenia": "Panleukopenia",
+      "fip": "FIP (feline infectious peritonitis)",
+      "calicivirus": "Calicivirus"
+    }
   },
   "shelters": {
     "title": "Verified shelters",
@@ -300,6 +326,76 @@
     "confirmDelete": "Are you sure you want to delete this update?",
     "delete": "Delete"
   },
+  "veterinarian": {
+    "accessDenied": "Access denied. Only veterinarians can access this panel.",
+    "followUpsTitle": "Assigned follow-ups",
+    "followUpsSubtitle": "Animals with post-adoption follow-ups assigned to you.",
+    "loading": "Loading...",
+    "noFollowUps": "You have no assigned follow-ups yet.",
+    "backToFollowUps": "Back to follow-ups",
+    "backToMyApplications": "Back to my applications",
+    "scheduledFor": "Scheduled for {date}",
+    "markComplete": "Mark as completed",
+    "clinicalHistoryTitle": "Clinical history",
+    "noClinicalEntries": "No clinical entries yet.",
+    "addEntryTitle": "Add clinical entry",
+    "addEntrySubmit": "Save entry",
+    "submitting": "Saving...",
+    "fieldEntryType": "Entry type",
+    "fieldTitle": "Title",
+    "fieldOccurredAt": "Date and time",
+    "fieldBodyEs": "Details (Spanish)",
+    "fieldBodyEn": "Details (English)",
+    "status": {
+      "pending": "Pending",
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "overdue": "Overdue"
+    },
+    "entryType": {
+      "checkup": "Checkup",
+      "vaccination": "Vaccination",
+      "treatment": "Treatment",
+      "observation": "Observation",
+      "incident": "Incident"
+    }
+  },
+  "webManager": {
+    "accessDenied": "Access denied. Only web managers and administrators can access this panel.",
+    "applicationsTitle": "Adoption applications",
+    "applicationsSubtitle": "Applications received by all shelters.",
+    "sheltersTitle": "Shelters",
+    "sheltersSubtitle": "Shelters registered on the platform.",
+    "backToShelters": "Back to shelters",
+    "tabInfo": "Information",
+    "tabApplications": "Applications",
+    "tabsLabel": "Shelter tabs",
+    "filterAll": "All",
+    "loading": "Loading...",
+    "noApplications": "No applications.",
+    "noShelters": "No shelters.",
+    "resultsCount": "{count} result(s)",
+    "tableAnimal": "Animal",
+    "tableShelter": "Shelter",
+    "tableApplicant": "Applicant",
+    "tableStatus": "Status",
+    "tableCreatedAt": "Received",
+    "infoOwnerEmail": "Owner email",
+    "infoCity": "City",
+    "infoDescription": "Description",
+    "status": {
+      "submitted": "Submitted",
+      "reviewing": "Reviewing",
+      "interview": "Interview",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "shelters": {
+      "pending": "Pending",
+      "verified": "Verified",
+      "rejected": "Rejected"
+    }
+  },
   "adoption": {
     "title": "Adoption application for {animalName}",
     "stepsLabel": "Form steps",
@@ -309,6 +405,7 @@
     "sectionBasicInfo": "Basic information",
     "sectionHomeContext": "Home & context",
     "sectionExperience": "Pet experience",
+    "sectionPetsAtHome": "Current pets at home",
     "sectionCompatibility": "Compatibility",
     "sectionCommitment": "Commitment",
     "sectionLogistics": "Logistics & motivation",
@@ -321,12 +418,14 @@
       "has_yard": "Do you have a yard or garden?",
       "hours_alone": "How many hours a day will the animal be alone?",
       "previous_pets": "Have you had pets before?",
-      "current_pets": "Do you currently have pets?",
       "experience": "What is your level of experience with pets?",
+      "has_pets": "Do you currently have pets at home?",
+      "pets_cats": "Cats",
+      "pets_dogs": "Dogs",
+      "pets_others": "Other animals",
+      "pets_count": "Quantity",
       "has_children": "Are there children in the home?",
       "children_ages": "Children's ages (if applicable)",
-      "has_cats": "Are there cats in the home?",
-      "has_other_dogs": "Are there other dogs in the home?",
       "accepts_vaccination": "Vaccination",
       "accepts_sterilization": "Sterilization",
       "accepts_followup": "Post-adoption follow-up",
@@ -342,7 +441,8 @@
       "city": "E.g.: New York, Miami",
       "children_ages": "E.g.: 3 and 7 years old",
       "availability_date": "E.g.: Immediately, in 2 weeks",
-      "motivation": "Tell us why you want to adopt..."
+      "motivation": "Tell us why you want to adopt...",
+      "pets_count": "E.g.: 2"
     },
     "checkboxLabels": {
       "accepts_vaccination": "I commit to keeping the animal's vaccines up to date",
@@ -370,13 +470,7 @@
         "both": "Dogs and cats",
         "other": "Other animals"
       },
-      "current_pets": {
-        "none": "None",
-        "dogs": "Yes, dog(s)",
-        "cats": "Yes, cat(s)",
-        "both": "Dogs and cats",
-        "other": "Other animals"
-      },
+      "has_pets": { "yes": "Yes", "no": "No" },
       "experience": {
         "none": "None",
         "little": "Little",
@@ -384,8 +478,6 @@
         "extensive": "Extensive"
       },
       "has_children": { "yes": "Yes", "no": "No" },
-      "has_cats": { "yes": "Yes", "no": "No" },
-      "has_other_dogs": { "yes": "Yes", "no": "No" },
       "has_transport": { "yes": "Yes", "no": "No" },
       "delivery_preference": {
         "pickup": "Pick up at the shelter",
@@ -397,6 +489,7 @@
     "yes": "Yes",
     "no": "No",
     "reviewDescription": "Review your answers before continuing:",
+    "reviewPets": "{cats} cat(s), {dogs} dog(s), {others} other(s)",
     "notesDescription": "Would you like to add any additional comments for the shelter?",
     "notesPlaceholder": "Additional notes (optional)...",
     "back": "Back",
@@ -493,7 +586,14 @@
     "campaigns": "Active Campaigns",
     "campaignsDesc": "Support open fundraising campaigns from shelters",
     "terms": "Terms & Conditions",
-    "termsDesc": "Review the terms of use of the platform"
+    "termsDesc": "Review the terms of use of the platform",
+    "shelterResponsibilities": "Shelter responsibilities",
+    "adminResponsibilities": "Admin responsibilities",
+    "shelterPendingWidget": "{count} applications awaiting your review",
+    "shelterPendingWidgetZero": "No pending applications",
+    "adminQueueWidget": "{count} shelters pending verification",
+    "adminQueueWidgetZero": "No shelters pending verification",
+    "viewAll": "View all"
   },
   "myApplications": {
     "title": "My Adoption Applications",
@@ -514,7 +614,12 @@
     "exploreAnimals": "Explore animals",
     "submittedOn": "Submitted on {date}",
     "reviewedOn": "Reviewed on {date}",
-    "featuredAnimals": "Animals waiting for you"
+    "featuredAnimals": "Animals waiting for you",
+    "history": {
+      "back": "Back to my applications",
+      "loading": "Loading...",
+      "clinicalHistoryTitle": "Clinical history"
+    }
   },
   "myDonations": {
     "title": "My Donations",
@@ -859,5 +964,37 @@
     "switchToDark": "Switch to dark mode",
     "light": "Light",
     "dark": "Dark"
+  },
+  "manual": {
+    "navLabel": "Manual",
+    "eyebrow": "Web managers and admins only",
+    "title": "Tuhuella interactive manual",
+    "subtitle": "Walk through roles, processes, and public views. Use search to jump to the process you need and the sidebar to navigate the platform.",
+    "startHere": "Start here",
+    "accessDenied": "Access denied. Only web managers and administrators can access the manual.",
+    "search": {
+      "placeholder": "Search processes, roles, routes...",
+      "clear": "Clear search",
+      "noResults": "No results. Try different keywords."
+    },
+    "sidebar": {
+      "title": "Index"
+    },
+    "card": {
+      "why": "Why it matters",
+      "steps": "How it works",
+      "route": "Route",
+      "endpoints": "Endpoints",
+      "tips": "Tips for web managers"
+    },
+    "audience": {
+      "public": "Public",
+      "adopter": "Adopter",
+      "shelter_admin": "Shelter",
+      "veterinarian": "Veterinarian",
+      "web_manager": "Web Manager",
+      "admin": "Admin",
+      "cross": "Cross-cutting"
+    }
   }
 }

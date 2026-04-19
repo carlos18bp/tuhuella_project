@@ -13,6 +13,11 @@ class Campaign(ArchivableModel):
         PAUSED = 'paused', 'Paused'
         ARCHIVED = 'archived', 'Archived'
 
+    class ApprovalStatus(models.TextChoices):
+        PENDING = 'pending', 'Pending'
+        APPROVED = 'approved', 'Approved'
+        REJECTED = 'rejected', 'Rejected'
+
     shelter = models.ForeignKey(
         'base_feature_app.Shelter',
         on_delete=models.CASCADE,
@@ -30,6 +35,21 @@ class Campaign(ArchivableModel):
         choices=Status.choices,
         default=Status.DRAFT,
     )
+    approval_status = models.CharField(
+        max_length=20,
+        choices=ApprovalStatus.choices,
+        default=ApprovalStatus.PENDING,
+        db_index=True,
+    )
+    submitted_at = models.DateTimeField(null=True, blank=True)
+    reviewed_by = models.ForeignKey(
+        'base_feature_app.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='campaigns_reviewed',
+    )
+    reviewed_at = models.DateTimeField(null=True, blank=True)
 
     cover_image = SingleImageField(
         related_name='campaign_cover',
