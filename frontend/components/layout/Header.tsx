@@ -113,7 +113,7 @@ export default function Header() {
     { label: t('myNotifications'), href: ROUTES.MY_NOTIFICATIONS, icon: <BellRing className="h-4 w-4" /> },
   ];
 
-  const notificationContent = ({ close }: { open: boolean; close: () => void }) => (
+  const notificationContent = ({ close }: { close: () => void }) => (
     <>
       <div className="flex items-center justify-between px-4 py-3 border-b border-border-tertiary">
         <span className="text-sm font-semibold text-text-primary">{tNotif('bellTitle')}</span>
@@ -156,7 +156,7 @@ export default function Header() {
     </>
   );
 
-  const accountContent = ({ close }: { open: boolean; close: () => void }) => (
+  const accountContent = ({ close }: { close: () => void }) => (
     <>
       {(user?.first_name || user?.email) && (
         <div className="px-4 pt-3 pb-2">
