@@ -177,3 +177,7 @@ export const WEB_MANAGER_CAMPAIGN_CREATE = ['@flow:web-manager-campaign-create',
 // ── Manual ──
 export const MANUAL_BROWSE = ['@flow:manual-browse', '@module:manual', '@priority:P2'];
 export const MANUAL_SEARCH = ['@flow:manual-search', '@module:manual', '@priority:P2'];
+
+// ── Profile (additional roles) ──
+export const WEB_MANAGER_PROFILE = ['@flow:web-manager-profile', '@module:web-manager', '@priority:P3'];
+export const VETERINARIAN_PROFILE = ['@flow:veterinarian-profile', '@module:veterinarian', '@priority:P3'];

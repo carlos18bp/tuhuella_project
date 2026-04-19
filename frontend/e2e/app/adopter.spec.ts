@@ -12,6 +12,7 @@ import {
   ADOPTER_PROFILE,
   PROFILE_EDIT,
   NOTIFICATION_PREFERENCES,
+  ADOPTION_APPLICATION_HISTORY,
 } from '../helpers/flow-tags';
 import {
   mockProfileStats,
@@ -538,4 +539,27 @@ test.describe('Adopter intent — authenticated', () => {
 
     await expect(page.getByRole('button', { name: /Actualizar intención/i })).toBeVisible({ timeout: 10_000 });
   });
+});
+
+test.describe('Adoption Application History', () => {
+  test(
+    'should display clinical history page for an adoption application',
+    { tag: [...ADOPTION_APPLICATION_HISTORY] },
+    async ({ page }) => {
+      await page.route('**/api/adoptions/1/**', (route: any) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ id: 1, animal: 5, animal_name: 'Luna', status: 'approved' }),
+        }),
+      );
+      await page.route('**/api/animals/5/clinical-history/**', (route: any) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
+      );
+
+      await loginAndNavigate(page, 'adopter', '/my-applications/1/history');
+
+      await expect(page.getByRole('heading', { name: /Historia clínica/i })).toBeVisible({ timeout: 15_000 });
+    },
+  );
 });

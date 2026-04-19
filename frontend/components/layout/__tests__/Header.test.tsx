@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import Header from '../Header';
@@ -50,6 +50,10 @@ const setupMock = (overrides: Record<string, unknown> = {}) => {
   mockUseAuthStore.mockImplementation((selector: (s: Record<string, unknown>) => unknown) => selector(state));
 };
 
+const openAccountMenu = async () => {
+  await userEvent.click(screen.getAllByRole('button', { name: 'Abrir menú de cuenta' })[0]);
+};
+
 describe('Header', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -65,17 +69,17 @@ describe('Header', () => {
   it('renders public navigation links', () => {
     setupMock();
     render(<Header />);
-    expect(screen.getByRole('link', { name: 'Animales' })).toHaveAttribute('href', '/animals');
-    expect(screen.getByRole('link', { name: 'Refugios' })).toHaveAttribute('href', '/shelters');
-    expect(screen.getByRole('link', { name: 'Campañas' })).toHaveAttribute('href', '/campaigns');
-    expect(screen.getByRole('link', { name: 'Busco Adoptar' })).toHaveAttribute('href', '/looking-to-adopt');
+    expect(screen.getAllByRole('link', { name: 'Animales' })[0]).toHaveAttribute('href', '/animals');
+    expect(screen.getAllByRole('link', { name: 'Refugios' })[0]).toHaveAttribute('href', '/shelters');
+    expect(screen.getAllByRole('link', { name: 'Campañas' })[0]).toHaveAttribute('href', '/campaigns');
+    expect(screen.getAllByRole('link', { name: 'Busco Adoptar' })[0]).toHaveAttribute('href', '/looking-to-adopt');
   });
 
   it('renders sign-in and sign-up links when unauthenticated', () => {
     setupMock();
     render(<Header />);
-    expect(screen.getByRole('link', { name: 'Iniciar sesión' })).toHaveAttribute('href', '/sign-in');
-    expect(screen.getByRole('link', { name: 'Registrarse' })).toHaveAttribute('href', '/sign-up');
+    expect(screen.getAllByRole('link', { name: 'Iniciar sesión' })[0]).toHaveAttribute('href', '/sign-in');
+    expect(screen.getAllByRole('link', { name: 'Registrarse' })[0]).toHaveAttribute('href', '/sign-up');
   });
 
   it('hides sign-in and sign-up links when authenticated', () => {
@@ -88,56 +92,101 @@ describe('Header', () => {
     expect(screen.queryByRole('link', { name: 'Registrarse' })).not.toBeInTheDocument();
   });
 
-  it('renders Favoritos and Mi Perfil links when authenticated', () => {
+  it('exposes Favoritos and Mi Perfil inside the account menu when authenticated', async () => {
     setupMock({
       isAuthenticated: true,
       user: { role: 'adopter' },
     });
     render(<Header />);
-    expect(screen.getByRole('link', { name: 'Favoritos' })).toHaveAttribute('href', '/favorites');
-    expect(screen.getByRole('link', { name: 'Mi Perfil' })).toHaveAttribute('href', '/my-profile');
+
+    await openAccountMenu();
+
+    expect(screen.getByRole('menuitem', { name: /Favoritos/ })).toHaveAttribute('href', '/favorites');
+    expect(screen.getByRole('menuitem', { name: /Mi Perfil/ })).toHaveAttribute('href', '/my-profile');
   });
 
-  it('renders shelter panel link for shelter_admin role', () => {
+  it('hides the role panel button for adopters', () => {
+    setupMock({
+      isAuthenticated: true,
+      user: { role: 'adopter' },
+    });
+    render(<Header />);
+    expect(screen.queryByRole('button', { name: /Panel Refugio/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Panel Web Manager/ })).not.toBeInTheDocument();
+  });
+
+  it('opens a panel dropdown with all shelter sub-sections for shelter_admin', async () => {
     setupMock({
       isAuthenticated: true,
       user: { role: 'shelter_admin' },
     });
     render(<Header />);
-    expect(screen.getByRole('link', { name: 'Panel Refugio' })).toHaveAttribute('href', '/shelter/dashboard');
+
+    const panelButton = screen.getAllByRole('button', { name: /Panel Refugio/ })[0];
+    await userEvent.click(panelButton);
+
+    expect(screen.getByRole('menuitem', { name: /Dashboard/ })).toHaveAttribute('href', '/shelter/dashboard');
+    expect(screen.getByRole('menuitem', { name: /Solicitudes/ })).toHaveAttribute('href', '/shelter/applications');
+    expect(screen.getByRole('menuitem', { name: /Ajustes/ })).toHaveAttribute('href', '/shelter/settings');
   });
 
-  it('hides shelter panel link for non-shelter users', () => {
+  it('opens a panel dropdown with web-manager sub-sections for web_manager', async () => {
     setupMock({
       isAuthenticated: true,
-      user: { role: 'adopter' },
+      user: { role: 'web_manager' },
     });
     render(<Header />);
-    expect(screen.queryByRole('link', { name: 'Panel Refugio' })).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getAllByRole('button', { name: /Panel Web Manager/ })[0]);
+
+    expect(screen.getByRole('menuitem', { name: /Solicitudes/ })).toHaveAttribute('href', '/web-manager/applications');
+    expect(screen.getByRole('menuitem', { name: /Refugios/ })).toHaveAttribute('href', '/web-manager/shelters');
+    expect(screen.getByRole('menuitem', { name: /Campañas/ })).toHaveAttribute('href', '/web-manager/campaigns');
   });
 
-  it('renders admin link for admin role', () => {
+  it('opens a panel dropdown with admin sub-sections for admin', async () => {
     setupMock({
       isAuthenticated: true,
       user: { role: 'admin' },
     });
     render(<Header />);
-    expect(screen.getByRole('link', { name: 'Admin' })).toHaveAttribute('href', '/admin/dashboard');
+
+    await userEvent.click(screen.getAllByRole('button', { name: /Admin/ })[0]);
+
+    expect(screen.getByRole('menuitem', { name: /Dashboard/ })).toHaveAttribute('href', '/admin/dashboard');
+    expect(screen.getByRole('menuitem', { name: /Aprobar refugios/ })).toHaveAttribute('href', '/admin/shelters/approve');
+    expect(screen.getByRole('menuitem', { name: /Moderación/ })).toHaveAttribute('href', '/admin/moderation');
   });
 
-  it('renders sign-out button when authenticated', () => {
+  it('renders the veterinarian panel as a direct link (single sub-section)', () => {
+    setupMock({
+      isAuthenticated: true,
+      user: { role: 'veterinarian' },
+    });
+    render(<Header />);
+    expect(screen.getAllByRole('link', { name: /Panel Veterinario/ })[0]).toHaveAttribute('href', '/veterinarian/follow-ups');
+  });
+
+  it('places the sign-out button inside the account menu and triggers signOut', async () => {
+    const mockSignOut = jest.fn();
     setupMock({
       isAuthenticated: true,
       user: { role: 'adopter' },
+      signOut: mockSignOut,
     });
     render(<Header />);
-    expect(screen.getByRole('button', { name: 'Salir' })).toBeInTheDocument();
+
+    await openAccountMenu();
+    const signOutBtn = screen.getByRole('menuitem', { name: 'Salir' });
+    await userEvent.click(signOutBtn);
+
+    expect(mockSignOut).toHaveBeenCalledTimes(1);
   });
 
   it('renders locale switcher', () => {
     setupMock();
     render(<Header />);
-    expect(screen.getByTestId('locale-switcher')).toBeInTheDocument();
+    expect(screen.getAllByTestId('locale-switcher')[0]).toBeInTheDocument();
   });
 
   it('renders mobile menu toggle button', () => {
@@ -164,42 +213,32 @@ describe('Header', () => {
 
     await userEvent.click(toggle);
     const mobileLinks = screen.getAllByRole('link', { name: 'Animales' });
-    await userEvent.click(mobileLinks[mobileLinks.length - 1]);
+    const mobileLink = mobileLinks[mobileLinks.length - 1];
+    await userEvent.click(mobileLink);
+
+    const closingPanel = document.querySelector('.animate-scale-out');
+    expect(closingPanel).not.toBeNull();
+    fireEvent.animationEnd(closingPanel!);
 
     const remainingLinks = screen.getAllByRole('link', { name: 'Animales' });
-    expect(remainingLinks).toHaveLength(1);
+    expect(remainingLinks).toHaveLength(2);
   });
 
-  it('calls signOut when sign-out button is clicked', async () => {
-    const mockSignOut = jest.fn();
-    setupMock({
-      isAuthenticated: true,
-      user: { role: 'adopter' },
-      signOut: mockSignOut,
-    });
-    render(<Header />);
-    const signOutBtn = screen.getByRole('button', { name: 'Salir' });
-
-    await userEvent.click(signOutBtn);
-
-    expect(mockSignOut).toHaveBeenCalledTimes(1);
-  });
-
-  it('shows mobile authenticated links when authenticated and menu open', async () => {
+  it('shows authenticated account links in mobile menu', async () => {
     setupMock({
       isAuthenticated: true,
       user: { role: 'adopter' },
     });
     render(<Header />);
-    const toggle = screen.getByRole('button', { name: 'Toggle menu' });
 
-    await userEvent.click(toggle);
+    await userEvent.click(screen.getByRole('button', { name: 'Toggle menu' }));
 
-    const favLinks = screen.getAllByRole('link', { name: 'Favoritos' });
-    expect(favLinks.length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByRole('link', { name: 'Favoritos' })).toHaveAttribute('href', '/favorites');
+    expect(screen.getByRole('link', { name: 'Mi Perfil' })).toHaveAttribute('href', '/my-profile');
+    expect(screen.getByRole('link', { name: 'Mis solicitudes' })).toHaveAttribute('href', '/my-applications');
   });
 
-  it('calls signOut and closes mobile menu on mobile sign-out click', async () => {
+  it('calls signOut from the mobile menu sign-out button', async () => {
     const mockSignOut = jest.fn();
     setupMock({
       isAuthenticated: true,
@@ -244,9 +283,9 @@ describe('Header', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /Nosotros/ }));
 
-    expect(screen.getByRole('link', { name: 'Quiénes Somos' })).toHaveAttribute('href', '/about');
-    expect(screen.getByRole('link', { name: 'Trabaja con Nosotros' })).toHaveAttribute('href', '/work-with-us');
-    expect(screen.getByRole('link', { name: 'Aliados Estratégicos' })).toHaveAttribute('href', '/strategic-allies');
+    expect(screen.getByRole('menuitem', { name: 'Quiénes Somos' })).toHaveAttribute('href', '/about');
+    expect(screen.getByRole('menuitem', { name: 'Trabaja con Nosotros' })).toHaveAttribute('href', '/work-with-us');
+    expect(screen.getByRole('menuitem', { name: 'Aliados Estratégicos' })).toHaveAttribute('href', '/strategic-allies');
   });
 
   it('closes about dropdown when clicking about sub-link', async () => {
@@ -254,10 +293,10 @@ describe('Header', () => {
     render(<Header />);
 
     await userEvent.click(screen.getByRole('button', { name: /Nosotros/ }));
-    expect(screen.getByRole('link', { name: 'Quiénes Somos' })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'Quiénes Somos' })).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('link', { name: 'Quiénes Somos' }));
-    expect(screen.queryByRole('link', { name: 'Trabaja con Nosotros' })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('menuitem', { name: 'Quiénes Somos' }));
+    expect(screen.queryByRole('menuitem', { name: 'Trabaja con Nosotros' })).not.toBeInTheDocument();
   });
 
   it('opens notification dropdown when bell is clicked', async () => {
@@ -275,7 +314,7 @@ describe('Header', () => {
     setupMock({ isAuthenticated: true, user: { role: 'adopter' } });
     render(<Header />);
 
-    await userEvent.click(screen.getByRole('button', { name: 'Notificaciones' }));
+    await userEvent.click(screen.getAllByRole('button', { name: 'Notificaciones' })[0]);
 
     expect(screen.getByTestId('notification-dropdown')).toBeInTheDocument();
     expect(screen.getByText('Notificaciones')).toBeInTheDocument();
@@ -296,7 +335,7 @@ describe('Header', () => {
     setupMock({ isAuthenticated: true, user: { role: 'adopter' } });
     render(<Header />);
 
-    const bellButton = screen.getByRole('button', { name: 'Notificaciones' });
+    const bellButton = screen.getAllByRole('button', { name: 'Notificaciones' })[0];
     await userEvent.click(bellButton);
     expect(screen.getByTestId('notification-dropdown')).toBeInTheDocument();
 
@@ -319,7 +358,7 @@ describe('Header', () => {
     setupMock({ isAuthenticated: true, user: { role: 'adopter' } });
     render(<Header />);
 
-    await userEvent.click(screen.getByRole('button', { name: 'Notificaciones' }));
+    await userEvent.click(screen.getAllByRole('button', { name: 'Notificaciones' })[0]);
     const markAllBtn = screen.getByRole('button', { name: /Marcar todo leído/ });
     await userEvent.click(markAllBtn);
 
@@ -340,7 +379,21 @@ describe('Header', () => {
     setupMock({ isAuthenticated: true, user: { role: 'adopter' } });
     render(<Header />);
 
-    expect(screen.getByText('99+')).toBeInTheDocument();
+    expect(screen.getAllByText('99+')).toHaveLength(3);
+  });
+
+  it('renders a mobile notification shortcut linking to /my-profile/notifications when authenticated', () => {
+    setupMock({ isAuthenticated: true, user: { role: 'adopter' } });
+    render(<Header />);
+
+    const bellLinks = screen.getAllByRole('link', { name: 'Notificaciones' });
+    expect(bellLinks[0]).toHaveAttribute('href', '/my-profile/notifications');
+  });
+
+  it('hides the mobile notification shortcut when unauthenticated', () => {
+    setupMock();
+    render(<Header />);
+    expect(screen.queryByRole('link', { name: 'Notificaciones' })).not.toBeInTheDocument();
   });
 
   it('shows no-notifications message in empty dropdown', async () => {
@@ -357,7 +410,7 @@ describe('Header', () => {
     setupMock({ isAuthenticated: true, user: { role: 'adopter' } });
     render(<Header />);
 
-    await userEvent.click(screen.getByRole('button', { name: 'Notificaciones' }));
+    await userEvent.click(screen.getAllByRole('button', { name: 'Notificaciones' })[0]);
     expect(screen.getByText('No tienes notificaciones.')).toBeInTheDocument();
   });
 });

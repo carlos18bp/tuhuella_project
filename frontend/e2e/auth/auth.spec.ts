@@ -1,6 +1,6 @@
 import { test, expect } from '../test-with-coverage';
 import { waitForPageLoad } from '../fixtures';
-import { AUTH_SIGN_IN_FORM, AUTH_SIGN_UP_FORM, AUTH_LOGIN_INVALID, AUTH_PROTECTED_REDIRECT, AUTH_FORGOT_PASSWORD_FORM, AUTH_ROLE_REDIRECT, AUTH_SIGN_OUT, AUTH_SESSION_PERSISTENCE, AUTH_GOOGLE_LOGIN } from '../helpers/flow-tags';
+import { AUTH_SIGN_IN_FORM, AUTH_SIGN_UP_FORM, AUTH_LOGIN_INVALID, AUTH_PROTECTED_REDIRECT, AUTH_FORGOT_PASSWORD_FORM, AUTH_ROLE_REDIRECT, AUTH_SIGN_OUT, AUTH_SESSION_PERSISTENCE, AUTH_GOOGLE_LOGIN, AUTH_ADMIN_TOKEN_HANDOFF } from '../helpers/flow-tags';
 
 test.describe('Authentication', () => {
   test('should navigate to sign-in page', { tag: [...AUTH_SIGN_IN_FORM] }, async ({ page }) => {
@@ -223,4 +223,16 @@ test.describe('Authentication', () => {
     await expect(page).toHaveURL(/.*sign-in/);
     expect(typeof hasGoogle).toBe('boolean');
   });
+});
+
+test.describe('Admin Token Handoff', () => {
+  test(
+    'should redirect to sign-in when admin-login is visited without token params',
+    { tag: [...AUTH_ADMIN_TOKEN_HANDOFF] },
+    async ({ page }) => {
+      await page.goto('/admin-login');
+      await page.waitForURL(/.*sign-in/, { timeout: 10_000 });
+      await expect(page).toHaveURL(/.*sign-in/);
+    },
+  );
 });

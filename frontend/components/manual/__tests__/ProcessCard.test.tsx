@@ -47,18 +47,7 @@ describe('ProcessCard', () => {
     expect(screen.getByText('/adopt')).toBeInTheDocument();
   });
 
-  it('renders endpoints when provided', () => {
-    render(
-      <ProcessCard
-        process={buildProcess({ endpoints: ['/api/animals/', '/api/adoptions/'] })}
-        locale="es"
-      />,
-    );
-    expect(screen.getByText('/api/animals/')).toBeInTheDocument();
-    expect(screen.getByText('/api/adoptions/')).toBeInTheDocument();
-  });
-
-  it('omits the route/endpoints section when neither is provided', () => {
+  it('omits the route section when it is not provided', () => {
     render(<ProcessCard process={buildProcess()} locale="es" />);
     expect(screen.queryByText('/adopt')).not.toBeInTheDocument();
   });
@@ -95,20 +84,10 @@ describe('ProcessCard', () => {
     expect(article.querySelector('span.rounded-full')).not.toBeNull();
   });
 
-  it('renders endpoints section alone when route is absent but endpoints exist', () => {
+  it('renders route section when only route is provided', () => {
     render(
       <ProcessCard
-        process={buildProcess({ endpoints: ['/api/x/'] })}
-        locale="es"
-      />,
-    );
-    expect(screen.getByText('/api/x/')).toBeInTheDocument();
-  });
-
-  it('renders route section alone when endpoints array is empty', () => {
-    render(
-      <ProcessCard
-        process={buildProcess({ route: '/only-route', endpoints: [] })}
+        process={buildProcess({ route: '/only-route' })}
         locale="es"
       />,
     );

@@ -34,7 +34,30 @@
     "about": "About Us",
     "aboutUs": "Who We Are",
     "workWithUs": "Work with Us",
-    "strategicAllies": "Strategic Allies"
+    "strategicAllies": "Strategic Allies",
+    "panel": "Panel",
+    "account": "My account",
+    "openAccountMenu": "Open account menu",
+    "openPanelMenu": "Open panel menu",
+    "myApplications": "My applications",
+    "myDonations": "My donations",
+    "mySponsorships": "My sponsorships",
+    "myNotifications": "Notifications",
+    "dashboard": "Dashboard",
+    "applications": "Applications",
+    "animalsManage": "Animals",
+    "campaignsManage": "Campaigns",
+    "donations": "Donations",
+    "updates": "Updates",
+    "settings": "Settings",
+    "approveShelters": "Approve shelters",
+    "moderation": "Moderation",
+    "payments": "Payments",
+    "metrics": "Metrics",
+    "blogAdmin": "Blog",
+    "followUps": "Follow-ups",
+    "sheltersManage": "Shelters",
+    "more": "More"
   },
   "faqPage": {
     "title": "Frequently Asked Questions",
@@ -983,9 +1006,8 @@
     "card": {
       "why": "Why it matters",
       "steps": "How it works",
-      "route": "Route",
-      "endpoints": "Endpoints",
-      "tips": "Tips for web managers"
+      "route": "Where to find it",
+      "tips": "Helpful tips"
     },
     "audience": {
       "public": "Public",

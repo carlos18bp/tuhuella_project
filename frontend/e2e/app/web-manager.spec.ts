@@ -7,6 +7,7 @@ import {
   WEB_MANAGER_SHELTERS,
   WEB_MANAGER_SHELTER_DETAIL,
   WEB_MANAGER_APPLICATIONS,
+  WEB_MANAGER_PROFILE,
 } from '../helpers/flow-tags';
 import {
   mockAdminCampaigns,
@@ -14,6 +15,8 @@ import {
   mockShelterData,
   mockCampaignMessages,
   mockAdminApplications,
+  mockProfileStats,
+  mockActivity,
 } from '../helpers/mock-data';
 
 test.describe('Web Manager — Unauthenticated (Shelters & Applications)', () => {
@@ -196,4 +199,25 @@ test.describe('Web Manager — Campaign Create', () => {
     await expect(page.getByRole('combobox')).toBeVisible({ timeout: 10_000 });
     await expect(page.getByRole('button', { name: /Crear campaña/i })).toBeVisible({ timeout: 10_000 });
   });
+});
+
+test.describe('Web Manager — Profile', () => {
+  test(
+    'should display profile page for web_manager with common profile elements',
+    { tag: [...WEB_MANAGER_PROFILE] },
+    async ({ page }) => {
+      await page.route('**/user/profile-stats/**', (route: any) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockProfileStats) }),
+      );
+      await page.route('**/user/activity/**', (route: any) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockActivity) }),
+      );
+
+      await loginAndNavigate(page, 'web_manager', '/my-profile');
+
+      const profileName = page.getByText(/Laura/i);
+      const profileHeading = page.getByRole('heading', { name: /perfil|profile/i });
+      await expect(profileName.or(profileHeading)).toBeVisible({ timeout: 15_000 });
+    },
+  );
 });

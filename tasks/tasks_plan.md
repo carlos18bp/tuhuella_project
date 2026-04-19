@@ -1,6 +1,6 @@
 # Tuhuella — Feature Task Plan
 
-> Last updated: 2026-04-19 (Phase 16 added)
+> Last updated: 2026-04-19 (Phase 16 manual rewrite)
 
 ## Status Legend
 - ✅ Done
@@ -279,26 +279,42 @@
 | i18n extraction for new campaign pages | ⏳ | Hardcoded Spanish strings acceptable for now (consistent with existing patterns) |
 | Shared CampaignForm component (shelter/nueva + web-manager/new dedup) | ⏳ | ~150-line duplication; deferred as larger refactor |
 
-## Phase 16 — Interactive In-App Manual (2026-04-19)
+## Phase 16 — Interactive In-App Manual (2026-04-19, content rewrite 2026-04-19)
 | Task | Status | Notes |
 |------|--------|-------|
-| `lib/manual/types.ts` — ManualProcess, ManualSection, ManualSearchHit types | ✅ | ManualAudience (7 values), LocalizedText, LocalizedList |
-| `lib/manual/content.ts` — 8 sections, ~37 processes, bilingual | ✅ | Sections: introduction, public-views, adopter, shelter, vet, web-manager (highlighted), admin, cross-cutting |
+| `lib/manual/types.ts` — ManualProcess, ManualSection, ManualSearchHit types | ✅ | ManualAudience (7 values), LocalizedText, LocalizedList; `endpoints` field removed in rewrite |
+| `lib/manual/content.ts` — 9 sections, ~72 processes, bilingual, non-technical | ✅ | Sections: introduction, getting-started (highlighted), public-views, adopter, shelter, vet, web-manager (highlighted), admin, cross-cutting. All jargon removed (no Django/Huey/JWT/endpoints). |
 | `lib/manual/useManualSearch.ts` — Fuse.js hook with useDeferredValue | ✅ | Weights: title 0.5, keywords 0.25, summary 0.15, steps 0.07, route 0.03; max 12 results |
 | `lib/auth/permissions.ts` — canAccessStaffArea helper | ✅ | Deduplicates role check across layout + Header |
 | `components/manual/RoleBadge.tsx` | ✅ | 7 color-coded audience badges |
-| `components/manual/ProcessCard.tsx` | ✅ | Anchor card: title/badge/why/steps/route/endpoints/tips callout |
+| `components/manual/ProcessCard.tsx` | ✅ | Anchor card: title/badge/why/steps/route/tips callout. Endpoints block removed; route section simplified to single `<section>`. |
 | `components/manual/ManualSidebar.tsx` | ✅ | Collapsible accordion, mobile toggle + desktop sticky |
 | `components/manual/ManualSearch.tsx` | ✅ | Keyboard nav, Cmd/Ctrl+K shortcut, scroll-to-highlight with timer cleanup |
 | `app/[locale]/manual/layout.tsx` — role gate | ✅ | useRequireAuth + canAccessStaffArea → AdminAccessDenied |
 | `app/[locale]/manual/page.tsx` — shell | ✅ | Sticky search + sidebar + ProcessCards |
-| `messages/{es,en}.json` — manual namespace | ✅ | Chrome only (navLabel, search.*, card.*, audience.*) |
+| `messages/{es,en}.json` — manual namespace | ✅ | card.endpoints removed; card.route → "Dónde encontrarlo" / "Where to find it"; card.tips neutral label |
 | `package.json` — fuse.js ^7.3.0 | ✅ | |
 | Header conditional "Manual" link | ✅ | Violet, BookOpen icon, web_manager/admin/is_staff only |
-| 11 Jest tests (layout gate, search hook, search component) | ✅ | All passing |
+| 33 Jest tests (layout gate, search hook, search component, ProcessCard, sidebar) | ✅ | All passing |
 | Build passes — /[locale]/manual route in output | ✅ | |
 | **Pending (optional)** | ⏳ | |
-| E2E spec `e2e/app/manual.spec.ts` | ⏳ | Login as web_manager → navigate → search → scroll |
+| E2E spec `e2e/app/manual.spec.ts` | ✅ | Basic flows covered (load, search, no-results) |
+
+## Phase 17 — Header UI/UX Overhaul + Responsive Optimization (2026-04-19)
+| Task | Status | Notes |
+|------|--------|-------|
+| `DropdownMenu` primitive (`components/ui/DropdownMenu.tsx`) | ✅ | useId SSR-safe IDs, getTriggerProps ARIA encapsulation, Escape + arrow-key nav, onOpen callback, DropdownDivider |
+| Panel dropdown per role (`buildRolePanel`) | ✅ | shelter_admin 7 items, web_manager 3, admin 6, veterinarian plain link, adopter null |
+| Avatar dropdown (`accountItems[]`) | ✅ | Mi Perfil, Favoritos, Mis solicitudes, Mis donaciones, Mis apadrinamientos, Notificaciones, Manual (staff), Cerrar sesión |
+| `UnreadBadge` local component | ✅ | Extracted from desktop + mobile bell; renders null when count ≤ 0 |
+| Mobile notification bell (`lg:hidden`) | ✅ | Link to MY_NOTIFICATIONS with UnreadBadge; shown only when authenticated |
+| Breakpoint `md:` → `lg:` (4 occurrences in Header.tsx) | ✅ | Tablets 768–1023 now get mobile drawer |
+| Hamburger touch target `p-2` → `p-2.5` | ✅ | WCAG 2.5.5 44×44 compliance |
+| Gap polish: `xl:gap-1 2xl:gap-2` public nav, `2xl:gap-3` auth side | ✅ | |
+| Mobile drawer: Panel + Mi cuenta section headings | ✅ | accountItems[] reused; role-colored panel section |
+| `messages/{es,en}.json` — new nav.* keys | ✅ | panel, account, openAccountMenu, openPanelMenu, myApplications, myDonations, mySponsorships, myNotifications, dashboard, applications, animalsManage, campaignsManage, donations, updates, settings, approveShelters, moderation, payments, metrics, blogAdmin, followUps, sheltersManage |
+| Header tests updated (27 → 29 passing) | ✅ | openAccountMenu helper, role panel tests, mobile bell tests, 99+ badge toHaveLength(2) |
+| Header.tsx 465 → 610 lines; DropdownMenu.tsx 133 lines | ✅ | TypeScript clean |
 
 ## Known Issues
 - Wompi payment SDK not integrated (placeholder only)

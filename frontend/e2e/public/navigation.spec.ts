@@ -128,6 +128,74 @@ test.describe('Navigation', () => {
   });
 });
 
+test.describe('Header Dropdowns (authenticated)', () => {
+  test.describe.configure({ mode: 'serial' });
+
+  test(
+    'should open panel dropdown for shelter_admin and show shelter sub-sections',
+    { tag: [...NAVIGATION_HEADER] },
+    async ({ page }) => {
+      await page.route('**/api/auth/validate_token/**', (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            user: { id: 2, email: 'shelter-e2e@example.com', first_name: 'Ana', last_name: 'López', role: 'shelter_admin', is_staff: false, is_active: true },
+          }),
+        }),
+      );
+      await page.route('**/api/notifications/**', (route) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ results: [], unread_count: 0 }) }),
+      );
+      await page.route('**/api/notifications/unread-count/**', (route) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ unread_count: 0 }) }),
+      );
+
+      await loginAndNavigate(page, 'shelter_admin', '/');
+      await waitForPageLoad(page);
+
+      const panelButton = page.getByRole('button', { name: /Panel Refugio/i });
+      await expect(panelButton).toBeVisible({ timeout: 10_000 });
+      await panelButton.click();
+
+      await expect(page.getByRole('menuitem', { name: /Dashboard/i })).toBeVisible();
+      await expect(page.getByRole('menuitem', { name: /Solicitudes/i })).toBeVisible();
+    },
+  );
+
+  test(
+    'should open account dropdown for adopter and show account links',
+    { tag: [...NAVIGATION_HEADER] },
+    async ({ page }) => {
+      await page.route('**/api/auth/validate_token/**', (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            user: { id: 1, email: 'adopter-e2e@example.com', first_name: 'Carlos', last_name: 'Pérez', role: 'adopter', is_staff: false, is_active: true },
+          }),
+        }),
+      );
+      await page.route('**/api/notifications/**', (route) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ results: [], unread_count: 0 }) }),
+      );
+      await page.route('**/api/notifications/unread-count/**', (route) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ unread_count: 0 }) }),
+      );
+
+      await loginAndNavigate(page, 'adopter', '/');
+      await waitForPageLoad(page);
+
+      const accountButton = page.getByRole('button', { name: /Abrir menú de cuenta/i });
+      await expect(accountButton).toBeVisible({ timeout: 10_000 });
+      await accountButton.click();
+
+      await expect(page.getByRole('menuitem', { name: /Mi Perfil/i })).toBeVisible();
+      await expect(page.getByRole('menuitem', { name: /Favoritos/i })).toBeVisible();
+    },
+  );
+});
+
 test.describe('Notification Bell (authenticated)', () => {
   test.describe.configure({ mode: 'serial' });
 

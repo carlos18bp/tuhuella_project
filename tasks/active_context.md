@@ -1,6 +1,6 @@
 # Tuhuella — Active Context
 
-> Last updated: 2026-04-19 (Phase 16)
+> Last updated: 2026-04-19 (Phase 16 — Manual Rewrite)
 
 ## Current State
 
@@ -76,14 +76,36 @@ The project is a mature animal adoption platform with complete backend and front
 | Management commands | 21 |
 | Frontend pages | 64 |
 | Zustand stores | 13 |
-| UI components | 69 |
-| Total frontend components | 93 |
+| UI components | 70 |
+| Total frontend components | 94 |
 | Custom hooks | 6 |
 | Exported types | ~56 |
 | Backend test files | 100+ |
 | Frontend unit test files | 289+ |
 | E2E spec files | 20 |
 | E2E flow definitions | 98 |
+
+## Recently Completed: Phase 17 — Header UI/UX Overhaul + Responsive Optimization (2026-04-19)
+
+**Problem**: Staff-role header was overloaded: web_manager had 8+ inline items at 768px, causing crowding. Tablets got the full desktop header despite lacking the width. No notification badge visible on mobile.
+
+**Panel Dropdown** per role (`buildRolePanel`): replaces the single deep-link with a grouped menu matching the sidebar scope:
+- `shelter_admin` → 7 items (Dashboard, Animales, Solicitudes, Campañas, Donaciones, Actualizaciones, Ajustes)
+- `web_manager` → 3 items (Solicitudes, Refugios, Campañas)
+- `admin` → 6 items (Dashboard, Aprobar refugios, Moderación, Pagos, Métricas, Blog)
+- `veterinarian` → single `<Link>` (no dropdown)
+
+**Avatar Dropdown**: collapses Mi Perfil + Favoritos + Cerrar sesión + conditional Manual into one button. `accountItems[]` array shared by desktop dropdown and mobile drawer, eliminating drift.
+
+**`DropdownMenu` primitive** (`components/ui/DropdownMenu.tsx`): extracted from 3 hand-rolled outside-click handlers. Uses `useId()` for SSR-safe IDs. Provides `getTriggerProps()` to wire ARIA at call sites. Handles Escape + arrow-key nav. Used by About, Notification bell, Panel, and Avatar dropdowns.
+
+**Responsive overhaul**: desktop breakpoint promoted from `md:` (768) to `lg:` (1024). Tablets now get the mobile drawer. Mobile bell (`<Link href={MY_NOTIFICATIONS}>` with `UnreadBadge`) added beside hamburger when authenticated. Hamburger touch target bumped from `p-2` → `p-2.5` (WCAG 44×44). Gap polish: `xl:gap-1 2xl:gap-2` on public nav, `2xl:gap-3` on auth side.
+
+**`UnreadBadge` local component**: extracted duplicated badge + 99+ ternary used by desktop and mobile bells.
+
+**Header.tsx**: 465 → 610 lines. **Tests**: 27 → 29 passing. **New file**: `components/ui/DropdownMenu.tsx` (133 lines).
+
+---
 
 ## Recently Completed: Phase 13a — Enriched Favorites View
 
@@ -168,6 +190,30 @@ Full shelter-requests → web_manager-moderates → chat cycle implemented:
 - New pages: `web-manager/campaigns/page.tsx` (tabs: Pendientes/Aprobadas/Rechazadas/Todas), `web-manager/campaigns/[id]/page.tsx` (approve/reject with reason), `web-manager/campaigns/new/page.tsx` (direct create with shelter selector), `shelter/campaigns/[id]/page.tsx` (edit + resubmit + chat), `shelter/campaigns/nueva/page.tsx` (request form → pending)
 - `CampaignMessageThread` component: cache-aware, bubble styles by role/author, system message badges
 - `shelter/campaigns/page.tsx` updated: uses `fetchMyCampaigns`, shows approval badges, rejection banners
+
+## Recently Completed: Phase 16 — Interactive In-App Manual (2026-04-19, refined 2026-04-19)
+
+### Phase 16 Refinement — Non-Technical Manual Rewrite
+
+Manual rewritten as a fully non-technical reference for operations staff (web_manager / admin / is_staff).
+
+**Removed from content.ts:** `tech-stack`, `three-services`, `cross-auth-jwt` (JWT/axios details), `cross-notifications` (NotificationLog/Huey internals), old `cross-payments` technical ficha.
+
+**`endpoints` field eliminated end-to-end:**
+- `ManualProcess.endpoints?: string[]` removed from `lib/manual/types.ts`
+- All `endpoints: [...]` entries removed from 25+ processes in `content.ts`
+- Endpoint rendering block removed from `ProcessCard.tsx`; route section simplified to single `<section>` (was 2-column grid)
+- `messages/{es,en}.json`: `manual.card.endpoints` key removed; `manual.card.route` → "Dónde encontrarlo" / "Where to find it"; `manual.card.tips` → neutral label
+
+**New section added — "Cómo empezar" (`getting-started`, highlighted):** crear cuenta, iniciar sesión, recuperar contraseña, cambiar idioma.
+
+**New processes added:** public-about, public-faq, public-contact, public-strategic-allies, public-terms, public-work-with-us, public-volunteer-apply, public-looking-to-adopt, adopter-edit-profile, adopter-notifications-inbox, adopter-notification-preferences (split from combined ficha), adopter-my-donations, adopter-my-sponsorships, shelter-dashboard, shelter-settings, shelter-edit-campaign, wm-campaign-detail, admin-login, admin-impersonate, cross-session-expired, cross-emails (user-facing), cross-payments (rewritten as user-facing), cross-bilingual, roles-overview.
+
+**Jargon purged everywhere:** no Django, DRF, Huey, Gunicorn, systemd, nginx, JWT, Wompi, AdoptionApplication, NotificationLog, PostAdoptionFollowUp, verification_status=, approval_status=, interceptor, CRUD.
+
+**Outcome:** 8 sections → 9 sections (added getting-started); ~37 processes → ~72 processes; 33/33 unit tests pass; 0 manual-related TypeScript errors.
+
+---
 
 ## Recently Completed: Phase 16 — Interactive In-App Manual (2026-04-19)
 

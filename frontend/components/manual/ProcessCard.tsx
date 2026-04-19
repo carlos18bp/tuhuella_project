@@ -45,34 +45,14 @@ export default function ProcessCard({ process, locale }: Props) {
         </ol>
       </section>
 
-      {(process.route || (process.endpoints && process.endpoints.length > 0)) && (
-        <section className="mt-4 grid gap-3 md:grid-cols-2">
-          {process.route && (
-            <div>
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-text-quaternary">
-                {k('route')}
-              </h4>
-              <code className="mt-1 inline-block rounded-md bg-surface-secondary px-2 py-1 text-xs text-text-primary">
-                {process.route}
-              </code>
-            </div>
-          )}
-          {process.endpoints && process.endpoints.length > 0 && (
-            <div>
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-text-quaternary">
-                {k('endpoints')}
-              </h4>
-              <ul className="mt-1 space-y-1">
-                {process.endpoints.map((ep) => (
-                  <li key={ep}>
-                    <code className="inline-block rounded-md bg-surface-secondary px-2 py-1 text-xs text-text-primary">
-                      {ep}
-                    </code>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+      {process.route && (
+        <section className="mt-4">
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-text-quaternary">
+            {k('route')}
+          </h4>
+          <code className="mt-1 inline-block rounded-md bg-surface-secondary px-2 py-1 text-xs text-text-primary">
+            {process.route}
+          </code>
         </section>
       )}
 

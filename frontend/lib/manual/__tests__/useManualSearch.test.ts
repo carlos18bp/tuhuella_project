@@ -18,13 +18,13 @@ describe('useManualSearch', () => {
   });
 
   it('finds a process whose keywords include a synonym', () => {
-    const { result } = renderHook(() => useManualSearch('wompi', 'es'));
+    const { result } = renderHook(() => useManualSearch('pasarela', 'es'));
     expect(result.current.results.length).toBeGreaterThan(0);
     expect(result.current.results[0].process.id).toMatch(/payment/);
   });
 
   it('exposes the owning section for a keyword-matched result', () => {
-    const { result } = renderHook(() => useManualSearch('wompi', 'es'));
+    const { result } = renderHook(() => useManualSearch('pasarela', 'es'));
     expect(result.current.results.length).toBeGreaterThan(0);
     expect(result.current.results[0].section.id).toBe('cross-cutting');
   });

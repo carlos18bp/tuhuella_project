@@ -69,6 +69,12 @@ Implementation uses `NotificationPreference` + `NotificationLog` (two models) ra
 ### 9. Dark mode
 Theme toggle via ThemeProvider component with cookie persistence. Uses Tailwind `dark:` variant throughout.
 
+### 10. DropdownMenu primitive (`components/ui/DropdownMenu.tsx`)
+Reusable dropdown that consolidates outside-click + Escape handling + arrow-key navigation into one place. Uses React 18's `useId()` for SSR-safe IDs (avoids hydration mismatch). Render-prop API: `trigger` receives `{ open, close, getTriggerProps }` — `getTriggerProps()` encapsulates `aria-expanded`, `aria-haspopup`, `aria-controls`, and the trigger `ref`/`id`. An optional `onOpen` callback runs side effects before the panel opens. Exports `DropdownDivider`.
+
+### 11. Header breakpoint convention
+Desktop header activates at `lg:` (1024px), not `md:` (768px). Tablets (768–1023px) get the mobile hamburger drawer. This prevents the packed staff-role header from crowding at iPad portrait widths. A mobile notification bell (`<Link>` to `MY_NOTIFICATIONS`) renders beside the hamburger when authenticated (`lg:hidden`, badge from `unreadCount`).
+
 ## Environment Variables
 
 ### Backend (`backend/.env`)
@@ -101,14 +107,14 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=
 | Frontend pages | 56 |
 | Zustand stores | 13 |
 | Custom hooks | 5 (useFAQs, useRequireAuth, useScrollReveal, useAuthSync, useMediaQuery) |
-| UI components | 65 |
+| UI components | 66 |
 | Animals components | 1 (AnimalHealthSection) |
 | Web-manager components | 1 (AdminApplicationsTable) |
 | Veterinarian components | 2 (ClinicalEntryForm, ClinicalHistoryTimeline) |
 | Layout components | 12 |
 | Blog components | 4 |
 | Provider components | 3 |
-| Total frontend components | 88 |
+| Total frontend components | 89 |
 | Exported types | ~52 |
 | Backend test files | 99+ |
 | Frontend unit test files | 289+ |

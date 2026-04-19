@@ -19,6 +19,23 @@ test.describe('Manual — Web Manager', () => {
     await expect(page.getByText(/Web Manager/i)).toBeVisible({ timeout: 10_000 });
   });
 
+  test('should display the "Cómo empezar" highlighted section', { tag: [...MANUAL_BROWSE] }, async ({ page }) => {
+    await loginAndNavigate(page, 'web_manager', '/manual');
+
+    await expect(page.getByRole('heading', { name: /cómo empezar/i })).toBeVisible({ timeout: 15_000 });
+  });
+
+  test('should return results when searching for new process keywords', { tag: [...MANUAL_SEARCH] }, async ({ page }) => {
+    await loginAndNavigate(page, 'web_manager', '/manual');
+
+    const searchbox = page.getByRole('searchbox');
+    await expect(searchbox).toBeVisible({ timeout: 15_000 });
+
+    await searchbox.fill('voluntariado');
+
+    await expect(page.getByRole('option').first()).toBeVisible({ timeout: 5_000 });
+  });
+
   test('should display search input on the manual page', { tag: [...MANUAL_SEARCH] }, async ({ page }) => {
     await loginAndNavigate(page, 'web_manager', '/manual');
 

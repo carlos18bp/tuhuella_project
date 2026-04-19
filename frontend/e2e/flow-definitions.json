@@ -327,8 +327,8 @@
       "module": "navigation",
       "roles": ["shared"],
       "priority": "P2",
-      "description": "Header contains navigation links to animals, shelters, campaigns, and looking-to-adopt (labels depend on locale)",
-      "expectedSpecs": 1
+      "description": "Header renders on every page. Desktop at lg: (1024px+); below that hamburger drawer. Public links: Animales, Refugios, Campañas, Busco Adoptar, Blog, Nosotros dropdown. Authenticated: Panel dropdown per role (shelter_admin 7 items, web_manager 3, admin 6; veterinarian plain link) + Avatar dropdown (Mi Perfil, Favoritos, account items, Cerrar sesión). Mobile: bell link to /my-profile/notifications beside hamburger.",
+      "expectedSpecs": 3
     },
     "navigation-footer": {
       "name": "Footer navigation",
@@ -517,7 +517,7 @@
     "notification-bell": {
       "name": "Notification bell interaction",
       "module": "navigation",
-      "roles": ["adopter", "shelter_admin", "admin"],
+      "roles": ["adopter", "shelter_admin", "web_manager", "admin", "veterinarian"],
       "priority": "P2",
       "description": "Authenticated user sees bell icon with unread count, opens dropdown, views notifications, and clicks mark all read",
       "expectedSpecs": 1
@@ -775,15 +775,31 @@
       "module": "manual",
       "roles": ["web_manager", "admin"],
       "priority": "P2",
-      "description": "web_manager or admin navigates to /manual; layout gate blocks other roles; page renders sticky search bar and collapsible sidebar with 8 process sections; user expands a section and clicks an anchor link, which scrolls to the ProcessCard and fires a 1.6 s highlight ring",
-      "expectedSpecs": 1
+      "description": "web_manager or admin navigates to /manual; layout gate blocks other roles; page renders sticky search bar and collapsible sidebar with 9 process sections (getting-started and web-manager highlighted); user expands a section and clicks an anchor link, which scrolls to the ProcessCard and fires a 1.6 s highlight ring",
+      "expectedSpecs": 3
     },
     "manual-search": {
       "name": "Manual search and process navigation",
       "module": "manual",
       "roles": ["web_manager", "admin"],
       "priority": "P2",
-      "description": "Authenticated staff user types a query (or Cmd/Ctrl+K) into the Fuse.js search bar on /manual; dropdown shows ranked results with title, role badge, and summary snippet; user selects a result via keyboard or click; page scrolls to the matching ProcessCard",
+      "description": "Authenticated staff user types a query (or Cmd/Ctrl+K) into the Fuse.js search bar on /manual; dropdown shows ranked results with title, role badge, and summary snippet; user selects a result via keyboard or click; page scrolls to the matching ProcessCard. ~72 non-technical processes covering all roles (public, adopter, shelter, vet, web-manager, admin, cross-cutting).",
+      "expectedSpecs": 3
+    },
+    "web-manager-profile": {
+      "name": "Web manager profile view",
+      "module": "web-manager",
+      "roles": ["web_manager"],
+      "priority": "P3",
+      "description": "Web manager views their profile at /my-profile: common elements (avatar, name, edit button, profile completeness) render for all roles; role-specific activity section not yet implemented (pending Phase 13b).",
+      "expectedSpecs": 1
+    },
+    "veterinarian-profile": {
+      "name": "Veterinarian profile view",
+      "module": "veterinarian",
+      "roles": ["veterinarian"],
+      "priority": "P3",
+      "description": "Veterinarian views their profile at /my-profile: common elements (avatar, name, edit button, profile completeness) render for all roles; role-specific section not yet implemented (pending Phase 13b).",
       "expectedSpecs": 1
     }
   }

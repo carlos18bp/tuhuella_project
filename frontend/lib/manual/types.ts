@@ -22,7 +22,6 @@ export type ManualProcess = {
   why: LocalizedText;
   steps: LocalizedList;
   route?: string;
-  endpoints?: string[];
   tips?: LocalizedList;
   keywords: string[];
 };

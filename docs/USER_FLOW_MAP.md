@@ -103,7 +103,7 @@ Use this document to understand each flow's steps, branching conditions, role re
 | `donation-checkout-submit` | Donation checkout form submission | donation | P1 | adopter | `/checkout/donation` |
 | `sponsorship-checkout-submit` | Sponsorship checkout form submission | sponsorship | P1 | adopter | `/checkout/sponsorship` |
 | `notification-preferences` | Notification preferences management | adopter | P2 | adopter | `/my-profile/notifications` |
-| `notification-bell` | Notification bell interaction | navigation | P2 | adopter, shelter_admin, admin | all pages |
+| `notification-bell` | Notification bell interaction | navigation | P2 | adopter, shelter_admin, web_manager, admin, veterinarian | all pages |
 | `shelter-panel-updates` | Shelter manage update posts | shelter-panel | P2 | shelter_admin | `/shelter/updates` |
 | `shelter-panel-update-create` | Shelter create update post | shelter-panel | P2 | shelter_admin | `/shelter/updates/create` |
 | `shelter-detail-view-animals` | Shelter detail view animals link | shelter | P2 | shared | `/shelters/[shelterId]` |
@@ -143,6 +143,8 @@ Use this document to understand each flow's steps, branching conditions, role re
 | `web-manager-campaign-create` | Web manager create campaign | web-manager | P2 | web_manager, admin | `/web-manager/campaigns/new` |
 | `manual-browse` | Interactive manual page load | manual | P2 | web_manager, admin | `/manual` |
 | `manual-search` | Manual search and process navigation | manual | P2 | web_manager, admin | `/manual` |
+| `web-manager-profile` | Web manager profile view | web-manager | P3 | web_manager | `/my-profile` |
+| `veterinarian-profile` | Veterinarian profile view | veterinarian | P3 | veterinarian | `/my-profile` |
 
 ---
 
@@ -1789,10 +1791,13 @@ Use this document to understand each flow's steps, branching conditions, role re
 
 **Steps:**
 
-1. Header renders on every page.
+1. Header renders on every page. Desktop layout activates at `lg:` (1024px); below that the hamburger drawer is shown.
 2. Contains logo/brand linking to `/`.
-3. Navigation links: Animales, Refugios, Campañas, Busco Adoptar.
-4. Auth section: Sign In / Sign Up (guest) or user menu with role-specific links (authenticated).
+3. Navigation links: Animales, Refugios, Campañas, Busco Adoptar, Blog, Nosotros dropdown (Quiénes Somos, Trabaja con Nosotros, Aliados Estratégicos).
+4. Unauthenticated: Sign In and Sign Up links.
+5. Authenticated — **Panel dropdown** (role-specific): shelter_admin opens "Panel Refugio" (7 items: Dashboard, Animales, Solicitudes, Campañas, Donaciones, Actualizaciones, Ajustes); web_manager opens "Panel Web Manager" (3 items: Solicitudes, Refugios, Campañas); admin opens "Admin" (6 items: Dashboard, Aprobar refugios, Moderación, Pagos, Métricas, Blog); veterinarian gets a direct link to "Panel Veterinario".
+6. Authenticated — **Avatar/Account dropdown**: Mi Perfil, Favoritos, Mis solicitudes, Mis donaciones, Mis apadrinamientos, Notificaciones, Manual (staff only), Cerrar sesión.
+7. Mobile (`< lg:`): bell icon beside hamburger links to /my-profile/notifications (with unread badge); drawer contains Panel section and Mi cuenta section.
 
 ---
 
@@ -1834,7 +1839,7 @@ Use this document to understand each flow's steps, branching conditions, role re
 | Field | Value |
 |-------|-------|
 | **Priority** | P2 |
-| **Roles** | adopter, shelter_admin, admin |
+| **Roles** | adopter, shelter_admin, web_manager, admin, veterinarian |
 | **Frontend route** | all pages |
 | **API endpoints** | `GET /api/notifications/unread-count/`, `GET /api/notifications/logs/`, `PUT /api/notifications/logs/mark-all-read/` |
 
@@ -2581,8 +2586,8 @@ Use this document to understand each flow's steps, branching conditions, role re
 
 1. User navigates to `/manual`.
 2. Layout checks role via `canAccessStaffArea(user)`. Unauthenticated or unauthorized roles see `AdminAccessDenied` and are redirected to `/sign-in`.
-3. Page renders a sticky search bar (Fuse.js, Cmd/Ctrl+K shortcut) and a collapsible sidebar with 8 sections.
-4. "Rol: Web Manager" section is highlighted as "Empieza aquí".
+3. Page renders a sticky search bar (Fuse.js, Cmd/Ctrl+K shortcut) and a collapsible sidebar with 9 sections.
+4. "Cómo empezar" (`getting-started`) and "Rol: Web Manager" sections are highlighted as "Empieza aquí". All content is non-technical (~72 processes covering all roles).
 5. User expands a section in the sidebar and clicks a process anchor link.
 6. Page scrolls smoothly to the `ProcessCard` with that `id`; a teal ring highlights the card for 1.6 s.
 
@@ -2610,7 +2615,7 @@ Use this document to understand each flow's steps, branching conditions, role re
 **Steps:**
 
 1. User types a query into the search input (or presses Cmd/Ctrl+K to focus it).
-2. `useManualSearch` runs Fuse.js fuzzy search over all processes (title weight 0.5, keywords 0.25, summary 0.15, steps 0.07).
+2. `useManualSearch` runs Fuse.js fuzzy search over ~72 processes across 9 sections (title weight 0.5, keywords 0.25, summary 0.15, steps 0.07).
 3. Dropdown appears below the input with up to 12 ranked results showing title, role badge, summary snippet, and route.
 4. User navigates with ↑/↓ keys; highlighted result changes.
 5. User presses Enter (or clicks a result): dropdown closes, page scrolls to the matching `ProcessCard`, ring highlight fires.
@@ -2623,6 +2628,58 @@ Use this document to understand each flow's steps, branching conditions, role re
 | Query produces no matches | "Sin resultados" / "No results" shown in dropdown |
 | Query is cleared | Dropdown disappears; `isSearching = false` |
 | Multiple rapid keystrokes | `useDeferredValue` defers re-indexing; UI stays responsive |
+
+---
+
+### web-manager-profile
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P3 |
+| **Roles** | web_manager |
+| **Frontend route** | `/my-profile` |
+
+**Preconditions:** User is authenticated as web_manager.
+
+**Steps:**
+
+1. Web manager navigates to `/my-profile`.
+2. Page renders common profile elements: avatar (initials), user full name (h1), role badge, profile completeness bar, Edit Profile button.
+3. Profile fields displayed: email, role (`web_manager`), phone (if set), city (if set).
+4. Role-specific activity section: not yet implemented (pending Phase 13b enriched dashboard); currently renders no role-specific widget.
+
+**Branching conditions:**
+
+| Condition | Outcome |
+|-----------|---------|
+| Unauthenticated access | Redirected to `/sign-in` |
+| Phase 13b complete | Web-manager widget section will appear in the right column |
+
+---
+
+### veterinarian-profile
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P3 |
+| **Roles** | veterinarian |
+| **Frontend route** | `/my-profile` |
+
+**Preconditions:** User is authenticated as veterinarian.
+
+**Steps:**
+
+1. Veterinarian navigates to `/my-profile`.
+2. Page renders common profile elements: avatar (initials), user full name (h1), role badge, profile completeness bar, Edit Profile button.
+3. Profile fields displayed: email, role (`veterinarian`), phone (if set), city (if set).
+4. Role-specific activity section: not yet implemented (pending Phase 13b); currently renders no role-specific widget.
+
+**Branching conditions:**
+
+| Condition | Outcome |
+|-----------|---------|
+| Unauthenticated access | Redirected to `/sign-in` |
+| Phase 13b complete | Veterinarian widget section will appear in the right column |
 
 ---
 
