@@ -20,9 +20,12 @@ type IndexedProcess = {
 
 const MAX_RESULTS = 12;
 
-const buildIndex = (locale: ManualLocale): IndexedProcess[] => {
+const buildIndex = (
+  locale: ManualLocale,
+  sections: ManualSection[],
+): IndexedProcess[] => {
   const rows: IndexedProcess[] = [];
-  for (const section of MANUAL_SECTIONS) {
+  for (const section of sections) {
     for (const process of section.processes) {
       rows.push({
         id: process.id,
@@ -54,10 +57,17 @@ const FUSE_OPTIONS = {
   ],
 };
 
-export function useManualSearch(query: string, locale: ManualLocale) {
+export function useManualSearch(
+  query: string,
+  locale: ManualLocale,
+  sections: ManualSection[] = MANUAL_SECTIONS,
+) {
   const deferredQuery = useDeferredValue(query.trim());
 
-  const fuse = useMemo(() => new Fuse(buildIndex(locale), FUSE_OPTIONS), [locale]);
+  const fuse = useMemo(
+    () => new Fuse(buildIndex(locale, sections), FUSE_OPTIONS),
+    [locale, sections],
+  );
 
   const results = useMemo<ManualSearchHit[]>(() => {
     if (!deferredQuery) return [];

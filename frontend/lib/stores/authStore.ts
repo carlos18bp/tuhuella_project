@@ -38,7 +38,7 @@ type AuthState = {
   fetchProfileStats: () => Promise<void>;
   fetchActivity: () => Promise<void>;
   updateProfile: (data: Partial<Pick<User, 'first_name' | 'last_name' | 'phone' | 'city'>>) => Promise<void>;
-  sendPasswordResetCode: (email: string) => Promise<void>;
+  sendPasswordResetCode: (email: string, locale?: string) => Promise<void>;
   resetPassword: (args: { email: string; code: string; new_password: string }) => Promise<void>;
 };
 
@@ -161,8 +161,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ user: response.data });
   },
 
-  sendPasswordResetCode: async (email: string) => {
-    await api.post(API_ENDPOINTS.SEND_PASSCODE, { email });
+  sendPasswordResetCode: async (email: string, locale?: string) => {
+    await api.post(API_ENDPOINTS.SEND_PASSCODE, { email, locale });
   },
   
   resetPassword: async ({ email, code, new_password }) => {

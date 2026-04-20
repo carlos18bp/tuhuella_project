@@ -4,12 +4,15 @@ import { useRouter } from '@/i18n/navigation';
 import { Link } from '@/i18n/navigation';
 import { FormEvent, useState } from 'react';
 import { PawPrint, ArrowLeft } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
 
 import { useAuthStore } from '@/lib/stores/authStore';
 import { authInputCodeClass, authInputFieldClass } from '@/lib/ui/authFormClasses';
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations('forgotPassword');
   const { sendPasswordResetCode, resetPassword } = useAuthStore();
 
   const [step, setStep] = useState<'email' | 'code'>('email');
@@ -28,11 +31,11 @@ export default function ForgotPasswordPage() {
     setMessage('');
 
     try {
-      await sendPasswordResetCode(email);
-      setMessage('Verification code sent to your email');
+      await sendPasswordResetCode(email, locale);
+      setMessage(t('codeSent'));
       setStep('code');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to send code');
+      setError(err.response?.data?.error || t('errorSendFailed'));
     } finally {
       setLoading(false);
     }
@@ -44,26 +47,24 @@ export default function ForgotPasswordPage() {
     setError('');
     setMessage('');
 
-    // Validate passwords match
     if (newPassword !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('errorPasswordsDontMatch'));
       setLoading(false);
       return;
     }
 
-    // Validate password strength
     if (newPassword.length < 8) {
-      setError('Password must be at least 8 characters');
+      setError(t('errorPasswordTooShort'));
       setLoading(false);
       return;
     }
 
     try {
       await resetPassword({ email, code, new_password: newPassword });
-      setMessage('Password reset successfully! Redirecting...');
+      setMessage(t('resetSuccess'));
       router.replace('/sign-in');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to reset password');
+      setError(err.response?.data?.error || t('errorResetFailed'));
     } finally {
       setLoading(false);
     }
@@ -77,9 +78,9 @@ export default function ForgotPasswordPage() {
             <PawPrint className="h-5 w-5 text-teal-600 dark:text-teal-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-text-primary">Recuperar contraseña</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-text-primary">{t('title')}</h1>
             <p className="text-sm text-text-tertiary">
-              {step === 'email' ? 'Te enviaremos un código de verificación' : 'Ingresa el código y tu nueva contraseña'}
+              {step === 'email' ? t('subtitleEmail') : t('subtitleCode')}
             </p>
           </div>
         </div>
@@ -87,14 +88,14 @@ export default function ForgotPasswordPage() {
         {step === 'email' ? (
           <form className="space-y-4" onSubmit={onSendCode}>
             <div>
-              <label htmlFor="reset-email" className="block text-sm font-medium text-text-secondary mb-1.5">Correo electrónico</label>
-              <input 
+              <label htmlFor="reset-email" className="block text-sm font-medium text-text-secondary mb-1.5">{t('emailLabel')}</label>
+              <input
                 id="reset-email"
                 className={authInputFieldClass}
-                placeholder="tu@email.com" 
+                placeholder={t('emailPlaceholder')}
                 type="email"
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)} 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
                 required
               />
@@ -105,7 +106,7 @@ export default function ForgotPasswordPage() {
               type="submit"
               disabled={loading}
             >
-              {loading ? 'Enviando...' : 'Enviar código de verificación'}
+              {loading ? t('sendingBtn') : t('sendCodeBtn')}
             </button>
 
             {error ? <p className="text-red-600 dark:text-red-300 text-sm">{error}</p> : null}
@@ -114,48 +115,48 @@ export default function ForgotPasswordPage() {
         ) : (
           <form className="space-y-4" onSubmit={onResetPassword}>
             <p className="text-sm text-text-tertiary">
-              Ingresa el código de 6 dígitos enviado a <strong className="text-text-secondary">{email}</strong>
+              {t('codeIntro')} <strong className="text-text-secondary">{email}</strong>
             </p>
-            
+
             <div>
-              <label htmlFor="reset-code" className="block text-sm font-medium text-text-secondary mb-1.5">Código</label>
-              <input 
+              <label htmlFor="reset-code" className="block text-sm font-medium text-text-secondary mb-1.5">{t('codeLabel')}</label>
+              <input
                 id="reset-code"
-                className={authInputCodeClass} 
-                placeholder="000000" 
+                className={authInputCodeClass}
+                placeholder={t('codePlaceholder')}
                 type="text"
-                value={code} 
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} 
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 maxLength={6}
                 required
               />
-              <p className="text-xs text-text-quaternary mt-1">Código de 6 dígitos del correo</p>
+              <p className="text-xs text-text-quaternary mt-1">{t('codeHint')}</p>
             </div>
-            
+
             <div>
-              <label htmlFor="reset-newpw" className="block text-sm font-medium text-text-secondary mb-1.5">Nueva contraseña</label>
-              <input 
+              <label htmlFor="reset-newpw" className="block text-sm font-medium text-text-secondary mb-1.5">{t('newPasswordLabel')}</label>
+              <input
                 id="reset-newpw"
                 className={authInputFieldClass}
-                placeholder="••••••••" 
-                value={newPassword} 
-                onChange={(e) => setNewPassword(e.target.value)} 
-                type="password" 
+                placeholder={t('passwordPlaceholder')}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                type="password"
                 autoComplete="new-password"
                 required
               />
-              <p className="text-xs text-text-quaternary mt-1">Mínimo 8 caracteres</p>
+              <p className="text-xs text-text-quaternary mt-1">{t('newPasswordHint')}</p>
             </div>
-            
+
             <div>
-              <label htmlFor="reset-confirm" className="block text-sm font-medium text-text-secondary mb-1.5">Confirmar contraseña</label>
-              <input 
+              <label htmlFor="reset-confirm" className="block text-sm font-medium text-text-secondary mb-1.5">{t('confirmPasswordLabel')}</label>
+              <input
                 id="reset-confirm"
                 className={authInputFieldClass}
-                placeholder="••••••••" 
-                value={confirmPassword} 
-                onChange={(e) => setConfirmPassword(e.target.value)} 
-                type="password" 
+                placeholder={t('passwordPlaceholder')}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                type="password"
                 autoComplete="new-password"
                 required
               />
@@ -166,7 +167,7 @@ export default function ForgotPasswordPage() {
               type="submit"
               disabled={loading}
             >
-              {loading ? 'Restableciendo...' : 'Restablecer contraseña'}
+              {loading ? t('resettingBtn') : t('resetBtn')}
             </button>
 
             {error ? <p className="text-red-600 dark:text-red-300 text-sm">{error}</p> : null}
@@ -178,7 +179,7 @@ export default function ForgotPasswordPage() {
               className="flex items-center justify-center gap-1 min-h-11 text-sm text-text-tertiary hover:text-teal-600 dark:hover:text-teal-400 transition-colors w-full"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
-              Volver al correo
+              {t('backToEmail')}
             </button>
           </form>
         )}
@@ -189,7 +190,7 @@ export default function ForgotPasswordPage() {
             className="flex items-center justify-center gap-1 min-h-11 text-text-tertiary hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            Volver a iniciar sesión
+            {t('backToSignIn')}
           </Link>
         </div>
       </div>

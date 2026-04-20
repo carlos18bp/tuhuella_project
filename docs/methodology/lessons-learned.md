@@ -181,3 +181,63 @@ source venv/bin/activate && <command>
 - Multi-select with floating action bar: user checks 2–3 items → fixed bottom bar shows count + "Compare" button
 - Comparison rendered in a modal with a side-by-side table (columns = selected items, rows = attributes)
 - Selection state managed locally in the page component, not in a global store
+
+### DRF Throttle Rate Testing — monkey-patch `get_rate`, not `@override_settings`
+- `@override_settings(REST_FRAMEWORK={...})` has NO effect on DRF throttle rates during tests.
+- DRF caches `api_settings.DEFAULT_THROTTLE_RATES` at class-load (module import) time.
+- The only reliable approach: monkey-patch the `get_rate` method on the throttle class with a `try/finally` restore:
+  ```python
+  original_get_rate = SignInThrottle.get_rate
+  SignInThrottle.get_rate = lambda self: '3/minute'
+  try:
+      # trigger N+1 requests and assert 429
+  finally:
+      SignInThrottle.get_rate = original_get_rate
+  ```
+- Always add an autouse fixture with `cache.clear()` before each test to prevent throttle hit-count leakage between tests (DRF stores counts in Django's cache).
+
+---
+
+## 6. Security Patterns
+
+### Rate Limiting — `AnonRateThrottle` subclassing
+- All public auth endpoints (`sign_in`, `google_login`, `send_passcode`, `verify_passcode_and_reset_password`) are decorated with `@throttle_classes([<ScopeThrottle>])`.
+- Each scope is an `AnonRateThrottle` subclass with a named `scope`. Default rates live in `settings.py` `REST_FRAMEWORK['DEFAULT_THROTTLE_RATES']` and are overridable via env vars (e.g., `DJANGO_THROTTLE_SIGN_IN`).
+- Pattern to add a new throttle:
+  ```python
+  class MyEndpointThrottle(AnonRateThrottle):
+      scope = 'my_endpoint'
+  ```
+  Add `'my_endpoint': os.getenv('DJANGO_THROTTLE_MY_ENDPOINT', 'N/period')` to settings.
+
+### Open-Redirect Prevention — `safeRedirectTarget()`
+- After successful login, read `?redirect=` from search params, but only accept safe relative paths.
+- Reject anything that doesn't start with `/`, or starts with `//` (protocol-relative URLs that browsers treat as absolute).
+  ```ts
+  function safeRedirectTarget(value: string | null | undefined): string | null {
+    if (!value) return null;
+    if (!value.startsWith('/') || value.startsWith('//')) return null;
+    return value;
+  }
+  ```
+- Fall back to `ROUTES.HOME` when the target is absent or unsafe.
+
+### Locale-Aware Transactional Email — dict-based dispatch
+- Instead of `if locale == 'en': ... else: ...` branches, use a locale dict in `email_utils.py`:
+  ```python
+  MY_EMAIL_LOCALES = {
+      'es': {'subject': '...', 'template': 'emails/foo.html', 'text': '...'},
+      'en': {'subject': '...', 'template': 'emails/foo_en.html', 'text': '...'},
+  }
+  ```
+- Look up with `MY_EMAIL_LOCALES.get((locale or '').lower(), MY_EMAIL_LOCALES['es'])` to default to Spanish.
+- The `locale` value is read from the request body (passed by the frontend after `useLocale()`).
+
+### `validate_password()` Placement in Password Reset
+- Call `validate_password(new_password, user=user)` **after** validating and consuming the passcode, not before.
+- Calling it before would still require looking up the user, leaking whether the email exists and whether the code is valid before the strength check fires — a subtle user-enumeration vector.
+- Place it immediately after the passcode `is_used` / expiry check, before `user.set_password()`.
+
+### `update_last_login` on Successful Auth
+- Call `update_last_login(None, user)` (from `django.contrib.auth.models`) before generating tokens in both `sign_in()` and `google_login()`.
+- This is Django's standard signal-compatible helper; it sets `user.last_login` without requiring a full `user.save()`.

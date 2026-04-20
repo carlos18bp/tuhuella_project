@@ -1,6 +1,6 @@
 {
-  "version": "5.4.0",
-  "lastUpdated": "2026-04-19",
+  "version": "5.5.0",
+  "lastUpdated": "2026-04-20",
   "flows": {
     "home-loads": {
       "name": "Home page loads",
@@ -72,6 +72,30 @@
       "roles": ["guest"],
       "priority": "P2",
       "description": "User navigates to /forgot-password and sees email input and send code button",
+      "expectedSpecs": 1
+    },
+    "auth-forgot-password-reset": {
+      "name": "Forgot password complete reset wizard",
+      "module": "auth",
+      "roles": ["guest"],
+      "priority": "P2",
+      "description": "User completes the full reset wizard on /forgot-password: (1) enters email and sends code, (2) enters the 6-digit code, (3) sets a new password that passes strength validation, (4) sees success state and is redirected to /sign-in",
+      "expectedSpecs": 1
+    },
+    "auth-login-redirect": {
+      "name": "Sign-in with post-login redirect",
+      "module": "auth",
+      "roles": ["guest"],
+      "priority": "P2",
+      "description": "User arrives at /sign-in?redirect=/some-path (from a protected-route gate), signs in successfully, and is redirected to /some-path instead of /. Unsafe targets (absolute URLs, protocol-relative //host) fall back to /",
+      "expectedSpecs": 1
+    },
+    "auth-sign-up-success": {
+      "name": "Sign-up successful submission",
+      "module": "auth",
+      "roles": ["guest"],
+      "priority": "P2",
+      "description": "User fills all required sign-up fields with valid data (matching passwords, accepted terms), submits, and is redirected to /sign-in (or home) after the account is created",
       "expectedSpecs": 1
     },
     "auth-protected-redirect": {
@@ -773,18 +797,26 @@
     "manual-browse": {
       "name": "Interactive manual page load",
       "module": "manual",
-      "roles": ["web_manager", "admin"],
+      "roles": ["adopter", "shelter_admin", "admin", "veterinarian", "web_manager"],
       "priority": "P2",
-      "description": "web_manager or admin navigates to /manual; layout gate blocks other roles; page renders sticky search bar and collapsible sidebar with 9 process sections (getting-started and web-manager highlighted); user expands a section and clicks an anchor link, which scrolls to the ProcessCard and fires a 1.6 s highlight ring",
+      "description": "Any authenticated user navigates to /manual; unauthenticated users are redirected to /sign-in; page renders sticky search bar and collapsible sidebar with 9 process sections; web_manager/admin see all sections; other roles see only their relevant filtered sections (Phase 19 filterByRole). User expands a section and clicks an anchor link, which scrolls to the ProcessCard and fires a 1.6 s highlight ring.",
       "expectedSpecs": 3
     },
     "manual-search": {
       "name": "Manual search and process navigation",
       "module": "manual",
-      "roles": ["web_manager", "admin"],
+      "roles": ["adopter", "shelter_admin", "admin", "veterinarian", "web_manager"],
       "priority": "P2",
-      "description": "Authenticated staff user types a query (or Cmd/Ctrl+K) into the Fuse.js search bar on /manual; dropdown shows ranked results with title, role badge, and summary snippet; user selects a result via keyboard or click; page scrolls to the matching ProcessCard. ~72 non-technical processes covering all roles (public, adopter, shelter, vet, web-manager, admin, cross-cutting).",
+      "description": "Authenticated user types a query (or Cmd/Ctrl+K) into the Fuse.js search bar on /manual; dropdown shows ranked results filtered by role; user selects a result via keyboard or click; page scrolls to the matching ProcessCard. Search index respects role-filtered section visibility (Phase 19).",
       "expectedSpecs": 3
+    },
+    "manual-role-filter": {
+      "name": "Manual content filtered by role",
+      "module": "manual",
+      "roles": ["adopter", "shelter_admin", "veterinarian"],
+      "priority": "P3",
+      "description": "Authenticated user with a non-staff role (adopter, shelter_admin, veterinarian) visits /manual and sees only the process sections relevant to their role (via filterByRole.ts). Staff roles (web_manager, admin) see all sections. Sections excluded from a role are not rendered in the sidebar or page body.",
+      "expectedSpecs": 1
     },
     "web-manager-profile": {
       "name": "Web manager profile view",

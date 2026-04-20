@@ -73,36 +73,79 @@ test.describe('Veterinarian — Follow-Up Detail', () => {
   });
 });
 
+const vetMockUser = { id: 10, email: 'vet-e2e@example.com', first_name: 'Marco', last_name: 'Ríos', role: 'veterinarian', is_staff: false, is_active: true };
+
+async function setupVetProfile(page: any) {
+  await page.route('**/api/auth/validate_token/**', (route: any) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ user: vetMockUser }) }),
+  );
+  await page.route('**/api/token/refresh/**', (route: any) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ access: 'e2e-mock-access-token', refresh: 'e2e-mock-refresh-token' }) }),
+  );
+  await page.route('**/user/profile-stats/**', (route: any) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockProfileStats) }),
+  );
+  await page.route('**/user/activity/**', (route: any) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockActivity) }),
+  );
+  await page.route('**/api/notifications/unread-count/**', (route: any) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ unread_count: 0 }) }),
+  );
+  await page.context().addCookies([
+    { name: 'access_token', value: 'e2e-mock-access-token', domain: 'localhost', path: '/' },
+    { name: 'refresh_token', value: 'e2e-mock-refresh-token', domain: 'localhost', path: '/' },
+  ]);
+}
+
 test.describe('Veterinarian — Profile', () => {
   test(
     'should display profile page for veterinarian with common profile elements',
     { tag: [...VETERINARIAN_PROFILE] },
     async ({ page }) => {
-      await page.route('**/api/auth/validate_token/**', (route: any) =>
-        route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            user: { id: 10, email: 'vet-e2e@example.com', first_name: 'Marco', last_name: 'Ríos', role: 'veterinarian', is_staff: false, is_active: true },
-          }),
-        }),
-      );
-      await page.route('**/user/profile-stats/**', (route: any) =>
-        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockProfileStats) }),
-      );
-      await page.route('**/user/activity/**', (route: any) =>
-        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockActivity) }),
-      );
-      await page.route('**/api/notifications/unread-count/**', (route: any) =>
-        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ unread_count: 0 }) }),
-      );
-
+      await setupVetProfile(page);
       await page.goto('/my-profile');
       await waitForPageLoad(page);
 
       const profileName = page.getByText(/Marco/i);
       const profileHeading = page.getByRole('heading', { name: /perfil|profile/i });
       await expect(profileName.or(profileHeading)).toBeVisible({ timeout: 15_000 });
+    },
+  );
+
+  test(
+    'should show VeterinarianProfileSection heading and stat cards',
+    { tag: [...VETERINARIAN_PROFILE] },
+    async ({ page }) => {
+      await setupVetProfile(page);
+      await page.route('**/api/follow-ups/**', (route: any) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockFollowUps) }),
+      );
+
+      await page.goto('/my-profile');
+      await waitForPageLoad(page);
+
+      await expect(page.getByText(/Responsabilidades del veterinario/i)).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByText(/Seguimientos asignados/i).first()).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByText('Pendiente')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByText('En curso')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByText('Completado')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByText('Vencido')).toBeVisible({ timeout: 10_000 });
+    },
+  );
+
+  test(
+    'should show follow-up quick action link in VeterinarianProfileSection',
+    { tag: [...VETERINARIAN_PROFILE] },
+    async ({ page }) => {
+      await setupVetProfile(page);
+      await page.route('**/api/follow-ups/**', (route: any) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
+      );
+
+      await page.goto('/my-profile');
+      await waitForPageLoad(page);
+
+      await expect(page.getByRole('link', { name: /Seguimientos/i })).toBeVisible({ timeout: 15_000 });
     },
   );
 });

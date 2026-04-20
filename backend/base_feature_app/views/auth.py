@@ -3,12 +3,16 @@ Authentication views for user sign up, sign in, and password management.
 """
 import logging
 
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.throttling import AnonRateThrottle
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import update_last_login
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from django.conf import settings
 
 import requests
@@ -44,6 +48,18 @@ User = get_user_model()
 logger = logging.getLogger(__name__)
 
 CURRENT_TERMS_VERSION = '2026-03-25'
+
+
+class PasswordResetSendThrottle(AnonRateThrottle):
+    scope = 'password_reset'
+
+
+class PasswordResetVerifyThrottle(AnonRateThrottle):
+    scope = 'password_reset_verify'
+
+
+class SignInThrottle(AnonRateThrottle):
+    scope = 'sign_in'
 
 
 @api_view(['POST'])
@@ -115,10 +131,11 @@ def sign_up(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([SignInThrottle])
 def sign_in(request):
     """
     User sign in endpoint.
-    
+
     Expected data:
     - email: str
     - password: str
@@ -164,15 +181,17 @@ def sign_in(request):
             {'error': 'Account is no longer available'},
             status=status.HTTP_403_FORBIDDEN
         )
-    
-    # Generate tokens
+
+    update_last_login(None, user)
+
     tokens = generate_auth_tokens(user)
-    
+
     return Response(tokens, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([SignInThrottle])
 def google_login(request):
     """
     Google OAuth login endpoint.
@@ -274,32 +293,36 @@ def google_login(request):
             {'error': 'Account is no longer available'},
             status=status.HTTP_403_FORBIDDEN,
         )
-    
-    # Generate tokens
+
+    update_last_login(None, user)
+
     tokens = generate_auth_tokens(user)
     tokens['created'] = created
     tokens['google_validated'] = payload is not None
-    
+
     return Response(tokens, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([PasswordResetSendThrottle])
 def send_passcode(request):
     """
     Send password reset code to user's email.
-    
+
     Expected data:
     - email: str
+    - locale: str (optional, 'es' or 'en'; defaults to 'es')
     """
     email = request.data.get('email', '').strip().lower()
-    
+    locale = (request.data.get('locale') or '').strip().lower() or 'es'
+
     if not email:
         return Response(
             {'error': 'Email is required'},
             status=status.HTTP_400_BAD_REQUEST
         )
-    
+
     try:
         user = User.objects.get(email=email)
     except User.DoesNotExist:
@@ -308,19 +331,19 @@ def send_passcode(request):
             {'message': 'If the email exists, a code has been sent'},
             status=status.HTTP_200_OK
         )
-    
+
     # Generate and save code
     password_code = PasswordCode.generate_code(user)
-    
+
     # Send email
-    success = send_password_reset_code(user, password_code.code)
-    
+    success = send_password_reset_code(user, password_code.code, locale=locale)
+
     if not success:
         return Response(
             {'error': 'Failed to send email'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-    
+
     return Response(
         {'message': 'Code sent successfully'},
         status=status.HTTP_200_OK
@@ -329,10 +352,11 @@ def send_passcode(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([PasswordResetVerifyThrottle])
 def verify_passcode_and_reset_password(request):
     """
     Verify passcode and reset password.
-    
+
     Expected data:
     - email: str
     - code: str
@@ -341,13 +365,13 @@ def verify_passcode_and_reset_password(request):
     email = request.data.get('email', '').strip().lower()
     code = request.data.get('code', '').strip()
     new_password = request.data.get('new_password')
-    
+
     if not email or not code or not new_password:
         return Response(
             {'error': 'Email, code, and new password are required'},
             status=status.HTTP_400_BAD_REQUEST
         )
-    
+
     try:
         user = User.objects.get(email=email)
     except User.DoesNotExist:
@@ -355,14 +379,14 @@ def verify_passcode_and_reset_password(request):
             {'error': 'Invalid email or code'},
             status=status.HTTP_400_BAD_REQUEST
         )
-    
+
     # Find valid code
     try:
         password_code = user.password_codes.filter(
             code=code,
             used=False
         ).first()
-        
+
         if not password_code or not password_code.is_valid():
             return Response(
                 {'error': 'Invalid or expired code'},
@@ -373,15 +397,24 @@ def verify_passcode_and_reset_password(request):
             {'error': 'Invalid or expired code'},
             status=status.HTTP_400_BAD_REQUEST
         )
-    
-    # Update password
+
+    # Enforce password strength (min length, common-password, numeric-only, similarity).
+    # Validated only after proving the user holds a valid code so we don't leak
+    # whether a given email exists for unauthenticated callers.
+    try:
+        validate_password(new_password, user=user)
+    except ValidationError as exc:
+        return Response(
+            {'error': 'Password does not meet requirements', 'details': list(exc.messages)},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
     user.password = make_password(new_password)
-    user.save()
-    
-    # Mark code as used
+    user.save(update_fields=['password'])
+
     password_code.used = True
-    password_code.save()
-    
+    password_code.save(update_fields=['used'])
+
     return Response(
         {'message': 'Password reset successfully'},
         status=status.HTTP_200_OK

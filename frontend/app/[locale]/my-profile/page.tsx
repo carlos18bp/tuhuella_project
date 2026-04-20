@@ -14,6 +14,8 @@ import { ROUTES } from '@/lib/constants';
 import type { ActivityEvent } from '@/lib/types';
 import ShelterAdminProfileSection from '@/components/ui/ShelterAdminProfileSection';
 import AdminProfileSection from '@/components/ui/AdminProfileSection';
+import VeterinarianProfileSection from '@/components/ui/VeterinarianProfileSection';
+import WebManagerProfileSection from '@/components/ui/WebManagerProfileSection';
 import { useRoleProfileData } from '@/lib/hooks/useRoleProfileData';
 import { calcCompleteness, formatMemberSince, getUserInitials } from '@/lib/profile';
 
@@ -249,12 +251,37 @@ export default function MiPerfilPage() {
     ...(user.city ? [{ icon: MapPin, label: t('city'), value: user.city }] : []),
   ];
 
-  const rightColumnHeading =
-    user.role === 'shelter_admin'
-      ? t('shelterResponsibilities')
-      : user.role === 'admin'
-        ? t('adminResponsibilities')
-        : t('myActivity');
+  const RIGHT_COLUMN_HEADING_KEYS: Record<string, string> = {
+    shelter_admin: 'shelterResponsibilities',
+    admin: 'adminResponsibilities',
+    veterinarian: 'veterinarianResponsibilities',
+    web_manager: 'webManagerResponsibilities',
+  };
+  const rightColumnHeading = t(RIGHT_COLUMN_HEADING_KEYS[user.role] ?? 'myActivity');
+
+  const crossActivityLinks = [
+    {
+      label: t('notifications'),
+      desc: t('notificationsDesc'),
+      href: ROUTES.MY_NOTIFICATIONS,
+      icon: Bell,
+      color: 'text-violet-600 bg-violet-50 dark:bg-violet-900/20 dark:text-violet-400',
+    },
+    {
+      label: t('faq'),
+      desc: t('faqDesc'),
+      href: ROUTES.FAQ,
+      icon: HelpCircle,
+      color: 'text-sky-600 bg-sky-50 dark:bg-sky-900/20 dark:text-sky-400',
+    },
+    {
+      label: t('terms'),
+      desc: t('termsDesc'),
+      href: ROUTES.TERMS,
+      icon: ScrollText,
+      color: 'text-slate-500 bg-slate-50 dark:bg-slate-800/40 dark:text-slate-400',
+    },
+  ];
 
   return (
     <div className="mx-auto max-w-[1200px] px-6 py-10 min-w-0 overflow-x-hidden">
@@ -459,6 +486,34 @@ export default function MiPerfilPage() {
 
           {user.role === 'admin' && (
             <AdminProfileSection adminStats={roleData.adminStats ?? undefined} />
+          )}
+
+          {user.role === 'veterinarian' && <VeterinarianProfileSection />}
+
+          {user.role === 'web_manager' && <WebManagerProfileSection />}
+
+          {!isAdopter && (
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {crossActivityLinks.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="group rounded-xl border border-border-primary bg-surface-primary p-5 shadow-sm hover:shadow-md hover:border-border-secondary transition-all"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className={`h-10 w-10 rounded-lg ${item.color} flex items-center justify-center`}>
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-text-quaternary group-hover:text-text-tertiary group-hover:translate-x-0.5 transition-all" />
+                    </div>
+                    <h3 className="mt-3 font-semibold text-text-primary">{item.label}</h3>
+                    <p className="text-xs text-text-tertiary mt-1 leading-relaxed">{item.desc}</p>
+                  </Link>
+                );
+              })}
+            </div>
           )}
         </div>
       </div>

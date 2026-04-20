@@ -54,6 +54,29 @@ This file tracks known errors, their context, and resolutions. When a reusable f
 
 ---
 
+### [ERROR-005] Weak password in test breaks after validate_password added
+- **Date**: 2026-04-20
+- **Context**: `test_verify_passcode_resets_password` used `'newpass'` (7 chars). Passed before `validate_password()` enforcement was added to `verify_passcode_and_reset_password`.
+- **Root Cause**: Test password pre-dated the strength check. `validate_password()` rejects passwords < 8 chars, common words, or all-numeric.
+- **Resolution**: Changed test password to `'NewStrongPass123'` (meets all validators).
+- **Files Affected**: `backend/base_feature_app/tests/views/test_auth_endpoints.py`
+
+### [ERROR-006] DRF throttle @override_settings does not propagate
+- **Date**: 2026-04-20
+- **Context**: `@override_settings(REST_FRAMEWORK={'DEFAULT_THROTTLE_RATES': {'sign_in': '3/minute'}})` on a test had no effect — the throttle still used its original rate.
+- **Root Cause**: DRF caches `api_settings.DEFAULT_THROTTLE_RATES` at class-load time (module import). Patching Django settings at test runtime doesn't invalidate this cache.
+- **Resolution**: Monkey-patch the `get_rate` method directly on the throttle class with try/finally restore:
+  ```python
+  original_get_rate = SignInThrottle.get_rate
+  SignInThrottle.get_rate = lambda self: '3/minute'
+  try:
+      # trigger requests and assert 429
+  finally:
+      SignInThrottle.get_rate = original_get_rate
+  ```
+  Also add an autouse fixture with `cache.clear()` before/after each test to prevent throttle state leakage between tests.
+- **Files Affected**: `backend/base_feature_app/tests/views/test_auth_endpoints.py`
+
 ## Known Issues
 
 _None currently._

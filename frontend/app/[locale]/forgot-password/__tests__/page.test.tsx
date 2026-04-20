@@ -47,11 +47,11 @@ describe('ForgotPasswordPage', () => {
     await advanceToCodeStep();
 
     await waitFor(() => {
-      expect(sendPasswordResetCode).toHaveBeenCalledWith('user@example.com');
+      expect(sendPasswordResetCode).toHaveBeenCalledWith('user@example.com', 'es');
     });
 
     expect(screen.getByPlaceholderText('000000')).toBeInTheDocument();
-    expect(screen.getByText('Verification code sent to your email')).toBeInTheDocument();
+    expect(screen.getByText('Código de verificación enviado a tu correo')).toBeInTheDocument();
   });
 
   it('shows error when sending code fails', async () => {
@@ -77,7 +77,7 @@ describe('ForgotPasswordPage', () => {
 
     submitEmail();
 
-    expect(await screen.findByText('Failed to send code')).toBeInTheDocument();
+    expect(await screen.findByText('No se pudo enviar el código')).toBeInTheDocument();
   });
 
   it('validates password mismatch', async () => {
@@ -96,7 +96,7 @@ describe('ForgotPasswordPage', () => {
     fireEvent.change(pwFields[1], { target: { value: 'password456' } });
     fireEvent.click(screen.getByRole('button', { name: 'Restablecer contraseña' }));
 
-    expect(await screen.findByText('Passwords do not match')).toBeInTheDocument();
+    expect(await screen.findByText('Las contraseñas no coinciden')).toBeInTheDocument();
     expect(resetPassword).not.toHaveBeenCalled();
   });
 
@@ -116,7 +116,7 @@ describe('ForgotPasswordPage', () => {
     fireEvent.change(pwFields[1], { target: { value: 'short' } });
     fireEvent.click(screen.getByRole('button', { name: 'Restablecer contraseña' }));
 
-    expect(await screen.findByText('Password must be at least 8 characters')).toBeInTheDocument();
+    expect(await screen.findByText('La contraseña debe tener al menos 8 caracteres')).toBeInTheDocument();
     expect(resetPassword).not.toHaveBeenCalled();
   });
 
@@ -146,7 +146,7 @@ describe('ForgotPasswordPage', () => {
       });
     });
 
-    expect(screen.getByText('Password reset successfully! Redirecting...')).toBeInTheDocument();
+    expect(screen.getByText('¡Contraseña restablecida! Redirigiendo...')).toBeInTheDocument();
 
     await waitFor(() => {
       expect(replace).toHaveBeenCalledWith('/sign-in');
@@ -190,7 +190,7 @@ describe('ForgotPasswordPage', () => {
     fireEvent.change(pwFields[1], { target: { value: 'password123' } });
     fireEvent.click(screen.getByRole('button', { name: 'Restablecer contraseña' }));
 
-    expect(await screen.findByText('Failed to reset password')).toBeInTheDocument();
+    expect(await screen.findByText('No se pudo restablecer la contraseña')).toBeInTheDocument();
   });
 
   it('allows returning to email step', async () => {

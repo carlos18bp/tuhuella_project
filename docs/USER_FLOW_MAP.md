@@ -6,8 +6,8 @@ Use this document to understand each flow's steps, branching conditions, role re
 
 > **Flow IDs in this document match `e2e/flow-definitions.json` and `e2e/helpers/flow-tags.ts` exactly.**
 
-**Version:** 5.4.0
-**Last Updated:** 2026-04-19
+**Version:** 5.6.0
+**Last Updated:** 2026-04-20
 
 ---
 
@@ -34,7 +34,7 @@ Use this document to understand each flow's steps, branching conditions, role re
 19. [Volunteer Module](#volunteer-module)
 20. [Veterinarian Module](#veterinarian-module)
 21. [Web Manager Module](#web-manager-module)
-22. [Manual Module](#manual-module)
+22. [Manual Module](#manual-module) _(updated Phase 19: all authenticated roles; role-based filtering)_
 23. [Cross-Reference](#cross-reference)
 
 ---
@@ -54,6 +54,9 @@ Use this document to understand each flow's steps, branching conditions, role re
 | `auth-login-invalid` | Login with invalid credentials | auth | P1 | guest | `/sign-in` |
 | `auth-sign-up-form` | Sign-up form display and validation | auth | P1 | guest | `/sign-up` |
 | `auth-forgot-password-form` | Forgot password form display | auth | P2 | guest | `/forgot-password` |
+| `auth-forgot-password-reset` | Forgot password complete reset wizard | auth | P2 | guest | `/forgot-password` |
+| `auth-login-redirect` | Sign-in with post-login redirect | auth | P2 | guest | `/sign-in?redirect=<path>` |
+| `auth-sign-up-success` | Sign-up successful submission | auth | P2 | guest | `/sign-up` |
 | `auth-protected-redirect` | Protected route redirect | auth | P1 | shared | any protected route |
 | `auth-role-redirect` | Role-based navigation | auth | P2 | adopter, shelter_admin, admin | any page |
 | `auth-sign-out` | Sign out | auth | P2 | adopter, shelter_admin, admin | any page |
@@ -141,8 +144,9 @@ Use this document to understand each flow's steps, branching conditions, role re
 | `web-manager-campaigns` | Web manager campaigns list | web-manager | P2 | web_manager, admin | `/web-manager/campaigns` |
 | `web-manager-campaign-detail` | Web manager campaign approve/reject | web-manager | P2 | web_manager, admin | `/web-manager/campaigns/[id]` |
 | `web-manager-campaign-create` | Web manager create campaign | web-manager | P2 | web_manager, admin | `/web-manager/campaigns/new` |
-| `manual-browse` | Interactive manual page load | manual | P2 | web_manager, admin | `/manual` |
-| `manual-search` | Manual search and process navigation | manual | P2 | web_manager, admin | `/manual` |
+| `manual-browse` | Interactive manual page load | manual | P2 | all authenticated | `/manual` |
+| `manual-search` | Manual search and process navigation | manual | P2 | all authenticated | `/manual` |
+| `manual-role-filter` | Manual content filtered by role | manual | P3 | adopter, shelter_admin, veterinarian | `/manual` |
 | `web-manager-profile` | Web manager profile view | web-manager | P3 | web_manager | `/my-profile` |
 | `veterinarian-profile` | Veterinarian profile view | veterinarian | P3 | veterinarian | `/my-profile` |
 
@@ -386,38 +390,114 @@ Use this document to understand each flow's steps, branching conditions, role re
 | **Priority** | P2 |
 | **Roles** | guest |
 | **Frontend route** | `/forgot-password` |
-| **API endpoints** | `POST /api/auth/send_passcode/`, `POST /api/auth/verify_passcode_and_reset_password/` |
+| **API endpoints** | `POST /api/auth/send_passcode/` |
 
-**Preconditions:** User is not authenticated. A registered account exists.
+**Preconditions:** User is not authenticated.
 
-**Step A — Request passcode:**
+**Steps:**
 
 1. User navigates to `/forgot-password`.
 2. Page renders email input and **Send verification code** button (step = `email`).
-3. User enters email and clicks **Send verification code**.
-4. Frontend sends `POST /api/auth/send_passcode/` with `{ email }`.
-5. Backend generates a `PasswordCode`, sends email with 6-digit code.
-6. Success message: "Verification code sent to your email". UI transitions to step = `code`.
-
-**Step B — Reset password:**
-
-7. Page renders **Code** (6-digit), **New Password**, **Confirm New Password** fields and **Reset password** button.
-8. User enters code and new password.
-9. Frontend validates passwords match and length >= 8.
-10. Frontend sends `POST /api/auth/verify_passcode_and_reset_password/` with `{ email, code, new_password }`.
-11. Backend verifies code, updates password, marks code as used. Returns HTTP 200.
-12. Success message: "Password reset successfully! Redirecting..." — redirect to `/sign-in`.
+3. User types in the email field and can click the button.
+4. Navigation from `/sign-in` → `/forgot-password` link works.
 
 **Branching conditions:**
 
 | Condition | Behavior |
 |-----------|----------|
-| Email not registered | API still returns `200 { message: "If the email exists, a code has been sent" }` (no leak) |
-| Email send failure | `500 { error: "Failed to send email" }` |
-| Invalid or expired code | `400 { error: "Invalid or expired code" }` |
-| Passwords do not match | Client error — no API call |
-| Password < 8 chars | Client error — no API call |
+| No GOOGLE_CLIENT_ID set | Google button absent, email form still renders |
+
+---
+
+### auth-forgot-password-reset
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | guest |
+| **Frontend route** | `/forgot-password` |
+| **API endpoints** | `POST /api/auth/send_passcode/`, `POST /api/auth/verify_passcode_and_reset_password/` |
+
+**Preconditions:** User is not authenticated. A registered account exists.
+
+**Steps:**
+
+1. User navigates to `/forgot-password`, enters valid email, clicks **Send verification code**.
+2. Frontend POSTs `{ email, locale }` to `/api/auth/send_passcode/`. Backend generates `PasswordCode` and sends localized email.
+3. UI transitions to step = `code`. User sees Code + New Password + Confirm Password fields.
+4. User enters the 6-digit code and a password that passes `validate_password()` (≥8 chars, not all-numeric, not common).
+5. Frontend POSTs `{ email, code, new_password }` to `/api/auth/verify_passcode_and_reset_password/`.
+6. Backend verifies code (not used, not expired), sets new password, marks code used. Returns HTTP 200.
+7. Success message shown; user redirected to `/sign-in`.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| Email not registered | API returns `200` with generic message (no user enumeration) |
+| Invalid / expired code | `400 { error: "Invalid or expired code" }` |
+| Weak password (< 8 chars, common, all-numeric) | `400 { error: "..." }` from `validate_password()` |
+| Passwords do not match | Client-side error — no API call |
 | "Back to email" clicked | UI returns to step A |
+
+---
+
+### auth-login-redirect
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | guest |
+| **Frontend route** | `/sign-in?redirect=<path>` |
+| **API endpoints** | `POST /api/auth/sign_in/` |
+
+**Preconditions:** User lands on `/sign-in` with a `?redirect=` query param (typically set by a protected-route gate).
+
+**Steps:**
+
+1. Browser navigates to `/sign-in?redirect=/my-applications`.
+2. `safeRedirectTarget()` validates the param: accepts `/`-starting paths, rejects absolute URLs and `//host` paths.
+3. User enters valid credentials and submits.
+4. On success, `router.replace('/my-applications')` fires instead of `router.replace('/')`.
+5. User lands on the intended page.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| `redirect=https://evil.com` | Unsafe — falls back to `/` |
+| `redirect=//host/path` | Unsafe (protocol-relative) — falls back to `/` |
+| No `redirect` param | Falls back to `ROUTES.HOME` (`/`) |
+
+---
+
+### auth-sign-up-success
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | guest |
+| **Frontend route** | `/sign-up` |
+| **API endpoints** | `POST /api/auth/sign_up/` |
+
+**Preconditions:** User is not authenticated. Email not yet registered.
+
+**Steps:**
+
+1. User navigates to `/sign-up`.
+2. User fills all required fields: first name, last name, email, password, confirm password, and accepts terms.
+3. Passwords match and meet strength requirements.
+4. User submits form.
+5. API creates account, returns tokens or redirects to sign-in.
+6. User lands on `/sign-in` (or home) after successful registration.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| Email already registered | `400` error — email taken message shown |
+| Passwords don't match | Client-side validation — no API call |
+| Terms not accepted | Form blocked — no API call |
 
 ---
 
@@ -2576,18 +2656,18 @@ Use this document to understand each flow's steps, branching conditions, role re
 | Field | Value |
 |-------|-------|
 | **Priority** | P2 |
-| **Roles** | web_manager, admin |
+| **Roles** | all authenticated (adopter, shelter_admin, admin, veterinarian, web_manager) |
 | **Frontend route** | `/manual` |
 | **API endpoints** | None (static content) |
 
-**Preconditions:** User is authenticated as `web_manager`, `admin`, or `is_staff`.
+**Preconditions:** User is authenticated (any role). Unauthenticated users are redirected to `/sign-in`.
 
 **Steps:**
 
 1. User navigates to `/manual`.
-2. Layout checks role via `canAccessStaffArea(user)`. Unauthenticated or unauthorized roles see `AdminAccessDenied` and are redirected to `/sign-in`.
-3. Page renders a sticky search bar (Fuse.js, Cmd/Ctrl+K shortcut) and a collapsible sidebar with 9 sections.
-4. "Cómo empezar" (`getting-started`) and "Rol: Web Manager" sections are highlighted as "Empieza aquí". All content is non-technical (~72 processes covering all roles).
+2. Layout calls `useRequireAuth()`. Unauthenticated → redirected to `/sign-in`. Authenticated → content rendered.
+3. `filterByRole(user.role)` determines which of the 9 sections are visible. web_manager / admin see all sections; other roles see their subset.
+4. Page renders a sticky search bar (Fuse.js, Cmd/Ctrl+K shortcut) and a collapsible sidebar with the visible sections.
 5. User expands a section in the sidebar and clicks a process anchor link.
 6. Page scrolls smoothly to the `ProcessCard` with that `id`; a teal ring highlights the card for 1.6 s.
 
@@ -2596,8 +2676,8 @@ Use this document to understand each flow's steps, branching conditions, role re
 | Condition | Outcome |
 |-----------|---------|
 | Unauthenticated | `useRequireAuth` redirects to `/sign-in` |
-| Role = adopter / shelter_admin / veterinarian | `AdminAccessDenied` shown, no content |
-| Role = web_manager / admin, or `is_staff = true` | Full manual rendered |
+| Role = adopter | Sees getting-started + adopter sections; staff sections hidden |
+| Role = web_manager / admin | Full manual rendered (all 9 sections) |
 
 ---
 
@@ -2606,17 +2686,17 @@ Use this document to understand each flow's steps, branching conditions, role re
 | Field | Value |
 |-------|-------|
 | **Priority** | P2 |
-| **Roles** | web_manager, admin |
+| **Roles** | all authenticated (adopter, shelter_admin, admin, veterinarian, web_manager) |
 | **Frontend route** | `/manual` |
 | **API endpoints** | None (client-side Fuse.js index) |
 
-**Preconditions:** Manual page is loaded as `web_manager` or `admin`.
+**Preconditions:** Manual page is loaded by any authenticated user.
 
 **Steps:**
 
 1. User types a query into the search input (or presses Cmd/Ctrl+K to focus it).
-2. `useManualSearch` runs Fuse.js fuzzy search over ~72 processes across 9 sections (title weight 0.5, keywords 0.25, summary 0.15, steps 0.07).
-3. Dropdown appears below the input with up to 12 ranked results showing title, role badge, summary snippet, and route.
+2. `useManualSearch` runs Fuse.js fuzzy search over the role-filtered sections (title 0.5, keywords 0.25, summary 0.15, steps 0.07). Results respect the user's role-filtered section visibility.
+3. Dropdown appears with up to 12 ranked results showing title, role badge, summary snippet, and route.
 4. User navigates with ↑/↓ keys; highlighted result changes.
 5. User presses Enter (or clicks a result): dropdown closes, page scrolls to the matching `ProcessCard`, ring highlight fires.
 6. User presses Esc: query clears and input loses focus.
@@ -2628,6 +2708,35 @@ Use this document to understand each flow's steps, branching conditions, role re
 | Query produces no matches | "Sin resultados" / "No results" shown in dropdown |
 | Query is cleared | Dropdown disappears; `isSearching = false` |
 | Multiple rapid keystrokes | `useDeferredValue` defers re-indexing; UI stays responsive |
+
+---
+
+### manual-role-filter
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P3 |
+| **Roles** | adopter, shelter_admin, veterinarian |
+| **Frontend route** | `/manual` |
+| **API endpoints** | None |
+
+**Preconditions:** User is authenticated as a non-staff role.
+
+**Steps:**
+
+1. User with role `adopter`, `shelter_admin`, or `veterinarian` navigates to `/manual`.
+2. `filterManualSectionsForRole(user.role)` runs, returning only sections relevant to that role.
+3. Sidebar shows only the filtered sections (e.g., adopter sees `getting-started`, `public-views`, `adopter`; staff sections like `web-manager` are absent).
+4. Page body renders only the visible sections and their `ProcessCard` entries.
+5. Search index is built from the filtered sections — staff-only processes do not appear in results.
+
+**Branching conditions:**
+
+| Condition | Outcome |
+|-----------|---------|
+| Role = web_manager / admin | `filterByRole` returns all sections — no filtering |
+| Role = veterinarian | Sees getting-started, public-views, vet sections |
+| Role = shelter_admin | Sees getting-started, public-views, shelter, cross-cutting |
 
 ---
 
@@ -2646,14 +2755,16 @@ Use this document to understand each flow's steps, branching conditions, role re
 1. Web manager navigates to `/my-profile`.
 2. Page renders common profile elements: avatar (initials), user full name (h1), role badge, profile completeness bar, Edit Profile button.
 3. Profile fields displayed: email, role (`web_manager`), phone (if set), city (if set).
-4. Role-specific activity section: not yet implemented (pending Phase 13b enriched dashboard); currently renders no role-specific widget.
+4. Right column heading: "Responsabilidades del web manager".
+5. `WebManagerProfileSection` renders: 3 stat cards (pending shelters, submitted applications, pending campaigns — fetched via 3 parallel API calls) and 4 quick action links (shelters, applications, campaigns, new campaign).
+6. Cross-links grid below: notifications, FAQ, terms.
 
 **Branching conditions:**
 
 | Condition | Outcome |
 |-----------|---------|
 | Unauthenticated access | Redirected to `/sign-in` |
-| Phase 13b complete | Web-manager widget section will appear in the right column |
+| API fetch fails | Stat cards show em-dash (—) |
 
 ---
 
@@ -2672,14 +2783,16 @@ Use this document to understand each flow's steps, branching conditions, role re
 1. Veterinarian navigates to `/my-profile`.
 2. Page renders common profile elements: avatar (initials), user full name (h1), role badge, profile completeness bar, Edit Profile button.
 3. Profile fields displayed: email, role (`veterinarian`), phone (if set), city (if set).
-4. Role-specific activity section: not yet implemented (pending Phase 13b); currently renders no role-specific widget.
+4. Right column heading: "Responsabilidades del veterinario".
+5. `VeterinarianProfileSection` renders: 4 stat cards (pending / in_progress / completed / overdue follow-up counts derived from `useFollowUpStore`) and one quick action link to `/veterinarian/follow-ups`.
+6. Cross-links grid below: notifications, FAQ, terms.
 
 **Branching conditions:**
 
 | Condition | Outcome |
 |-----------|---------|
 | Unauthenticated access | Redirected to `/sign-in` |
-| Phase 13b complete | Veterinarian widget section will appear in the right column |
+| No follow-ups assigned | Empty state message shown below stat cards |
 
 ---
 

@@ -220,4 +220,60 @@ test.describe('Web Manager — Profile', () => {
       await expect(profileName.or(profileHeading)).toBeVisible({ timeout: 15_000 });
     },
   );
+
+  test(
+    'should display WebManagerProfileSection with stat labels and quick actions',
+    { tag: [...WEB_MANAGER_PROFILE] },
+    async ({ page }) => {
+      await page.route('**/api/admin/shelters/all/**', (route: any) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ count: 3 }) }),
+      );
+      await page.route('**/api/admin/applications/**', (route: any) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ count: 5 }) }),
+      );
+      await page.route('**/api/admin/campaigns/**', (route: any) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ count: 2 }) }),
+      );
+      await page.route('**/user/profile-stats/**', (route: any) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockProfileStats) }),
+      );
+      await page.route('**/user/activity/**', (route: any) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockActivity) }),
+      );
+
+      await loginAndNavigate(page, 'web_manager', '/my-profile');
+
+      await expect(page.getByText(/Responsabilidades del web manager/i)).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByText(/Resumen del web manager/i)).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByText(/Refugios por verificar/i)).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByText(/Solicitudes nuevas/i)).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByText(/Campañas por revisar/i)).toBeVisible({ timeout: 10_000 });
+    },
+  );
+
+  test(
+    'should render quick action links in WebManagerProfileSection',
+    { tag: [...WEB_MANAGER_PROFILE] },
+    async ({ page }) => {
+      await page.route('**/api/admin/shelters/all/**', (route: any) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ count: 0 }) }),
+      );
+      await page.route('**/api/admin/applications/**', (route: any) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ count: 0 }) }),
+      );
+      await page.route('**/api/admin/campaigns/**', (route: any) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ count: 0 }) }),
+      );
+      await page.route('**/user/profile-stats/**', (route: any) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockProfileStats) }),
+      );
+      await page.route('**/user/activity/**', (route: any) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockActivity) }),
+      );
+
+      await loginAndNavigate(page, 'web_manager', '/my-profile');
+
+      await expect(page.getByRole('link', { name: /Nueva campaña/i })).toBeVisible({ timeout: 15_000 });
+    },
+  );
 });

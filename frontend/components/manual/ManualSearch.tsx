@@ -5,17 +5,18 @@ import { Search, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { useManualSearch } from '@/lib/manual/useManualSearch';
-import type { ManualLocale } from '@/lib/manual/types';
+import type { ManualLocale, ManualSection } from '@/lib/manual/types';
 import RoleBadge from './RoleBadge';
 
 type Props = {
   locale: ManualLocale;
+  sections?: ManualSection[];
 };
 
 const HIGHLIGHT_MS = 1600;
 const HIGHLIGHT_CLASSES = ['ring-2', 'ring-teal-500', 'ring-offset-2', 'ring-offset-surface-secondary'];
 
-export default function ManualSearch({ locale }: Props) {
+export default function ManualSearch({ locale, sections }: Props) {
   const t = useTranslations('manual');
   const k = (key: string) => t(`search.${key}`);
   const [query, setQuery] = useState('');
@@ -23,7 +24,7 @@ export default function ManualSearch({ locale }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const highlightTimerRef = useRef<number | null>(null);
   const highlightedElRef = useRef<HTMLElement | null>(null);
-  const { results, isSearching } = useManualSearch(query, locale);
+  const { results, isSearching } = useManualSearch(query, locale, sections);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {

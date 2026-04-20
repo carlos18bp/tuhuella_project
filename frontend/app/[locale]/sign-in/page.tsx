@@ -2,11 +2,13 @@
 
 import { useRouter } from '@/i18n/navigation';
 import { Link } from '@/i18n/navigation';
+import { useSearchParams } from 'next/navigation';
 import { FormEvent, useState, useEffect, useRef } from 'react';
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { PawPrint } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { useAuthStore } from '@/lib/stores/authStore';
 import { api } from '@/lib/services/http';
@@ -20,11 +22,22 @@ type GoogleUser = {
   picture?: string;
 };
 
+// Only allow same-origin absolute paths to prevent open-redirect abuse.
+function safeRedirectTarget(value: string | null | undefined): string | null {
+  if (!value) return null;
+  if (!value.startsWith('/') || value.startsWith('//')) return null;
+  return value;
+}
+
 export default function SignInPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const t = useTranslations('auth');
+  const tCommon = useTranslations('common');
   const { signIn, googleLogin } = useAuthStore();
 
   const hasGoogleClientId = Boolean(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+  const postLoginTarget = safeRedirectTarget(searchParams?.get('redirect')) ?? ROUTES.HOME;
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -45,7 +58,7 @@ export default function SignInPage() {
     setError('');
 
     if (siteKey && !captchaToken) {
-      setError('Please complete the captcha');
+      setError(t('captchaRequired'));
       return;
     }
 
@@ -53,9 +66,9 @@ export default function SignInPage() {
 
     try {
       await signIn({ email, password, captcha_token: captchaToken ?? undefined });
-      router.replace(ROUTES.HOME);
+      router.replace(postLoginTarget);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Invalid credentials');
+      setError(err.response?.data?.error || t('invalidCredentials'));
       recaptchaRef.current?.reset();
       setCaptchaToken(null);
     } finally {
@@ -69,7 +82,7 @@ export default function SignInPage() {
       setError('');
 
       if (!credentialResponse.credential) {
-        setError('Google login failed');
+        setError(t('googleLoginFailed'));
         return;
       }
 
@@ -87,17 +100,17 @@ export default function SignInPage() {
         family_name: decoded?.family_name,
         picture: decoded?.picture,
       });
-      
-      router.replace(ROUTES.HOME);
+
+      router.replace(postLoginTarget);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Google login failed');
+      setError(err.response?.data?.error || t('googleLoginFailed'));
     } finally {
       setLoading(false);
     }
   };
 
   const handleGoogleError = () => {
-    setError('Google login failed');
+    setError(t('googleLoginFailed'));
   };
 
   return (
@@ -109,35 +122,35 @@ export default function SignInPage() {
             <PawPrint className="h-5 w-5 text-teal-600 dark:text-teal-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-text-primary">Iniciar sesión</h1>
-            <p className="text-sm text-text-tertiary">Bienvenido de vuelta a Tu Huella</p>
+            <h1 className="text-2xl font-bold tracking-tight text-text-primary">{t('signInTitle')}</h1>
+            <p className="text-sm text-text-tertiary">{t('welcomeBack')}</p>
           </div>
         </div>
 
         <form className="space-y-4" onSubmit={onSubmit}>
           <div>
-            <label htmlFor="signin-email" className="block text-sm font-medium text-text-secondary mb-1.5">Correo electrónico</label>
+            <label htmlFor="signin-email" className="block text-sm font-medium text-text-secondary mb-1.5">{t('email')}</label>
             <input
               id="signin-email"
               className={authInputFieldClass}
-              placeholder="tu@email.com" 
+              placeholder="tu@email.com"
               type="email"
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
               required
             />
           </div>
-          
+
           <div>
-            <label htmlFor="signin-password" className="block text-sm font-medium text-text-secondary mb-1.5">Contraseña</label>
+            <label htmlFor="signin-password" className="block text-sm font-medium text-text-secondary mb-1.5">{t('password')}</label>
             <input
               id="signin-password"
               className={authInputFieldClass}
-              placeholder="••••••••" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              type="password" 
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              type="password"
               autoComplete="current-password"
               required
             />
@@ -159,7 +172,7 @@ export default function SignInPage() {
             type="submit"
             disabled={loading}
           >
-            {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+            {loading ? tCommon('signingIn') : t('signInButton')}
           </button>
 
           {error ? (
@@ -174,7 +187,7 @@ export default function SignInPage() {
             href="/forgot-password"
             className="inline-flex items-center justify-center min-h-11 text-sm text-text-tertiary hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
           >
-            ¿Olvidaste tu contraseña?
+            {t('forgotPassword')}
           </Link>
         </div>
 
@@ -184,7 +197,7 @@ export default function SignInPage() {
               <div className="w-full border-t border-border-primary"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-3 bg-surface-primary text-text-quaternary">O continúa con</span>
+              <span className="px-3 bg-surface-primary text-text-quaternary">{t('orContinueWith')}</span>
             </div>
           </div>
 
@@ -199,31 +212,31 @@ export default function SignInPage() {
               />
             </div>
           ) : (
-            <p className="mt-6 text-sm text-red-600 text-center">Missing NEXT_PUBLIC_GOOGLE_CLIENT_ID</p>
+            <p className="mt-6 text-sm text-red-600 text-center">{t('missingGoogleClientId')}</p>
           )}
         </div>
 
         <div className="mt-6 text-center text-sm">
-          <span className="text-text-tertiary">¿No tienes cuenta? </span>
+          <span className="text-text-tertiary">{t('noAccount')} </span>
           <Link
             href="/sign-up"
             className="text-teal-600 dark:text-teal-400 font-medium hover:text-teal-700 dark:hover:text-teal-300 transition-colors inline-flex items-center min-h-11"
           >
-            Regístrate
+            {t('registerLink')}
           </Link>
         </div>
 
         {siteKey && (
           <p className="mt-4 text-center text-[10px] text-text-quaternary leading-relaxed">
-            Protegido por reCAPTCHA de Google.{' '}
-            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline">Privacidad</a>
-            {' y '}
-            <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline">Términos</a>.
+            {t('recaptchaNoticePrefix')}{' '}
+            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline">{t('recaptchaNoticePrivacy')}</a>
+            {' '}{t('recaptchaNoticeAnd')}{' '}
+            <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline">{t('recaptchaNoticeTerms')}</a>.
           </p>
         )}
 
         <p className="mt-4 text-center text-[10px] text-text-quaternary">
-          Powered by{' '}
+          {t('poweredBy')}{' '}
           <a href="https://projectapp.co" target="_blank" rel="noopener noreferrer" className="hover:text-teal-500 transition-colors">
             ProjectApp.co
           </a>

@@ -1,6 +1,6 @@
 # Tuhuella — Active Context
 
-> Last updated: 2026-04-19 (Phase 16 — Manual Rewrite)
+> Last updated: 2026-04-20 (Phase 19 — Role Profile Sections + Manual Filtered by Role)
 
 ## Current State
 
@@ -84,6 +84,52 @@ The project is a mature animal adoption platform with complete backend and front
 | Frontend unit test files | 289+ |
 | E2E spec files | 20 |
 | E2E flow definitions | 98 |
+
+## Recently Completed: Phase 19 — Role Profile Sections + Manual Filtered by Role (2026-04-20)
+
+`veterinarian` and `web_manager` roles now have meaningful activity cards in `/my-profile`, and the in-app manual is open to all authenticated users with content filtered by role.
+
+**Profile sections:**
+- New `VeterinarianProfileSection`: stats grid (pending/in_progress/completed/overdue follow-ups) derived from `useFollowUpStore`; quick action to `/veterinarian/follow-ups`.
+- New `WebManagerProfileSection`: 3 stats (pending shelters, submitted applications, pending campaigns) via parallel `api.get` calls (local state, not store — avoids store pollution); 4 quick actions.
+- `my-profile/page.tsx`: role→heading lookup map replaces ternary chain; renders `<VeterinarianProfileSection>` and `<WebManagerProfileSection>` conditionally; new `crossActivityLinks` (notifications, FAQ, terms) rendered for non-adopter roles below the custom section.
+- i18n: added `profile.veterinarianResponsibilities`, `profile.webManagerResponsibilities`; extended `webManager.*` with `overviewTitle`, `pendingShelters`, `submittedApplications`, `pendingCampaigns`, `newCampaign`.
+
+**Manual open to all authenticated users:**
+- New `lib/manual/filterByRole.ts`: `canViewManualAudience` and `filterManualSectionsForRole`; `web_manager`/`admin` see all; others see `cross` + `public` + their own audience.
+- `manual/layout.tsx`: removed `canAccessStaffArea` gate; now only `useRequireAuth()`.
+- `manual/page.tsx`: computes `visibleSections = filterManualSectionsForRole(MANUAL_SECTIONS, user.role)` via `useMemo`; passes filtered list to sidebar, search, and body.
+- `ManualSearch.tsx` + `useManualSearch.ts`: optional `sections` prop (defaults to `MANUAL_SECTIONS`) so search index respects role filtering.
+- `manual.eyebrow` translation changed from "Solo para web managers y admins" to "Guía paso a paso de Tuhuella" / "Step-by-step Tuhuella guide".
+- Removed dead keys: `manual.accessDenied`, `webManager.totalShelters`.
+- `layout.test.tsx`: replaced denied-access assertions with `it.each` over all 5 roles asserting children render.
+- 58 tests passing across 6 test suites; lint clean.
+
+---
+
+## Recently Completed: Phase 18 — Auth Security Hardening (2026-04-20)
+
+End-to-end review and hardening of the password reset and sign-in flows (both backend + frontend).
+
+**Backend:**
+- Added `PasswordResetSendThrottle` (5/hr), `PasswordResetVerifyThrottle` (10/hr), `SignInThrottle` (10/min) — all `AnonRateThrottle` subclasses applied via `@throttle_classes`
+- Added `DEFAULT_THROTTLE_RATES` dict to `REST_FRAMEWORK` settings; rates are env-var overridable
+- Added `validate_password(new_password, user=user)` in `verify_passcode_and_reset_password` — placed **after** passcode validation to avoid user enumeration
+- Added `update_last_login(None, user)` before token generation in both `sign_in()` and `google_login()`
+- `user.save(update_fields=['password'])` + `password_code.save(update_fields=['used'])` for targeted DB writes
+- `send_passcode` now reads `locale` from request body and passes to `email_utils`
+- English password reset email template (`emails/password_reset_code_en.html`, extends base_email.html)
+- Locale-aware dispatch via `PASSWORD_RESET_EMAIL_LOCALES` dict in `email_utils.py`
+- New tests: `test_verify_passcode_rejects_weak_password`, `test_send_passcode_passes_locale_to_email_helper`, `test_sign_in_updates_last_login`, `test_sign_in_rate_limited`, English/fallback email locale tests
+
+**Frontend:**
+- `forgot-password/page.tsx`: fully i18n'd with `useTranslations('forgotPassword')` + `useLocale()`; passes locale to API
+- `sign-in/page.tsx`: fully i18n'd; added `safeRedirectTarget()` open-redirect guard + `?redirect=` support (safe relative paths only); `useSearchParams` from `next/navigation`
+- New `forgotPassword` namespace (~28 keys) in `messages/{es,en}.json`; extended `auth` namespace (14 keys); `auth.signingIn` removed (reuses `common.signingIn`)
+- `authStore.sendPasswordResetCode` accepts optional `locale` param
+- New sign-in tests: redirect safety (`it.each` for unsafe URLs + safe path), i18n string assertions updated to Spanish
+
+---
 
 ## Recently Completed: Phase 17 — Header UI/UX Overhaul + Responsive Optimization (2026-04-19)
 

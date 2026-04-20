@@ -156,7 +156,7 @@ tuhuella_project/
 │   │   ├── management/commands/  # 21 commands
 │   │   ├── services/        # email_service, notification_service, notification_templates
 │   │   ├── utils/           # auth_utils, email_utils, recaptcha, shelter_access (is_veterinarian, is_web_manager)
-│   │   ├── templates/emails/ # Branded HTML email templates (base + 3 specific)
+│   │   ├── templates/emails/ # Branded HTML email templates (base + 4 specific, incl. password_reset_code_en.html)
 │   │   ├── tests/           # 99+ test files (models, serializers, views, services, utils, commands)
 │   │   └── admin.py         # MiHuellaAdminSite (26 admin classes)
 │   ├── base_feature_project/
@@ -205,8 +205,10 @@ tuhuella_project/
 | Authentication | JWT (access + refresh) via `djangorestframework-simplejwt` |
 | OAuth | Google sign-in with server-side token verification |
 | Authorization | Role-based (`adopter`, `shelter_admin`, `admin`, `veterinarian`, `web_manager`) + object-level queryset filtering; helpers in `utils/shelter_access.py` |
+| Rate Limiting | `AnonRateThrottle` subclasses on all public auth endpoints: `SignInThrottle` (10/min), `PasswordResetSendThrottle` (5/hr), `PasswordResetVerifyThrottle` (10/hr); rates override-able via env vars |
 | CSRF | Django middleware (session endpoints) |
-| Input Validation | DRF serializers (server) + Zod-ready (client) |
+| Input Validation | DRF serializers (server) + `validate_password()` on reset + Zod-ready (client) |
+| Open Redirect | `safeRedirectTarget()` in sign-in page rejects absolute URLs and protocol-relative `//host` paths |
 | Secrets | `.env` files, never committed |
 | Headers | HSTS, X-Frame-Options, Content-Type-Nosniff (prod) |
 

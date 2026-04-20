@@ -12,24 +12,49 @@ from django.template.loader import render_to_string
 TEAM_EMAIL = 'team@proyectapps.co'
 
 
-def send_password_reset_code(user, code):
+PASSWORD_RESET_EMAIL_LOCALES = {
+    'es': {
+        'subject': 'Mi Huella - Codigo de restablecimiento',
+        'template': 'emails/password_reset_code.html',
+        'text': (
+            'Hola {first_name},\n\n'
+            'Tu codigo de restablecimiento es: {code}\n\n'
+            'Este codigo expira en 15 minutos.\n\n'
+            'Si no solicitaste esto, ignora este correo.\n\n'
+            '— Mi Huella'
+        ),
+    },
+    'en': {
+        'subject': 'Mi Huella - Password reset code',
+        'template': 'emails/password_reset_code_en.html',
+        'text': (
+            'Hello {first_name},\n\n'
+            'Your password reset code is: {code}\n\n'
+            'This code expires in 15 minutes.\n\n'
+            'If you did not request this, you can safely ignore this email.\n\n'
+            '— Mi Huella'
+        ),
+    },
+}
+
+
+def send_password_reset_code(user, code, locale='es'):
     """
     Send password reset code via email with branded HTML template.
 
     :param user: User instance
     :param code: 6-digit code
+    :param locale: 'es' (default) or 'en'. Unknown locales fall back to 'es'.
     """
-    subject = 'Mi Huella - Codigo de restablecimiento'
-    text_message = (
-        f'Hola {user.first_name},\n\n'
-        f'Tu codigo de restablecimiento es: {code}\n\n'
-        f'Este codigo expira en 15 minutos.\n\n'
-        f'Si no solicitaste esto, ignora este correo.\n\n'
-        f'— Mi Huella'
+    variant = PASSWORD_RESET_EMAIL_LOCALES.get(
+        (locale or '').lower(),
+        PASSWORD_RESET_EMAIL_LOCALES['es'],
     )
+    subject = variant['subject']
+    text_message = variant['text'].format(first_name=user.first_name, code=code)
 
     try:
-        html_message = render_to_string('emails/password_reset_code.html', {
+        html_message = render_to_string(variant['template'], {
             'user': user,
             'code': code,
         })

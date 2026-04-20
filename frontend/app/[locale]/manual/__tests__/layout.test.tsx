@@ -50,44 +50,16 @@ describe('ManualLayout', () => {
   beforeEach(resetAuth);
   afterAll(resetAuth);
 
-  it('denies access for adopter role', () => {
-    setUser({ ...baseUser, role: 'adopter' });
-    render(
-      <ManualLayout>
-        <p>visible content</p>
-      </ManualLayout>,
-    );
-    expect(screen.getByText(/Acceso denegado/i)).toBeInTheDocument();
-    expect(screen.queryByText('visible content')).not.toBeInTheDocument();
-  });
-
-  it('renders children for web_manager role', () => {
-    setUser({ ...baseUser, role: 'web_manager' });
-    render(
-      <ManualLayout>
-        <p>visible content</p>
-      </ManualLayout>,
-    );
-    expect(screen.getByText('visible content')).toBeInTheDocument();
-  });
-
-  it('renders children for admin role', () => {
-    setUser({ ...baseUser, role: 'admin' });
-    render(
-      <ManualLayout>
-        <p>visible content</p>
-      </ManualLayout>,
-    );
-    expect(screen.getByText('visible content')).toBeInTheDocument();
-  });
-
-  it('renders children for staff flag even without web_manager/admin role', () => {
-    setUser({ ...baseUser, role: 'adopter', is_staff: true });
-    render(
-      <ManualLayout>
-        <p>visible content</p>
-      </ManualLayout>,
-    );
-    expect(screen.getByText('visible content')).toBeInTheDocument();
-  });
+  it.each(['adopter', 'shelter_admin', 'veterinarian', 'web_manager', 'admin'] as const)(
+    'renders children for %s role',
+    (role) => {
+      setUser({ ...baseUser, role });
+      render(
+        <ManualLayout>
+          <p>visible content</p>
+        </ManualLayout>,
+      );
+      expect(screen.getByText('visible content')).toBeInTheDocument();
+    },
+  );
 });

@@ -20,6 +20,9 @@ export const AUTH_SIGN_IN_FORM = ['@flow:auth-sign-in-form', '@module:auth', '@p
 export const AUTH_LOGIN_INVALID = ['@flow:auth-login-invalid', '@module:auth', '@priority:P1'];
 export const AUTH_SIGN_UP_FORM = ['@flow:auth-sign-up-form', '@module:auth', '@priority:P1'];
 export const AUTH_FORGOT_PASSWORD_FORM = ['@flow:auth-forgot-password-form', '@module:auth', '@priority:P2'];
+export const AUTH_FORGOT_PASSWORD_RESET = ['@flow:auth-forgot-password-reset', '@module:auth', '@priority:P2'];
+export const AUTH_LOGIN_REDIRECT = ['@flow:auth-login-redirect', '@module:auth', '@priority:P2'];
+export const AUTH_SIGN_UP_SUCCESS = ['@flow:auth-sign-up-success', '@module:auth', '@priority:P2'];
 export const AUTH_PROTECTED_REDIRECT = ['@flow:auth-protected-redirect', '@module:auth', '@priority:P1'];
 export const AUTH_ROLE_REDIRECT = ['@flow:auth-role-redirect', '@module:auth', '@priority:P2'];
 export const AUTH_SIGN_OUT = ['@flow:auth-sign-out', '@module:auth', '@priority:P2'];
@@ -177,6 +180,7 @@ export const WEB_MANAGER_CAMPAIGN_CREATE = ['@flow:web-manager-campaign-create',
 // ── Manual ──
 export const MANUAL_BROWSE = ['@flow:manual-browse', '@module:manual', '@priority:P2'];
 export const MANUAL_SEARCH = ['@flow:manual-search', '@module:manual', '@priority:P2'];
+export const MANUAL_ROLE_FILTER = ['@flow:manual-role-filter', '@module:manual', '@priority:P3'];
 
 // ── Profile (additional roles) ──
 export const WEB_MANAGER_PROFILE = ['@flow:web-manager-profile', '@module:web-manager', '@priority:P3'];

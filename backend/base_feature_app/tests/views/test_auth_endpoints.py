@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import pytest
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.test import override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -11,6 +12,14 @@ from rest_framework import status
 
 from base_feature_app.models import PasswordCode
 from base_feature_app.views import auth as auth_views
+
+
+@pytest.fixture(autouse=True)
+def _clear_throttle_cache():
+    """Reset DRF throttle counters between tests so rate limits don't leak."""
+    cache.clear()
+    yield
+    cache.clear()
 
 
 class DummyResponse:
@@ -161,6 +170,55 @@ def test_sign_in_success(mock_captcha, api_client):
 
     assert response.status_code == status.HTTP_200_OK
     assert 'access' in response.json()
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.views.auth.verify_recaptcha', return_value=True)
+def test_sign_in_updates_last_login(mock_captcha, api_client):
+    """A successful sign-in must stamp `last_login` on the user."""
+    User = get_user_model()
+    user = User.objects.create_user(email='lastlogin@example.com', password='pass1234')
+    assert user.last_login is None
+
+    response = api_client.post(
+        reverse('sign_in'),
+        {'email': user.email, 'password': 'pass1234'},
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    user.refresh_from_db()
+    assert user.last_login is not None
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.views.auth.verify_recaptcha', return_value=True)
+def test_sign_in_rate_limited(mock_captcha, api_client):
+    """After exceeding the per-minute quota, sign_in must respond with 429."""
+    from base_feature_app.views.auth import SignInThrottle
+
+    original_get_rate = SignInThrottle.get_rate
+    SignInThrottle.get_rate = lambda self: '3/minute'
+    try:
+        User = get_user_model()
+        User.objects.create_user(email='brute@example.com', password='pass1234')
+
+        for _ in range(3):
+            api_client.post(
+                reverse('sign_in'),
+                {'email': 'brute@example.com', 'password': 'wrong'},
+                format='json',
+            )
+
+        response = api_client.post(
+            reverse('sign_in'),
+            {'email': 'brute@example.com', 'password': 'pass1234'},
+            format='json',
+        )
+
+        assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
+    finally:
+        SignInThrottle.get_rate = original_get_rate
 
 
 @pytest.mark.django_db
@@ -448,7 +506,7 @@ def test_verify_passcode_resets_password(api_client):
 
     response = api_client.post(
         reverse('verify_passcode_reset'),
-        {'email': user.email, 'code': '333333', 'new_password': 'newpass'},
+        {'email': user.email, 'code': '333333', 'new_password': 'NewStrongPass123'},
         format='json',
     )
 
@@ -457,7 +515,56 @@ def test_verify_passcode_resets_password(api_client):
     user.refresh_from_db()
 
     assert password_code.used is True
-    assert user.check_password('newpass') is True
+    assert user.check_password('NewStrongPass123') is True
+
+
+@pytest.mark.django_db
+def test_verify_passcode_rejects_weak_password(api_client):
+    """Password reset must fail with 400 when the new password is below the
+    project's AUTH_PASSWORD_VALIDATORS (e.g. < 8 chars), even with a valid code."""
+    User = get_user_model()
+    user = User.objects.create_user(email='weak@example.com', password='pass1234')
+    PasswordCode.objects.create(user=user, code='444444')
+
+    response = api_client.post(
+        reverse('verify_passcode_reset'),
+        {'email': user.email, 'code': '444444', 'new_password': 'short'},
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    body = response.json()
+    assert body['error'] == 'Password does not meet requirements'
+    assert isinstance(body.get('details'), list) and body['details']
+    user.refresh_from_db()
+    assert user.check_password('pass1234') is True
+
+
+@pytest.mark.django_db
+def test_send_passcode_passes_locale_to_email_helper(api_client, monkeypatch):
+    """send_passcode must forward the requested locale down to send_password_reset_code."""
+    User = get_user_model()
+    user = User.objects.create_user(email='locale@example.com', password='pass1234')
+
+    captured = {}
+
+    def fake_send(user_arg, code_arg, locale='es'):
+        captured['user'] = user_arg
+        captured['code'] = code_arg
+        captured['locale'] = locale
+        return True
+
+    monkeypatch.setattr(auth_views, 'send_password_reset_code', fake_send)
+
+    response = api_client.post(
+        reverse('send_passcode'),
+        {'email': user.email, 'locale': 'en'},
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert captured['locale'] == 'en'
+    assert captured['user'] == user
 
 
 @pytest.mark.django_db

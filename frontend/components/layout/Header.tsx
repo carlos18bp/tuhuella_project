@@ -750,7 +750,7 @@ function buildRolePanel(
     case 'web_manager':
       return {
         label: t('webManagerPanel'),
-        color: { text: 'text-sky-700', hover: 'hover:bg-sky-50' },
+        color: { text: 'text-text-secondary', hover: 'hover:bg-surface-hover hover:text-text-primary' },
         icon: <ClipboardList className="h-4 w-4" />,
         items: [
           { label: t('applications'), href: ROUTES.WEB_MANAGER_APPLICATIONS, icon: <ClipboardList className="h-4 w-4" /> },

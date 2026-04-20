@@ -40,6 +40,28 @@ def test_send_password_reset_code_returns_false_on_smtp_error():
     assert result is False
 
 
+@pytest.mark.django_db
+def test_send_password_reset_code_uses_english_template_and_subject_for_en_locale():
+    user = UserFactory(first_name='Laura')
+    with patch('base_feature_app.utils.email_utils.send_mail') as mock_send, \
+         patch('base_feature_app.utils.email_utils.render_to_string', return_value='<html/>') as mock_render:
+        send_password_reset_code(user, '123456', locale='en')
+    # subject is the first positional arg to send_mail
+    assert mock_send.call_args.args[0] == 'Mi Huella - Password reset code'
+    # English template selected
+    assert mock_render.call_args.args[0] == 'emails/password_reset_code_en.html'
+
+
+@pytest.mark.django_db
+def test_send_password_reset_code_defaults_to_spanish_for_unknown_locale():
+    user = UserFactory(first_name='Laura')
+    with patch('base_feature_app.utils.email_utils.send_mail') as mock_send, \
+         patch('base_feature_app.utils.email_utils.render_to_string', return_value='<html/>') as mock_render:
+        send_password_reset_code(user, '123456', locale='fr')
+    assert mock_send.call_args.args[0] == 'Mi Huella - Codigo de restablecimiento'
+    assert mock_render.call_args.args[0] == 'emails/password_reset_code.html'
+
+
 def test_send_verification_code_sends_to_correct_email():
     with patch('base_feature_app.utils.email_utils.send_mail') as mock_send, \
          patch('base_feature_app.utils.email_utils.render_to_string', return_value='<html/>'):

@@ -9,6 +9,11 @@ import { jwtDecode } from 'jwt-decode';
 
 let mockGoogleCredential: string | null = 'token';
 let mockGoogleError = false;
+let mockSearchParams = new URLSearchParams();
+
+jest.mock('next/navigation', () => ({
+  useSearchParams: () => mockSearchParams,
+}));
 
 jest.mock('@react-oauth/google', () => ({
   GoogleLogin: ({ onSuccess, onError }: any) => (
@@ -70,6 +75,7 @@ describe('SignInPage', () => {
     jest.clearAllMocks();
     mockGoogleCredential = 'token';
     mockGoogleError = false;
+    mockSearchParams = new URLSearchParams();
     process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID = 'test-client';
     user = userEvent.setup();
   });
@@ -89,7 +95,7 @@ describe('SignInPage', () => {
 
     render(<SignInPage />);
 
-    expect(screen.getByText('Missing NEXT_PUBLIC_GOOGLE_CLIENT_ID')).toBeInTheDocument();
+    expect(screen.getByText('Falta configurar NEXT_PUBLIC_GOOGLE_CLIENT_ID')).toBeInTheDocument();
   });
 
   it('signs in successfully and redirects', async () => {
@@ -135,7 +141,7 @@ describe('SignInPage', () => {
     fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'password123' } });
     fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
 
-    expect(await screen.findByText('Invalid credentials')).toBeInTheDocument();
+    expect(await screen.findByText('Credenciales inválidas')).toBeInTheDocument();
   });
 
   it('shows default error when sign in error payload is missing', async () => {
@@ -149,7 +155,7 @@ describe('SignInPage', () => {
     fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'password123' } });
     fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
 
-    expect(await screen.findByText('Invalid credentials')).toBeInTheDocument();
+    expect(await screen.findByText('Credenciales inválidas')).toBeInTheDocument();
   });
 
   it('handles Google login success', async () => {
@@ -189,7 +195,7 @@ describe('SignInPage', () => {
 
     await user.click(screen.getByRole('button', { name: 'Google Login' }));
 
-    expect(await screen.findByText('Google login failed')).toBeInTheDocument();
+    expect(await screen.findByText('Error al iniciar sesión con Google')).toBeInTheDocument();
   });
 
   it('shows error when Google login fails with response error', async () => {
@@ -227,7 +233,7 @@ describe('SignInPage', () => {
 
     await user.click(screen.getByRole('button', { name: 'Google Login' }));
 
-    expect(await screen.findByText('Google login failed')).toBeInTheDocument();
+    expect(await screen.findByText('Error al iniciar sesión con Google')).toBeInTheDocument();
   });
 
   it('handles Google login error callback', async () => {
@@ -239,7 +245,7 @@ describe('SignInPage', () => {
 
     await user.click(screen.getByRole('button', { name: 'Google Login' }));
 
-    expect(await screen.findByText('Google login failed')).toBeInTheDocument();
+    expect(await screen.findByText('Error al iniciar sesión con Google')).toBeInTheDocument();
   });
 
   it('continues when jwt decode fails', async () => {
@@ -287,7 +293,7 @@ describe('SignInPage', () => {
     fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'password123' } });
     fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
 
-    expect(await screen.findByText('Please complete the captcha')).toBeInTheDocument();
+    expect(await screen.findByText('Por favor completa el captcha')).toBeInTheDocument();
     expect(signIn).not.toHaveBeenCalled();
   });
 
@@ -303,5 +309,40 @@ describe('SignInPage', () => {
     await waitFor(() => {
       expect(screen.getByText(/Protegido por reCAPTCHA/)).toBeInTheDocument();
     });
+  });
+
+  it('redirects to safe relative ?redirect target after sign-in', async () => {
+    mockSearchParams = new URLSearchParams('redirect=/my-applications');
+    const signIn = jest.fn().mockResolvedValue(undefined);
+    setAuthStoreState({ signIn, googleLogin: jest.fn() });
+    const replace = jest.fn();
+    mockUseRouter.mockReturnValue({ replace });
+
+    render(<SignInPage />);
+
+    fireEvent.change(screen.getByPlaceholderText('tu@email.com'), { target: { value: 'user@example.com' } });
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
+
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/my-applications'));
+  });
+
+  it.each([
+    ['absolute external URL', 'redirect=https://evil.example.com/steal'],
+    ['protocol-relative //host', 'redirect=//evil.example.com'],
+  ])('ignores unsafe ?redirect target (%s) and falls back to home', async (_label, query) => {
+    mockSearchParams = new URLSearchParams(query);
+    const signIn = jest.fn().mockResolvedValue(undefined);
+    setAuthStoreState({ signIn, googleLogin: jest.fn() });
+    const replace = jest.fn();
+    mockUseRouter.mockReturnValue({ replace });
+
+    render(<SignInPage />);
+
+    fireEvent.change(screen.getByPlaceholderText('tu@email.com'), { target: { value: 'user@example.com' } });
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
+
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/'));
   });
 });

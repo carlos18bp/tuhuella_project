@@ -126,6 +126,11 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    'DEFAULT_THROTTLE_RATES': {
+        'password_reset': os.getenv('DJANGO_THROTTLE_PASSWORD_RESET', '5/hour'),
+        'password_reset_verify': os.getenv('DJANGO_THROTTLE_PASSWORD_RESET_VERIFY', '10/hour'),
+        'sign_in': os.getenv('DJANGO_THROTTLE_SIGN_IN', '10/minute'),
+    },
 }
 
 GOOGLE_OAUTH_CLIENT_ID = os.getenv('DJANGO_GOOGLE_CLIENT_ID', '').strip()

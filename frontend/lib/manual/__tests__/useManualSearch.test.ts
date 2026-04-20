@@ -1,6 +1,8 @@
 import { renderHook } from '@testing-library/react';
+import { BookOpen } from 'lucide-react';
 
 import { useManualSearch } from '../useManualSearch';
+import type { ManualSection } from '../types';
 
 describe('useManualSearch', () => {
   it('returns empty results when the query is blank', () => {
@@ -33,5 +35,41 @@ describe('useManualSearch', () => {
     const { result } = renderHook(() => useManualSearch('zxqvbnmplk', 'es'));
     expect(result.current.results).toHaveLength(0);
     expect(result.current.isSearching).toBe(true);
+  });
+
+  it('restricts search to the provided sections subset', () => {
+    const customSections: ManualSection[] = [
+      {
+        id: 'custom',
+        title: { es: 'Custom', en: 'Custom' },
+        icon: BookOpen,
+        audience: 'cross',
+        processes: [
+          {
+            id: 'custom-only',
+            audience: 'cross',
+            title: { es: 'Proceso único personalizado', en: 'Custom only process' },
+            summary: { es: 'resumen', en: 'summary' },
+            why: { es: '', en: '' },
+            steps: { es: ['paso uno'], en: ['step one'] },
+            keywords: ['personalizado'],
+          },
+        ],
+      },
+    ];
+
+    const { result } = renderHook(() =>
+      useManualSearch('personalizado', 'es', customSections),
+    );
+    expect(result.current.results).toHaveLength(1);
+    expect(result.current.results[0].process.id).toBe('custom-only');
+  });
+
+  it('finds nothing when the query matches global content excluded by custom sections', () => {
+    const emptySubset: ManualSection[] = [];
+    const { result } = renderHook(() =>
+      useManualSearch('adopción', 'es', emptySubset),
+    );
+    expect(result.current.results).toHaveLength(0);
   });
 });

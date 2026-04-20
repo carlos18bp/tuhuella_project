@@ -1,9 +1,12 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 
 import { MANUAL_SECTIONS } from '@/lib/manual/content';
+import { filterManualSectionsForRole } from '@/lib/manual/filterByRole';
 import type { ManualLocale } from '@/lib/manual/types';
+import { useAuthStore } from '@/lib/stores/authStore';
 import ManualSidebar from '@/components/manual/ManualSidebar';
 import ManualSearch from '@/components/manual/ManualSearch';
 import ProcessCard from '@/components/manual/ProcessCard';
@@ -12,10 +15,16 @@ export default function ManualPage() {
   const rawLocale = useLocale();
   const locale: ManualLocale = rawLocale === 'en' ? 'en' : 'es';
   const t = useTranslations('manual');
+  const role = useAuthStore((s) => s.user?.role);
+
+  const visibleSections = useMemo(
+    () => filterManualSectionsForRole(MANUAL_SECTIONS, role),
+    [role],
+  );
 
   return (
     <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
-      <ManualSidebar sections={MANUAL_SECTIONS} locale={locale} />
+      <ManualSidebar sections={visibleSections} locale={locale} />
 
       <div className="min-w-0 flex-1">
         <header className="mb-6">
@@ -27,11 +36,11 @@ export default function ManualPage() {
         </header>
 
         <div className="sticky top-20 z-30 mb-8">
-          <ManualSearch locale={locale} />
+          <ManualSearch sections={visibleSections} locale={locale} />
         </div>
 
         <div className="flex flex-col gap-10">
-          {MANUAL_SECTIONS.map((section) => {
+          {visibleSections.map((section) => {
             const Icon = section.icon;
             return (
               <section key={section.id} id={`section-${section.id}`} className="scroll-mt-24">

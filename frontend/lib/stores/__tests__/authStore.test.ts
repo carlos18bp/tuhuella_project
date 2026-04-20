@@ -182,7 +182,7 @@ describe('authStore', () => {
       await useAuthStore.getState().sendPasswordResetCode('user@example.com');
     });
 
-    expect(mockApi.post).toHaveBeenCalledWith('/auth/send_passcode/', { email: 'user@example.com' });
+    expect(mockApi.post).toHaveBeenCalledWith('/auth/send_passcode/', { email: 'user@example.com', locale: undefined });
   });
 
   it('resets password', async () => {

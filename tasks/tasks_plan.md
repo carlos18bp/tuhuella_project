@@ -1,6 +1,6 @@
 # Tuhuella — Feature Task Plan
 
-> Last updated: 2026-04-19 (Phase 16 manual rewrite)
+> Last updated: 2026-04-20 (Phase 19 — Role Profile Sections + Manual Filtered by Role)
 
 ## Status Legend
 - ✅ Done
@@ -290,7 +290,7 @@
 | `components/manual/ProcessCard.tsx` | ✅ | Anchor card: title/badge/why/steps/route/tips callout. Endpoints block removed; route section simplified to single `<section>`. |
 | `components/manual/ManualSidebar.tsx` | ✅ | Collapsible accordion, mobile toggle + desktop sticky |
 | `components/manual/ManualSearch.tsx` | ✅ | Keyboard nav, Cmd/Ctrl+K shortcut, scroll-to-highlight with timer cleanup |
-| `app/[locale]/manual/layout.tsx` — role gate | ✅ | useRequireAuth + canAccessStaffArea → AdminAccessDenied |
+| `app/[locale]/manual/layout.tsx` — role gate | ✅ | useRequireAuth + canAccessStaffArea → AdminAccessDenied (gate removed in Phase 19 — open to all authenticated users) |
 | `app/[locale]/manual/page.tsx` — shell | ✅ | Sticky search + sidebar + ProcessCards |
 | `messages/{es,en}.json` — manual namespace | ✅ | card.endpoints removed; card.route → "Dónde encontrarlo" / "Where to find it"; card.tips neutral label |
 | `package.json` — fuse.js ^7.3.0 | ✅ | |
@@ -315,6 +315,42 @@
 | `messages/{es,en}.json` — new nav.* keys | ✅ | panel, account, openAccountMenu, openPanelMenu, myApplications, myDonations, mySponsorships, myNotifications, dashboard, applications, animalsManage, campaignsManage, donations, updates, settings, approveShelters, moderation, payments, metrics, blogAdmin, followUps, sheltersManage |
 | Header tests updated (27 → 29 passing) | ✅ | openAccountMenu helper, role panel tests, mobile bell tests, 99+ badge toHaveLength(2) |
 | Header.tsx 465 → 610 lines; DropdownMenu.tsx 133 lines | ✅ | TypeScript clean |
+
+## Phase 18 — Auth Security Hardening (2026-04-20)
+| Task | Status | Notes |
+|------|--------|-------|
+| `PasswordResetSendThrottle` (5/hr) + `PasswordResetVerifyThrottle` (10/hr) | ✅ | `@throttle_classes` on `send_passcode` + `verify_passcode_and_reset_password` |
+| `SignInThrottle` (10/min) | ✅ | Applied to both `sign_in` and `google_login` |
+| `DEFAULT_THROTTLE_RATES` in `settings.py` | ✅ | All three rates env-var overridable |
+| `validate_password()` enforcement in password reset | ✅ | After passcode validation — avoids user enumeration |
+| `update_last_login(None, user)` in `sign_in` + `google_login` | ✅ | Django standard helper |
+| `update_fields=['password']` + `update_fields=['used']` targeted saves | ✅ | |
+| `send_passcode` reads locale from request body | ✅ | Passes to `email_utils` |
+| English password reset email template (`password_reset_code_en.html`) | ✅ | Extends `base_email.html` |
+| `PASSWORD_RESET_EMAIL_LOCALES` dict in `email_utils.py` | ✅ | Locale-aware dispatch; defaults to Spanish |
+| `forgot-password/page.tsx`: full i18n + `useLocale()` + locale to API | ✅ | `useTranslations('forgotPassword')` |
+| `sign-in/page.tsx`: full i18n + `safeRedirectTarget()` + `?redirect=` param | ✅ | Rejects absolute URLs + `//host` paths |
+| `forgotPassword` namespace in `messages/{es,en}.json` (~28 keys) | ✅ | |
+| Extended `auth` namespace in `messages/{es,en}.json` (14 keys; removed duplicate `signingIn`) | ✅ | `common.signingIn` reused |
+| `authStore.sendPasswordResetCode`: optional `locale` param | ✅ | |
+| Backend tests: throttle (monkey-patch `get_rate`), weak password, locale email, `last_login` | ✅ | `_clear_throttle_cache` autouse fixture with `cache.clear()` |
+| Frontend sign-in tests: `it.each` redirect safety, i18n assertions | ✅ | |
+
+## Phase 19 — Role Profile Sections + Manual Filtered by Role (2026-04-20)
+| Task | Status | Notes |
+|------|--------|-------|
+| `VeterinarianProfileSection` component | ✅ | Stats from `useFollowUpStore`; fetches on mount if empty; quick action to `/veterinarian/follow-ups` |
+| `WebManagerProfileSection` component | ✅ | Parallel `api.get` via local state (not store); 3 stats + 4 quick actions |
+| `my-profile/page.tsx`: vet + web_manager headings | ✅ | Role→heading lookup map; `crossActivityLinks` for non-adopters |
+| `lib/manual/filterByRole.ts` | ✅ | `canViewManualAudience` + `filterManualSectionsForRole`; web_manager/admin see all |
+| `manual/layout.tsx`: removed staff-only gate | ✅ | Now `useRequireAuth()` only — all authenticated users allowed |
+| `manual/page.tsx`: filtered sections via `useMemo` | ✅ | `visibleSections` passed to sidebar, search, body |
+| `ManualSearch.tsx` + `useManualSearch.ts`: `sections` prop | ✅ | Optional; defaults to `MANUAL_SECTIONS`; search index respects role |
+| `manual/layout.test.tsx`: updated assertions | ✅ | `it.each` over all 5 roles; removed denied-access test |
+| i18n: `profile.veterinarianResponsibilities`, `profile.webManagerResponsibilities` | ✅ | es + en |
+| i18n: `webManager.overviewTitle`, `pendingShelters`, `submittedApplications`, `pendingCampaigns`, `newCampaign` | ✅ | es + en |
+| i18n: `manual.eyebrow` neutralized; `manual.accessDenied` + `webManager.totalShelters` removed | ✅ | |
+| 58 tests passing | ✅ | Lint clean |
 
 ## Known Issues
 - Wompi payment SDK not integrated (placeholder only)
