@@ -20,6 +20,8 @@ EVENT_KEYS = [
     'shelter_invite_responded',
     'donation_paid',
     'donation_failed',
+    'platform_donation_paid',
+    'platform_donation_failed',
     'sponsorship_paid',
     'sponsorship_failed',
     'campaign_update_published',

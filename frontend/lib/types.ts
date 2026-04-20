@@ -37,9 +37,22 @@ export type ProfileStats = {
 };
 
 export type ActivityEvent = {
-  type: 'application' | 'donation' | 'sponsorship' | 'favorite';
+  type:
+    | 'application'
+    | 'donation'
+    | 'sponsorship'
+    | 'favorite'
+    | 'animal_added'
+    | 'campaign_created'
+    | 'application_reviewed'
+    | 'donation_received'
+    | 'clinical_entry'
+    | 'followup_completed'
+    | 'campaign_reviewed'
+    | 'shelter_verified';
   animal_name?: string;
   shelter_name?: string;
+  campaign_title?: string;
   status?: string;
   amount?: string;
   date: string;

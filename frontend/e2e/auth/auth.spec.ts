@@ -1,6 +1,6 @@
 import { test, expect } from '../test-with-coverage';
 import { waitForPageLoad } from '../fixtures';
-import { AUTH_SIGN_IN_FORM, AUTH_SIGN_UP_FORM, AUTH_LOGIN_INVALID, AUTH_PROTECTED_REDIRECT, AUTH_FORGOT_PASSWORD_FORM, AUTH_ROLE_REDIRECT, AUTH_SIGN_OUT, AUTH_SESSION_PERSISTENCE, AUTH_GOOGLE_LOGIN, AUTH_ADMIN_TOKEN_HANDOFF } from '../helpers/flow-tags';
+import { AUTH_SIGN_IN_FORM, AUTH_SIGN_UP_FORM, AUTH_LOGIN_INVALID, AUTH_PROTECTED_REDIRECT, AUTH_FORGOT_PASSWORD_FORM, AUTH_FORGOT_PASSWORD_RESET, AUTH_LOGIN_REDIRECT, AUTH_SIGN_UP_SUCCESS, AUTH_ROLE_REDIRECT, AUTH_SIGN_OUT, AUTH_SESSION_PERSISTENCE, AUTH_GOOGLE_LOGIN, AUTH_ADMIN_TOKEN_HANDOFF } from '../helpers/flow-tags';
 
 test.describe('Authentication', () => {
   test('should navigate to sign-in page', { tag: [...AUTH_SIGN_IN_FORM] }, async ({ page }) => {
@@ -222,6 +222,102 @@ test.describe('Authentication', () => {
     // At minimum, verify the sign-in page loaded correctly
     await expect(page).toHaveURL(/.*sign-in/);
     expect(typeof hasGoogle).toBe('boolean');
+  });
+});
+
+test.describe('Authentication — complete flows', () => {
+  test('should complete forgot-password reset wizard end-to-end', { tag: [...AUTH_FORGOT_PASSWORD_RESET] }, async ({ page }) => {
+    await page.route('**/api/google-captcha/site-key/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ site_key: '' }) }),
+    );
+    await page.route('**/api/auth/send_passcode/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'Code sent' }) }),
+    );
+    await page.route('**/api/auth/verify_passcode_and_reset_password/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'Password reset' }) }),
+    );
+
+    await page.goto('/forgot-password');
+    await waitForPageLoad(page);
+    await expect(page.getByLabel(/Correo electrónico/i)).toBeVisible();
+
+    // Step 1 — enter email and request code
+    await page.locator('#reset-email').fill('test@example.com');
+    await page.getByRole('button', { name: /Enviar código/i }).click();
+
+    // Step 2 — code input and new password inputs appear
+    await expect(page.locator('#reset-code')).toBeVisible({ timeout: 5_000 });
+    await page.locator('#reset-code').fill('123456');
+    await page.locator('#reset-newpw').fill('NewPass123!');
+    await page.locator('#reset-confirm').fill('NewPass123!');
+
+    // Submit reset
+    await page.locator('button[type="submit"]').click();
+
+    // On success → redirect to sign-in
+    await page.waitForURL(/sign-in/, { timeout: 10_000 });
+    await expect(page).toHaveURL(/sign-in/);
+  });
+
+  test('should register new account and redirect to home', { tag: [...AUTH_SIGN_UP_SUCCESS] }, async ({ page }) => {
+    await page.route('**/api/google-captcha/site-key/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ site_key: '' }) }),
+    );
+    await page.route('**/api/auth/sign_up/**', (route) =>
+      route.fulfill({
+        status: 201,
+        contentType: 'application/json',
+        body: JSON.stringify({ access: 'mock-access', refresh: 'mock-refresh', user: { id: 99, email: 'newuser@example.com' } }),
+      }),
+    );
+
+    await page.goto('/sign-up');
+    await waitForPageLoad(page);
+
+    await page.getByLabel(/^Nombre$/i).fill('María');
+    await page.getByLabel(/Apellido/i).fill('García');
+    await page.getByLabel(/Correo electrónico/i).fill('newuser@example.com');
+    await page.getByLabel('Contraseña', { exact: true }).fill('SecurePass123!');
+    await page.getByLabel(/Confirmar contraseña/i).fill('SecurePass123!');
+    await page.locator('label[for="terms-checkbox"]').click();
+    await expect(page.locator('#terms-checkbox')).toBeChecked();
+
+    await page.getByRole('button', { name: /Crear cuenta/i }).click();
+
+    // On success → router.replace(ROUTES.HOME), so user leaves sign-up
+    await page.waitForURL((url) => !url.toString().includes('sign-up'), { timeout: 10_000 });
+    await expect(page).not.toHaveURL(/sign-up/);
+  });
+
+  test('should redirect to original path after sign-in with redirect param', { tag: [...AUTH_LOGIN_REDIRECT] }, async ({ page }) => {
+    await page.route('**/api/google-captcha/site-key/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ site_key: '' }) }),
+    );
+    await page.route('**/api/auth/sign_in/**', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ access: 'mock-access', refresh: 'mock-refresh' }),
+      }),
+    );
+    await page.route('**/api/token/refresh/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ access: 'mock-access' }) }),
+    );
+    await page.route('**/api/auth/validate_token/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ valid: true }) }),
+    );
+
+    await page.goto('/sign-in?redirect=/my-profile');
+    await waitForPageLoad(page);
+    await expect(page).toHaveURL(/sign-in/);
+
+    await page.getByLabel(/correo/i).fill('adopter-e2e@example.com');
+    await page.getByLabel(/contraseña/i).fill('testpass123');
+    await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click();
+
+    // After login → should navigate away from sign-in
+    await page.waitForURL(/(?!.*sign-in)/, { timeout: 10_000 });
+    await expect(page).not.toHaveURL(/sign-in/);
   });
 });
 

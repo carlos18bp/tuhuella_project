@@ -1,6 +1,6 @@
 # Tuhuella — Feature Task Plan
 
-> Last updated: 2026-04-20 (Phase 19 — Role Profile Sections + Manual Filtered by Role)
+> Last updated: 2026-04-20 (Phase 21 — Platform Support 5th Donation Flow)
 
 ## Status Legend
 - ✅ Done
@@ -351,6 +351,21 @@
 | i18n: `webManager.overviewTitle`, `pendingShelters`, `submittedApplications`, `pendingCampaigns`, `newCampaign` | ✅ | es + en |
 | i18n: `manual.eyebrow` neutralized; `manual.accessDenied` + `webManager.totalShelters` removed | ✅ | |
 | 58 tests passing | ✅ | Lint clean |
+
+## Phase 20 — Activity Timeline for All Roles (2026-04-20)
+| Task | Status | Notes |
+|------|--------|-------|
+| `user_activity` view: shelter_admin events (animal_added, campaign_created, application_reviewed, donation_received) | ✅ | Filtered by shelter.owner=user; Animal/Campaign/AdoptionApplication/Donation queries |
+| `user_activity` view: veterinarian events (clinical_entry, followup_completed) | ✅ | ClinicalHistoryEntry.author + PostAdoptionFollowUp.assigned_vet with completed_date |
+| `user_activity` view: web_manager events (campaign_reviewed) | ✅ | Campaign.reviewed_by=user with reviewed_at |
+| `user_activity` view: admin events (shelter_verified) | ✅ | Shelter.verified_at set (global — no reviewer FK) |
+| `backend/views/profile.py`: new imports ClinicalHistoryEntry, PostAdoptionFollowUp | ✅ | |
+| `frontend/lib/types.ts`: ActivityEvent.type union widened 4→12; `campaign_title?` field added | ✅ | |
+| `my-profile/page.tsx`: isAdopter gate removed from activity card; fetchActivity() runs for all | ✅ | fetchProfileStats still adopter-only |
+| `my-profile/page.tsx`: `showExploreCta` prop on ActivityTimeline; CTA hidden for non-adopters | ✅ | |
+| `my-profile/page.tsx`: iconMap + getDescription extended (8 new cases); new icons (Stethoscope, CheckCircle2, PawPrint) | ✅ | |
+| `messages/{es,en}.json`: 8 new activity* keys (activityAnimalAdded…activityShelterVerified) | ✅ | |
+| Backend check + 23 profile view tests passing; tsc clean on changed files | ✅ | |
 
 ## Known Issues
 - Wompi payment SDK not integrated (placeholder only)

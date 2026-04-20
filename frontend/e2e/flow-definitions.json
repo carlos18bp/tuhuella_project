@@ -1,5 +1,5 @@
 {
-  "version": "5.5.0",
+  "version": "5.7.0",
   "lastUpdated": "2026-04-20",
   "flows": {
     "home-loads": {
@@ -431,7 +431,7 @@
       "module": "shelter-panel",
       "roles": ["shelter_admin"],
       "priority": "P2",
-      "description": "Shelter admin views their role-adaptive profile at /my-profile with ShelterAdminProfileSection and pending-applications widget",
+      "description": "Shelter admin views their role-adaptive profile at /my-profile with ShelterAdminProfileSection (pending-applications widget, shelter stats) and activity timeline with animal_added, campaign_created, application_reviewed, and donation_received events.",
       "expectedSpecs": 1
     },
     "admin-profile": {
@@ -439,7 +439,7 @@
       "module": "admin",
       "roles": ["admin"],
       "priority": "P2",
-      "description": "Admin views their role-adaptive profile at /my-profile with AdminProfileSection and moderation-queue widget",
+      "description": "Admin views their role-adaptive profile at /my-profile with AdminProfileSection (moderation-queue widget, platform stats) and activity timeline with shelter_verified events.",
       "expectedSpecs": 1
     },
     "admin-payments": {
@@ -823,7 +823,7 @@
       "module": "web-manager",
       "roles": ["web_manager"],
       "priority": "P3",
-      "description": "Web manager views their profile at /my-profile: common elements (avatar, name, edit button, profile completeness) render for all roles; role-specific activity section not yet implemented (pending Phase 13b).",
+      "description": "Web manager views their profile at /my-profile: common elements (avatar, name, role badge, completeness bar, Edit Profile button) and role-specific activity timeline with campaign_reviewed events; WebManagerProfileSection shows stat cards (pending shelters, applications, campaigns) and quick action links.",
       "expectedSpecs": 1
     },
     "veterinarian-profile": {
@@ -831,7 +831,71 @@
       "module": "veterinarian",
       "roles": ["veterinarian"],
       "priority": "P3",
-      "description": "Veterinarian views their profile at /my-profile: common elements (avatar, name, edit button, profile completeness) render for all roles; role-specific section not yet implemented (pending Phase 13b).",
+      "description": "Veterinarian views their profile at /my-profile: common elements (avatar, name, role badge, completeness bar) and role-specific activity timeline with clinical_entry and followup_completed events; VeterinarianProfileSection shows follow-up stat cards (pending/in_progress/completed/overdue) and quick action link.",
+      "expectedSpecs": 1
+    },
+    "platform-support-info": {
+      "name": "Platform support landing page",
+      "module": "donation",
+      "roles": ["shared"],
+      "priority": "P2",
+      "description": "User views /apoya-la-plataforma: hero renders with CTA to checkout, cost breakdown cards visible, transparency section visible, comparison grid with 5 ways visible.",
+      "expectedSpecs": 1
+    },
+    "donation-platform-checkout": {
+      "name": "Platform donation checkout flow",
+      "module": "donation",
+      "roles": ["adopter"],
+      "priority": "P1",
+      "description": "Authenticated adopter navigates to /checkout/platform, selects an amount, submits, and is redirected to /checkout/confirmation with dest=platform in the query string.",
+      "expectedSpecs": 1
+    },
+    "shelter-panel-animal-create": {
+      "name": "Shelter create new animal",
+      "module": "shelter-panel",
+      "roles": ["shelter_admin"],
+      "priority": "P1",
+      "description": "Shelter admin adds a new animal record via the create form at /shelter/animals, filling required fields (name, species, breed, age, gender, status, description) and submitting; animal appears in the shelter's list.",
+      "expectedSpecs": 1
+    },
+    "shelter-panel-animal-edit": {
+      "name": "Shelter edit existing animal",
+      "module": "shelter-panel",
+      "roles": ["shelter_admin"],
+      "priority": "P3",
+      "description": "Shelter admin opens an existing animal record from /shelter/animals and updates its fields (description, photos, health info, status) via the edit form at /shelter/animals/[id] or an inline modal.",
+      "expectedSpecs": 1
+    },
+    "shelter-panel-animal-archive": {
+      "name": "Shelter archive animal",
+      "module": "shelter-panel",
+      "roles": ["shelter_admin"],
+      "priority": "P3",
+      "description": "Shelter admin archives (soft-deletes) an animal from /shelter/animals with a confirmation step; archived animals are hidden from public listings and excluded from shelter stats.",
+      "expectedSpecs": 1
+    },
+    "auth-password-change": {
+      "name": "Authenticated password change",
+      "module": "auth",
+      "roles": ["adopter", "shelter_admin", "admin", "web_manager", "veterinarian"],
+      "priority": "P2",
+      "description": "Authenticated user changes their password via PATCH /api/auth/update_password/ from the profile edit page; requires current password confirmation and new password strength validation before saving.",
+      "expectedSpecs": 1
+    },
+    "shelter-invite-send": {
+      "name": "Shelter admin sends adopter invite",
+      "module": "adopter-intent",
+      "roles": ["shelter_admin"],
+      "priority": "P3",
+      "description": "Shelter admin browses public adopter intents at /looking-to-adopt, views a matching profile, and sends a shelter invite via POST /api/shelter-invites/create/; adopter receives an in-app and email notification.",
+      "expectedSpecs": 1
+    },
+    "shelter-invite-respond": {
+      "name": "Adopter responds to shelter invite",
+      "module": "adopter-intent",
+      "roles": ["adopter"],
+      "priority": "P3",
+      "description": "Adopter with pending shelter invites sees invite count on /my-profile stats banner, navigates to manage invites, and accepts or rejects via PATCH /api/shelter-invites/[pk]/respond/; invite count updates accordingly.",
       "expectedSpecs": 1
     }
   }

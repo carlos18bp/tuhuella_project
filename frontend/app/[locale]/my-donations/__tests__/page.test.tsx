@@ -159,4 +159,13 @@ describe('MisDonacionesPage', () => {
     render(<MisDonacionesPage />);
     expect(screen.getByText(/Hope this helps/)).toBeInTheDocument();
   });
+
+  it('shows platform badge when donation destination is platform', () => {
+    useDonationStore.setState({
+      donations: [makeDonation({ destination: 'platform' as const, shelter: null, campaign: null, campaign_title: '' })],
+    });
+
+    render(<MisDonacionesPage />);
+    expect(screen.getAllByText(/Plataforma/i).length).toBeGreaterThanOrEqual(1);
+  });
 });

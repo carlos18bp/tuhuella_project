@@ -16,7 +16,9 @@ from base_feature_app.models import (
     AdoptionApplication,
     Animal,
     Campaign,
+    ClinicalHistoryEntry,
     Donation,
+    PostAdoptionFollowUp,
     Shelter,
     Sponsorship,
     User,
@@ -194,6 +196,109 @@ def user_activity(request):
             'animal_name': fav.animal.name,
             'date': fav.created_at.isoformat(),
         })
+
+    if user.role == User.Role.SHELTER_ADMIN:
+        shelter = Shelter.objects.filter(owner=user).first()
+        if shelter is not None:
+            for animal in (
+                Animal.objects
+                .filter(shelter=shelter, archived_at__isnull=True)
+                .order_by('-created_at')[:10]
+            ):
+                events.append({
+                    'type': 'animal_added',
+                    'animal_name': animal.name,
+                    'date': animal.created_at.isoformat(),
+                })
+
+            for camp in (
+                Campaign.objects
+                .filter(shelter=shelter, archived_at__isnull=True)
+                .order_by('-created_at')[:10]
+            ):
+                events.append({
+                    'type': 'campaign_created',
+                    'campaign_title': camp.title_es or camp.title_en,
+                    'date': camp.created_at.isoformat(),
+                })
+
+            for app in (
+                AdoptionApplication.objects
+                .filter(
+                    animal__shelter=shelter,
+                    archived_at__isnull=True,
+                    reviewed_at__isnull=False,
+                )
+                .select_related('animal')
+                .order_by('-reviewed_at')[:10]
+            ):
+                events.append({
+                    'type': 'application_reviewed',
+                    'animal_name': app.animal.name,
+                    'status': app.status,
+                    'date': app.reviewed_at.isoformat(),
+                })
+
+            for don in (
+                Donation.objects
+                .filter(shelter=shelter, status='paid', archived_at__isnull=True)
+                .order_by('-paid_at')[:10]
+            ):
+                events.append({
+                    'type': 'donation_received',
+                    'amount': str(don.amount),
+                    'date': (don.paid_at or don.created_at).isoformat(),
+                })
+
+    elif user.role == User.Role.VETERINARIAN:
+        for entry in (
+            ClinicalHistoryEntry.objects
+            .filter(author=user)
+            .select_related('animal')
+            .order_by('-created_at')[:10]
+        ):
+            events.append({
+                'type': 'clinical_entry',
+                'animal_name': entry.animal.name,
+                'date': entry.created_at.isoformat(),
+            })
+
+        for fu in (
+            PostAdoptionFollowUp.objects
+            .filter(assigned_veterinarian=user, completed_date__isnull=False)
+            .select_related('animal')
+            .order_by('-completed_date')[:10]
+        ):
+            events.append({
+                'type': 'followup_completed',
+                'animal_name': fu.animal.name,
+                'date': fu.completed_date.isoformat(),
+            })
+
+    elif user.role == User.Role.WEB_MANAGER:
+        for camp in (
+            Campaign.objects
+            .filter(reviewed_by=user, reviewed_at__isnull=False)
+            .order_by('-reviewed_at')[:10]
+        ):
+            events.append({
+                'type': 'campaign_reviewed',
+                'campaign_title': camp.title_es or camp.title_en,
+                'status': camp.approval_status,
+                'date': camp.reviewed_at.isoformat(),
+            })
+
+    elif user.role == User.Role.ADMIN:
+        for shelter in (
+            Shelter.objects
+            .filter(verified_at__isnull=False)
+            .order_by('-verified_at')[:10]
+        ):
+            events.append({
+                'type': 'shelter_verified',
+                'shelter_name': shelter.name,
+                'date': shelter.verified_at.isoformat(),
+            })
 
     # Sort by date descending and limit to 10
     events.sort(key=lambda e: e['date'], reverse=True)

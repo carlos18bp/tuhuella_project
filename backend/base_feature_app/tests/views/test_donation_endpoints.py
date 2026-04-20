@@ -91,3 +91,37 @@ def test_donation_detail_returns_404_for_missing(authenticated_client):
     response = authenticated_client.get(reverse('donation-detail', args=[99999]))
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+def test_donation_create_platform_succeeds_without_shelter(authenticated_client):
+    """Authenticated user can create a platform donation with no shelter or campaign."""
+    response = authenticated_client.post(
+        reverse('donation-create'),
+        {
+            'destination': 'platform',
+            'amount': '15000.00',
+        },
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+
+
+@pytest.mark.django_db
+def test_donation_create_platform_stores_correct_destination(authenticated_client):
+    """Platform donation is persisted with destination=platform and no shelter."""
+    authenticated_client.post(
+        reverse('donation-create'),
+        {
+            'destination': 'platform',
+            'amount': '20000.00',
+        },
+        format='json',
+    )
+
+    assert Donation.objects.filter(
+        destination=Donation.Destination.PLATFORM,
+        shelter=None,
+        campaign=None,
+    ).exists()

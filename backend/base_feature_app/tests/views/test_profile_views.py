@@ -1,8 +1,9 @@
 import pytest
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework import status
 
-from base_feature_app.models import AdoptionApplication, Campaign, Favorite, Shelter
+from base_feature_app.models import AdoptionApplication, Campaign, Favorite, PostAdoptionFollowUp, Shelter
 
 # ---------------------------------------------------------------------------
 # profile-stats
@@ -88,6 +89,90 @@ def test_user_activity_max_10(authenticated_client, existing_user, animal):
 
     response = authenticated_client.get(reverse('user-activity'))
     assert len(response.json()) == 10
+
+
+@pytest.mark.django_db
+def test_user_activity_shelter_admin_sees_animal_added(
+    shelter_admin_client, shelter, animal,
+):
+    response = shelter_admin_client.get(reverse('user-activity'))
+    types = [e['type'] for e in response.json()]
+    assert 'animal_added' in types
+
+
+@pytest.mark.django_db
+def test_user_activity_shelter_admin_sees_application_reviewed(
+    api_client, shelter_admin_user, shelter, existing_user, animal,
+):
+    AdoptionApplication.objects.create(
+        user=existing_user, animal=animal,
+        status='approved', form_answers={},
+        reviewed_at=timezone.now(),
+    )
+    api_client.force_authenticate(user=shelter_admin_user)
+    response = api_client.get(reverse('user-activity'))
+    types = [e['type'] for e in response.json()]
+    assert 'application_reviewed' in types
+
+
+@pytest.mark.django_db
+def test_user_activity_veterinarian_sees_clinical_entry(api_client, animal):
+    from base_feature_app.tests.factories import ClinicalHistoryEntryFactory, VeterinarianUserFactory
+    vet = VeterinarianUserFactory()
+    ClinicalHistoryEntryFactory(author=vet, animal=animal)
+    api_client.force_authenticate(user=vet)
+    response = api_client.get(reverse('user-activity'))
+    types = [e['type'] for e in response.json()]
+    assert 'clinical_entry' in types
+
+
+@pytest.mark.django_db
+def test_user_activity_veterinarian_sees_followup_completed(api_client):
+    from base_feature_app.tests.factories import (
+        AdoptionApplicationFactory, PostAdoptionFollowUpFactory, VeterinarianUserFactory,
+    )
+    vet = VeterinarianUserFactory()
+    app = AdoptionApplicationFactory()
+    PostAdoptionFollowUpFactory(
+        adoption_application=app,
+        animal=app.animal,
+        adopter=app.user,
+        assigned_veterinarian=vet,
+        status=PostAdoptionFollowUp.Status.COMPLETED,
+        completed_date=timezone.now().date(),
+    )
+    api_client.force_authenticate(user=vet)
+    response = api_client.get(reverse('user-activity'))
+    types = [e['type'] for e in response.json()]
+    assert 'followup_completed' in types
+
+
+@pytest.mark.django_db
+def test_user_activity_web_manager_sees_campaign_reviewed(api_client, shelter):
+    from base_feature_app.tests.factories import CampaignFactory, WebManagerUserFactory
+    wm = WebManagerUserFactory()
+    CampaignFactory(
+        shelter=shelter,
+        reviewed_by=wm,
+        reviewed_at=timezone.now(),
+        approval_status=Campaign.ApprovalStatus.APPROVED,
+    )
+    api_client.force_authenticate(user=wm)
+    response = api_client.get(reverse('user-activity'))
+    types = [e['type'] for e in response.json()]
+    assert 'campaign_reviewed' in types
+
+
+@pytest.mark.django_db
+def test_user_activity_admin_sees_shelter_verified(api_client, admin_user, shelter):
+    admin_user.role = 'admin'
+    admin_user.save(update_fields=['role'])
+    shelter.verified_at = timezone.now()
+    shelter.save(update_fields=['verified_at'])
+    api_client.force_authenticate(user=admin_user)
+    response = api_client.get(reverse('user-activity'))
+    types = [e['type'] for e in response.json()]
+    assert 'shelter_verified' in types
 
 
 # ---------------------------------------------------------------------------

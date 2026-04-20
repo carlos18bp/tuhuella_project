@@ -91,3 +91,52 @@ def test_dispatch_exception_logged_not_raised(mock_dispatch_notif):
     """Exception in dispatch_notification is caught by _dispatch — no propagation."""
     app = AdoptionApplicationFactory()
     assert app.pk is not None
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.signals._dispatch')
+def test_platform_donation_paid_dispatches_platform_event_to_user(mock_dispatch):
+    """Platform donation going to paid dispatches platform_donation_paid — not donation_paid."""
+    donation = DonationFactory(
+        shelter=None,
+        destination=Donation.Destination.PLATFORM,
+        status='pending',
+    )
+    mock_dispatch.reset_mock()
+    donation.status = 'paid'
+    donation.save()
+    events = [c[0][0] for c in mock_dispatch.call_args_list]
+    assert 'platform_donation_paid' in events
+    assert 'donation_paid' not in events
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.signals._dispatch')
+def test_platform_donation_paid_does_not_notify_shelter_owner(mock_dispatch):
+    """Platform donation going to paid dispatches only once — no shelter-owner copy."""
+    donation = DonationFactory(
+        shelter=None,
+        destination=Donation.Destination.PLATFORM,
+        status='pending',
+    )
+    mock_dispatch.reset_mock()
+    donation.status = 'paid'
+    donation.save()
+    assert mock_dispatch.call_count == 1
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.signals._dispatch')
+def test_platform_donation_failed_dispatches_platform_event_to_user(mock_dispatch):
+    """Platform donation going to failed dispatches platform_donation_failed."""
+    donation = DonationFactory(
+        shelter=None,
+        destination=Donation.Destination.PLATFORM,
+        status='pending',
+    )
+    mock_dispatch.reset_mock()
+    donation.status = 'failed'
+    donation.save()
+    events = [c[0][0] for c in mock_dispatch.call_args_list]
+    assert 'platform_donation_failed' in events
+    assert 'donation_failed' not in events

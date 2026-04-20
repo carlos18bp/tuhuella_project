@@ -1,5 +1,6 @@
 from faker import Faker
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 from base_feature_app.models import User, Shelter, ShelterMembership
 
 from .create_users import FIXED_SHELTER_ADMINS
@@ -81,6 +82,7 @@ class Command(BaseCommand):
             admin_email = FIXED_SHELTER_ADMIN_EMAILS[idx]
             owner = fixed_owners_by_email[admin_email]
 
+            v_status = fixed['verification_status']
             shelter, was_created = Shelter.objects.get_or_create(
                 name=fixed['name'],
                 defaults={
@@ -93,7 +95,8 @@ class Command(BaseCommand):
                     'phone': fake_es.phone_number()[:20],
                     'email': f"contacto+{fixed['name'].lower().replace(' ', '')}@tuhuella.com",
                     'website': fake_en.url(),
-                    'verification_status': fixed['verification_status'],
+                    'verification_status': v_status,
+                    'verified_at': timezone.now() if v_status == Shelter.VerificationStatus.VERIFIED else None,
                 },
             )
             if was_created:
@@ -133,6 +136,7 @@ class Command(BaseCommand):
                 email=fake_en.company_email(),
                 website=fake_en.url(),
                 verification_status=status,
+                verified_at=timezone.now() if status == Shelter.VerificationStatus.VERIFIED else None,
             )
             created += 1
             used_owner_ids.add(owner.id)

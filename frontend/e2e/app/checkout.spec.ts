@@ -1,6 +1,6 @@
 import { test, expect } from '../test-with-coverage';
 import { waitForPageLoad, loginAndNavigate } from '../fixtures';
-import { DONATION_CHECKOUT, SPONSORSHIP_CHECKOUT, PAYMENT_CONFIRMATION, DONATION_CHECKOUT_SUBMIT, SPONSORSHIP_CHECKOUT_SUBMIT } from '../helpers/flow-tags';
+import { DONATION_CHECKOUT, SPONSORSHIP_CHECKOUT, PAYMENT_CONFIRMATION, DONATION_CHECKOUT_SUBMIT, SPONSORSHIP_CHECKOUT_SUBMIT, PLATFORM_SUPPORT_INFO, DONATION_PLATFORM_CHECKOUT } from '../helpers/flow-tags';
 
 test.describe('Checkout Flows', () => {
   test('should redirect unauthenticated user from donation checkout', { tag: [...DONATION_CHECKOUT] }, async ({ page }) => {
@@ -43,6 +43,22 @@ test.describe('Checkout Flows', () => {
     await waitForPageLoad(page);
 
     await expect(page).toHaveURL(/confirmation/);
+  });
+});
+
+test.describe('Platform Support', () => {
+  test('should display platform support info page', { tag: [...PLATFORM_SUPPORT_INFO] }, async ({ page }) => {
+    await page.goto('/apoya-la-plataforma');
+    await waitForPageLoad(page);
+    // Public page — should not redirect to sign-in
+    await expect(page).not.toHaveURL(/sign-in/);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  });
+
+  test('should redirect unauthenticated user from platform checkout', { tag: [...DONATION_PLATFORM_CHECKOUT] }, async ({ page }) => {
+    await page.goto('/checkout/platform');
+    await waitForPageLoad(page);
+    await expect(page).toHaveURL(/sign-in|platform/);
   });
 });
 
@@ -102,6 +118,42 @@ test.describe.serial('Checkout Flows — Authenticated', () => {
     await expect(page.getByRole('button', { name: /Procesando/i })).toBeVisible();
 
     // Verify navigation to confirmation page
+    await page.waitForURL(/confirmation/, { timeout: 10_000 });
+    await expect(page).toHaveURL(/confirmation/);
+  });
+
+  test('should submit platform donation checkout', { tag: [...DONATION_PLATFORM_CHECKOUT] }, async ({ page }) => {
+    await page.route('**/api/donation-amounts/**', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          { id: 1, amount: 10000, label: '' },
+          { id: 2, amount: 25000, label: '' },
+          { id: 3, amount: 50000, label: '' },
+        ]),
+      }),
+    );
+
+    await loginAndNavigate(page, 'adopter', '/');
+    await waitForPageLoad(page);
+    await page.goto('/checkout/platform');
+    await waitForPageLoad(page);
+
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+
+    // Select amount
+    const amountButton = page.getByRole('button', { name: /\$.*10[,.]000/i }).first();
+    await expect(amountButton).toBeVisible({ timeout: 10_000 });
+    await amountButton.click();
+
+    // Select PSE payment method
+    await page.getByText(/PSE/i).click();
+
+    // Submit
+    await page.locator('button[type="submit"]').click();
+
+    // Should redirect to confirmation
     await page.waitForURL(/confirmation/, { timeout: 10_000 });
     await expect(page).toHaveURL(/confirmation/);
   });

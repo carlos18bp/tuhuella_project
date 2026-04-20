@@ -87,6 +87,7 @@ export default function Header() {
     { label: t('shelters'), href: ROUTES.SHELTERS },
     { label: t('campaigns'), href: ROUTES.CAMPAIGNS },
     { label: t('lookingToAdopt'), href: ROUTES.LOOKING_TO_ADOPT },
+    { label: t('supportPlatform'), href: ROUTES.PLATFORM_SUPPORT },
     { label: t('blog'), href: ROUTES.BLOG },
   ];
 

@@ -71,6 +71,8 @@ export const ROUTES = {
   CHECKOUT_DONATION: '/checkout/donation',
   CHECKOUT_SPONSORSHIP: '/checkout/sponsorship',
   CHECKOUT_CONFIRMATION: '/checkout/confirmation',
+  CHECKOUT_PLATFORM: '/checkout/platform',
+  PLATFORM_SUPPORT: '/apoya-la-plataforma',
 } as const;
 
 export const API_ENDPOINTS = {

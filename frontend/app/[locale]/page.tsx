@@ -8,7 +8,7 @@ import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { Heart, Shield, Users, TrendingUp } from 'lucide-react';
+import { Heart, Shield, Users, TrendingUp, Sparkles, ArrowRight } from 'lucide-react';
 
 import { useAnimalStore } from '@/lib/stores/animalStore';
 import { useCampaignStore } from '@/lib/stores/campaignStore';
@@ -232,6 +232,9 @@ export default function HomePage() {
         </section>
       )}
 
+      {/* Platform Support CTA */}
+      <PlatformSupportCTA />
+
       {/* Why Adopt — Value Content */}
       <section className="py-10 md:py-16 bg-gradient-to-b from-surface-secondary via-surface-tertiary/35 to-surface-secondary border-y border-border-primary">
         <Container>
@@ -331,5 +334,49 @@ export default function HomePage() {
         </div>
       )}
     </>
+  );
+}
+
+function PlatformSupportCTA() {
+  const t = useTranslations('platformSupport');
+  return (
+    <section className="py-10 md:py-16">
+      <Container>
+        <div className="relative overflow-hidden rounded-3xl border border-rose-200 bg-gradient-to-br from-rose-50 via-rose-50/40 to-white p-6 sm:p-10 dark:border-rose-800/40 dark:from-rose-950/25 dark:via-rose-950/10 dark:to-background">
+          <div className="relative z-10 grid gap-6 md:grid-cols-[1.5fr_1fr] md:items-center">
+            <div>
+              <span className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-white/70 px-3 py-1 text-xs font-medium text-rose-700 dark:border-rose-800/40 dark:bg-rose-950/40 dark:text-rose-300">
+                <Sparkles className="h-3.5 w-3.5" />
+                {t('badge')}
+              </span>
+              <h2 className="mt-4 text-2xl sm:text-3xl md:text-4xl font-bold text-text-primary">
+                {t('title')}{' '}
+                <span className="bg-gradient-to-r from-rose-500 to-rose-700 bg-clip-text text-transparent">
+                  {t('titleAccent')}
+                </span>
+              </h2>
+              <p className="mt-3 text-sm sm:text-base text-text-secondary max-w-xl">
+                {t('subtitle')}
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row md:flex-col gap-3 md:items-end">
+              <Link
+                href={ROUTES.PLATFORM_SUPPORT}
+                className="min-h-11 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-rose-500 to-rose-600 px-6 py-3 text-sm font-medium text-white shadow-sm hover:from-rose-400 hover:to-rose-500 btn-base"
+              >
+                {t('cta')}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href={ROUTES.BLOG_DETAIL('por-que-tuhuella-tiene-costos')}
+                className="min-h-11 inline-flex items-center justify-center rounded-full border border-border-primary bg-surface-primary px-6 py-3 text-sm font-medium text-text-secondary hover:bg-surface-hover btn-base"
+              >
+                {t('ctaSecondary')}
+              </Link>
+            </div>
+          </div>
+        </div>
+      </Container>
+    </section>
   );
 }

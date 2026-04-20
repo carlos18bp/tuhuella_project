@@ -222,6 +222,46 @@ TEMPLATES = {
             '— Mi Huella'
         ),
     },
+    'platform_donation_paid': {
+        'subject_es': 'Gracias por apoyar el sostenimiento de Tuhuella',
+        'subject_en': 'Thank you for supporting Tuhuella',
+        'body_es': (
+            'Hola {user_name},\n\n'
+            'Recibimos tu aporte de ${amount} al sostenimiento de la plataforma.\n'
+            'Con esta contribución nos ayudas a cubrir los costos de infraestructura, '
+            'correo, dominio y el desarrollo continuo de Tuhuella.\n\n'
+            'Gracias por creer en la iniciativa y hacerla posible.\n\n'
+            'Ver recibo: {link}\n\n'
+            '— Mi Huella'
+        ),
+        'body_en': (
+            'Hi {user_name},\n\n'
+            'We received your ${amount} contribution to keep the platform running.\n'
+            'This helps cover infrastructure, email, domain, and the ongoing '
+            'development of Tuhuella.\n\n'
+            'Thank you for believing in the initiative and keeping it alive.\n\n'
+            'View receipt: {link}\n\n'
+            '— Mi Huella'
+        ),
+    },
+    'platform_donation_failed': {
+        'subject_es': 'No pudimos procesar tu apoyo a la plataforma',
+        'subject_en': 'We could not process your platform contribution',
+        'body_es': (
+            'Hola {user_name},\n\n'
+            'No pudimos procesar tu aporte de ${amount} al sostenimiento de Tuhuella.\n'
+            'Si quieres intentarlo de nuevo, puedes hacerlo desde el siguiente enlace.\n\n'
+            'Reintentar: {link}\n\n'
+            '— Mi Huella'
+        ),
+        'body_en': (
+            'Hi {user_name},\n\n'
+            'We could not process your ${amount} contribution to support Tuhuella.\n'
+            'You can try again from the link below.\n\n'
+            'Retry: {link}\n\n'
+            '— Mi Huella'
+        ),
+    },
     'sponsorship_paid': {
         'subject_es': 'Apadrinamiento confirmado para {animal_name}',
         'subject_en': 'Sponsorship confirmed for {animal_name}',

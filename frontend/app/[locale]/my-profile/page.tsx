@@ -5,7 +5,7 @@ import {
   User as UserIcon, Mail, Shield, MapPin, Phone, FileText, DollarSign,
   Heart, Users, ChevronRight, Calendar, Pencil,
   Clock, HandHeart, MailOpen, Bell, HelpCircle, Briefcase, Megaphone, ScrollText,
-  ClipboardList, Building2,
+  ClipboardList, Building2, Stethoscope, CheckCircle2, PawPrint,
 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
@@ -19,7 +19,7 @@ import WebManagerProfileSection from '@/components/ui/WebManagerProfileSection';
 import { useRoleProfileData } from '@/lib/hooks/useRoleProfileData';
 import { calcCompleteness, formatMemberSince, getUserInitials } from '@/lib/profile';
 
-function ActivityTimeline({ events }: { events: ActivityEvent[] }) {
+function ActivityTimeline({ events, showExploreCta = true }: { events: ActivityEvent[]; showExploreCta?: boolean }) {
   const t = useTranslations('profile');
 
   if (events.length === 0) {
@@ -30,12 +30,14 @@ function ActivityTimeline({ events }: { events: ActivityEvent[] }) {
         </div>
         <p className="mt-3 text-sm font-medium text-text-secondary">{t('noActivity')}</p>
         <p className="mt-1 text-xs text-text-quaternary leading-relaxed max-w-xs mx-auto">{t('noActivityDesc')}</p>
-        <Link
-          href={ROUTES.ANIMALS}
-          className="mt-4 inline-flex items-center justify-center min-h-11 text-xs bg-teal-600 text-white rounded-full px-5 py-2 font-medium hover:bg-teal-700 transition-colors shadow-sm"
-        >
-          {t('exploreToStart')} &rarr;
-        </Link>
+        {showExploreCta && (
+          <Link
+            href={ROUTES.ANIMALS}
+            className="mt-4 inline-flex items-center justify-center min-h-11 text-xs bg-teal-600 text-white rounded-full px-5 py-2 font-medium hover:bg-teal-700 transition-colors shadow-sm"
+          >
+            {t('exploreToStart')} &rarr;
+          </Link>
+        )}
       </div>
     );
   }
@@ -45,6 +47,14 @@ function ActivityTimeline({ events }: { events: ActivityEvent[] }) {
     donation: { icon: DollarSign, color: 'text-amber-600 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400' },
     sponsorship: { icon: HandHeart, color: 'text-red-500 bg-red-50 dark:bg-red-900/30 dark:text-red-400' },
     favorite: { icon: Heart, color: 'text-pink-500 bg-pink-50 dark:bg-pink-900/30 dark:text-pink-400' },
+    animal_added: { icon: PawPrint, color: 'text-teal-600 bg-teal-50 dark:bg-teal-900/30 dark:text-teal-400' },
+    campaign_created: { icon: Megaphone, color: 'text-orange-500 bg-orange-50 dark:bg-orange-900/30 dark:text-orange-400' },
+    application_reviewed: { icon: ClipboardList, color: 'text-teal-600 bg-teal-50 dark:bg-teal-900/30 dark:text-teal-400' },
+    donation_received: { icon: DollarSign, color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-400' },
+    clinical_entry: { icon: Stethoscope, color: 'text-sky-600 bg-sky-50 dark:bg-sky-900/30 dark:text-sky-400' },
+    followup_completed: { icon: CheckCircle2, color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-400' },
+    campaign_reviewed: { icon: Megaphone, color: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 dark:text-indigo-400' },
+    shelter_verified: { icon: Building2, color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-400' },
   };
 
   function getDescription(event: ActivityEvent) {
@@ -57,6 +67,22 @@ function ActivityTimeline({ events }: { events: ActivityEvent[] }) {
         return t('activitySponsorship', { name: event.animal_name || '' });
       case 'favorite':
         return t('activityFavorite', { name: event.animal_name || '' });
+      case 'animal_added':
+        return t('activityAnimalAdded', { name: event.animal_name || '' });
+      case 'campaign_created':
+        return t('activityCampaignCreated', { title: event.campaign_title || '' });
+      case 'application_reviewed':
+        return t('activityApplicationReviewed', { name: event.animal_name || '' });
+      case 'donation_received':
+        return t('activityDonationReceived', { amount: event.amount || '0' });
+      case 'clinical_entry':
+        return t('activityClinicalEntry', { name: event.animal_name || '' });
+      case 'followup_completed':
+        return t('activityFollowupCompleted', { name: event.animal_name || '' });
+      case 'campaign_reviewed':
+        return t('activityCampaignReviewed', { title: event.campaign_title || '' });
+      case 'shelter_verified':
+        return t('activityShelterVerified', { shelter: event.shelter_name || '' });
       default:
         return '';
     }
@@ -130,9 +156,10 @@ export default function MiPerfilPage() {
   const isAdopter = user?.role === 'adopter';
 
   useEffect(() => {
-    if (!isAdopter) return;
-    void fetchProfileStats();
     void fetchActivity();
+    if (isAdopter) {
+      void fetchProfileStats();
+    }
   }, [isAdopter, fetchProfileStats, fetchActivity]);
 
   if (!user) {
@@ -375,12 +402,10 @@ export default function MiPerfilPage() {
             </div>
           </div>
 
-          {isAdopter && (
-            <div className="rounded-2xl border border-border-primary bg-surface-primary shadow-sm p-5">
-              <h2 className="text-base font-bold text-text-primary mb-4">{t('recentActivity')}</h2>
-              <ActivityTimeline events={activity} />
-            </div>
-          )}
+          <div className="rounded-2xl border border-border-primary bg-surface-primary shadow-sm p-5">
+            <h2 className="text-base font-bold text-text-primary mb-4">{t('recentActivity')}</h2>
+            <ActivityTimeline events={activity} showExploreCta={isAdopter} />
+          </div>
           {user.role === 'shelter_admin' && (
             <PendingWidget
               icon={ClipboardList}

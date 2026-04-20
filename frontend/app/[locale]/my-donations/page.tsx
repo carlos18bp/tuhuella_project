@@ -201,11 +201,19 @@ export default function MisDonacionesPage() {
         <div className="mt-8 space-y-3">
           {filtered.map((donation) => {
             const color = statusColors[donation.status] || statusColors.pending;
+            const isPlatform = donation.destination === 'platform';
             return (
               <div key={donation.id} className="rounded-2xl border border-border-primary bg-surface-primary p-5 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <p className="text-xl font-bold text-text-primary">${Number(donation.amount).toLocaleString()}</p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-xl font-bold text-text-primary">${Number(donation.amount).toLocaleString()}</p>
+                      {isPlatform && (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-rose-700 dark:border-rose-800/40 dark:bg-rose-950/30 dark:text-rose-300">
+                          {tCommon('donationDestinationPlatform')}
+                        </span>
+                      )}
+                    </div>
                     {donation.campaign_title && (
                       <div className="flex items-center gap-1.5 mt-1.5">
                         <Megaphone className="h-3.5 w-3.5 text-amber-500 shrink-0" />

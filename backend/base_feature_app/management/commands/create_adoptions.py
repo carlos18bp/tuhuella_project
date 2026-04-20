@@ -1,6 +1,7 @@
 import random
 
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 from faker import Faker
 
 from base_feature_app.models import AdoptionApplication, Animal, AnimalStatusHistory, User
@@ -47,6 +48,10 @@ class Command(BaseCommand):
                 AdoptionApplication.Status.APPROVED,
                 AdoptionApplication.Status.REJECTED,
             ])
+            reviewed_statuses = {
+                AdoptionApplication.Status.APPROVED,
+                AdoptionApplication.Status.REJECTED,
+            }
             AdoptionApplication.objects.create(
                 user=user,
                 animal=animal,
@@ -58,6 +63,7 @@ class Command(BaseCommand):
                     'motivation': fake.paragraph(nb_sentences=2),
                 },
                 notes=fake.sentence() if random.random() < 0.3 else '',
+                reviewed_at=timezone.now() if status in reviewed_statuses else None,
             )
 
             # Leave an audit trail when the application was approved

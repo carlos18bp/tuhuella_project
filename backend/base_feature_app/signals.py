@@ -305,19 +305,21 @@ def on_donation_save(sender, instance, created, **kwargs):
     donation = instance
     prev = getattr(donation, '_prev_status', None)
 
+    is_platform = donation.destination == Donation.Destination.PLATFORM
+
     if donation.status == 'paid' and prev != 'paid' and donation.user:
         campaign_title = ''
         if donation.campaign:
             campaign_title = donation.campaign.title_es
-        _dispatch('donation_paid', donation.user, {
+        paid_event = 'platform_donation_paid' if is_platform else 'donation_paid'
+        _dispatch(paid_event, donation.user, {
             'user_name': donation.user.first_name or donation.user.email,
             'amount': str(donation.amount),
             'campaign_title': campaign_title,
             'shelter_name': donation.shelter.name if donation.shelter else '',
-            'link': f'/my-donations',
+            'link': '/my-donations',
         })
-        # Also notify shelter owner
-        if donation.shelter and donation.shelter.owner:
+        if not is_platform and donation.shelter and donation.shelter.owner:
             _dispatch('donation_paid', donation.shelter.owner, {
                 'user_name': donation.shelter.owner.first_name or donation.shelter.owner.email,
                 'amount': str(donation.amount),
@@ -327,10 +329,12 @@ def on_donation_save(sender, instance, created, **kwargs):
             })
 
     elif donation.status == 'failed' and prev != 'failed' and donation.user:
-        _dispatch('donation_failed', donation.user, {
+        failed_event = 'platform_donation_failed' if is_platform else 'donation_failed'
+        failed_link = '/apoya-la-plataforma' if is_platform else '/checkout/donation'
+        _dispatch(failed_event, donation.user, {
             'user_name': donation.user.first_name or donation.user.email,
             'amount': str(donation.amount),
-            'link': f'/checkout/donation',
+            'link': failed_link,
         })
 
 

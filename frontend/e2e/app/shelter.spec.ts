@@ -18,6 +18,7 @@ import {
   SHELTER_ADMIN_PROFILE,
   SHELTER_PANEL_CAMPAIGN_DETAIL,
   SHELTER_PANEL_CAMPAIGN_CREATE,
+  SHELTER_PANEL_ANIMAL_CREATE,
 } from '../helpers/flow-tags';
 import {
   mockShelterAnimals,
@@ -463,5 +464,50 @@ test.describe('Shelter Campaign Detail & Create', () => {
     await waitForPageLoad(page);
 
     await expect(page).toHaveURL(/sign-in|nueva/);
+  });
+});
+
+test.describe('Shelter Panel — Animal Create', () => {
+  test('should redirect unauthenticated user from animal create page', { tag: [...SHELTER_PANEL_ANIMAL_CREATE] }, async ({ page }) => {
+    await page.goto('/shelter/animals/nuevo');
+    await waitForPageLoad(page);
+
+    await expect(page).toHaveURL(/sign-in|nuevo/);
+  });
+
+  test('should show "Agregar animal" CTA on animals list', { tag: [...SHELTER_PANEL_ANIMAL_CREATE] }, async ({ page }) => {
+    await page.route('**/api/animals/**', (route: any) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ count: 0, page: 1, page_size: 20, total_pages: 1, results: [] }),
+      }),
+    );
+
+    await loginAndNavigate(page, 'shelter_admin', '/shelter/animals');
+
+    await expect(page.getByRole('heading', { name: /Gestión de Animales/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('link', { name: /Agregar animal/i })).toBeVisible({ timeout: 10_000 });
+  });
+
+  test('should navigate to animal create page from animals list', { tag: [...SHELTER_PANEL_ANIMAL_CREATE] }, async ({ page }) => {
+    await page.route('**/api/animals/**', (route: any) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ count: 0, page: 1, page_size: 20, total_pages: 1, results: [] }),
+      }),
+    );
+
+    await loginAndNavigate(page, 'shelter_admin', '/shelter/animals');
+
+    await expect(page.getByRole('heading', { name: /Gestión de Animales/i })).toBeVisible({ timeout: 15_000 });
+
+    const addLink = page.getByRole('link', { name: /Agregar animal/i });
+    await expect(addLink).toBeVisible({ timeout: 10_000 });
+    await addLink.click();
+
+    await page.waitForURL(/animals\/nuevo/, { timeout: 10_000 });
+    await expect(page).toHaveURL(/animals\/nuevo/);
   });
 });

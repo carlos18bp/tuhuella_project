@@ -1,6 +1,6 @@
 # Tuhuella — Active Context
 
-> Last updated: 2026-04-20 (Phase 19 — Role Profile Sections + Manual Filtered by Role)
+> Last updated: 2026-04-20 (Phase 21 — Platform Support 5th Donation Flow)
 
 ## Current State
 
@@ -84,6 +84,56 @@ The project is a mature animal adoption platform with complete backend and front
 | Frontend unit test files | 289+ |
 | E2E spec files | 20 |
 | E2E flow definitions | 98 |
+
+## Recently Completed: Phase 21 — Platform Support 5th Donation Flow (2026-04-20)
+
+Added a 5th way to support Tuhuella: donations directed at sustaining the platform's own infrastructure (servers, hosting, email, dev costs).
+
+**Backend:**
+- Data migration `0021_platform_support_content.py`: seeds `FAQTopic(slug="apoyo-plataforma")` with 5 bilingual `FAQItem`s and 1 bilingual `BlogPost(slug="por-que-tuhuella-tiene-costos", category="historias")` — idempotent via `get_or_create`.
+- `notification_templates.py`: added `platform_donation_paid` and `platform_donation_failed` keys with platform-specific copy (no shelter/campaign references).
+- `signals.py` (`on_donation_save`): detects `donation.destination == PLATFORM`; routes to platform notification keys; skips shelter-owner notification for platform donations.
+- `views/notification.py`: added both new keys to `EVENT_KEYS` list for preference initialization.
+
+**Frontend:**
+- New page `/apoya-la-plataforma`: hero + cost breakdown cards (4 icons) + transparency panel + 5-ways comparison grid + FAQ accordion + bottom CTA.
+- New page `/checkout/platform`: rose-themed checkout mirroring `/checkout/donation`; fetches amounts from `/api/donation-amounts/`; POSTs with `destination: "platform"`.
+- `constants.ts`: `ROUTES.PLATFORM_SUPPORT` + `ROUTES.CHECKOUT_PLATFORM`.
+- Header: "Apoya la plataforma" nav item between `lookingToAdopt` and `blog`.
+- Footer: link in "information" column.
+- Home (`page.tsx`): `PlatformSupportCTA` section between campaigns and "Why Adopt".
+- `my-donations/page.tsx`: rose "Plataforma" badge when `donation.destination === 'platform'`.
+- `messages/{es,en}.json`: `platformSupport`, `platformCheckout`, `myDonationsBadge.platform` namespaces (76 new keys each language).
+
+**Verification:** `python manage.py check` clean; `pytest test_signals.py -k donation` 1 passed; `tsc --noEmit` no new errors in changed files.
+
+---
+
+## Recently Completed: Phase 20 — Activity Timeline for All Roles (2026-04-20)
+
+The "Actividad Reciente" card in `/my-profile` (below the user info card) now renders for every role, populated with role-specific events from the backend.
+
+**Backend (`backend/base_feature_app/views/profile.py`):**
+- `user_activity(request)` extended with per-role branches (if/elif after the 4 cross-role loops):
+  - `shelter_admin`: Animal added, Campaign created, AdoptionApplication reviewed, Donation received — all filtered by the shelter the user owns.
+  - `veterinarian`: ClinicalHistoryEntry authored by user, PostAdoptionFollowUp completed and assigned to user.
+  - `web_manager`: Campaign reviewed (reviewed_by=user, reviewed_at set).
+  - `admin`: Shelter verified (verified_at set, global — no "who verified" field on model).
+- New imports: `ClinicalHistoryEntry`, `PostAdoptionFollowUp`.
+- Cross-role events (application/donation/sponsorship/favorite) continue to run unconditionally — any user who has them sees them.
+
+**Frontend:**
+- `frontend/lib/types.ts` — `ActivityEvent.type` union widened from 4 to 12 members; new optional `campaign_title` field added.
+- `frontend/app/[locale]/my-profile/page.tsx`:
+  - `isAdopter` gate removed from the "Actividad Reciente" card — card renders for all roles.
+  - `useEffect` now calls `fetchActivity()` for all roles; `fetchProfileStats()` remains adopter-only.
+  - `ActivityTimeline` gains `showExploreCta?: boolean` prop (defaults `true`); CTA to `/animals` is hidden for non-adopter roles in the empty state.
+  - `iconMap` and `getDescription` switch extended with 8 new cases; new lucide icons imported (`Stethoscope`, `CheckCircle2`, `PawPrint`).
+- `frontend/messages/{es,en}.json` — 8 new `activity*` keys under `profile` namespace.
+
+**Verification:** `python manage.py check` clean; `pytest test_profile_views.py -v` → 23 passed; `tsc --noEmit` no new errors in changed files.
+
+---
 
 ## Recently Completed: Phase 19 — Role Profile Sections + Manual Filtered by Role (2026-04-20)
 
@@ -298,7 +348,6 @@ Role-gated manual for `web_manager` and `admin` (and `is_staff`), accessible at 
 - Total E2E spec files: 16 (up from 14)
 
 ## Next Steps
-- Implement Phase 13b (enriched my-profile dashboard)
 - Wire web-manager "Seguimientos" tab on shelter detail (vet assignment dropdown)
 - Add Huey periodic task for campaign closure automation (`ends_at` expiry + `raised_amount >= goal_amount`)
 - Add Huey periodic tasks once `--periodic` confirmed on `tuhuella-huey.service`

@@ -6,7 +6,7 @@ Use this document to understand each flow's steps, branching conditions, role re
 
 > **Flow IDs in this document match `e2e/flow-definitions.json` and `e2e/helpers/flow-tags.ts` exactly.**
 
-**Version:** 5.6.0
+**Version:** 5.7.0
 **Last Updated:** 2026-04-20
 
 ---
@@ -77,6 +77,8 @@ Use this document to understand each flow's steps, branching conditions, role re
 | `donation-checkout` | Donation checkout flow | donation | P1 | adopter | `/checkout/donation` |
 | `donation-history` | View donation history | donation | P2 | adopter | `/my-donations` |
 | `payment-confirmation` | Payment confirmation page | donation | P2 | adopter | `/checkout/confirmation` |
+| `platform-support-info` | Platform support landing page | donation | P2 | shared | `/apoya-la-plataforma` |
+| `donation-platform-checkout` | Platform donation checkout | donation | P1 | adopter | `/checkout/platform` |
 | `sponsorship-checkout` | Sponsorship checkout flow | sponsorship | P1 | adopter | `/checkout/sponsorship` |
 | `sponsorship-history` | View sponsorships | sponsorship | P2 | adopter | `/my-sponsorships` |
 | `favorite-toggle` | Toggle animal favorite | favorite | P2 | adopter | `/animals/[animalId]` |
@@ -149,6 +151,12 @@ Use this document to understand each flow's steps, branching conditions, role re
 | `manual-role-filter` | Manual content filtered by role | manual | P3 | adopter, shelter_admin, veterinarian | `/manual` |
 | `web-manager-profile` | Web manager profile view | web-manager | P3 | web_manager | `/my-profile` |
 | `veterinarian-profile` | Veterinarian profile view | veterinarian | P3 | veterinarian | `/my-profile` |
+| `shelter-panel-animal-create` | Shelter create new animal | shelter-panel | P1 | shelter_admin | `/shelter/animals` |
+| `shelter-panel-animal-edit` | Shelter edit existing animal | shelter-panel | P3 | shelter_admin | `/shelter/animals` |
+| `shelter-panel-animal-archive` | Shelter archive animal | shelter-panel | P3 | shelter_admin | `/shelter/animals` |
+| `auth-password-change` | Authenticated password change | auth | P2 | all authenticated | `/my-profile/edit` |
+| `shelter-invite-send` | Shelter admin sends adopter invite | adopter-intent | P3 | shelter_admin | `/looking-to-adopt` |
+| `shelter-invite-respond` | Adopter responds to shelter invite | adopter-intent | P3 | adopter | `/my-profile` |
 
 ---
 
@@ -619,6 +627,38 @@ Use this document to understand each flow's steps, branching conditions, role re
 | Audience mismatch (prod) | `401 { error: "Invalid Google client" }` |
 | New user | User created with unusable password; `created: true` |
 | Existing user | Matched by email; names updated if blank |
+
+---
+
+### auth-password-change
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | adopter, shelter_admin, admin, web_manager, veterinarian |
+| **Frontend route** | `/my-profile/edit` |
+| **API endpoints** | `PATCH /api/auth/update_password/` |
+
+**Preconditions:** User is authenticated.
+
+**Steps:**
+
+1. User navigates to `/my-profile/edit`.
+2. Page renders profile edit form; a "Change Password" section is visible below the profile fields.
+3. User enters current password, new password, and confirmation in the respective inputs.
+4. Frontend validates new password strength (min length, complexity) client-side.
+5. User clicks **Save** / **Guardar contraseña**.
+6. Frontend sends `PATCH /api/auth/update_password/` with `{ current_password, new_password }`.
+7. On success: success toast shown, password fields cleared.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| New password too weak | Client-side error before submit |
+| New password ≠ confirmation | Error before submit |
+| Current password wrong | `400` returned; error shown inline |
+| Unauthenticated access | Redirected to `/sign-in` |
 
 ---
 
@@ -1193,6 +1233,66 @@ Use this document to understand each flow's steps, branching conditions, role re
 
 ---
 
+### platform-support-info
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | shared |
+| **Frontend route** | `/apoya-la-plataforma` |
+| **API endpoints** | None |
+
+**Preconditions:** None.
+
+**Steps:**
+
+1. User navigates to `/apoya-la-plataforma`.
+2. Page renders hero with platform support CTA.
+3. Cost breakdown cards show platform operating costs.
+4. Transparency section describes how funds are used.
+5. Comparison grid lists 5 ways to support Tuhuella.
+6. User clicks the CTA button to proceed to the platform donation checkout.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| User not authenticated | CTA redirects to `/sign-in?redirect=/checkout/platform` |
+| User authenticated | CTA navigates directly to `/checkout/platform` |
+
+---
+
+### donation-platform-checkout
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P1 |
+| **Roles** | adopter |
+| **Frontend route** | `/checkout/platform` |
+| **API endpoints** | `POST /api/donations/create/`, `POST /api/payments/create-intent/` |
+
+**Preconditions:** User is authenticated (redirect to `/sign-in` otherwise).
+
+**Steps:**
+
+1. User navigates to `/checkout/platform`.
+2. Page renders preset donation amounts and custom amount input (same pattern as shelter donations).
+3. User selects an amount.
+4. User selects payment method (card / PSE / Nequi).
+5. User submits the form.
+6. Frontend sends `POST /api/donations/create/` with `dest=platform` context, then `POST /api/payments/create-intent/`.
+7. User is redirected to `/checkout/confirmation?dest=platform`.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| Unauthenticated | Redirected to `/sign-in?redirect=/checkout/platform` |
+| No amount selected | Submit disabled |
+| Payment fails | Error shown inline; user stays on checkout |
+
+---
+
 ## Sponsorship Module
 
 ### sponsorship-checkout
@@ -1376,6 +1476,69 @@ Use this document to understand each flow's steps, branching conditions, role re
 
 ---
 
+### shelter-invite-send
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P3 |
+| **Roles** | shelter_admin |
+| **Frontend route** | `/looking-to-adopt` |
+| **API endpoints** | `POST /api/shelter-invites/create/` |
+
+**Preconditions:** User is authenticated as `shelter_admin` with a verified shelter.
+
+**Steps:**
+
+1. Shelter admin navigates to `/looking-to-adopt`.
+2. Page loads public adopter intents via `GET /api/adopter-intents/`.
+3. Admin browses intents and clicks on a profile that matches their shelter.
+4. Admin clicks **Invitar** / **Send Invite** button on the adopter intent card.
+5. Frontend sends `POST /api/shelter-invites/create/` with `{ adopter_id, shelter_id }`.
+6. Success toast shown; invite button disabled for that adopter.
+7. Adopter receives in-app notification and email (`shelter_invite_sent` event).
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| Shelter not verified | Invite button hidden or disabled |
+| Invite already sent to this adopter | Button shows "Invitación enviada" |
+| Unauthenticated access | Redirect to `/sign-in` |
+
+---
+
+### shelter-invite-respond
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P3 |
+| **Roles** | adopter |
+| **Frontend route** | `/my-profile` |
+| **API endpoints** | `GET /api/shelter-invites/`, `PATCH /api/shelter-invites/[pk]/respond/` |
+
+**Preconditions:** User is authenticated as `adopter` and has at least one pending shelter invite.
+
+**Steps:**
+
+1. Adopter navigates to `/my-profile`.
+2. Profile stats banner shows `shelter_invites.pending_count > 0`.
+3. Adopter clicks the banner or navigates to the invite management area.
+4. Page loads pending invites via `GET /api/shelter-invites/`.
+5. Each invite card shows shelter name, shelter city, and action buttons (Accept / Reject).
+6. Adopter clicks **Aceptar** (accept) or **Rechazar** (reject).
+7. Frontend sends `PATCH /api/shelter-invites/[pk]/respond/` with `{ response: 'accepted' | 'rejected' }`.
+8. Invite status updates; pending count decrements.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| No pending invites | Banner not shown; invite list shows empty state |
+| Unauthenticated access | Redirect to `/sign-in` |
+| API error | Error toast; invite remains in pending state |
+
+---
+
 ## Adopter Module
 
 ### adopter-profile
@@ -1538,6 +1701,99 @@ Use this document to understand each flow's steps, branching conditions, role re
 |-----------|----------|
 | No animals | Empty state + "Agregar animal" CTA |
 | Filters applied | List updates with filtered results |
+
+---
+
+### shelter-panel-animal-create
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P1 |
+| **Roles** | shelter_admin |
+| **Frontend route** | `/shelter/animals` (create modal or inline form) |
+| **API endpoints** | `POST /api/animals/create/` |
+
+**Preconditions:** User is authenticated as `shelter_admin` with an owned shelter.
+
+**Steps:**
+
+1. Shelter admin navigates to `/shelter/animals`.
+2. Admin clicks **Agregar animal** / **Add animal** button.
+3. Create form (modal or page) renders with required fields: name, species, breed, age, gender, status, description.
+4. Admin fills all required fields and optionally uploads photos.
+5. Admin clicks **Guardar** / **Save**.
+6. Frontend sends `POST /api/animals/create/` with form data.
+7. New animal appears in the list with status `draft`.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| Missing required fields | Inline validation errors; submit blocked |
+| API error | Error toast; form stays open |
+| Animal saved as `published` | Immediately visible on public `/animals` page |
+
+---
+
+### shelter-panel-animal-edit
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P3 |
+| **Roles** | shelter_admin |
+| **Frontend route** | `/shelter/animals` (edit form) |
+| **API endpoints** | `GET /api/animals/[pk]/`, `PATCH /api/animals/[pk]/update/` |
+
+**Preconditions:** User is authenticated as `shelter_admin`; at least one animal exists.
+
+**Steps:**
+
+1. Shelter admin navigates to `/shelter/animals`.
+2. Admin clicks the edit action on an animal card.
+3. Edit form opens pre-populated with existing animal data.
+4. Admin modifies one or more fields (description, photos, health info, status).
+5. Admin clicks **Guardar** / **Save**.
+6. Frontend sends `PATCH /api/animals/[pk]/update/` with changed fields.
+7. Animal card in the list reflects the updated data.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| No changes made | Save button disabled or no-op |
+| API error | Error toast; form stays open with original values |
+| Status changed to `published` | Animal becomes visible on public listing |
+
+---
+
+### shelter-panel-animal-archive
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P3 |
+| **Roles** | shelter_admin |
+| **Frontend route** | `/shelter/animals` |
+| **API endpoints** | `DELETE /api/animals/[pk]/delete/` |
+
+**Preconditions:** User is authenticated as `shelter_admin`; at least one active animal exists.
+
+**Steps:**
+
+1. Shelter admin navigates to `/shelter/animals`.
+2. Admin clicks the archive/delete action on an animal card.
+3. Confirmation dialog appears: "¿Archivar este animal?" with Cancel and Confirm buttons.
+4. Admin clicks **Confirmar**.
+5. Frontend sends `DELETE /api/animals/[pk]/delete/` (soft-delete via `archived_at`).
+6. Animal disappears from the active list.
+7. Archived animal no longer appears on the public `/animals` page.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| Admin clicks Cancel | Dialog closes; animal unchanged |
+| Animal has pending adoption applications | Warning shown (animal can still be archived) |
+| API error | Error toast; animal remains in list |
 
 ---
 
@@ -2747,6 +3003,7 @@ Use this document to understand each flow's steps, branching conditions, role re
 | **Priority** | P3 |
 | **Roles** | web_manager |
 | **Frontend route** | `/my-profile` |
+| **API endpoints** | `GET /api/user/profile/`, `GET /api/user/activity/` |
 
 **Preconditions:** User is authenticated as web_manager.
 
@@ -2755,9 +3012,10 @@ Use this document to understand each flow's steps, branching conditions, role re
 1. Web manager navigates to `/my-profile`.
 2. Page renders common profile elements: avatar (initials), user full name (h1), role badge, profile completeness bar, Edit Profile button.
 3. Profile fields displayed: email, role (`web_manager`), phone (if set), city (if set).
-4. Right column heading: "Responsabilidades del web manager".
-5. `WebManagerProfileSection` renders: 3 stat cards (pending shelters, submitted applications, pending campaigns — fetched via 3 parallel API calls) and 4 quick action links (shelters, applications, campaigns, new campaign).
-6. Cross-links grid below: notifications, FAQ, terms.
+4. Activity timeline rendered with role-specific events: `campaign_reviewed` (campaigns the manager reviewed).
+5. Right column heading: "Responsabilidades del web manager".
+6. `WebManagerProfileSection` renders: 3 stat cards (pending shelters, submitted applications, pending campaigns — fetched via 3 parallel API calls) and 4 quick action links (shelters, applications, campaigns, new campaign).
+7. Cross-links grid below: notifications, FAQ, terms.
 
 **Branching conditions:**
 
@@ -2775,6 +3033,7 @@ Use this document to understand each flow's steps, branching conditions, role re
 | **Priority** | P3 |
 | **Roles** | veterinarian |
 | **Frontend route** | `/my-profile` |
+| **API endpoints** | `GET /api/user/profile/`, `GET /api/user/activity/` |
 
 **Preconditions:** User is authenticated as veterinarian.
 
@@ -2783,9 +3042,10 @@ Use this document to understand each flow's steps, branching conditions, role re
 1. Veterinarian navigates to `/my-profile`.
 2. Page renders common profile elements: avatar (initials), user full name (h1), role badge, profile completeness bar, Edit Profile button.
 3. Profile fields displayed: email, role (`veterinarian`), phone (if set), city (if set).
-4. Right column heading: "Responsabilidades del veterinario".
-5. `VeterinarianProfileSection` renders: 4 stat cards (pending / in_progress / completed / overdue follow-up counts derived from `useFollowUpStore`) and one quick action link to `/veterinarian/follow-ups`.
-6. Cross-links grid below: notifications, FAQ, terms.
+4. Activity timeline rendered with role-specific events: `clinical_entry` (history entries the vet authored) and `followup_completed` (follow-ups they marked complete).
+5. Right column heading: "Responsabilidades del veterinario".
+6. `VeterinarianProfileSection` renders: 4 stat cards (pending / in_progress / completed / overdue follow-up counts derived from `useFollowUpStore`) and one quick action link to `/veterinarian/follow-ups`.
+7. Cross-links grid below: notifications, FAQ, terms.
 
 **Branching conditions:**
 

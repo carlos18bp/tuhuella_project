@@ -185,3 +185,19 @@ export const MANUAL_ROLE_FILTER = ['@flow:manual-role-filter', '@module:manual',
 // ── Profile (additional roles) ──
 export const WEB_MANAGER_PROFILE = ['@flow:web-manager-profile', '@module:web-manager', '@priority:P3'];
 export const VETERINARIAN_PROFILE = ['@flow:veterinarian-profile', '@module:veterinarian', '@priority:P3'];
+
+// ── Platform Support ──
+export const PLATFORM_SUPPORT_INFO = ['@flow:platform-support-info', '@module:donation', '@priority:P2'];
+export const DONATION_PLATFORM_CHECKOUT = ['@flow:donation-platform-checkout', '@module:donation', '@priority:P1'];
+
+// ── Shelter Panel (animal CRUD) ──
+export const SHELTER_PANEL_ANIMAL_CREATE = ['@flow:shelter-panel-animal-create', '@module:shelter-panel', '@priority:P1'];
+export const SHELTER_PANEL_ANIMAL_EDIT = ['@flow:shelter-panel-animal-edit', '@module:shelter-panel', '@priority:P3'];
+export const SHELTER_PANEL_ANIMAL_ARCHIVE = ['@flow:shelter-panel-animal-archive', '@module:shelter-panel', '@priority:P3'];
+
+// ── Auth (password change) ──
+export const AUTH_PASSWORD_CHANGE = ['@flow:auth-password-change', '@module:auth', '@priority:P2'];
+
+// ── Adopter Intent (shelter invites) ──
+export const SHELTER_INVITE_SEND = ['@flow:shelter-invite-send', '@module:adopter-intent', '@priority:P3'];
+export const SHELTER_INVITE_RESPOND = ['@flow:shelter-invite-respond', '@module:adopter-intent', '@priority:P3'];
