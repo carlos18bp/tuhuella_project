@@ -44,7 +44,7 @@ describe('favoriteStore', () => {
     expect(state.loading).toBe(false);
   });
 
-  it('handles fetchFavorites failure gracefully', async () => {
+  it('sets error on fetchFavorites failure', async () => {
     mockApi.get.mockRejectedValueOnce(new Error('Network error'));
 
     await act(async () => {
@@ -53,11 +53,23 @@ describe('favoriteStore', () => {
 
     expect(useFavoriteStore.getState().favorites).toHaveLength(0);
     expect(useFavoriteStore.getState().loading).toBe(false);
+    expect(useFavoriteStore.getState().error).toBe('Failed to load favorites');
   });
 
-  it('toggles favorite to add', async () => {
+  it('stores the returned favorite object on toggle add', async () => {
+    mockApi.post.mockResolvedValueOnce({
+      data: { status: 'added', animal_id: 10, favorite: FAVORITE_FIXTURE },
+    });
+
+    const result = await useFavoriteStore.getState().toggleFavorite(10);
+
+    expect(result.status).toBe('added');
+    expect(useFavoriteStore.getState().favorites).toHaveLength(1);
+    expect(useFavoriteStore.getState().favorites[0].animal).toBe(10);
+  });
+
+  it('toggles favorite to add without favorite object in response', async () => {
     mockApi.post.mockResolvedValueOnce({ data: { status: 'added', animal_id: 10 } });
-    mockApi.get.mockResolvedValueOnce({ data: [FAVORITE_FIXTURE] });
 
     const result = await useFavoriteStore.getState().toggleFavorite(10);
 
@@ -102,7 +114,6 @@ describe('favoriteStore', () => {
       await useFavoriteStore.getState().updateFavoriteNote(1, 'test');
     });
 
-    // Favorites remain unchanged
     expect(useFavoriteStore.getState().favorites[0]).toEqual(FAVORITE_FIXTURE);
   });
 
@@ -114,7 +125,6 @@ describe('favoriteStore', () => {
       useFavoriteStore.getState().toggleFavorite(10),
     ).rejects.toThrow('fail');
 
-    // Favorites should be restored to original
     expect(useFavoriteStore.getState().favorites).toHaveLength(1);
     expect(useFavoriteStore.getState().favorites[0].animal).toBe(10);
   });

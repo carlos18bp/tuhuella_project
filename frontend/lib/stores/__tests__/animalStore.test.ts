@@ -195,4 +195,43 @@ describe('animalStore', () => {
       { params: { page: 3, page_size: 20 } },
     );
   });
+
+  it('passes lang param to fetchAnimals when provided', async () => {
+    mockApi.get.mockResolvedValueOnce({
+      data: { results: [ANIMAL_FIXTURE], count: 1, page: 1, page_size: 20, total_pages: 1 },
+    });
+
+    await act(async () => {
+      await useAnimalStore.getState().fetchAnimals({ species: 'dog' }, 'en');
+    });
+
+    expect(mockApi.get).toHaveBeenCalledWith(
+      expect.any(String),
+      { params: { species: 'dog', lang: 'en', page: 1, page_size: 20 } },
+    );
+  });
+
+  it('passes lang param to fetchAnimal when provided', async () => {
+    mockApi.get.mockResolvedValueOnce({ data: ANIMAL_FIXTURE });
+
+    await act(async () => {
+      await useAnimalStore.getState().fetchAnimal(1, 'en');
+    });
+
+    expect(mockApi.get).toHaveBeenCalledWith(
+      expect.any(String),
+      { params: { lang: 'en' } },
+    );
+  });
+
+  it('sets error message when fetchAnimal fails with Error', async () => {
+    mockApi.get.mockRejectedValueOnce(new Error('Not found'));
+
+    await act(async () => {
+      await useAnimalStore.getState().fetchAnimal(99);
+    });
+
+    expect(useAnimalStore.getState().error).toBe('Not found');
+    expect(useAnimalStore.getState().loading).toBe(false);
+  });
 });

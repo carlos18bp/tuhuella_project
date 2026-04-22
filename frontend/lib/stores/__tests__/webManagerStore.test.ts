@@ -102,6 +102,21 @@ describe('webManagerStore', () => {
       expect(calledUrl).not.toContain('city');
     });
 
+    it('omits falsy filter values from query string', async () => {
+      mockApi.get.mockResolvedValueOnce({ data: makePaginated([]) });
+
+      await act(async () => {
+        await useWebManagerStore.getState().fetchShelters({
+          verification_status: null as unknown as string,
+          city: '',
+        });
+      });
+
+      const [calledUrl] = mockApi.get.mock.calls[0];
+      expect(calledUrl).not.toContain('verification_status');
+      expect(calledUrl).not.toContain('city');
+    });
+
     it('sets error and clears loading when the API call fails', async () => {
       mockApi.get.mockRejectedValueOnce(new Error('Unauthorized'));
 

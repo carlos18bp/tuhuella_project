@@ -92,6 +92,27 @@ def test_send_volunteer_application_notification_sends_to_team():
     assert TEAM_EMAIL in call_args.args[3]
 
 
+def test_send_verification_code_returns_false_on_smtp_error():
+    with patch('base_feature_app.utils.email_utils.send_mail', side_effect=Exception('SMTP down')), \
+         patch('base_feature_app.utils.email_utils.render_to_string', return_value='<html/>'):
+        result = send_verification_code('test@example.com', '654321')
+    assert result is False
+
+
+@pytest.mark.django_db
+def test_send_volunteer_notification_returns_false_on_smtp_error():
+    position = VolunteerPositionFactory()
+    user = UserFactory()
+    application = MagicMock()
+    application.user = user
+    application.position = position
+    application.motivation = 'I love animals'
+    with patch('base_feature_app.utils.email_utils.send_mail', side_effect=Exception('SMTP down')), \
+         patch('base_feature_app.utils.email_utils.render_to_string', return_value='<html/>'):
+        result = send_volunteer_application_notification(application)
+    assert result is False
+
+
 def test_send_contact_form_email_sets_reply_to():
     mock_msg = MagicMock()
     with patch('base_feature_app.utils.email_utils.EmailMultiAlternatives', return_value=mock_msg) as mock_cls, \
