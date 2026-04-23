@@ -40,15 +40,16 @@ describe('canViewManualAudience', () => {
   });
 
   describe('web_manager and admin see everything', () => {
-    it.each(['web_manager', 'admin'] as UserRole[])(
-      '%s can view any audience',
-      (role) => {
-        const all: ManualAudience[] = ['public', 'cross', 'adopter', 'shelter_admin', 'veterinarian', 'web_manager', 'admin'];
-        for (const audience of all) {
-          expect(canViewManualAudience(role, audience)).toBe(true);
-        }
-      },
-    );
+    const ALL_AUDIENCES: ManualAudience[] = [
+      'public', 'cross', 'adopter', 'shelter_admin', 'veterinarian', 'web_manager', 'admin',
+    ];
+    it.each(
+      (['web_manager', 'admin'] as UserRole[]).flatMap(
+        (role) => ALL_AUDIENCES.map((audience) => [role, audience] as [UserRole, ManualAudience]),
+      ),
+    )('%s can view %s audience', (role, audience) => {
+      expect(canViewManualAudience(role, audience)).toBe(true);
+    });
   });
 
   describe('adopter role', () => {
@@ -74,15 +75,15 @@ describe('canViewManualAudience', () => {
   });
 
   describe('each non-privileged role sees only its own + cross + public', () => {
-    it.each(['shelter_admin', 'veterinarian'] as UserRole[])(
-      '%s cannot view other role-specific audiences',
-      (role) => {
-        const others: ManualAudience[] = ['adopter', 'shelter_admin', 'veterinarian'].filter(
-          (a) => a !== role,
-        ) as ManualAudience[];
-        for (const audience of others) {
-          expect(canViewManualAudience(role, audience)).toBe(false);
-        }
+    it.each([
+      ['shelter_admin', 'adopter'],
+      ['shelter_admin', 'veterinarian'],
+      ['veterinarian', 'adopter'],
+      ['veterinarian', 'shelter_admin'],
+    ] as [UserRole, ManualAudience][])(
+      '%s cannot view %s audience',
+      (role, audience) => {
+        expect(canViewManualAudience(role, audience)).toBe(false);
       },
     );
   });

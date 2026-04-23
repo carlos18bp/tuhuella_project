@@ -19,7 +19,8 @@ def test_shelter_membership_str_shows_user_and_shelter():
 def test_shelter_membership_unique_per_user_per_shelter():
     user = UserFactory()
     shelter = ShelterFactory()
-    ShelterMembership.objects.create(shelter=shelter, user=user, role='staff')
+    first = ShelterMembership.objects.create(shelter=shelter, user=user, role='staff')
+    assert first.pk is not None
     with pytest.raises(IntegrityError):
         ShelterMembership.objects.create(shelter=shelter, user=user, role='admin')
 

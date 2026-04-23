@@ -92,31 +92,25 @@ def test_validate_content_json_passes_valid_structure():
 
 def test_get_cover_image_display_returns_empty_when_no_cover():
     """Returns '' when cover_image is None and cover_image_url is empty."""
-    from unittest.mock import MagicMock
-    obj = MagicMock()
-    obj.cover_image = None
-    obj.cover_image_url = ''
+    from types import SimpleNamespace
+    obj = SimpleNamespace(cover_image=None, cover_image_url='')
     assert _get_cover_image_display(obj) == ''
 
 
 def test_get_cover_image_display_falls_back_to_url_field():
     """Returns cover_image_url when cover_image (Library) is None."""
-    from unittest.mock import MagicMock
-    obj = MagicMock()
-    obj.cover_image = None
-    obj.cover_image_url = 'https://unsplash.com/img.jpg'
+    from types import SimpleNamespace
+    obj = SimpleNamespace(cover_image=None, cover_image_url='https://unsplash.com/img.jpg')
     assert _get_cover_image_display(obj) == 'https://unsplash.com/img.jpg'
 
 
 def test_get_cover_image_display_prefers_uploaded_file():
     """Uploaded file URL takes priority over cover_image_url."""
-    from unittest.mock import MagicMock
-    library = MagicMock()
-    library.primary_attachment.file.url = '/media/blog/img.jpg'
-
-    obj = MagicMock()
-    obj.cover_image = library
-    obj.cover_image_url = 'https://unsplash.com/img.jpg'
+    from types import SimpleNamespace
+    library = SimpleNamespace(
+        primary_attachment=SimpleNamespace(file=SimpleNamespace(url='/media/blog/img.jpg')),
+    )
+    obj = SimpleNamespace(cover_image=library, cover_image_url='https://unsplash.com/img.jpg')
     assert _get_cover_image_display(obj) == '/media/blog/img.jpg'
 
 

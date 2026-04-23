@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from base_feature_app.tests.factories import UserFactory, VolunteerPositionFactory
 from base_feature_app.utils.email_utils import (
@@ -79,12 +79,10 @@ def test_send_verification_code_returns_true_on_success():
 
 @pytest.mark.django_db
 def test_send_volunteer_application_notification_sends_to_team():
+    from types import SimpleNamespace
     position = VolunteerPositionFactory()
     user = UserFactory()
-    application = MagicMock()
-    application.user = user
-    application.position = position
-    application.motivation = 'I love animals'
+    application = SimpleNamespace(user=user, position=position, motivation='I love animals')
     with patch('base_feature_app.utils.email_utils.send_mail') as mock_send, \
          patch('base_feature_app.utils.email_utils.render_to_string', return_value='<html/>'):
         send_volunteer_application_notification(application)
@@ -101,12 +99,10 @@ def test_send_verification_code_returns_false_on_smtp_error():
 
 @pytest.mark.django_db
 def test_send_volunteer_notification_returns_false_on_smtp_error():
+    from types import SimpleNamespace
     position = VolunteerPositionFactory()
     user = UserFactory()
-    application = MagicMock()
-    application.user = user
-    application.position = position
-    application.motivation = 'I love animals'
+    application = SimpleNamespace(user=user, position=position, motivation='I love animals')
     with patch('base_feature_app.utils.email_utils.send_mail', side_effect=Exception('SMTP down')), \
          patch('base_feature_app.utils.email_utils.render_to_string', return_value='<html/>'):
         result = send_volunteer_application_notification(application)
@@ -114,8 +110,12 @@ def test_send_volunteer_notification_returns_false_on_smtp_error():
 
 
 def test_send_contact_form_email_sets_reply_to():
-    mock_msg = MagicMock()
-    with patch('base_feature_app.utils.email_utils.EmailMultiAlternatives', return_value=mock_msg) as mock_cls, \
+    from types import SimpleNamespace
+    stub_msg = SimpleNamespace(
+        attach_alternative=lambda *_: None,
+        send=lambda: None,
+    )
+    with patch('base_feature_app.utils.email_utils.EmailMultiAlternatives', return_value=stub_msg) as mock_cls, \
          patch('base_feature_app.utils.email_utils.render_to_string', return_value='<html/>'):
         send_contact_form_email(
             name='Pedro', email='pedro@example.com',
@@ -126,9 +126,13 @@ def test_send_contact_form_email_sets_reply_to():
 
 
 def test_send_contact_form_email_returns_false_on_error():
-    mock_msg = MagicMock()
-    mock_msg.send.side_effect = Exception('connection refused')
-    with patch('base_feature_app.utils.email_utils.EmailMultiAlternatives', return_value=mock_msg), \
+    def _raise_on_send(): raise Exception('connection refused')
+    from types import SimpleNamespace
+    stub_msg = SimpleNamespace(
+        attach_alternative=lambda *_: None,
+        send=_raise_on_send,
+    )
+    with patch('base_feature_app.utils.email_utils.EmailMultiAlternatives', return_value=stub_msg), \
          patch('base_feature_app.utils.email_utils.render_to_string', return_value='<html/>'):
         result = send_contact_form_email(
             name='Pedro', email='pedro@example.com',

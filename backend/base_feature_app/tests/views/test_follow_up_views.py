@@ -2,6 +2,7 @@ from datetime import date, datetime, timedelta, timezone as dt_timezone
 
 import pytest
 from django.utils import timezone
+from freezegun import freeze_time
 
 from base_feature_app.models import (
     AdoptionApplication,
@@ -145,6 +146,7 @@ def test_adopter_sees_own_follow_up(api_client, existing_user):
 
 
 @pytest.mark.django_db
+@freeze_time('2026-01-15')
 def test_archived_follow_up_hidden_from_vet(vet_client, veterinarian, existing_user):
     animal = AnimalFactory()
     app = AdoptionApplicationFactory(animal=animal, user=existing_user)

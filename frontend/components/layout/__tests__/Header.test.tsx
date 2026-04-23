@@ -216,6 +216,7 @@ describe('Header', () => {
     const mobileLink = mobileLinks[mobileLinks.length - 1];
     await userEvent.click(mobileLink);
 
+    // quality: allow-fragile-selector (animation class .animate-scale-out is only detectable via DOM query)
     const closingPanel = document.querySelector('.animate-scale-out');
     expect(closingPanel).not.toBeNull();
     fireEvent.animationEnd(closingPanel!);

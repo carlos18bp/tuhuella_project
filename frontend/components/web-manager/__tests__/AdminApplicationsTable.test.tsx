@@ -60,30 +60,35 @@ describe('AdminApplicationsTable', () => {
 
   it('applies submitted status badge style', () => {
     render(<AdminApplicationsTable items={[buildApp({ status: 'submitted' })]} />);
+    // quality: allow-fragile-selector (CSS class assertion requires DOM access; span has no ARIA role)
     const badge = screen.getByRole('row', { name: /Firulais/ }).querySelector('span.rounded-full');
     expect(badge?.className).toContain('bg-amber-50');
   });
 
   it('applies approved status badge style', () => {
     render(<AdminApplicationsTable items={[buildApp({ status: 'approved' })]} />);
+    // quality: allow-fragile-selector (CSS class assertion requires DOM access; span has no ARIA role)
     const badge = screen.getByRole('row', { name: /Firulais/ }).querySelector('span.rounded-full');
     expect(badge?.className).toContain('bg-emerald-50');
   });
 
   it('applies rejected status badge style', () => {
     render(<AdminApplicationsTable items={[buildApp({ status: 'rejected' })]} />);
+    // quality: allow-fragile-selector (CSS class assertion requires DOM access; span has no ARIA role)
     const badge = screen.getByRole('row', { name: /Firulais/ }).querySelector('span.rounded-full');
     expect(badge?.className).toContain('bg-red-50');
   });
 
   it('applies reviewing status badge style', () => {
     render(<AdminApplicationsTable items={[buildApp({ status: 'reviewing' })]} />);
+    // quality: allow-fragile-selector (CSS class assertion requires DOM access; span has no ARIA role)
     const badge = screen.getByRole('row', { name: /Firulais/ }).querySelector('span.rounded-full');
     expect(badge?.className).toContain('bg-sky-50');
   });
 
   it('applies interview status badge style', () => {
     render(<AdminApplicationsTable items={[buildApp({ status: 'interview' })]} />);
+    // quality: allow-fragile-selector (CSS class assertion requires DOM access; span has no ARIA role)
     const badge = screen.getByRole('row', { name: /Firulais/ }).querySelector('span.rounded-full');
     expect(badge?.className).toContain('bg-indigo-50');
   });
