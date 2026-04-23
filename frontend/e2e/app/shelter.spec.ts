@@ -392,8 +392,8 @@ test.describe('Shelter Admin Profile — Authenticated', () => {
     const shelterSection = page.getByText(/Responsabilidades del refugio/i);
     await expect(shelterSection).toBeVisible({ timeout: 10_000 });
 
-    await expect(page.getByText(/Mis Solicitudes/i)).not.toBeVisible();
-    await expect(page.getByText(/Mis Donaciones/i)).not.toBeVisible();
+    await expect(page.getByRole('main').getByText(/Mis Solicitudes/i)).not.toBeVisible();
+    await expect(page.getByRole('main').getByText(/Mis Donaciones/i)).not.toBeVisible();
   });
 
   test('should display pending-applications widget with correct count', { tag: [...SHELTER_ADMIN_PROFILE] }, async ({ page }) => {
@@ -438,7 +438,7 @@ test.describe('Shelter Campaign Detail & Create', () => {
 
     await expect(page.getByText(/Rescate de temporada/i)).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/Reenviar a revisión/i)).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByText(/Falta imagen de portada/i)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/Falta imagen de portada/i).first()).toBeVisible({ timeout: 10_000 });
   });
 
   test('should redirect unauthenticated user from campaign detail', { tag: [...SHELTER_PANEL_CAMPAIGN_DETAIL] }, async ({ page }) => {

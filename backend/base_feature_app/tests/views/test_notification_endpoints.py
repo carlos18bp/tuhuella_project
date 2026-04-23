@@ -33,13 +33,13 @@ def test_preferences_list_returns_user_prefs(authenticated_client, notification_
 
 @pytest.mark.django_db
 def test_preferences_init_creates_defaults(authenticated_client, existing_user):
-    """Init creates 24 default preferences (12 events x 2 channels)."""
+    """Init creates 38 default preferences (19 events x 2 channels)."""
     url = reverse('notification-preferences-init')
     response = authenticated_client.post(url)
     assert response.status_code == 201
     data = response.json()
-    assert data['created'] == 24
-    assert NotificationPreference.objects.filter(user=existing_user).count() == 24
+    assert data['created'] == 38
+    assert NotificationPreference.objects.filter(user=existing_user).count() == 38
 
 
 @pytest.mark.django_db

@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 from django.core.management import call_command
 
@@ -9,6 +11,7 @@ from base_feature_app.models import (
     Donation,
     Favorite,
     Shelter,
+    ShelterMembership,
     Sponsorship,
     UpdatePost,
     User,
@@ -164,3 +167,95 @@ def test_delete_fake_data_preserves_superusers():
     superuser_count_after = User.objects.filter(is_superuser=True).count()
 
     assert superuser_count_after == superuser_count_before
+
+
+# --- create_shelters extra coverage ---
+
+@pytest.mark.django_db
+def test_create_shelters_skips_when_no_shelter_admins():
+    """create_shelters returns early and creates no shelters when no shelter_admin users exist."""
+    call_command('create_shelters', '--count', '2')
+
+    assert Shelter.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_create_shelters_creates_owner_membership_for_each_shelter():
+    """create_shelters creates a ShelterMembership with role='owner' for each shelter."""
+    call_command('create_users', '--count', '4')
+    call_command('create_shelters', '--count', '2')
+
+    assert ShelterMembership.objects.filter(role=ShelterMembership.Role.OWNER).count() >= 2
+
+
+@pytest.mark.django_db
+def test_create_shelters_generates_faker_shelters_when_count_exceeds_fixed():
+    """create_shelters creates faker-generated shelters beyond the fixed seed count."""
+    call_command('create_users', '--count', '4')
+    call_command('create_shelters', '--count', '5')
+
+    assert Shelter.objects.count() == 5
+
+
+@pytest.mark.django_db
+def test_create_shelters_is_idempotent_for_fixed_shelters():
+    """Running create_shelters twice does not duplicate fixed seed shelters."""
+    call_command('create_users', '--count', '4')
+    call_command('create_shelters', '--count', '2')
+    first_count = Shelter.objects.count()
+
+    call_command('create_shelters', '--count', '2')
+
+    assert Shelter.objects.count() == first_count
+
+
+# --- create_campaigns extra coverage ---
+
+@pytest.mark.django_db
+def test_create_campaigns_skips_when_no_verified_shelters():
+    """create_campaigns returns early when no verified shelters exist."""
+    call_command('create_campaigns', '--count', '3')
+
+    assert Campaign.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_create_campaigns_creates_pending_campaign():
+    """create_campaigns produces at least one PENDING campaign when count is large enough."""
+    call_command('create_users', '--count', '4')
+    call_command('create_shelters', '--count', '2')
+    call_command('create_campaigns', '--count', '4')
+
+    assert Campaign.objects.filter(approval_status=Campaign.ApprovalStatus.PENDING).count() >= 1
+
+
+@pytest.mark.django_db
+def test_create_campaigns_creates_rejected_campaign():
+    """create_campaigns produces at least one REJECTED campaign when count is large enough."""
+    call_command('create_users', '--count', '4')
+    call_command('create_shelters', '--count', '2')
+    call_command('create_campaigns', '--count', '5')
+
+    assert Campaign.objects.filter(approval_status=Campaign.ApprovalStatus.REJECTED).count() >= 1
+
+
+@pytest.mark.django_db
+def test_create_campaigns_creates_completed_campaign():
+    """create_campaigns produces at least one COMPLETED campaign when count is large enough."""
+    call_command('create_users', '--count', '4')
+    call_command('create_shelters', '--count', '2')
+    call_command('create_campaigns', '--count', '3')
+
+    assert Campaign.objects.filter(status=Campaign.Status.COMPLETED).count() >= 1
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.management.commands.create_campaigns.urllib.request.urlopen',
+       side_effect=Exception('Network error'))
+def test_create_campaigns_evidence_images_skipped_on_network_failure(mock_urlopen):
+    """Network failures in _add_evidence_images are silently skipped; campaigns still created."""
+    call_command('create_users', '--count', '4')
+    call_command('create_shelters', '--count', '2')
+    call_command('create_campaigns', '--count', '3')
+
+    assert Campaign.objects.count() >= 1

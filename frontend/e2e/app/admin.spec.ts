@@ -284,8 +284,8 @@ test.describe('Admin Profile — Authenticated', () => {
     const adminSection = page.getByText(/Responsabilidades de administrador/i);
     await expect(adminSection).toBeVisible({ timeout: 10_000 });
 
-    await expect(page.getByText(/Mis Solicitudes/i)).not.toBeVisible();
-    await expect(page.getByText(/Favoritos/i)).not.toBeVisible();
+    await expect(page.getByRole('main').getByText(/Mis Solicitudes/i)).not.toBeVisible();
+    await expect(page.getByRole('main').getByText(/Favoritos/i)).not.toBeVisible();
   });
 
   test('should display moderation-queue widget with pending count', { tag: [...ADMIN_PROFILE] }, async ({ page }) => {

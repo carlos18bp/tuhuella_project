@@ -9,6 +9,10 @@ from base_feature_app.models import (
     AnimalStatusHistory,
     Campaign,
     Donation,
+    Payment,
+    PaymentHistory,
+    Shelter,
+    ShelterMembership,
     Sponsorship,
 )
 from base_feature_app.tests.factories import (
@@ -16,7 +20,11 @@ from base_feature_app.tests.factories import (
     AnimalFactory,
     CampaignFactory,
     DonationFactory,
+    PaymentFactory,
+    ShelterFactory,
+    ShelterInviteFactory,
     SponsorshipFactory,
+    UpdatePostFactory,
     WebManagerUserFactory,
 )
 
@@ -265,3 +273,84 @@ def test_adoption_submitted_notifies_web_managers(mock_dispatch):
         if recipient == manager
     ]
     assert any(event == 'adoption_submitted' for event, _ in manager_calls)
+
+
+# --- Payment history ---
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.signals._dispatch')
+def test_payment_record_status_history_created_on_payment_creation(mock_dispatch):
+    """Creating a Payment produces a PaymentHistory row with previous_status=''."""
+    payment = PaymentFactory()
+
+    assert PaymentHistory.objects.filter(payment=payment, previous_status='').exists()
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.signals._dispatch')
+def test_payment_record_status_history_created_on_status_change(mock_dispatch):
+    """Saving a Payment with a different status produces an additional PaymentHistory row."""
+    payment = PaymentFactory(status=Payment.Status.PENDING)
+    initial_count = PaymentHistory.objects.filter(payment=payment).count()
+
+    payment.status = Payment.Status.APPROVED
+    payment.save()
+
+    assert PaymentHistory.objects.filter(payment=payment).count() == initial_count + 1
+    latest = PaymentHistory.objects.filter(payment=payment).order_by('-id').first()
+    assert latest.new_status == Payment.Status.APPROVED
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.signals._dispatch')
+def test_payment_record_status_history_skipped_when_status_unchanged(mock_dispatch):
+    """Saving a Payment without changing status does not create a new PaymentHistory row."""
+    payment = PaymentFactory(status=Payment.Status.PENDING)
+    initial_count = PaymentHistory.objects.filter(payment=payment).count()
+
+    payment.save()
+
+    assert PaymentHistory.objects.filter(payment=payment).count() == initial_count
+
+
+# --- Shelter owner membership ---
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.signals._dispatch')
+def test_shelter_ensure_owner_membership_creates_membership_on_shelter_creation(mock_dispatch):
+    """Creating a Shelter produces a ShelterMembership with role=owner for the shelter owner."""
+    shelter = ShelterFactory()
+
+    assert ShelterMembership.objects.filter(
+        shelter=shelter,
+        user=shelter.owner,
+        role=ShelterMembership.Role.OWNER,
+    ).exists()
+
+
+# --- Shelter invite ---
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.signals._dispatch')
+def test_shelter_invite_save_dispatches_shelter_invite_sent(mock_dispatch):
+    """Creating a ShelterInvite dispatches shelter_invite_sent to the adopter intent user."""
+    invite = ShelterInviteFactory()
+
+    events = [c[0][0] for c in mock_dispatch.call_args_list]
+    assert 'shelter_invite_sent' in events
+
+
+# --- UpdatePost no-campaign path ---
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.signals._dispatch')
+def test_on_update_post_created_skips_dispatch_when_no_campaign(mock_dispatch):
+    """Creating an UpdatePost without a campaign does not dispatch campaign_update_published."""
+    UpdatePostFactory(campaign=None)
+
+    events = [c[0][0] for c in mock_dispatch.call_args_list]
+    assert 'campaign_update_published' not in events
