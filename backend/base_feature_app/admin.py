@@ -159,6 +159,9 @@ class AnimalAdmin(AttachmentsAdminMixin, admin.ModelAdmin):
     )
     readonly_fields = ('created_at', 'updated_at')
     inlines = [AnimalDiseaseScreeningInline]
+
+    def delete_queryset(self, request, queryset):
+        queryset.update(archived_at=timezone.now(), status=Animal.Status.ARCHIVED)
     fieldsets = (
         (None, {
             'fields': ('shelter', 'name', 'species', 'breed', 'age_range', 'gender', 'size', 'status', 'archived_at'),

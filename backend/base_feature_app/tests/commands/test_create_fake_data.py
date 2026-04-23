@@ -17,19 +17,33 @@ from base_feature_app.models import (
 
 @pytest.mark.django_db
 def test_create_users_creates_admin():
-    """create_users command creates the admin@mihuella.com superuser."""
+    """create_users command creates the admin@tuhuella.com superuser."""
     call_command('create_users', '--count', '2')
 
-    assert User.objects.filter(email='admin@mihuella.com', is_superuser=True).exists()
+    assert User.objects.filter(email='admin@tuhuella.com', is_superuser=True).exists()
 
 
 @pytest.mark.django_db
 def test_create_users_creates_specified_count():
-    """create_users command creates the requested number of regular users."""
+    """create_users --count creates that many Faker users on top of the fixed seed set."""
     call_command('create_users', '--count', '3')
 
-    non_admin_count = User.objects.filter(is_superuser=False).count()
-    assert non_admin_count == 3
+    # Faker emails are the ones NOT in the fixed seed list. The fixed admin/shelter_admin/
+    # adopter/web_manager/vet accounts all use @tuhuella.com.
+    from base_feature_app.management.commands.create_users import (
+        FIXED_ADMIN,
+        FIXED_ADOPTERS,
+        FIXED_SHELTER_ADMINS,
+        FIXED_VETERINARIANS,
+        FIXED_WEB_MANAGERS,
+    )
+
+    fixed_emails = {FIXED_ADMIN['email']}
+    for group in (FIXED_SHELTER_ADMINS, FIXED_ADOPTERS, FIXED_WEB_MANAGERS, FIXED_VETERINARIANS):
+        fixed_emails.update(entry['email'] for entry in group)
+
+    faker_count = User.objects.exclude(email__in=fixed_emails).count()
+    assert faker_count == 3
 
 
 @pytest.mark.django_db

@@ -137,7 +137,7 @@ describe('Header', () => {
     });
     render(<Header />);
 
-    await userEvent.click(screen.getAllByRole('button', { name: /Panel Web Manager/ })[0]);
+    await userEvent.click(screen.getAllByRole('button', { name: /Gestión Web/ })[0]);
 
     expect(screen.getByRole('menuitem', { name: /Solicitudes/ })).toHaveAttribute('href', '/web-manager/applications');
     expect(screen.getByRole('menuitem', { name: /Refugios/ })).toHaveAttribute('href', '/web-manager/shelters');

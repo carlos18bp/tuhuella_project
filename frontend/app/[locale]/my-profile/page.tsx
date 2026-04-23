@@ -156,8 +156,8 @@ export default function MiPerfilPage() {
   const isAdopter = user?.role === 'adopter';
 
   useEffect(() => {
-    void fetchActivity();
     if (isAdopter) {
+      void fetchActivity();
       void fetchProfileStats();
     }
   }, [isAdopter, fetchProfileStats, fetchActivity]);
@@ -402,10 +402,12 @@ export default function MiPerfilPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-border-primary bg-surface-primary shadow-sm p-5">
-            <h2 className="text-base font-bold text-text-primary mb-4">{t('recentActivity')}</h2>
-            <ActivityTimeline events={activity} showExploreCta={isAdopter} />
-          </div>
+          {isAdopter && (
+            <div className="rounded-2xl border border-border-primary bg-surface-primary shadow-sm p-5">
+              <h2 className="text-base font-bold text-text-primary mb-4">{t('recentActivity')}</h2>
+              <ActivityTimeline events={activity} showExploreCta={isAdopter} />
+            </div>
+          )}
           {user.role === 'shelter_admin' && (
             <PendingWidget
               icon={ClipboardList}

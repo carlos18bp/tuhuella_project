@@ -27,6 +27,8 @@ const setupMock = (overrides: Record<string, unknown> = {}) => {
 const fillForm = () => {
   fireEvent.change(screen.getByLabelText(/Nombre del refugio/), { target: { value: 'Mi Refugio' } });
   fireEvent.change(screen.getByLabelText(/Ciudad/), { target: { value: 'Bogotá' } });
+  fireEvent.change(screen.getByLabelText(/Descripción/), { target: { value: 'Un refugio de prueba.' } });
+  fireEvent.change(screen.getByLabelText(/Teléfono/), { target: { value: '+57 300 000 0000' } });
 };
 
 describe('ShelterOnboardingPage', () => {
@@ -121,10 +123,12 @@ describe('ShelterOnboardingPage', () => {
     render(<ShelterOnboardingPage />);
     fireEvent.change(screen.getByLabelText(/Nombre del refugio/), { target: { value: '   ' } });
     fireEvent.change(screen.getByLabelText(/Ciudad/), { target: { value: 'Bogotá' } });
+    fireEvent.change(screen.getByLabelText(/Descripción/), { target: { value: 'Un refugio de prueba.' } });
+    fireEvent.change(screen.getByLabelText(/Teléfono/), { target: { value: '+57 300 000 0000' } });
     await userEvent.click(screen.getByRole('button', { name: 'Registrar refugio' }));
 
     await waitFor(() => {
-      expect(screen.getByText('El nombre y la ciudad son obligatorios')).toBeInTheDocument();
+      expect(screen.getByText(/El nombre.*obligatorios/)).toBeInTheDocument();
     });
     expect(state.createShelter).not.toHaveBeenCalled();
   });

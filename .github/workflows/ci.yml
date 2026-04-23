@@ -142,6 +142,10 @@ jobs:
   frontend-e2e-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 18
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
     defaults:
       run:
         working-directory: frontend
@@ -187,8 +191,8 @@ jobs:
       - name: Install Playwright browsers with system deps
         run: npx playwright install --with-deps chromium
 
-      - name: Run Playwright E2E tests
-        run: npx playwright test --reporter='json,./e2e/reporters/flow-coverage-reporter.mjs'
+      - name: "Run Playwright E2E tests (shard ${{ matrix.shard }}/3)"
+        run: npx playwright test --shard=${{ matrix.shard }}/3 --reporter='json,./e2e/reporters/flow-coverage-reporter.mjs'
         env:
           CI: 'true'
           PLAYWRIGHT_JSON_OUTPUT_NAME: e2e-results/playwright-results.json
@@ -197,7 +201,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-frontend-e2e
+          name: coverage-frontend-e2e-${{ matrix.shard }}
           path: |
             frontend/e2e-results/flow-coverage.json
             frontend/e2e-results/playwright-results.json
@@ -207,7 +211,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-traces
+          name: playwright-traces-${{ matrix.shard }}
           path: frontend/test-results/
           retention-days: 7
 
@@ -245,12 +249,16 @@ jobs:
           path: coverage-artifacts/frontend-unit
         continue-on-error: true
 
-      - name: Download frontend-e2e coverage
+      - name: Download frontend-e2e coverage (all shards)
         uses: actions/download-artifact@v4
         with:
-          name: coverage-frontend-e2e
-          path: coverage-artifacts/frontend-e2e
+          pattern: coverage-frontend-e2e-*
+          path: coverage-artifacts/frontend-e2e-shards
         continue-on-error: true
+
+      - name: Merge E2E shard coverage
+        if: always()
+        run: node scripts/merge-e2e-shards.cjs coverage-artifacts/frontend-e2e-shards coverage-artifacts/frontend-e2e
 
       - name: Generate coverage summary
         if: always()
