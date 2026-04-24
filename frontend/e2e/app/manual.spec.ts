@@ -16,7 +16,7 @@ test.describe('Manual — Web Manager', () => {
     await loginAndNavigate(page, 'web_manager', '/manual');
 
     await expect(page.getByRole('heading', { name: /manual/i, level: 1 })).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText(/Web Manager/i)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: /Web Manager/i })).toBeVisible({ timeout: 10_000 });
   });
 
   test('should display the "Cómo empezar" highlighted section', { tag: [...MANUAL_BROWSE] }, async ({ page }) => {

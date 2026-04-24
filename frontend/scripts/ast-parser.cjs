@@ -103,6 +103,12 @@ function getMemberChain(callee) {
       continue;
     }
 
+    // handle it.each(array)(name, fn) — the callee of the outer call is itself a CallExpression
+    if (current.type === 'CallExpression') {
+      current = current.callee;
+      continue;
+    }
+
     break;
   }
 

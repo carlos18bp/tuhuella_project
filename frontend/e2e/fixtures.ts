@@ -251,13 +251,11 @@ export async function fillAdoptionForm(page: any) {
 
   // Section 3: Experience
   await page.getByLabel(/mascotas anteriormente/i).selectOption('dogs');
-  await page.getByLabel(/mascotas actualmente/i).selectOption('none');
+  await page.getByLabel(/mascotas actualmente/i).selectOption('no');
   await page.getByLabel(/nivel de experiencia/i).selectOption('moderate');
 
   // Section 4: Compatibility
   await page.getByLabel(/niños en el hogar/i).selectOption('no');
-  await page.getByLabel(/gatos en el hogar/i).selectOption('no');
-  await page.getByLabel(/otros perros en el hogar/i).selectOption('no');
 
   // Section 5: Commitment
   await page.getByLabel(/vacunas del animal/i).check();

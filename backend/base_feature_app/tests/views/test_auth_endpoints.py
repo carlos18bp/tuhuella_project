@@ -634,7 +634,7 @@ def test_validate_token_success(api_client):
     assert response.json()['valid'] is True
 
 
-@override_settings(DEBUG=False)
+@override_settings(DEBUG=False, RECAPTCHA_SECRET_KEY='test-secret')
 def test_verify_recaptcha_returns_false_when_no_token():
     """verify_recaptcha returns False when token is empty and DEBUG is False."""
     result = auth_views.verify_recaptcha('')

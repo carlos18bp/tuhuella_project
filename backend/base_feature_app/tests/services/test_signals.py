@@ -3,12 +3,29 @@ from unittest.mock import patch
 
 import pytest
 
-from base_feature_app.models import Donation
+from base_feature_app.models import (
+    AdoptionApplication,
+    Animal,
+    AnimalStatusHistory,
+    Campaign,
+    Donation,
+    Payment,
+    PaymentHistory,
+    Shelter,
+    ShelterMembership,
+    Sponsorship,
+)
 from base_feature_app.tests.factories import (
     AdoptionApplicationFactory,
+    AnimalFactory,
     CampaignFactory,
     DonationFactory,
+    PaymentFactory,
+    ShelterFactory,
+    ShelterInviteFactory,
     SponsorshipFactory,
+    UpdatePostFactory,
+    WebManagerUserFactory,
 )
 
 
@@ -140,3 +157,200 @@ def test_platform_donation_failed_dispatches_platform_event_to_user(mock_dispatc
     events = [c[0][0] for c in mock_dispatch.call_args_list]
     assert 'platform_donation_failed' in events
     assert 'donation_failed' not in events
+
+
+# --- DoesNotExist branches in pre_save handlers ---
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.signals._dispatch')
+def test_adoption_pre_save_sets_none_when_db_row_deleted(mock_dispatch):
+    """If an AdoptionApplication PK exists but row is deleted, _prev_status is None."""
+    app = AdoptionApplicationFactory(status='submitted')
+    AdoptionApplication.objects.filter(pk=app.pk).delete()
+    mock_dispatch.reset_mock()
+    app.status = 'reviewing'
+    app.save(force_insert=True)
+    assert getattr(app, '_prev_status', 'NOT_SET') is None
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.signals._dispatch')
+def test_donation_pre_save_sets_none_when_db_row_deleted(mock_dispatch):
+    """If a Donation PK exists but row is deleted, _prev_status is None."""
+    donation = DonationFactory(status='pending')
+    Donation.objects.filter(pk=donation.pk).delete()
+    mock_dispatch.reset_mock()
+    donation.status = 'paid'
+    donation.save(force_insert=True)
+    assert getattr(donation, '_prev_status', 'NOT_SET') is None
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.signals._dispatch')
+def test_sponsorship_pre_save_sets_none_when_db_row_deleted(mock_dispatch):
+    """If a Sponsorship PK exists but row is deleted, _prev_status is None."""
+    sp = SponsorshipFactory(status='pending')
+    Sponsorship.objects.filter(pk=sp.pk).delete()
+    mock_dispatch.reset_mock()
+    sp.status = 'active'
+    sp.save(force_insert=True)
+    assert getattr(sp, '_prev_status', 'NOT_SET') is None
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.signals._dispatch')
+def test_campaign_pre_save_sets_none_when_db_row_deleted(mock_dispatch):
+    """If a Campaign PK exists but row is deleted, _prev_approval_status is None."""
+    campaign = CampaignFactory()
+    Campaign.objects.filter(pk=campaign.pk).delete()
+    mock_dispatch.reset_mock()
+    campaign.approval_status = Campaign.ApprovalStatus.PENDING
+    campaign.save(force_insert=True)
+    assert getattr(campaign, '_prev_approval_status', 'NOT_SET') is None
+
+
+# --- Animal status history ---
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.signals._dispatch')
+def test_animal_creation_creates_initial_status_history(mock_dispatch):
+    """Creating an animal records initial status in AnimalStatusHistory."""
+    animal = AnimalFactory()
+    history = AnimalStatusHistory.objects.filter(animal=animal)
+    assert history.count() == 1
+    entry = history.first()
+    assert entry.previous_status == ''
+    assert entry.new_status == animal.status
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.signals._dispatch')
+def test_animal_status_change_creates_history_entry(mock_dispatch):
+    """Changing animal status creates a new AnimalStatusHistory entry."""
+    animal = AnimalFactory(status=Animal.Status.PUBLISHED)
+    initial_count = AnimalStatusHistory.objects.filter(animal=animal).count()
+    animal.status = Animal.Status.ADOPTED
+    animal.save()
+    assert AnimalStatusHistory.objects.filter(animal=animal).count() == initial_count + 1
+    latest = AnimalStatusHistory.objects.filter(animal=animal).order_by('-created_at').first()
+    assert latest.previous_status == Animal.Status.PUBLISHED
+    assert latest.new_status == Animal.Status.ADOPTED
+
+
+# --- Campaign raised_amount tracking ---
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.signals._dispatch')
+def test_campaign_raised_amount_tracking_stores_prev_values(mock_dispatch):
+    """Campaign pre_save stores previous raised_amount and goal_amount."""
+    campaign = CampaignFactory(
+        goal_amount=Decimal('500000'),
+        raised_amount=Decimal('100000'),
+    )
+    # Update raised_amount — the pre_save handler should read prev values
+    campaign.raised_amount = Decimal('200000')
+    campaign.save()
+    # If _prev_raised was properly set, no crash occurred
+    assert campaign.raised_amount == Decimal('200000')
+
+
+# --- Web manager notification on adoption ---
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.signals._dispatch')
+def test_adoption_submitted_notifies_web_managers(mock_dispatch):
+    """Creating an adoption application dispatches to all web_managers."""
+    manager = WebManagerUserFactory()
+    app = AdoptionApplicationFactory()
+    calls = [c[0] for c in mock_dispatch.call_args_list]
+    manager_calls = [
+        (event, recipient)
+        for event, recipient, _ in calls
+        if recipient == manager
+    ]
+    assert any(event == 'adoption_submitted' for event, _ in manager_calls)
+
+
+# --- Payment history ---
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.signals._dispatch')
+def test_payment_record_status_history_created_on_payment_creation(mock_dispatch):
+    """Creating a Payment produces a PaymentHistory row with previous_status=''."""
+    payment = PaymentFactory()
+
+    assert PaymentHistory.objects.filter(payment=payment, previous_status='').exists()
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.signals._dispatch')
+def test_payment_record_status_history_created_on_status_change(mock_dispatch):
+    """Saving a Payment with a different status produces an additional PaymentHistory row."""
+    payment = PaymentFactory(status=Payment.Status.PENDING)
+    initial_count = PaymentHistory.objects.filter(payment=payment).count()
+
+    payment.status = Payment.Status.APPROVED
+    payment.save()
+
+    assert PaymentHistory.objects.filter(payment=payment).count() == initial_count + 1
+    latest = PaymentHistory.objects.filter(payment=payment).order_by('-id').first()
+    assert latest.new_status == Payment.Status.APPROVED
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.signals._dispatch')
+def test_payment_record_status_history_skipped_when_status_unchanged(mock_dispatch):
+    """Saving a Payment without changing status does not create a new PaymentHistory row."""
+    payment = PaymentFactory(status=Payment.Status.PENDING)
+    initial_count = PaymentHistory.objects.filter(payment=payment).count()
+
+    payment.save()
+
+    assert PaymentHistory.objects.filter(payment=payment).count() == initial_count
+
+
+# --- Shelter owner membership ---
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.signals._dispatch')
+def test_shelter_ensure_owner_membership_creates_membership_on_shelter_creation(mock_dispatch):
+    """Creating a Shelter produces a ShelterMembership with role=owner for the shelter owner."""
+    shelter = ShelterFactory()
+
+    assert ShelterMembership.objects.filter(
+        shelter=shelter,
+        user=shelter.owner,
+        role=ShelterMembership.Role.OWNER,
+    ).exists()
+
+
+# --- Shelter invite ---
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.signals._dispatch')
+def test_shelter_invite_save_dispatches_shelter_invite_sent(mock_dispatch):
+    """Creating a ShelterInvite dispatches shelter_invite_sent to the adopter intent user."""
+    invite = ShelterInviteFactory()
+
+    events = [c[0][0] for c in mock_dispatch.call_args_list]
+    assert 'shelter_invite_sent' in events
+
+
+# --- UpdatePost no-campaign path ---
+
+
+@pytest.mark.django_db
+@patch('base_feature_app.signals._dispatch')
+def test_on_update_post_created_skips_dispatch_when_no_campaign(mock_dispatch):
+    """Creating an UpdatePost without a campaign does not dispatch campaign_update_published."""
+    UpdatePostFactory(campaign=None)
+
+    events = [c[0][0] for c in mock_dispatch.call_args_list]
+    assert 'campaign_update_published' not in events

@@ -115,7 +115,7 @@ class Command(BaseCommand):
         count = options['count']
         shelters_count = options['shelters_count']
 
-        admin, admin_created = User.objects.get_or_create(
+        admin, admin_created = User.objects.update_or_create(
             email=FIXED_ADMIN['email'],
             defaults={
                 'first_name': FIXED_ADMIN['first_name'],
@@ -123,6 +123,7 @@ class Command(BaseCommand):
                 'role': User.Role.ADMIN,
                 'is_staff': True,
                 'is_superuser': True,
+                'is_active': True,
             },
         )
         if admin_created:

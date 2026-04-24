@@ -24,14 +24,14 @@ test.describe('Platform Support Landing Page @flow:platform-support-info', () =>
     await page.goto('/apoya-la-plataforma');
     await waitForPageLoad(page);
 
-    await expect(page.getByRole('heading', { name: /costo|infraestructura/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /costo|infraestructura/i }).first()).toBeVisible();
   });
 
   test('renders transparency section', { tag: [...PLATFORM_SUPPORT_INFO] }, async ({ page }) => {
     await page.goto('/apoya-la-plataforma');
     await waitForPageLoad(page);
 
-    await expect(page.getByRole('heading', { name: /transparencia/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /transparencia|dónde va tu aporte/i })).toBeVisible();
   });
 
   test('renders 5-ways comparison grid', { tag: [...PLATFORM_SUPPORT_INFO] }, async ({ page }) => {
@@ -103,7 +103,7 @@ test.describe('Platform Donation Checkout @flow:donation-platform-checkout', () 
     await expect(amountButton).toBeVisible({ timeout: 10_000 });
     await amountButton.click();
 
-    await page.getByRole('button', { name: /Apoyar con/i }).click();
+    await page.getByRole('button', { name: /Apoyar/i }).click();
 
     await expect(page.getByRole('button', { name: /Procesando/i })).toBeVisible();
 

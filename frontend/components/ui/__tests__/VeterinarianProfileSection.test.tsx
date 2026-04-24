@@ -81,7 +81,6 @@ describe('VeterinarianProfileSection', () => {
       ],
     });
     render(<VeterinarianProfileSection />);
-    const statValues = screen.getAllByRole('heading', { level: 2 });
     // Verify counts rendered — pending=2 at index, completed=1
     // Use textContent since they are plain text nodes in <p>
     const allTwos = screen.getAllByText('2');

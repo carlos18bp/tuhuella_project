@@ -52,6 +52,47 @@ def test_retrieve_unpublished_post_returns_404(api_client, draft_blog_post):
     assert response.status_code == 404
 
 
+@pytest.mark.django_db
+def test_list_blog_posts_filters_by_category(api_client, blog_post):
+    """Public listing filters by ?category param."""
+    url = reverse('list-blog-posts')
+    response = api_client.get(url, {'category': blog_post.category})
+
+    assert response.status_code == 200
+    assert response.data['count'] >= 1
+
+
+@pytest.mark.django_db
+def test_list_blog_posts_search_filters_by_text(api_client, blog_post):
+    """Public listing filters by ?search param across bilingual fields."""
+    url = reverse('list-blog-posts')
+    response = api_client.get(url, {'search': blog_post.title_es[:10]})
+
+    assert response.status_code == 200
+    slugs = [p['slug'] for p in response.data['results']]
+    assert blog_post.slug in slugs
+
+
+@pytest.mark.django_db
+def test_list_blog_posts_invalid_page_defaults_to_one(api_client, blog_post):
+    """Invalid page param falls back to page 1."""
+    url = reverse('list-blog-posts')
+    response = api_client.get(url, {'page': 'abc'})
+
+    assert response.status_code == 200
+    assert response.data['page'] == 1
+
+
+@pytest.mark.django_db
+def test_list_blog_posts_invalid_page_size_defaults_to_six(api_client, blog_post):
+    """Invalid page_size param falls back to 6."""
+    url = reverse('list-blog-posts')
+    response = api_client.get(url, {'page_size': 'xyz'})
+
+    assert response.status_code == 200
+    assert response.data['page_size'] == 6
+
+
 # ---------------------------------------------------------------------------
 # Admin endpoints — authentication required
 # ---------------------------------------------------------------------------
@@ -197,6 +238,25 @@ def test_admin_calendar_missing_params_returns_400(admin_client):
     response = admin_client.get(url)
 
     assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_admin_calendar_invalid_date_returns_400(admin_client):
+    """Calendar endpoint rejects invalid date format."""
+    url = reverse('blog-calendar')
+    response = admin_client.get(url, {'start': 'not-a-date', 'end': 'bad'})
+
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_admin_upload_cover_image_requires_file(admin_client, blog_post):
+    """Cover image upload returns 400 when no file is provided."""
+    url = reverse('upload-blog-cover-image', kwargs={'post_id': blog_post.id})
+    response = admin_client.post(url)
+
+    assert response.status_code == 400
+    assert 'cover_image' in response.data
 
 
 @pytest.mark.django_db

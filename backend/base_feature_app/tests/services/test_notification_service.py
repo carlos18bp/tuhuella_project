@@ -39,6 +39,7 @@ def test_dispatch_notification_schedules_email_task():
     with patch('base_feature_app.tasks.send_email_notification') as mock_task:
         dispatch_notification('adoption_submitted', user, {})
     log = NotificationLog.objects.get(recipient=user, channel='email')
+    assert log.status == NotificationLog.Status.QUEUED
     mock_task.assert_called_once_with(log.pk)
 
 

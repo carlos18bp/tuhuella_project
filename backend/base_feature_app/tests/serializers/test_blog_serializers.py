@@ -2,7 +2,10 @@ import pytest
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from base_feature_app.serializers.blog import (
+    BlogPostAdminDetailSerializer,
+    BlogPostAdminListSerializer,
     BlogPostCreateUpdateSerializer,
+    BlogPostFromJSONSerializer,
     BlogPostListSerializer,
     _validate_content_json,
     _get_cover_image_display,
@@ -92,31 +95,25 @@ def test_validate_content_json_passes_valid_structure():
 
 def test_get_cover_image_display_returns_empty_when_no_cover():
     """Returns '' when cover_image is None and cover_image_url is empty."""
-    from unittest.mock import MagicMock
-    obj = MagicMock()
-    obj.cover_image = None
-    obj.cover_image_url = ''
+    from types import SimpleNamespace
+    obj = SimpleNamespace(cover_image=None, cover_image_url='')
     assert _get_cover_image_display(obj) == ''
 
 
 def test_get_cover_image_display_falls_back_to_url_field():
     """Returns cover_image_url when cover_image (Library) is None."""
-    from unittest.mock import MagicMock
-    obj = MagicMock()
-    obj.cover_image = None
-    obj.cover_image_url = 'https://unsplash.com/img.jpg'
+    from types import SimpleNamespace
+    obj = SimpleNamespace(cover_image=None, cover_image_url='https://unsplash.com/img.jpg')
     assert _get_cover_image_display(obj) == 'https://unsplash.com/img.jpg'
 
 
 def test_get_cover_image_display_prefers_uploaded_file():
     """Uploaded file URL takes priority over cover_image_url."""
-    from unittest.mock import MagicMock
-    library = MagicMock()
-    library.primary_attachment.file.url = '/media/blog/img.jpg'
-
-    obj = MagicMock()
-    obj.cover_image = library
-    obj.cover_image_url = 'https://unsplash.com/img.jpg'
+    from types import SimpleNamespace
+    library = SimpleNamespace(
+        primary_attachment=SimpleNamespace(file=SimpleNamespace(url='/media/blog/img.jpg')),
+    )
+    obj = SimpleNamespace(cover_image=library, cover_image_url='https://unsplash.com/img.jpg')
     assert _get_cover_image_display(obj) == '/media/blog/img.jpg'
 
 
@@ -140,3 +137,63 @@ def test_blog_list_serializer_cover_image_resolves_url_field(blog_post):
 
     data = BlogPostListSerializer(blog_post, context={}).data
     assert data['cover_image'] == 'https://unsplash.com/photo.jpg'
+
+
+# ── Admin serializers ────────────────────────────────────────────────────────
+
+
+@pytest.mark.django_db
+def test_blog_post_admin_list_serializer_returns_bilingual_fields(blog_post):
+    """BlogPostAdminListSerializer exposes both Spanish and English title and excerpt fields."""
+    data = BlogPostAdminListSerializer(blog_post).data
+
+    assert data['title_es'] == 'Guía de adopción responsable'
+    assert data['title_en'] == 'Responsible Adoption Guide'
+    assert 'excerpt_es' in data
+    assert 'excerpt_en' in data
+
+
+@pytest.mark.django_db
+def test_blog_post_admin_detail_serializer_returns_all_language_fields(blog_post):
+    """BlogPostAdminDetailSerializer exposes bilingual content and meta fields."""
+    data = BlogPostAdminDetailSerializer(blog_post).data
+
+    assert 'content_es' in data
+    assert 'content_en' in data
+    assert 'meta_title_es' in data
+    assert 'meta_title_en' in data
+    assert 'content_json_es' in data
+    assert 'content_json_en' in data
+
+
+@pytest.mark.django_db
+def test_blog_post_create_update_serializer_validates_content_json_es():
+    """BlogPostCreateUpdateSerializer accepts valid content_json_es structure."""
+    serializer = BlogPostCreateUpdateSerializer(data={
+        'title_es': 'Guía de adopción',
+        'title_en': 'Adoption Guide',
+        'excerpt_es': 'Todo lo que necesitas saber.',
+        'excerpt_en': 'Everything you need to know.',
+        'content_json_es': {
+            'intro': 'Introducción al tema.',
+            'sections': [{'heading': 'Sección 1', 'content': 'Contenido de la sección.'}],
+        },
+    })
+
+    assert serializer.is_valid(), serializer.errors
+
+
+def test_blog_post_from_json_serializer_validates_valid_data():
+    """BlogPostFromJSONSerializer accepts a complete valid payload with content_json_es."""
+    serializer = BlogPostFromJSONSerializer(data={
+        'title_es': 'Adopción responsable',
+        'title_en': 'Responsible adoption',
+        'excerpt_es': 'Todo lo que necesitas saber.',
+        'excerpt_en': 'Everything you need to know.',
+        'content_json_es': {
+            'intro': 'Introducción.',
+            'sections': [{'heading': 'Sección 1', 'content': 'Contenido'}],
+        },
+    })
+
+    assert serializer.is_valid(), serializer.errors

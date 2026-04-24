@@ -125,6 +125,16 @@ describe('followUpStore', () => {
       expect(state.error).toBe('Not found');
       expect(state.loading).toBe(false);
     });
+
+    it('sets generic error when fetchDetail rejects with non-Error', async () => {
+      mockApi.get.mockRejectedValueOnce('string rejection');
+
+      await act(async () => {
+        await useFollowUpStore.getState().fetchDetail(1);
+      });
+
+      expect(useFollowUpStore.getState().error).toBe('Error');
+    });
   });
 
   describe('assignVet', () => {
@@ -141,6 +151,20 @@ describe('followUpStore', () => {
       const state = useFollowUpStore.getState();
       expect(state.items[0].assigned_veterinarian).toBe(3);
       expect(state.detail?.assigned_veterinarian).toBe(3);
+    });
+
+    it('leaves non-matching items unchanged', async () => {
+      const other: PostAdoptionFollowUp = { ...FOLLOW_UP_FIXTURE, id: 2, animal_name: 'Rocky' };
+      const assigned: PostAdoptionFollowUp = { ...FOLLOW_UP_FIXTURE, assigned_veterinarian: 3 };
+      useFollowUpStore.setState({ items: [other, FOLLOW_UP_FIXTURE] });
+      mockApi.patch.mockResolvedValueOnce({ data: assigned });
+
+      await act(async () => {
+        await useFollowUpStore.getState().assignVet(1, 3);
+      });
+
+      expect(useFollowUpStore.getState().items[0].animal_name).toBe('Rocky');
+      expect(useFollowUpStore.getState().items[1].assigned_veterinarian).toBe(3);
     });
   });
 
@@ -162,6 +186,20 @@ describe('followUpStore', () => {
       const state = useFollowUpStore.getState();
       expect(state.items[0].status).toBe('completed');
       expect(state.detail?.status).toBe('completed');
+    });
+
+    it('leaves non-matching items unchanged', async () => {
+      const other: PostAdoptionFollowUp = { ...FOLLOW_UP_FIXTURE, id: 2, animal_name: 'Rocky' };
+      const completed: PostAdoptionFollowUp = { ...FOLLOW_UP_FIXTURE, status: 'completed', completed_date: '2026-04-19' };
+      useFollowUpStore.setState({ items: [other, FOLLOW_UP_FIXTURE] });
+      mockApi.patch.mockResolvedValueOnce({ data: completed });
+
+      await act(async () => {
+        await useFollowUpStore.getState().markComplete(1);
+      });
+
+      expect(useFollowUpStore.getState().items[0].animal_name).toBe('Rocky');
+      expect(useFollowUpStore.getState().items[1].status).toBe('completed');
     });
   });
 });

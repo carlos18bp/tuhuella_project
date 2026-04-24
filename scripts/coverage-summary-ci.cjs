@@ -188,19 +188,29 @@ function parseBackendTestResults() {
     totalSkipped = parseInt((s.match(/skipped="(\d+)"/) || [])[1] || '0', 10);
   }
 
-  // Extract failed test names
+  // Extract failed test names: scan each <failure>/<error> element and map it
+  // back to the enclosing <testcase> opening tag (the most recent opening
+  // before the failure). Iterating over <testcase>...</testcase> blocks
+  // directly does not work because self-closing <testcase .../> (passing tests)
+  // share the same prefix as open testcases and get silently conflated with
+  // the next failing testcase's content — misattributing the failure to the
+  // previous passing test.
   const failures = [];
-  const tcRegex = /<testcase\s+[^>]*classname="([^"]*)"[^>]*name="([^"]*)"[^>]*>[\s\S]*?<\/testcase>/g;
-  let match;
-  while ((match = tcRegex.exec(xml)) !== null) {
-    const block = match[0];
-    if (block.includes('<failure') || block.includes('<error')) {
-      const cls = match[1];
-      const name = match[2];
-      const msgMatch = block.match(/message="([^"]*)"/);
+  const failRegex = /<(?:failure|error)\s[^>]*message="([^"]*)"/g;
+  const openTagRegex = /<testcase\s+[^>]*classname="([^"]*)"[^>]*name="([^"]*)"[^>]*>/g;
+  let fMatch;
+  while ((fMatch = failRegex.exec(xml)) !== null) {
+    const before = xml.slice(0, fMatch.index);
+    openTagRegex.lastIndex = 0;
+    let lastOpen = null;
+    let oMatch;
+    while ((oMatch = openTagRegex.exec(before)) !== null) {
+      lastOpen = oMatch;
+    }
+    if (lastOpen) {
       failures.push({
-        test: `${cls}::${name}`,
-        message: msgMatch ? msgMatch[1].slice(0, 120) : '',
+        test: `${lastOpen[1]}::${lastOpen[2]}`,
+        message: (fMatch[1] || '').slice(0, 120),
       });
     }
   }

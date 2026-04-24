@@ -11,6 +11,9 @@ jest.mock('@/i18n/navigation', () => ({
   Link: ({ href, children, ...rest }: any) => React.createElement('a', { href, ...rest }, children),
   useRouter: () => ({ push: mockPush }),
 }));
+jest.mock('next/navigation', () => ({
+  useSearchParams: () => ({ get: () => null }),
+}));
 jest.mock('@/lib/hooks/useRequireAuth', () => ({ useRequireAuth: jest.fn() }));
 jest.mock('@/lib/hooks/useFAQs', () => ({
   useFAQsByTopic: () => ({ items: [], loading: false }),

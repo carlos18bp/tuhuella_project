@@ -242,14 +242,14 @@ test.describe('Authentication — complete flows', () => {
     await expect(page.getByLabel(/Correo electrónico/i)).toBeVisible();
 
     // Step 1 — enter email and request code
-    await page.locator('#reset-email').fill('test@example.com');
+    await page.getByLabel(/Correo electrónico/i).fill('test@example.com');
     await page.getByRole('button', { name: /Enviar código/i }).click();
 
     // Step 2 — code input and new password inputs appear
-    await expect(page.locator('#reset-code')).toBeVisible({ timeout: 5_000 });
-    await page.locator('#reset-code').fill('123456');
-    await page.locator('#reset-newpw').fill('NewPass123!');
-    await page.locator('#reset-confirm').fill('NewPass123!');
+    await expect(page.getByLabel(/Código/i)).toBeVisible({ timeout: 5_000 });
+    await page.getByLabel(/Código/i).fill('123456');
+    await page.getByLabel(/Nueva contraseña/i).fill('NewPass123!');
+    await page.getByLabel(/Confirmar contraseña/i).fill('NewPass123!');
 
     // Submit reset
     await page.locator('button[type="submit"]').click();
@@ -279,8 +279,8 @@ test.describe('Authentication — complete flows', () => {
     await page.getByLabel(/Correo electrónico/i).fill('newuser@example.com');
     await page.getByLabel('Contraseña', { exact: true }).fill('SecurePass123!');
     await page.getByLabel(/Confirmar contraseña/i).fill('SecurePass123!');
-    await page.locator('label[for="terms-checkbox"]').click();
-    await expect(page.locator('#terms-checkbox')).toBeChecked();
+    await page.getByRole('checkbox').check();
+    await expect(page.getByRole('checkbox')).toBeChecked();
 
     await page.getByRole('button', { name: /Crear cuenta/i }).click();
 

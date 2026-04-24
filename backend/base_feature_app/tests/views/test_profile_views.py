@@ -1,9 +1,11 @@
 import pytest
 from django.urls import reverse
 from django.utils import timezone
+from freezegun import freeze_time
 from rest_framework import status
 
-from base_feature_app.models import AdoptionApplication, Campaign, Favorite, PostAdoptionFollowUp, Shelter
+from base_feature_app.models import AdoptionApplication, Campaign, Donation, Favorite, PostAdoptionFollowUp, Shelter
+from base_feature_app.tests.factories import CampaignFactory, DonationFactory, SponsorshipFactory
 
 # ---------------------------------------------------------------------------
 # profile-stats
@@ -101,6 +103,7 @@ def test_user_activity_shelter_admin_sees_animal_added(
 
 
 @pytest.mark.django_db
+@freeze_time('2026-01-15')
 def test_user_activity_shelter_admin_sees_application_reviewed(
     api_client, shelter_admin_user, shelter, existing_user, animal,
 ):
@@ -127,7 +130,9 @@ def test_user_activity_veterinarian_sees_clinical_entry(api_client, animal):
 
 
 @pytest.mark.django_db
+@freeze_time('2026-01-15')
 def test_user_activity_veterinarian_sees_followup_completed(api_client):
+    """Veterinarian activity feed includes a completed follow-up entry."""
     from base_feature_app.tests.factories import (
         AdoptionApplicationFactory, PostAdoptionFollowUpFactory, VeterinarianUserFactory,
     )
@@ -148,6 +153,7 @@ def test_user_activity_veterinarian_sees_followup_completed(api_client):
 
 
 @pytest.mark.django_db
+@freeze_time('2026-01-15')
 def test_user_activity_web_manager_sees_campaign_reviewed(api_client, shelter):
     from base_feature_app.tests.factories import CampaignFactory, WebManagerUserFactory
     wm = WebManagerUserFactory()
@@ -164,6 +170,7 @@ def test_user_activity_web_manager_sees_campaign_reviewed(api_client, shelter):
 
 
 @pytest.mark.django_db
+@freeze_time('2026-01-15')
 def test_user_activity_admin_sees_shelter_verified(api_client, admin_user, shelter):
     admin_user.role = 'admin'
     admin_user.save(update_fields=['role'])
@@ -322,6 +329,7 @@ def test_get_profile_shelter_admin_stats_counts_owned_shelter_only(
 
 
 @pytest.mark.django_db
+@freeze_time('2026-01-15')
 def test_get_profile_shelter_admin_stats_excludes_archived_animals(
     shelter_admin_client, shelter, animal,
 ):
@@ -370,3 +378,58 @@ def test_get_profile_admin_stats_counts_pending_verifications(
     response = api_client.get(reverse('update-profile'))
 
     assert response.json()['admin_stats']['pending_verifications'] == 1
+
+
+# ---------------------------------------------------------------------------
+# user-activity — shelter_admin campaign_created and donation_received
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_user_activity_shelter_admin_sees_campaign_created(shelter_admin_client, shelter):
+    """Shelter admin activity includes campaign_created events for campaigns in their shelter."""
+    CampaignFactory(shelter=shelter)
+
+    response = shelter_admin_client.get(reverse('user-activity'))
+
+    types = [e['type'] for e in response.json()]
+    assert 'campaign_created' in types
+
+
+@pytest.mark.django_db
+def test_user_activity_shelter_admin_sees_donation_received(shelter_admin_client, shelter):
+    """Shelter admin activity includes donation_received events for paid donations to their shelter."""
+    DonationFactory(shelter=shelter, status=Donation.Status.PAID)
+
+    response = shelter_admin_client.get(reverse('user-activity'))
+
+    types = [e['type'] for e in response.json()]
+    assert 'donation_received' in types
+
+
+# ---------------------------------------------------------------------------
+# profile-stats — donations and sponsorships aggregation
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_profile_stats_counts_paid_donations(authenticated_client, existing_user):
+    """profile_stats donations count reflects only paid donations for the user."""
+    DonationFactory(user=existing_user, status=Donation.Status.PAID)
+
+    response = authenticated_client.get(reverse('profile-stats'))
+
+    data = response.json()
+    assert data['donations']['count'] == 1
+    assert data['donations']['total_amount'] != '0.00'
+
+
+@pytest.mark.django_db
+def test_profile_stats_counts_active_sponsorships(authenticated_client, existing_user):
+    """profile_stats sponsorships active_count reflects active sponsorships for the user."""
+    SponsorshipFactory(user=existing_user, status='active')
+
+    response = authenticated_client.get(reverse('profile-stats'))
+
+    data = response.json()
+    assert data['sponsorships']['active_count'] == 1

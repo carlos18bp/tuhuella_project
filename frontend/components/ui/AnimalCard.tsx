@@ -18,6 +18,7 @@ export default function AnimalCard({ animal, compact = false }: AnimalCardProps)
   return (
     <Link
       href={ROUTES.ANIMAL_DETAIL(animal.id)}
+      data-testid="animal-card-link"
       className="group h-full flex flex-col rounded-2xl border border-border-primary/80 bg-surface-primary overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 hover:border-border-secondary/80 transition-all duration-300 card-teal"
     >
       <div className={`${compact ? 'aspect-square' : 'aspect-[4/3]'} bg-gradient-to-br from-surface-tertiary to-surface-secondary relative`}>

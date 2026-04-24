@@ -1,5 +1,6 @@
 import pytest
 from django.utils import timezone
+from freezegun import freeze_time
 
 from base_feature_app.models import VolunteerApplication
 from base_feature_app.tests.factories import UserFactory, VolunteerPositionFactory
@@ -38,6 +39,7 @@ def test_volunteer_application_is_archived_false_by_default():
 
 
 @pytest.mark.django_db
+@freeze_time('2026-01-15')
 def test_volunteer_application_archive_sets_is_archived_true():
     user = UserFactory()
     position = VolunteerPositionFactory()

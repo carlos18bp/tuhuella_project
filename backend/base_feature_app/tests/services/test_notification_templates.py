@@ -5,8 +5,8 @@ from base_feature_app.services.notification_templates import render_template
 
 def test_render_template_returns_subject_and_body():
     subject, body = render_template('adoption_submitted', 'es', {'user_name': 'Ana'})
-    assert subject
-    assert body
+    assert isinstance(subject, str) and len(subject) > 0
+    assert isinstance(body, str) and len(body) > 0
 
 
 def test_render_template_es_locale_renders_spanish():

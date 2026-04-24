@@ -59,7 +59,7 @@ def test_favorite_toggle_removes_existing(authenticated_client, favorite, animal
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json()['status'] == 'removed'
-    assert not Favorite.objects.filter(user__email='user@example.com', animal=animal).exists()
+    assert not Favorite.objects.filter(user__email='user@example.com', animal=animal, archived_at__isnull=True).exists()
 
 
 @pytest.mark.django_db

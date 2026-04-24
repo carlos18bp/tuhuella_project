@@ -60,37 +60,43 @@ describe('AdminApplicationsTable', () => {
 
   it('applies submitted status badge style', () => {
     render(<AdminApplicationsTable items={[buildApp({ status: 'submitted' })]} />);
+    // quality: disable fragile_locator (CSS class assertion requires DOM access; span has no ARIA role)
     const badge = screen.getByRole('row', { name: /Firulais/ }).querySelector('span.rounded-full');
     expect(badge?.className).toContain('bg-amber-50');
   });
 
   it('applies approved status badge style', () => {
     render(<AdminApplicationsTable items={[buildApp({ status: 'approved' })]} />);
+    // quality: disable fragile_locator (CSS class assertion requires DOM access; span has no ARIA role)
     const badge = screen.getByRole('row', { name: /Firulais/ }).querySelector('span.rounded-full');
     expect(badge?.className).toContain('bg-emerald-50');
   });
 
   it('applies rejected status badge style', () => {
     render(<AdminApplicationsTable items={[buildApp({ status: 'rejected' })]} />);
+    // quality: disable fragile_locator (CSS class assertion requires DOM access; span has no ARIA role)
     const badge = screen.getByRole('row', { name: /Firulais/ }).querySelector('span.rounded-full');
     expect(badge?.className).toContain('bg-red-50');
   });
 
   it('applies reviewing status badge style', () => {
     render(<AdminApplicationsTable items={[buildApp({ status: 'reviewing' })]} />);
+    // quality: disable fragile_locator (CSS class assertion requires DOM access; span has no ARIA role)
     const badge = screen.getByRole('row', { name: /Firulais/ }).querySelector('span.rounded-full');
     expect(badge?.className).toContain('bg-sky-50');
   });
 
   it('applies interview status badge style', () => {
     render(<AdminApplicationsTable items={[buildApp({ status: 'interview' })]} />);
+    // quality: disable fragile_locator (CSS class assertion requires DOM access; span has no ARIA role)
     const badge = screen.getByRole('row', { name: /Firulais/ }).querySelector('span.rounded-full');
     expect(badge?.className).toContain('bg-indigo-50');
   });
 
   it('formats created_at as a locale date string', () => {
     render(<AdminApplicationsTable items={[buildApp({ created_at: '2026-04-10T10:00:00Z' })]} />);
-    const expected = new Date('2026-04-10T10:00:00Z').toLocaleDateString();
+    // quality: disable nondeterministic (fixed ISO date string with explicit locale 'es'; output is deterministic)
+    const expected = new Date('2026-04-10T10:00:00Z').toLocaleDateString('es');
     expect(screen.getByRole('cell', { name: expected })).toBeInTheDocument();
   });
 

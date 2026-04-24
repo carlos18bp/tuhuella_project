@@ -44,6 +44,7 @@ def test_shelter_admin_create_campaign_marks_pending(shelter_admin_client, shelt
 
 @pytest.mark.django_db
 def test_public_campaigns_list_hides_non_approved(api_client, shelter):
+    """Public campaigns endpoint returns only approved campaigns, hiding pending and rejected ones."""
     CampaignFactory(
         shelter=shelter,
         status=Campaign.Status.ACTIVE,
@@ -94,6 +95,7 @@ def test_approve_campaign_creates_system_message(web_manager_client, web_manager
 
 @pytest.mark.django_db
 def test_reject_campaign_requires_reason_and_creates_message(web_manager_client, pending_campaign):
+    """Rejection without a reason returns 400; with a reason it sets status to rejected and creates a system message."""
     no_reason = web_manager_client.post(
         f'/api/admin/campaigns/{pending_campaign.id}/reject/',
         {}, format='json',
@@ -130,6 +132,7 @@ def test_shelter_can_resubmit_rejected_campaign(shelter_admin_client, shelter):
 @pytest.mark.django_db
 def test_messages_thread_access_and_post(shelter_admin_client, web_manager_client,
                                           web_manager, pending_campaign):
+    """Campaign message thread is readable/writable by owner and web manager but blocked for strangers."""
     # shelter_admin (owner) can GET
     r1 = shelter_admin_client.get(f'/api/campaigns/{pending_campaign.id}/messages/')
     assert r1.status_code == 200

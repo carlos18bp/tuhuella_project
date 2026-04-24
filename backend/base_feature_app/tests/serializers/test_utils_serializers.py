@@ -1,27 +1,29 @@
-from unittest.mock import MagicMock
-
 from base_feature_app.serializers.utils import get_lang, library_primary_url
 
 
 # ── library_primary_url ──────────────────────────────────────────────────────
 
 def test_library_primary_url_returns_empty_when_library_is_none():
+    """Returns empty string when library argument is None."""
     assert library_primary_url(None) == ''
 
 
 def test_library_primary_url_returns_custom_default_when_library_is_none():
+    """Returns the custom default string when library argument is None."""
     assert library_primary_url(None, default='/placeholder.jpg') == '/placeholder.jpg'
 
 
 def test_library_primary_url_returns_empty_when_primary_attachment_is_none():
-    library = MagicMock()
-    library.primary_attachment = None
+    from types import SimpleNamespace
+    library = SimpleNamespace(primary_attachment=None)
     assert library_primary_url(library) == ''
 
 
 def test_library_primary_url_returns_url_when_attachment_present():
-    library = MagicMock()
-    library.primary_attachment.file.url = '/media/covers/img.jpg'
+    from types import SimpleNamespace
+    library = SimpleNamespace(
+        primary_attachment=SimpleNamespace(file=SimpleNamespace(url='/media/covers/img.jpg')),
+    )
     assert library_primary_url(library) == '/media/covers/img.jpg'
 
 
@@ -40,8 +42,8 @@ def test_get_lang_returns_en_from_context_dict():
 
 
 def test_get_lang_returns_es_for_unknown_lang_from_request():
-    req = MagicMock()
-    req.query_params.get.return_value = 'fr'
+    from types import SimpleNamespace
+    req = SimpleNamespace(query_params=SimpleNamespace(get=lambda *_: 'fr'))
 
     class _FakeSerializer:
         context = {'request': req}

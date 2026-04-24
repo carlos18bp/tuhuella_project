@@ -1,6 +1,23 @@
 import pytest
 from rest_framework.test import APIClient
 
+
+# Migration 0021_platform_support_content seeds one FAQTopic ("apoyo-plataforma")
+# with 15 items and one BlogPost ("por-que-tuhuella-tiene-costos") into the test
+# database. Tests that assert on exact counts or list ordering must start from a
+# clean slate. This autouse fixture nukes only that seed data — leaving the
+# schema and any test-created rows untouched.
+@pytest.fixture(autouse=True)
+def _purge_seed_platform_content(request, django_db_setup, django_db_blocker):
+    if 'no_db' in request.keywords:
+        return
+    from base_feature_app.models import BlogPost, FAQTopic
+
+    with django_db_blocker.unblock():
+        FAQTopic.objects.filter(slug='apoyo-plataforma').delete()
+        BlogPost.objects.filter(slug='por-que-tuhuella-tiene-costos').delete()
+
+
 from base_feature_app.tests.factories import (
     AdopterIntentFactory,
     AdminUserFactory,

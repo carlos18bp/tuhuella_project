@@ -174,6 +174,21 @@ describe('campaignStore', () => {
     expect(useCampaignStore.getState().campaigns[0].id).toBe(2);
   });
 
+  it('creates campaign without lang param', async () => {
+    const created = { ...CAMPAIGN_FIXTURE, id: 3 };
+    mockApi.post.mockResolvedValueOnce({ data: created });
+
+    await act(async () => {
+      await useCampaignStore.getState().createCampaign({ title_es: 'Sin lang' });
+    });
+
+    expect(mockApi.post).toHaveBeenCalledWith(
+      expect.any(String),
+      { title_es: 'Sin lang' },
+      { params: {} },
+    );
+  });
+
   it('replaces active campaign via updateCampaign', async () => {
     const updated = { ...CAMPAIGN_FIXTURE, title: 'Updated' };
     mockApi.patch.mockResolvedValueOnce({ data: updated });
@@ -185,6 +200,21 @@ describe('campaignStore', () => {
 
     expect(result).toEqual(updated);
     expect(useCampaignStore.getState().campaign).toEqual(updated);
+  });
+
+  it('passes lang param to updateCampaign', async () => {
+    const updated = { ...CAMPAIGN_FIXTURE, title: 'Updated' };
+    mockApi.patch.mockResolvedValueOnce({ data: updated });
+
+    await act(async () => {
+      await useCampaignStore.getState().updateCampaign(1, { title_es: 'Updated' }, 'en');
+    });
+
+    expect(mockApi.patch).toHaveBeenCalledWith(
+      expect.any(String),
+      { title_es: 'Updated' },
+      { params: { lang: 'en' } },
+    );
   });
 
   it('sets campaign to submitted result after submitForApproval', async () => {
@@ -210,6 +240,34 @@ describe('campaignStore', () => {
 
     expect(useCampaignStore.getState().messagesByCampaign[1]).toEqual(messages);
     expect(useCampaignStore.getState().messagesLoading).toBe(false);
+  });
+
+  it('passes lang param to fetchMessages', async () => {
+    mockApi.get.mockResolvedValueOnce({ data: [] });
+
+    await act(async () => {
+      await useCampaignStore.getState().fetchMessages(1, 'en');
+    });
+
+    expect(mockApi.get).toHaveBeenCalledWith(
+      expect.any(String),
+      { params: { lang: 'en' } },
+    );
+  });
+
+  it('submits for approval without lang param', async () => {
+    const submitted = { ...CAMPAIGN_FIXTURE, approval_status: 'pending_review' };
+    mockApi.post.mockResolvedValueOnce({ data: submitted });
+
+    await act(async () => {
+      await useCampaignStore.getState().submitForApproval(1);
+    });
+
+    expect(mockApi.post).toHaveBeenCalledWith(
+      expect.any(String),
+      {},
+      { params: {} },
+    );
   });
 
   it('sets error when fetchMessages fails', async () => {

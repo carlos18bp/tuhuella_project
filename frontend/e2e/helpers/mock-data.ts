@@ -120,9 +120,9 @@ export const mockShelterAnimals = [
 ];
 
 export const mockShelterCampaigns = [
-  { id: 1, title: 'Campaña de vacunación', description: 'Vacunas para todos', shelter: 1, shelter_name: 'Refugio E2E', goal_amount: '500000.00', raised_amount: '250000.00', progress_percentage: 50, status: 'active', approval_status: 'approved', submitted_at: '2026-02-27T10:00:00Z', reviewed_at: '2026-02-28T08:00:00Z', reviewed_by: null, reviewed_by_name: 'Laura Gómez', cover_image_url: '', starts_at: '2026-03-01T00:00:00Z', ends_at: '2026-04-30T00:00:00Z', created_at: '2026-02-28T10:00:00Z' },
-  { id: 2, title: 'Alimento para refugio', description: 'Comida mensual', shelter: 1, shelter_name: 'Refugio E2E', goal_amount: '300000.00', raised_amount: '300000.00', progress_percentage: 100, status: 'completed', approval_status: 'approved', submitted_at: '2025-12-19T10:00:00Z', reviewed_at: '2025-12-20T09:00:00Z', reviewed_by: null, reviewed_by_name: 'Laura Gómez', cover_image_url: '', starts_at: '2026-01-01T00:00:00Z', ends_at: '2026-02-28T00:00:00Z', created_at: '2025-12-20T10:00:00Z' },
-  { id: 3, title: 'Esterilización urgente', description: 'Esterilización masiva', shelter: 1, shelter_name: 'Refugio E2E', goal_amount: '800000.00', raised_amount: '0.00', progress_percentage: 0, status: 'draft', approval_status: 'pending', submitted_at: '2026-04-18T10:00:00Z', reviewed_at: null, reviewed_by: null, reviewed_by_name: null, cover_image_url: '', starts_at: null, ends_at: null, created_at: '2026-04-18T10:00:00Z' },
+  { id: 1, title: 'Campaña de vacunación', description: 'Vacunas para todos', shelter: 1, shelter_name: 'Refugio E2E', goal_amount: '500000.00', raised_amount: '250000.00', progress_percentage: 50, status: 'active', approval_status: 'approved', submitted_at: '2026-02-27T10:00:00Z', reviewed_at: '2026-02-28T08:00:00Z', cover_image_url: '', starts_at: '2026-03-01T00:00:00Z', ends_at: '2026-04-30T00:00:00Z', created_at: '2026-02-28T10:00:00Z' },
+  { id: 2, title: 'Alimento para refugio', description: 'Comida mensual', shelter: 1, shelter_name: 'Refugio E2E', goal_amount: '300000.00', raised_amount: '300000.00', progress_percentage: 100, status: 'completed', approval_status: 'approved', submitted_at: '2025-12-19T10:00:00Z', reviewed_at: '2025-12-20T09:00:00Z', cover_image_url: '', starts_at: '2026-01-01T00:00:00Z', ends_at: '2026-02-28T00:00:00Z', created_at: '2025-12-20T10:00:00Z' },
+  { id: 3, title: 'Esterilización urgente', description: 'Esterilización masiva', shelter: 1, shelter_name: 'Refugio E2E', goal_amount: '800000.00', raised_amount: '0.00', progress_percentage: 0, status: 'draft', approval_status: 'pending', submitted_at: '2026-04-18T10:00:00Z', reviewed_at: null, cover_image_url: '', starts_at: null, ends_at: null, created_at: '2026-04-18T10:00:00Z' },
 ];
 
 export const mockCampaignDetail = {
@@ -133,15 +133,10 @@ export const mockRejectedCampaignDetail = {
   id: 4, title: 'Rescate de temporada', title_es: 'Rescate de temporada', title_en: 'Season Rescue', description: 'Campaña de rescate invernal.', shelter: 1, shelter_name: 'Refugio E2E', goal_amount: '600000.00', raised_amount: '0.00', progress_percentage: 0, status: 'draft', approval_status: 'rejected', submitted_at: '2026-04-10T10:00:00Z', reviewed_at: '2026-04-12T09:00:00Z', reviewed_by: 5, reviewed_by_name: 'Laura Gómez', cover_image_url: '', starts_at: null, ends_at: null, created_at: '2026-04-10T10:00:00Z',
 };
 
-export const mockCampaignMessages = {
-  count: 2,
-  page: 1,
-  total_pages: 1,
-  results: [
-    { id: 1, campaign: 4, author: 5, author_name: 'Laura Gómez', author_role: 'web_manager', body: 'Falta imagen de portada para la campaña.', is_system: false, created_at: '2026-04-12T09:00:00Z' },
-    { id: 2, campaign: 4, author: null, author_name: 'Sistema', author_role: '', body: 'Solicitud rechazada. Motivo: Falta imagen de portada.', is_system: true, created_at: '2026-04-12T09:01:00Z' },
-  ],
-};
+export const mockCampaignMessages = [
+  { id: 1, campaign: 4, author: 5, author_name: 'Laura Gómez', author_role: 'web_manager', body: 'Falta imagen de portada para la campaña.', is_system: false, created_at: '2026-04-12T09:00:00Z' },
+  { id: 2, campaign: 4, author: null, author_name: 'Sistema', author_role: '', body: 'Solicitud rechazada. Motivo: Falta imagen de portada.', is_system: true, created_at: '2026-04-12T09:01:00Z' },
+];
 
 export const mockAdminCampaigns = {
   count: 2,

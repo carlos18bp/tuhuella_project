@@ -18,6 +18,7 @@ export default function ShelterCard({ shelter }: ShelterCardProps) {
   return (
     <Link
       href={ROUTES.SHELTER_DETAIL(shelter.id)}
+      data-testid="shelter-card-link"
       className="group h-full flex flex-col rounded-2xl border border-border-primary/80 bg-surface-primary overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 hover:border-border-secondary/80 transition-all duration-300 card-emerald"
     >
       <div className="aspect-[16/9] bg-gradient-to-br from-teal-50 to-stone-100 dark:from-teal-950/35 dark:to-surface-tertiary relative overflow-hidden">

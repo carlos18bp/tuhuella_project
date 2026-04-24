@@ -10,6 +10,8 @@ type Props = {
   currentUserId?: number | null;
 };
 
+const EMPTY_MESSAGES: CampaignMessage[] = [];
+
 function bubbleStyle(message: CampaignMessage, currentUserId?: number | null) {
   if (message.is_system) {
     return 'bg-amber-50 text-amber-900 ring-1 ring-amber-200';
@@ -24,7 +26,7 @@ function bubbleStyle(message: CampaignMessage, currentUserId?: number | null) {
 }
 
 export default function CampaignMessageThread({ campaignId, currentUserId }: Props) {
-  const messages = useCampaignStore((s) => s.messagesByCampaign[campaignId] || []);
+  const messages = useCampaignStore((s) => s.messagesByCampaign[campaignId] ?? EMPTY_MESSAGES);
   const loading = useCampaignStore((s) => s.messagesLoading);
   const hasCached = useCampaignStore((s) => campaignId in s.messagesByCampaign);
   const fetchMessages = useCampaignStore((s) => s.fetchMessages);

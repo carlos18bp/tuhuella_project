@@ -57,9 +57,9 @@ def test_update_post_create_requires_auth(api_client):
 
 
 @pytest.mark.django_db
-def test_update_post_create_success(authenticated_client, shelter):
-    """Authenticated user can create an update post."""
-    response = authenticated_client.post(
+def test_update_post_create_success(shelter_admin_client, shelter):
+    """Shelter admin can create an update post for their shelter."""
+    response = shelter_admin_client.post(
         reverse('update-post-create'),
         {
             'shelter': shelter.pk,

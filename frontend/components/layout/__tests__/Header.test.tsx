@@ -137,7 +137,7 @@ describe('Header', () => {
     });
     render(<Header />);
 
-    await userEvent.click(screen.getAllByRole('button', { name: /Panel Web Manager/ })[0]);
+    await userEvent.click(screen.getAllByRole('button', { name: /Gestión Web/ })[0]);
 
     expect(screen.getByRole('menuitem', { name: /Solicitudes/ })).toHaveAttribute('href', '/web-manager/applications');
     expect(screen.getByRole('menuitem', { name: /Refugios/ })).toHaveAttribute('href', '/web-manager/shelters');
@@ -216,6 +216,7 @@ describe('Header', () => {
     const mobileLink = mobileLinks[mobileLinks.length - 1];
     await userEvent.click(mobileLink);
 
+    // quality: disable fragile_locator (animation class .animate-scale-out is only detectable via DOM query)
     const closingPanel = document.querySelector('.animate-scale-out');
     expect(closingPanel).not.toBeNull();
     fireEvent.animationEnd(closingPanel!);

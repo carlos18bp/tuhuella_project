@@ -80,7 +80,7 @@ test.describe('Web Manager — Shelter Detail', () => {
     await loginAndNavigate(page, 'web_manager', '/web-manager/shelters/1');
 
     await expect(page.getByText('Refugio E2E')).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByRole('button', { name: /Solicitudes/i })).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('tab', { name: /Solicitudes/i })).toBeVisible({ timeout: 10_000 });
   });
 });
 

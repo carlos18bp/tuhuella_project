@@ -37,7 +37,7 @@ jest.mock('../providers', () => ({
   default: ({ children }: any) => <div data-testid="providers">{children}</div>,
 }));
 
-import LocaleLayout from '../layout';
+import LocaleLayout, { generateStaticParams } from '../layout';
 
 describe('LocaleLayout', () => {
   beforeEach(() => {
@@ -57,6 +57,11 @@ describe('LocaleLayout', () => {
     expect(screen.getByTestId('header')).toBeInTheDocument();
     expect(screen.getByTestId('footer')).toBeInTheDocument();
     expect(screen.getByText('Page content')).toBeInTheDocument();
+  });
+
+  it('generates static params for all locales', () => {
+    const params = generateStaticParams();
+    expect(params).toEqual([{ locale: 'es' }, { locale: 'en' }]);
   });
 
   it('calls notFound for invalid locale', async () => {

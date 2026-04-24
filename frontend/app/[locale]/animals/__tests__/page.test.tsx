@@ -14,6 +14,8 @@ jest.mock('@/lib/stores/animalStore', () => ({
 jest.mock('@/components/ui', () => ({
   AnimalCard: ({ animal }: any) =>
     React.createElement('div', { 'data-testid': `animal-card-${animal.id}` }, animal.name),
+  AnimalCardList: ({ animal }: any) =>
+    React.createElement('div', { 'data-testid': `animal-card-list-${animal.id}` }, animal.name),
   Container: ({ children, className }: any) =>
     React.createElement('div', { className }, children),
   EmptyState: ({ message }: any) =>
@@ -81,8 +83,8 @@ describe('AnimalesPage', () => {
   it('renders animal cards when animals are loaded', () => {
     setupMock({ animals: mockAnimals, loading: false });
     render(<AnimalesPage />);
-    expect(screen.getByTestId('animal-card-1')).toBeInTheDocument();
-    expect(screen.getByTestId('animal-card-2')).toBeInTheDocument();
+    expect(screen.getByTestId('animal-card-list-1')).toBeInTheDocument();
+    expect(screen.getByTestId('animal-card-list-2')).toBeInTheDocument();
   });
 
   it('calls fetchAnimals on mount', () => {
