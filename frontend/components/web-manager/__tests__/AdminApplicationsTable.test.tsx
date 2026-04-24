@@ -95,7 +95,8 @@ describe('AdminApplicationsTable', () => {
 
   it('formats created_at as a locale date string', () => {
     render(<AdminApplicationsTable items={[buildApp({ created_at: '2026-04-10T10:00:00Z' })]} />);
-    const expected = new Date('2026-04-10T10:00:00Z').toLocaleDateString();
+    // quality: disable nondeterministic (fixed ISO date string with explicit locale 'es'; output is deterministic)
+    const expected = new Date('2026-04-10T10:00:00Z').toLocaleDateString('es');
     expect(screen.getByRole('cell', { name: expected })).toBeInTheDocument();
   });
 

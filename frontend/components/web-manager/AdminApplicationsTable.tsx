@@ -60,7 +60,7 @@ export default function AdminApplicationsTable({
                 </span>
               </td>
               <td className="px-4 py-3 text-text-tertiary">
-                {new Date(app.created_at).toLocaleDateString()}
+                {new Date(app.created_at).toLocaleDateString('es')}
               </td>
             </tr>
           ))}
