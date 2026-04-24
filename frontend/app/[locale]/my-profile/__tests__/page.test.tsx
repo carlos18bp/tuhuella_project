@@ -283,9 +283,7 @@ describe('MiPerfilPage', () => {
 
     it('renders AdminProfileSection and hides adopter cards for admin', () => {
       useAuthStore.setState({ user: { ...mockUser, role: 'admin' } });
-      setRoleData({
-        adminStats: { total_users: 10, total_shelters: 5, total_animals: 20, pending_verifications: 3 },
-      });
+      setRoleData(ADMIN_ROLE_DATA);
 
       render(<MiPerfilPage />);
 
@@ -298,9 +296,7 @@ describe('MiPerfilPage', () => {
 
     it('renders moderation-queue widget with correct count and link for admin', () => {
       useAuthStore.setState({ user: { ...mockUser, role: 'admin' } });
-      setRoleData({
-        adminStats: { total_users: 10, total_shelters: 5, total_animals: 20, pending_verifications: 3 },
-      });
+      setRoleData(ADMIN_ROLE_DATA);
 
       render(<MiPerfilPage />);
 

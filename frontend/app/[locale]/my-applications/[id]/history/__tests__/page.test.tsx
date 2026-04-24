@@ -4,7 +4,6 @@ import { render, screen } from '@testing-library/react';
 
 import MyApplicationHistoryPage from '../page';
 import { useClinicalHistoryStore } from '@/lib/stores/clinicalHistoryStore';
-import { api } from '@/lib/services/http';
 
 jest.mock('next/navigation', () => ({
   useParams: () => ({ id: '5' }),

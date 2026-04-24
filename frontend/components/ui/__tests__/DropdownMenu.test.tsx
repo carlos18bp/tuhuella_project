@@ -12,9 +12,9 @@ function makeDropdown(overrides: Partial<React.ComponentProps<typeof DropdownMen
       )}
       {...overrides}
     >
-      <a role="menuitem" href="/one" tabIndex={-1}>One</a>
-      <a role="menuitem" href="/two" tabIndex={-1}>Two</a>
-      <a role="menuitem" href="/three" tabIndex={-1}>Three</a>
+      <a role="menuitem" href="#one" tabIndex={-1}>One</a>
+      <a role="menuitem" href="#two" tabIndex={-1}>Two</a>
+      <a role="menuitem" href="#three" tabIndex={-1}>Three</a>
     </DropdownMenu>,
   );
 }

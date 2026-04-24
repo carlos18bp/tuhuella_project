@@ -1,7 +1,6 @@
 import React from 'react';
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
 import WebManagerCampaignsPage from '../page';
 import { useWebManagerStore } from '@/lib/stores/webManagerStore';
