@@ -74,7 +74,7 @@ describe('ProcessCard', () => {
 
   it('sets id attribute to process id for anchor links', () => {
     const { container } = render(<ProcessCard process={buildProcess()} locale="es" />);
-    // quality: allow-fragile-selector (testing id attribute assignment; no ARIA equivalent for anchor targets)
+    // quality: disable fragile_locator (testing id attribute assignment; no ARIA equivalent for anchor targets)
     expect(container.querySelector('#p1')).not.toBeNull();
   });
 
@@ -82,7 +82,7 @@ describe('ProcessCard', () => {
     render(<ProcessCard process={buildProcess({ audience: 'veterinarian' })} locale="es" />);
     // audience label comes from i18n namespace; at minimum the badge span renders
     const article = screen.getByRole('article');
-    // quality: allow-fragile-selector (badge span has no ARIA role; presence check only)
+    // quality: disable fragile_locator (badge span has no ARIA role; presence check only)
     expect(article.querySelector('span.rounded-full')).not.toBeNull();
   });
 
