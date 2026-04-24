@@ -30,6 +30,7 @@ export default function AnimalGallery({ images, species, name }: AnimalGalleryPr
         <img
           src={images[0]}
           alt={`${name} - foto`}
+          data-testid="gallery-image"
           className="w-full h-full object-cover"
         />
       </div>
@@ -52,6 +53,7 @@ export default function AnimalGallery({ images, species, name }: AnimalGalleryPr
               <img
                 src={src}
                 alt={`${name} - foto ${i + 1}`}
+                data-testid="gallery-image"
                 className="w-full h-full object-cover"
               />
             </div>

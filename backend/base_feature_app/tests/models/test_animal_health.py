@@ -50,6 +50,7 @@ def test_detail_serializer_exposes_disease_screenings(animal):
 
 @pytest.mark.django_db
 def test_create_update_serializer_persists_health_fields(shelter, shelter_admin_user):
+    """AnimalCreateUpdateSerializer saves deworming flag and bilingual medical notes correctly."""
     class _Request:
         def __init__(self, u):
             self.user = u

@@ -48,8 +48,7 @@ test.describe('Animal Browse & Detail', () => {
     await page.goto('/animals');
     await waitForPageLoad(page);
 
-    // quality: allow-fragile-selector (dynamic data: no testid on animal cards, first visible link needed)
-    const firstAnimalLink = page.locator('a[href*="/animals/"]').first();
+    const firstAnimalLink = page.getByTestId('animal-card-link').first();
     if (await firstAnimalLink.isVisible({ timeout: 5000 })) {
       await firstAnimalLink.click();
       await page.waitForURL(/.*animals\/\d+/, { timeout: 10_000 });
@@ -62,8 +61,7 @@ test.describe('Animal Browse & Detail', () => {
     await page.goto('/animals');
     await waitForPageLoad(page);
 
-    // quality: allow-fragile-selector (dynamic data: no testid on animal cards, first visible link needed)
-    const firstAnimalLink = page.locator('a[href*="/animals/"]').first();
+    const firstAnimalLink = page.getByTestId('animal-card-link').first();
     if (await firstAnimalLink.isVisible({ timeout: 5000 })) {
       await firstAnimalLink.click();
       await page.waitForURL(/.*animals\/\d+/, { timeout: 10_000 });
@@ -81,8 +79,7 @@ test.describe('Animal Browse & Detail', () => {
     await page.goto('/animals');
     await waitForPageLoad(page);
 
-    // quality: allow-fragile-selector (dynamic data: no testid on animal cards, first visible link needed)
-    const firstAnimalLink = page.locator('a[href*="/animals/"]').first();
+    const firstAnimalLink = page.getByTestId('animal-card-link').first();
     if (await firstAnimalLink.isVisible({ timeout: 5000 })) {
       await firstAnimalLink.click();
       await page.waitForURL(/.*animals\/\d+/, { timeout: 10_000 });
@@ -95,15 +92,13 @@ test.describe('Animal Browse & Detail', () => {
     await page.goto('/animals');
     await waitForPageLoad(page);
 
-    // quality: allow-fragile-selector (dynamic data: no testid on animal cards, first visible link needed)
-    const firstAnimalLink = page.locator('a[href*="/animals/"]').first();
+    const firstAnimalLink = page.getByTestId('animal-card-link').first();
     if (await firstAnimalLink.isVisible({ timeout: 5000 })) {
       await firstAnimalLink.click();
       await page.waitForURL(/.*animals\/\d+/, { timeout: 10_000 });
 
       // Gallery component should be rendered in the detail page
-      // quality: allow-fragile-selector (positional needed: gallery has no testid, first image is sufficient proof)
-      await expect(page.locator('img').first()).toBeVisible();
+      await expect(page.getByTestId('gallery-image').first()).toBeVisible();
     }
   });
 });

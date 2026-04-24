@@ -4,10 +4,12 @@ from base_feature_app.serializers.utils import get_lang, library_primary_url
 # ── library_primary_url ──────────────────────────────────────────────────────
 
 def test_library_primary_url_returns_empty_when_library_is_none():
+    """Returns empty string when library argument is None."""
     assert library_primary_url(None) == ''
 
 
 def test_library_primary_url_returns_custom_default_when_library_is_none():
+    """Returns the custom default string when library argument is None."""
     assert library_primary_url(None, default='/placeholder.jpg') == '/placeholder.jpg'
 
 

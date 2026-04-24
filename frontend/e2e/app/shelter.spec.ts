@@ -42,8 +42,7 @@ test.describe('Shelter Public Pages', () => {
     await page.goto('/shelters');
     await waitForPageLoad(page);
 
-    // quality: allow-fragile-selector (dynamic data: no testid on shelter cards, first visible link needed)
-    const shelterLink = page.locator('a[href*="/shelters/"]').first();
+    const shelterLink = page.getByTestId('shelter-card-link').first();
     if (await shelterLink.isVisible({ timeout: 5000 })) {
       await shelterLink.click();
       await page.waitForURL(/.*shelters\/\d+/, { timeout: 10_000 });
@@ -56,8 +55,7 @@ test.describe('Shelter Public Pages', () => {
     await page.goto('/shelters');
     await waitForPageLoad(page);
 
-    // quality: allow-fragile-selector (dynamic data: first visible shelter link)
-    const shelterLink = page.locator('a[href*="/shelters/"]').first();
+    const shelterLink = page.getByTestId('shelter-card-link').first();
     if (await shelterLink.isVisible({ timeout: 5000 })) {
       await shelterLink.click();
       await page.waitForURL(/.*shelters\/\d+/, { timeout: 10_000 });
@@ -74,8 +72,7 @@ test.describe('Shelter Public Pages', () => {
     await page.goto('/shelters');
     await waitForPageLoad(page);
 
-    // quality: allow-fragile-selector (dynamic data: first visible shelter link)
-    const shelterLink = page.locator('a[href*="/shelters/"]').first();
+    const shelterLink = page.getByTestId('shelter-card-link').first();
     if (await shelterLink.isVisible({ timeout: 5000 })) {
       await shelterLink.click();
       await page.waitForURL(/.*shelters\/\d+/, { timeout: 10_000 });

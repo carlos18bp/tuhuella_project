@@ -69,6 +69,7 @@ def test_approving_application_auto_creates_follow_up(existing_user):
 
 @pytest.mark.django_db
 def test_vet_sees_only_assigned_follow_ups(vet_client, veterinarian, existing_user):
+    """Vet list endpoint returns only follow-ups assigned to the authenticated veterinarian."""
     mine_animal = AnimalFactory()
     other_animal = AnimalFactory()
     mine_app = AdoptionApplicationFactory(animal=mine_animal, user=existing_user)
@@ -96,6 +97,7 @@ def test_vet_sees_only_assigned_follow_ups(vet_client, veterinarian, existing_us
 
 @pytest.mark.django_db
 def test_assigning_non_vet_returns_400(api_client, admin_user, existing_user):
+    """Assign endpoint rejects a non-veterinarian user ID with 400."""
     api_client.force_authenticate(user=admin_user)
     animal = AnimalFactory()
     app = AdoptionApplicationFactory(animal=animal, user=existing_user)
@@ -118,6 +120,7 @@ def test_assigning_non_vet_returns_400(api_client, admin_user, existing_user):
 
 @pytest.mark.django_db
 def test_adopter_sees_own_follow_up(api_client, existing_user):
+    """Adopter list endpoint returns only the follow-up belonging to the authenticated adopter."""
     api_client.force_authenticate(user=existing_user)
     animal = AnimalFactory()
     app = AdoptionApplicationFactory(animal=animal, user=existing_user)
@@ -148,6 +151,7 @@ def test_adopter_sees_own_follow_up(api_client, existing_user):
 @pytest.mark.django_db
 @freeze_time('2026-01-15')
 def test_archived_follow_up_hidden_from_vet(vet_client, veterinarian, existing_user):
+    """Archived follow-ups are excluded from list and return 404 on detail for veterinarians."""
     animal = AnimalFactory()
     app = AdoptionApplicationFactory(animal=animal, user=existing_user)
     archived = PostAdoptionFollowUp.objects.create(
@@ -305,6 +309,7 @@ def test_assign_returns_400_when_veterinarian_not_found(
 def test_assign_success_transitions_pending_to_in_progress(
     web_manager_client, follow_up_of, animal, veterinarian,
 ):
+    """Successful vet assignment transitions follow-up status from pending to in_progress."""
     fu = follow_up_of(animal)
 
     response = web_manager_client.patch(
@@ -381,6 +386,7 @@ def test_clinical_history_returns_403_for_unauthorized_adopter(
 def test_clinical_history_lists_entries_for_adopter(
     api_client, existing_user, animal,
 ):
+    """Adopter who owns the animal receives the clinical history entries via GET."""
     animal.adopted_by = existing_user
     animal.save(update_fields=['adopted_by'])
     ClinicalHistoryEntry.objects.create(
@@ -440,6 +446,7 @@ def test_clinical_history_create_returns_403_for_unauthorized(
 def test_clinical_history_create_success_by_shelter_admin(
     shelter_admin_client, animal,
 ):
+    """Shelter admin can create a clinical history entry for a shelter animal, returning 201."""
     payload = {
         'entry_type': 'checkup',
         'title': 'Yearly checkup',
@@ -491,6 +498,7 @@ def test_clinical_history_viewable_by_shelter_admin_of_owning_shelter(
 def test_clinical_history_create_persists_entry_for_adopted_animal(
     shelter_admin_client, animal, existing_user,
 ):
+    """Clinical history entry is persisted with correct title for an already-adopted animal."""
     animal.adopted_by = existing_user
     animal.save(update_fields=['adopted_by'])
 

@@ -132,6 +132,7 @@ def test_user_activity_veterinarian_sees_clinical_entry(api_client, animal):
 @pytest.mark.django_db
 @freeze_time('2026-01-15')
 def test_user_activity_veterinarian_sees_followup_completed(api_client):
+    """Veterinarian activity feed includes a completed follow-up entry."""
     from base_feature_app.tests.factories import (
         AdoptionApplicationFactory, PostAdoptionFollowUpFactory, VeterinarianUserFactory,
     )
