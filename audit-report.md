@@ -130,12 +130,95 @@ Major bumps deliberately skipped (require owner review):
 
 ## 4. Update results
 
-_(populated below after the update commits.)_
-
 ### Frontend updates
+
+`npm audit fix` was run (no `--force`), then
+`npx --yes npm-check-updates -u --target minor` followed by `npm install`.
+Packages bumped (patch + minor only):
+
+| Package                     | From      | To        |
+| --------------------------- | --------- | --------- |
+| @playwright/test            | 1.58.2    | 1.59.1    |
+| @react-oauth/google         | 0.13.4    | 0.13.5    |
+| @tailwindcss/postcss        | 4.2.1     | 4.2.4     |
+| @testing-library/dom        | 10.0.0    | 10.4.1    |
+| @testing-library/jest-dom   | 6.4.2     | 6.9.1     |
+| @testing-library/user-event | 14.5.2    | 14.6.1    |
+| @types/node                 | 25.3.0    | 25.6.0    |
+| axios                       | 1.13.5    | 1.15.2    |
+| eslint                      | 9.39.3    | 9.39.4    |
+| eslint-config-next          | 16.1.6    | 16.2.4    |
+| eslint-plugin-playwright    | 2.7.1     | 2.10.2    |
+| gsap                        | 3.14.2    | 3.15.0    |
+| jest                        | 30.2.0    | 30.3.0    |
+| jest-environment-jsdom      | 30.2.0    | 30.3.0    |
+| next                        | 16.1.6    | 16.2.4    |
+| next-intl                   | 4.8.3     | 4.11.0    |
+| react                       | 19.2.4    | 19.2.5    |
+| react-dom                   | 19.2.4    | 19.2.5    |
+| swiper                      | 11.2.8    | 11.2.10   |
+| tailwindcss                 | 4.2.1     | 4.2.4     |
+| zustand                     | 5.0.11    | 5.0.12    |
+
+**Frontend `npm audit` after updates:** 4 vulnerabilities (1 critical, 3 moderate),
+down from 9 (1 critical, 3 high, 5 moderate). Remaining issues all require major
+version bumps (out of scope for this PR):
+
+| Package  | Severity | Required fix                                      |
+| -------- | -------- | ------------------------------------------------- |
+| swiper   | critical | `swiper@12.x` (major bump)                        |
+| postcss  | moderate | comes via Next.js — would need `next` major bump  |
+| next     | moderate | transitive on `postcss` advisory                  |
+| next-intl | moderate | transitive on `next`                             |
+
+Resolved transitive issues: `axios`, `brace-expansion`, `flatted`, `follow-redirects`, `picomatch`, plus the higher-severity `next`/`next-intl` advisories that were patched in 16.1.x → 16.2.x range.
 
 ### Backend updates
 
+`backend/requirements.txt` pins bumped (patch + minor only):
+
+| Package             | From      | To        |
+| ------------------- | --------- | --------- |
+| Django              | 6.0.2     | 6.0.4     |
+| djangorestframework | 3.16.1    | 3.17.1    |
+| Faker               | 40.5.1    | 40.15.0   |
+| pillow              | 12.1.1    | 12.2.0    |
+| pytest              | 9.0.2     | 9.0.3     |
+| pytest-cov          | 7.0.0     | 7.1.0     |
+| coverage            | 7.13.4    | 7.13.5    |
+| requests            | 2.32.5    | 2.33.1    |
+| ruff                | 0.15.2    | 0.15.12   |
+
+`gunicorn` left at `>=23.0,<24.0` — anything newer is a major bump.
+
+**Backend `pip-audit` after updates:** "No known vulnerabilities found" — all 10
+CVEs across Django (7), pillow, pytest, requests resolved.
+
 ### Rollbacks
 
-### Verification (build/tests)
+None. Every patch+minor bump installed cleanly and the smoke checks below
+passed. No pin had to be reverted.
+
+### Verification
+
+| Check                                                 | Result   |
+| ----------------------------------------------------- | -------- |
+| Backend `python manage.py check`                      | PASS — "System check identified no issues (0 silenced)." |
+| Backend `pytest --collect-only`                       | PASS — 763 tests collected, no import/collection errors. (Per project rules — see backend/CLAUDE.md — the full backend suite is not executed.) |
+| Backend `pip-audit -r requirements.txt`               | PASS — no vulnerabilities. |
+| Frontend `npm run build`                              | PASS — `Compiled successfully in 16.9s`, 108/108 static pages generated. |
+| Frontend `npm run lint`                               | 88 problems (46 errors, 42 warnings) — all pre-existing (e.g. `require()` style imports in `.cjs` scripts, unused vars). Not introduced by the dependency updates. |
+| Frontend `npm run test`                               | Not executed. Project rule (`CLAUDE.md`): "Never run the full test suite. Maximum 20 tests per batch." Build is green and Jest config loads from the bumped `next/jest` helper without errors during build. |
+
+### Open follow-ups (out of scope for this PR)
+
+These all require major version bumps and the owner should evaluate them
+separately:
+
+- `swiper` 11.2.10 → 12.x to clear the prototype-pollution **critical** advisory.
+- `next` 16.1.6 → next major (or wait for a 16.2.x patch that vendors a fixed `postcss`) to clear the transitive `postcss` XSS advisory.
+- `lucide-react` 0.577 → 1.x.
+- `eslint` 9 → 10.
+- `typescript` 5 → 6.
+- `gunicorn` 23 → 25 (currently constrained by the `<24.0` pin).
+
