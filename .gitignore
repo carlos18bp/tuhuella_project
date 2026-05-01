@@ -125,3 +125,6 @@ test-results/test-quality-report.json
 
 # Claude
 .claude/worktrees/
+
+# Audit venv
+backend/.venv-audit/
