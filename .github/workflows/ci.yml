@@ -145,7 +145,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3]
+        shard: [1, 2]
     defaults:
       run:
         working-directory: frontend
@@ -191,8 +191,8 @@ jobs:
       - name: Install Playwright browsers with system deps
         run: npx playwright install --with-deps chromium
 
-      - name: "Run Playwright E2E tests (shard ${{ matrix.shard }}/3)"
-        run: npx playwright test --shard=${{ matrix.shard }}/3 --reporter=blob
+      - name: "Run Playwright E2E tests (shard ${{ matrix.shard }}/2)"
+        run: npx playwright test --shard=${{ matrix.shard }}/2 --reporter=blob
         env:
           CI: 'true'
           PLAYWRIGHT_JSON_OUTPUT_NAME: e2e-results/playwright-results.json
