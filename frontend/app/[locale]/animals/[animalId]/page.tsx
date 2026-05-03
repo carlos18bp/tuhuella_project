@@ -5,7 +5,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import {
-  Heart, ArrowLeft, Weight, Zap, BatteryLow, Flame,
+  Heart, ArrowLeft, Weight,
   Palette, Home, Cpu, Baby, Dog, Cat, Share2, Check,
 } from 'lucide-react';
 
@@ -91,10 +91,6 @@ export default function AnimalDetailPage() {
 
   const genderLabel = animal.gender === 'male' ? t('male') : animal.gender === 'female' ? t('female') : t('unknown');
 
-  const energyIcons = { low: BatteryLow, medium: Zap, high: Flame };
-  const energyLabels = { low: t('energyLow'), medium: t('energyMedium'), high: t('energyHigh') };
-  const EnergyIcon = energyIcons[animal.energy_level] ?? Zap;
-
   const compatibilityColor = (v: AnimalCompatibility) =>
     v === 'yes'
       ? animalCompatibilityYesClass
@@ -111,7 +107,7 @@ export default function AnimalDetailPage() {
     animal.good_with_cats !== 'unknown';
 
   const showDetails =
-    animal.weight || animal.energy_level || animal.coat_color ||
+    animal.weight || animal.coat_color ||
     animal.is_house_trained || animal.microchip_id;
 
   return (
@@ -241,13 +237,6 @@ export default function AnimalDetailPage() {
                     </div>
                   </div>
                 )}
-                <div className="flex items-center gap-2.5 p-3 rounded-xl bg-surface-secondary">
-                  <EnergyIcon className="h-4 w-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                  <div>
-                    <p className="text-xs text-text-tertiary">{t('energyLevel')}</p>
-                    <p className="text-sm font-medium text-text-primary">{energyLabels[animal.energy_level]}</p>
-                  </div>
-                </div>
                 {animal.coat_color && (
                   <div className="flex items-center gap-2.5 p-3 rounded-xl bg-surface-secondary">
                     <Palette className="h-4 w-4 text-teal-600 dark:text-teal-400 shrink-0" />

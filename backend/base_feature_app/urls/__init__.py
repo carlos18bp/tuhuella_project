@@ -6,6 +6,7 @@ urlpatterns = [
     path('google-captcha/site-key/', auth_views.get_captcha_site_key, name='captcha-site-key'),
     path('auth/', include('base_feature_app.urls.auth')),
     path('shelters/', include('base_feature_app.urls.shelter')),
+    path('shelter-applications/', include('base_feature_app.urls.shelter_application')),
     path('animals/', include('base_feature_app.urls.animal')),
     path('adoptions/', include('base_feature_app.urls.adoption')),
     path('campaigns/', include('base_feature_app.urls.campaign')),

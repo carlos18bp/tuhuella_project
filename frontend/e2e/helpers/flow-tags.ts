@@ -39,6 +39,9 @@ export const ANIMAL_GALLERY = ['@flow:animal-gallery', '@module:animal', '@prior
 export const SHELTER_BROWSE = ['@flow:shelter-browse', '@module:shelter', '@priority:P2'];
 export const SHELTER_DETAIL = ['@flow:shelter-detail', '@module:shelter', '@priority:P2'];
 export const SHELTER_ONBOARDING = ['@flow:shelter-onboarding', '@module:shelter', '@priority:P1'];
+export const SHELTER_APPLICATION_SUBMIT = ['@flow:shelter-application-submit', '@module:shelter-application', '@priority:P1'];
+export const SHELTER_APPLICATION_STATUS = ['@flow:shelter-application-status', '@module:shelter-application', '@priority:P2'];
+export const SHELTER_APPLICATION_REVIEW = ['@flow:shelter-application-review', '@module:shelter-application', '@priority:P1'];
 
 // ── Adoption ──
 export const ADOPTION_SUBMIT = ['@flow:adoption-submit', '@module:adoption', '@priority:P1'];
@@ -125,6 +128,7 @@ export const NOTIFICATION_PREFERENCES = ['@flow:notification-preferences', '@mod
 // ── Shelter (additional) ──
 export const SHELTER_DETAIL_VIEW_ANIMALS = ['@flow:shelter-detail-view-animals', '@module:shelter', '@priority:P2'];
 export const SHELTER_DETAIL_GALLERY = ['@flow:shelter-detail-gallery', '@module:shelter', '@priority:P3'];
+export const SHELTER_DETAIL_VIDEO = ['@flow:shelter-detail-video', '@module:shelter', '@priority:P3'];
 
 // ── Campaign (additional) ──
 export const CAMPAIGN_TAB_TOGGLE = ['@flow:campaign-tab-toggle', '@module:campaign', '@priority:P3'];
@@ -151,6 +155,15 @@ export const WEB_MANAGER_APPLICATIONS = ['@flow:web-manager-applications', '@mod
 
 // ── Adoption (application history) ──
 export const ADOPTION_APPLICATION_HISTORY = ['@flow:adoption-application-history', '@module:adoption', '@priority:P3'];
+
+// ── Adoption (interview follow-up: WhatsApp + event timeline + cron reminder) ──
+export const ADOPTION_DETAIL_ADOPTER = ['@flow:adoption-detail-adopter', '@module:adoption', '@priority:P2'];
+export const ADOPTION_WHATSAPP_SHELTER = ['@flow:adoption-whatsapp-shelter', '@module:adoption', '@priority:P2'];
+export const ADOPTION_WHATSAPP_APPLICANT = ['@flow:adoption-whatsapp-applicant', '@module:adoption', '@priority:P2'];
+export const ADOPTION_EVENT_CREATE_SHELTER = ['@flow:adoption-event-create-shelter', '@module:adoption', '@priority:P1'];
+export const ADOPTION_EVENT_CREATE_WEB_MANAGER = ['@flow:adoption-event-create-web-manager', '@module:adoption', '@priority:P1'];
+export const ADOPTION_DETAIL_WEB_MANAGER = ['@flow:adoption-detail-web-manager', '@module:adoption', '@priority:P2'];
+export const ADOPTION_FOLLOWUP_REMINDER = ['@flow:adoption-followup-reminder', '@module:adoption', '@priority:P3'];
 
 // ── Volunteer ──
 export const VOLUNTEER_APPLY = ['@flow:volunteer-apply', '@module:volunteer', '@priority:P2'];

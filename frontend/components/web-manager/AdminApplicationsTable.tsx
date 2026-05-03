@@ -1,6 +1,8 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { ROUTES } from '@/lib/constants';
 import type { AdoptionApplication, AdoptionApplicationStatus } from '@/lib/types';
 
 const statusBadge: Record<AdoptionApplicationStatus, string> = {
@@ -50,8 +52,15 @@ export default function AdminApplicationsTable({
         </thead>
         <tbody>
           {items.map((app) => (
-            <tr key={app.id} className="border-t border-border-tertiary">
-              <td className="px-4 py-3 font-medium text-text-primary">{app.animal_name}</td>
+            <tr key={app.id} className="border-t border-border-tertiary hover:bg-surface-hover transition-colors">
+              <td className="px-4 py-3 font-medium text-text-primary">
+                <Link
+                  href={ROUTES.WEB_MANAGER_APPLICATION_DETAIL(app.id)}
+                  className="hover:text-teal-600 transition-colors"
+                >
+                  {app.animal_name}
+                </Link>
+              </td>
               {showShelter && <td className="px-4 py-3 text-text-secondary">{app.shelter_name ?? '—'}</td>}
               <td className="px-4 py-3 text-text-secondary">{app.user_email}</td>
               <td className="px-4 py-3">

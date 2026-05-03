@@ -10,6 +10,7 @@ import {
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/lib/stores/authStore';
+import { useShelterApplicationStore } from '@/lib/stores/shelterApplicationStore';
 import { ROUTES } from '@/lib/constants';
 import type { ActivityEvent } from '@/lib/types';
 import ShelterAdminProfileSection from '@/components/ui/ShelterAdminProfileSection';
@@ -155,12 +156,16 @@ export default function MiPerfilPage() {
   const roleData = useRoleProfileData();
   const isAdopter = user?.role === 'adopter';
 
+  const shelterApplication = useShelterApplicationStore((s) => s.application);
+  const fetchShelterApplication = useShelterApplicationStore((s) => s.fetchMine);
+
   useEffect(() => {
     if (isAdopter) {
       void fetchActivity();
       void fetchProfileStats();
+      void fetchShelterApplication();
     }
-  }, [isAdopter, fetchProfileStats, fetchActivity]);
+  }, [isAdopter, fetchProfileStats, fetchActivity, fetchShelterApplication]);
 
   if (!user) {
     return (
@@ -200,6 +205,16 @@ export default function MiPerfilPage() {
       icon: FileText,
       color: 'text-teal-600 bg-teal-50 dark:bg-teal-900/20 dark:text-teal-400',
       badge: stats?.applications.total ?? null,
+    },
+    {
+      label: t('applyAsShelter'),
+      desc: shelterApplication
+        ? t(`applyAsShelterStatus_${shelterApplication.status}`)
+        : t('applyAsShelterDesc'),
+      href: ROUTES.SHELTER_APPLICATION,
+      icon: Building2,
+      color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400',
+      intentStatus: shelterApplication?.status,
     },
     {
       label: t('donations'),

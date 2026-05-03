@@ -57,6 +57,17 @@ def scheduled_backup():
         raise
 
 
+@db_periodic_task(crontab(hour='9', minute='0'))
+def adoption_interview_follow_ups():
+    """Daily reminder to web_managers about applications stuck in 'interview' state."""
+    if not getattr(settings, 'ADOPTION_FOLLOW_UPS_ENABLED', True):
+        logger.info('adoption_interview_follow_ups skipped: ADOPTION_FOLLOW_UPS_ENABLED=False')
+        return
+
+    from base_feature_app.services.adoption_follow_up import dispatch_due_follow_ups
+    dispatch_due_follow_ups()
+
+
 @db_periodic_task(crontab(hour='4', minute='0'))
 def silk_garbage_collection():
     """

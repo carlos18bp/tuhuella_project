@@ -1,6 +1,6 @@
 # Tuhuella — Active Context
 
-> Last updated: 2026-04-20 (Phase 21 — Platform Support 5th Donation Flow)
+> Last updated: 2026-05-03 (Phase 24 — Adoption Interview Follow-Up + WhatsApp + Event Timeline)
 
 ## Current State
 
@@ -22,10 +22,14 @@ The project is a mature animal adoption platform with complete backend and front
 - **Roles**: 5 roles (adopter, shelter_admin, admin, veterinarian, web_manager); helpers in `utils/shelter_access.py`
 - **Web Manager workspace**: Global applications board + shelter list + shelter detail (Info + Applications tabs); receives adoption_submitted notifications
 - **Post-Adoption Follow-Up**: Auto-created +30 days on approval; vet workspace (list + detail + clinical entry form + mark complete); adopter read-only clinical history timeline; notification events for assignment/due-soon/overdue/entry-added
+- **In-app Manual**: `/{locale}/manual` con ~72 procesos bilingües filtrados por audiencia (`public`, `adopter`, `shelter_admin`, `veterinarian`, `web_manager`, `admin`, `cross`); búsqueda fuzzy con Fuse.js (atajo ⌘K/Ctrl+K); sidebar + ProcessCard; link visible para todo usuario autenticado en el menú de cuenta y el drawer móvil
+- **Shelter Application Workflow**: Adopter formaliza postulación a refugio en wizard de 4 pasos (datos básicos / legales / documentos diferidos / motivación); admin/web_manager revisa desde el panel; al aprobar se crea automáticamente el `Shelter` (verified) y el `User.role` cambia a `shelter_admin`; notificaciones a admins al postular y al postulante en aprobación/rechazo
+- **Shelter Video**: refugio puede tener un video corto (mp4/webm/mov/ogg) gestionado desde Django admin; en la vista detalle aparece un botón "Ver video" que abre `ShelterVideoModal` con un `<video controls>` HTML5; servido vía el rewrite `/media/*` ya existente
+- **Adoption Interview Follow-Up**: cuando una `AdoptionApplication` entra a `interview` se muestra el WhatsApp del refugio al adoptante y el del adoptante al refugio (`Shelter.phone` / `User.phone`, gateado por estado y rol en el serializer). Cada solicitud puede registrar `AdoptionApplicationEvent` (fecha + descripción) por shelter_admin o web_manager; un cron Huey diario (`adoption_interview_follow_ups`, 09:00 UTC) avisa por correo a todos los `web_manager` cada 5 días sobre solicitudes en `interview` y reinicia el temporizador con cada evento o transición de estado
 
 ### What's Pending
 - **Wompi payment integration**: Views are placeholder stubs
-- **Huey periodic tasks**: `scan_stalled_applications` + `scan_follow_ups` deferred until `--periodic` flag on `tuhuella-huey.service` is confirmed
+- **Huey periodic tasks**: `scan_stalled_applications` + `scan_follow_ups` deferred until `--periodic` flag on `tuhuella-huey.service` is confirmed (the new `adoption_interview_follow_ups` task ships with the same assumption)
 - **Web manager "Seguimientos" tab**: Follow-up tab on shelter detail (vet assignment dropdown) not yet wired
 - **Shelter animal create/edit UI**: Backend supports new health fields; no frontend form yet
 
@@ -84,6 +88,111 @@ The project is a mature animal adoption platform with complete backend and front
 | Frontend unit test files | 289+ |
 | E2E spec files | 20 |
 | E2E flow definitions | 98 |
+
+## Recently Completed: Phase 24 — Adoption Interview Follow-Up (2026-05-03)
+
+Cierra el estado `interview` de la adopción con tres capacidades complementarias: comunicación directa por WhatsApp entre adoptante y refugio, recordatorios automáticos al `web_manager` cada 5 días, y bitácora de eventos del proceso.
+
+**Backend:**
+- New model `AdoptionApplicationEvent` (`models/adoption_event.py`, `ArchivableModel`): FK `application` (CASCADE, related_name='events'), FK `created_by` (PROTECT), `event_date` (no future), `description` (≤2000 chars). `Meta.ordering = ['-event_date', '-created_at']`.
+- `AdoptionApplication` extendido con `next_follow_up_due_at` (DateTimeField, db_index=True) y helpers `schedule_follow_up()` / `clear_follow_up()` (`models/adoption.py`).
+- Migración `0024_adoption_followup_and_event.py` (AddField + CreateModel).
+- Endpoints (`views/adoption.py`, todos `@api_view`): `GET/POST /api/adoptions/<pk>/events/`, `PATCH/DELETE /api/adoptions/<pk>/events/<event_pk>/`. Helpers `_get_application_or_404`, `_can_view_application`, `_can_write_event` consolidan permisos. Lectura: applicant + shelter_admin del refugio + web_manager/admin. Escritura: shelter_admin del refugio + web_manager/admin. Soft-delete vía `archived_at`.
+- `application_update_status` ahora llama `schedule_follow_up()` al transicionar a `interview` y `clear_follow_up()` al pasar a `approved`/`rejected`.
+- `AdoptionDetailSerializer` extendido con `events`, `next_follow_up_due_at`, `shelter_whatsapp` y `applicant_whatsapp`. Privacidad: ambos números solo se exponen en estados `interview`/`approved`; `applicant_whatsapp` adicionalmente solo a shelter_admin del refugio o web_manager/admin (nunca al adoptante mismo).
+- New service `services/adoption_follow_up.py:dispatch_due_follow_ups()` query: `status=interview, archived_at__isnull=True, next_follow_up_due_at__lte=now()`. Para cada match dispara `dispatch_notification('adoption_interview_follow_up_due', web_manager, ctx)` a cada `User.role='web_manager'` activo y reprograma `next_follow_up_due_at = now() + 5 days`.
+- New Huey periodic task `adoption_interview_follow_ups` en `base_feature_project/tasks.py` (`crontab(hour='9', minute='0')`) gateada por flag `ADOPTION_FOLLOW_UPS_ENABLED` (settings + `.env.example`, default True; mismo patrón que `BACKUPS_ENABLED`).
+- New bilingual template `adoption_interview_follow_up_due` en `notification_templates.py`.
+- 21 tests backend pasando (4 model, 11 endpoints, 6 service); factories: nueva `AdoptionApplicationEventFactory`. Admin: `AdoptionApplicationEventAdmin` registrado en sección "Adoption Management".
+
+**Frontend:**
+- New types `AdoptionApplicationEvent` + campos `events`/`next_follow_up_due_at`/`shelter_whatsapp`/`applicant_whatsapp` en `AdoptionApplication` (`lib/types.ts`).
+- `lib/constants.ts`: `ADOPTION_EVENTS`/`ADOPTION_EVENT_DETAIL` API endpoints + `ROUTES.MY_APPLICATION_DETAIL` y `ROUTES.WEB_MANAGER_APPLICATION_DETAIL`.
+- `adoptionStore` extendido con `applicationsById` cache, `fetchApplication`, `createEvent`, `updateEvent`, `archiveEvent`.
+- 3 nuevos componentes en `components/adoption/`: `WhatsAppContactCard` (intro + contactName + `wa.me/<digits>?text=…` con sanitización a dígitos), `AdoptionEventTimeline` (lista cronológica con icono por rol del autor), `AdoptionEventCreateModal` (datetime-local + textarea, valida fecha pasada/presente y descripción no vacía).
+- New page `/[locale]/my-applications/[id]/page.tsx` (detalle del adoptante: badge de estado, `ApplicationTimeline`, WhatsApp del refugio cuando aplica, timeline read-only, link a `/history`).
+- New page `/[locale]/web-manager/applications/[id]/page.tsx` (detalle del web_manager con badge "Próximo recordatorio en N días" cuando `interview` y permisos de creación de evento).
+- `/[locale]/shelter/applications/page.tsx`: botón "Detalle" expande inline mostrando WhatsApp del adoptante + `AdoptionEventTimeline` con creación cuando estado en `interview`/`approved`.
+- `/[locale]/my-applications/page.tsx`: cada item linkea a `MY_APPLICATION_DETAIL` (antes navegaba al animal).
+- `AdminApplicationsTable`: el nombre del animal es ahora un link a `WEB_MANAGER_APPLICATION_DETAIL`.
+- i18n: nuevos namespaces `adoption.contact.*`, `adoption.events.*`, `myApplications.detail.*`, `webManager.detail.*`, `webManager.followUp.*` (es+en validados).
+- Bug fix colateral en `jest.setup.ts`: el mock de `useTranslations` ahora soporta namespaces con punto (`'adoption.events'`) — antes resolvía solo el primer nivel.
+- 5 Jest tests nuevos para `AdoptionEventTimeline` (empty, render, gating de creación, submit con payload normalizado).
+
+**Verification:** `python manage.py check` clean; `pytest test_adoption_event_model.py test_adoption_event_endpoints.py test_adoption_follow_up_service.py -v` → 21 passed; `npm test -- AdoptionEventTimeline.test.tsx` → 5 passed; `tsc --noEmit` sin errores nuevos en archivos modificados; JSON i18n validado en ambos idiomas.
+
+**Operational notes:** post-deploy correr `python manage.py migrate` y reiniciar `tuhuella_project tuhuella-huey tuhuella-frontend`. Asegurar `--periodic` en `tuhuella-huey.service` (mismo prereq que `BACKUPS_ENABLED`). Para apagar la tarea sin desplegar: `ADOPTION_FOLLOW_UPS_ENABLED=False` en `.env` y reiniciar `tuhuella-huey`. Las solicitudes existentes en `interview` quedan fuera del cron hasta que se registre un evento o se re-transicione (no hay backfill automático).
+
+---
+
+## Recently Completed: Phase 23 — Shelter Video on Detail Page (2026-05-03)
+
+Each `Shelter` can now host a short presentation video uploaded by platform staff. On the public detail page (`/[locale]/shelters/[shelterId]`) a "Ver video" button appears below the contact grid (only when a video is present) and opens a modal with an HTML5 `<video controls>` player.
+
+**Backend:**
+- `models/shelter.py`: new `video = FileField(upload_to='shelters/videos/', null=True, blank=True, validators=[FileExtensionValidator(['mp4','webm','mov','ogg'])])`. This is the **first plain `FileField` in `base_feature_app`** — all other media goes through `django_attachments` Library/Attachment (`SingleImageField`/`GalleryField`), but a Library is image-oriented (uses `ThumbnailerField` + image_width/height), so for video we sidestep it.
+- `Shelter.delete()` extended to call `self.video.delete(save=False)` after the existing Library cleanup.
+- Migration `0023_shelter_video.py`: single `AddField` op.
+- `serializers/shelter_detail.py`: new `video_url` SerializerMethodField (returns `obj.video.url` or `''`); added to `Meta.fields`. `ShelterListSerializer` and `ShelterCreateUpdateSerializer` are intentionally **not** modified — the video is admin-managed only, mirroring how `logo`/`cover_image`/`gallery` are handled.
+- `ShelterAdmin` gets the new field automatically (no `fields`/`fieldsets` override; `AttachmentsAdminMixin` only handles Library-backed fields).
+- Tests (19/19 passing): 1 model test (field optionality + `upload_to`), 2 serializer tests (empty case + populated case using `SimpleUploadedFile` with `settings.MEDIA_ROOT = str(tmp_path)` to avoid writing into the real `backend/media/`), 1 endpoint test (asserting `video_url` key is present in `GET /api/shelters/<id>/`).
+
+**Frontend:**
+- `lib/types.ts`: `Shelter.video_url?: string`.
+- `lib/__tests__/fixtures.ts`: first `mockShelter` now includes `video_url: '/media/shelters/videos/patitas-presentacion.mp4'`; the others stay without to keep the "no video" branch covered.
+- `messages/{es,en}.json` (`shelterDetail` namespace): 3 new keys — `playVideo`, `videoModalTitle`, `closeVideo`.
+- `components/ui/ShelterVideoModal.tsx` (new): controlled modal mirroring the `TermsModal` pattern (fixed inset overlay with `bg-black/80 backdrop-blur-sm`, click-outside + Escape to close, header with `Film` icon + title, body with `<video controls preload="metadata">` inside an `aspect-video max-w-4xl` container). `useEffect` pauses the video when `open` flips false. Exported from `components/ui/index.ts`.
+- `app/[locale]/shelters/[shelterId]/page.tsx`: imports `useState`, `Play` icon, `ShelterVideoModal`. New `videoOpen` state. Conditional teal-gradient "Ver video" button rendered above the gallery section only when `shelter.video_url` is set; modal mounted at the bottom of the component (also gated on `video_url`).
+- Tests: 7/7 passing in new `components/ui/__tests__/ShelterVideoModal.test.tsx` (renders `<video src>`, hidden when closed, default vs custom title, backdrop/close-button/Escape close); 18/18 passing in extended `app/[locale]/shelters/[shelterId]/__tests__/page.test.tsx` (button hidden when no `video_url`, click opens modal with the right `src`).
+
+**Verification:** `pytest tests/{models,serializers,views}/test_shelter_*` → 19 passed. Frontend `npm test` for both new/extended files → 7 + 18 passed. Manual: upload an `.mp4` from `/admin-site/`, hit `GET /api/shelters/<id>/` (response carries `video_url: "/media/shelters/videos/<file>.mp4"`), open `/es/shelters/<id>` → button appears → modal plays the file via the `/media/*` rewrite in `next.config.ts`.
+
+**Operational notes:** post-deploy run `python manage.py migrate` and restart `tuhuella_project` + `tuhuella-frontend`. No new env vars; file size is governed by Django's existing `DATA_UPLOAD_MAX_MEMORY_SIZE` and the nginx upload limit on the host.
+
+---
+
+## Recently Completed: Phase 22 — Shelter Application Workflow (2026-05-03)
+
+Adopter users now have a formal "Postularte como refugio" path from `/my-profile` that drives a multi-step application reviewed by admins/web_managers. On approval the system auto-creates a verified `Shelter` and promotes the applicant's role to `shelter_admin`. Replaces the orphan `/shelter/onboarding` flow as the user-facing entrypoint (the old endpoint stays accessible).
+
+**Backend:**
+- New model `ShelterApplication` (`models/shelter_application.py`, `ArchivableModel`): applicant FK, shelter basic fields (name/description_es/city/address/phone/email/website), legal fields (legal_name/tax_id/legal_representative_name/legal_representative_id), `documents` `GalleryField` (deferred upload), motivation/previous_experience/capacity_estimate, status (`submitted`/`under_review`/`approved`/`rejected`), `submitted_at`, `reviewed_by`, `reviewed_at`, `rejection_reason`, `created_shelter` OneToOneField to `Shelter`.
+- Partial unique constraint `unique_active_shelter_application_per_user` (status in submitted/under_review) — one active application per user; rejected users can re-apply.
+- Migration `0022_shelterapplication.py`.
+- Serializers: `ShelterApplicationCreateSerializer` (validates no active application + user is not already shelter_admin) and `ShelterApplicationDetailSerializer`.
+- Views (`views/shelter_application.py`, all `@api_view`): `POST /api/shelter-applications/` (adopter submits + dispatches `shelter_application_submitted` to all admins/web_managers), `GET /api/shelter-applications/me/` (404→null helper), `GET /api/shelter-applications/<pk>/` (owner or admin), `POST /<pk>/approve/` (atomic: creates `Shelter` VERIFIED + sets `user.role=shelter_admin` + links `created_shelter` + notifies applicant), `POST /<pk>/reject/` (requires `reason` + notifies applicant), `GET /api/shelter-applications/` admin list with `?status=` filter.
+- New `urls/shelter_application.py` mounted at `/api/shelter-applications/`.
+- 3 new templates in `notification_templates.py`: `shelter_application_submitted`, `shelter_application_approved`, `shelter_application_rejected` (ES + EN).
+- Admin: `ShelterApplicationAdmin` registered on `admin_site` with grouped fieldsets (Shelter info / Legal / Documents / Motivation).
+- 14 backend tests passing (`tests/models/test_shelter_application_model.py` + `tests/views/test_shelter_application_views.py`): unique-active constraint, re-apply after rejection, adopter submit, anon rejection, duplicate-active rejection, shelter_admin can't apply, `me/` 404 + latest, approve creates verified Shelter + promotes role, adopter can't approve, can't approve already-approved, reject requires reason, reject keeps role unchanged.
+
+**Frontend:**
+- `lib/stores/shelterApplicationStore.ts`: Zustand store (`fetchMine` ignores 404, `submit`, `reset`); types `ShelterApplication`, `ShelterApplicationStatus`, `ShelterApplicationPayload`.
+- `lib/constants.ts`: `ROUTES.SHELTER_APPLICATION` + `API_ENDPOINTS.SHELTER_APPLICATIONS`/`SHELTER_APPLICATION_MINE`/`SHELTER_APPLICATION_DETAIL`/`SHELTER_APPLICATION_APPROVE`/`SHELTER_APPLICATION_REJECT`.
+- `app/[locale]/shelter-application/page.tsx`: 4-step wizard (datos refugio → legales → documentos diferidos → motivación) with `useState<{ step: 1|2|3|4, form }>` pattern; per-step validation; status view when an application already exists (submitted/under_review/approved with "go to dashboard" CTA, rejected with reason + reapply); blocks non-adopter/non-shelter_admin roles.
+- `app/[locale]/my-profile/page.tsx`: new "Postularte como refugio" card inserted as **second** item in `adopterActivityLinks` (right after "Mis Solicitudes"); reads `shelterApplication.status` from store and shows dynamic status text via `profile.applyAsShelterStatus_*`; `useEffect` calls `fetchShelterApplication` for adopters.
+- `messages/{es,en}.json`: 6 keys in `profile.*` (`applyAsShelter`, `applyAsShelterDesc`, `applyAsShelterStatus_submitted/under_review/approved/rejected`); new `shelterApplication` namespace with wizard chrome (title/subtitle/stepCounter/back/next/submit), per-status copy, field labels, error messages.
+- E2E flow tag `SHELTER_APPLICATION` in `e2e/helpers/flow-tags.ts`.
+- Tests: 5 Jest unit tests passing (`app/[locale]/shelter-application/__tests__/page.test.tsx`) — wizard mount, step-1 validation block, full 4-step submit + redirect to my-profile, status view for submitted, rejection view + reapply button. Playwright spec `e2e/app/shelter-application.spec.ts` covers redirect-to-sign-in, full happy path with mocked POST, and existing-application status view (not executed live because dev servers were down at implementation time).
+
+**Verification:** `python manage.py check` clean; `pytest test_shelter_application_model.py test_shelter_application_views.py -v` → 14 passed; `npx tsc --noEmit` clean on changed files; `npm test -- shelter-application/__tests__/page.test.tsx` → 5 passed.
+
+**Operational notes:** post-deploy run `python manage.py migrate` and restart `tuhuella_project tuhuella-huey tuhuella-frontend`. The legacy `/shelter/onboarding` page and `POST /api/shelters/create/` endpoint are still reachable but are no longer surfaced from the adopter profile.
+
+---
+
+## Recently Completed: Phase 21.1 — Header Manual link gate aligned with Phase 19 (2026-05-03)
+
+Follow-up a Phase 19. Esa fase abrió la página `/manual` a todos los autenticados (removió `canAccessStaffArea` de `manual/layout.tsx`), pero el **link en el Header** seguía gateado por el mismo helper, así que `adopter`, `shelter_admin` y `veterinarian` no tenían punto de entrada salvo escribir la URL.
+
+**Cambios:**
+- `frontend/components/layout/Header.tsx`: eliminada la const `canAccessManual` y ambos guards `{canAccessManual && (...)}` (en `accountContent` y en el drawer móvil). El link al manual se renderiza directo dentro de las ramas ya autenticadas (el dropdown de cuenta solo se monta autenticado; el guard móvil vive dentro del ternario `isAuthenticated ? (...) : (...)`). Removido el import huérfano `canAccessStaffArea` (el helper queda en `lib/auth/permissions.ts` por si aparece un área realmente staff-only).
+- Drawer móvil: removido el `text-violet-700` (era un acento "staff" que ya no aplica).
+- `frontend/components/layout/__tests__/Header.test.tsx`: añadido `it.each` sobre `[adopter, shelter_admin]` aseverando que el menuitem "Manual" aparece en el dropdown de cuenta, más una aserción del drawer móvil y una negativa para sesión no iniciada. 33/33 tests pasan.
+
+**Verificación:** `npm test -- components/layout/__tests__/Header.test.tsx` → 33 passed.
+
+---
 
 ## Recently Completed: Phase 21 — Platform Support 5th Donation Flow (2026-04-20)
 

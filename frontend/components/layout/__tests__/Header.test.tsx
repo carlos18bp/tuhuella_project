@@ -105,6 +105,36 @@ describe('Header', () => {
     expect(screen.getByRole('menuitem', { name: /Mi Perfil/ })).toHaveAttribute('href', '/my-profile');
   });
 
+  it.each(['adopter', 'shelter_admin'])(
+    'exposes the Manual link in the account menu for %s',
+    async (role) => {
+      setupMock({ isAuthenticated: true, user: { role } });
+      render(<Header />);
+
+      await openAccountMenu();
+
+      expect(screen.getByRole('menuitem', { name: /Manual/ })).toHaveAttribute('href', '/manual');
+    },
+  );
+
+  it('shows the Manual link in the mobile menu for authenticated users', async () => {
+    setupMock({ isAuthenticated: true, user: { role: 'adopter' } });
+    render(<Header />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Toggle menu' }));
+
+    expect(screen.getByRole('link', { name: /Manual/ })).toHaveAttribute('href', '/manual');
+  });
+
+  it('does not expose the Manual link when unauthenticated', async () => {
+    setupMock();
+    render(<Header />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Toggle menu' }));
+
+    expect(screen.queryByRole('link', { name: /Manual/ })).not.toBeInTheDocument();
+  });
+
   it('hides the role panel button for adopters', () => {
     setupMock({
       isAuthenticated: true,

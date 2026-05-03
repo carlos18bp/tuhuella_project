@@ -125,6 +125,10 @@
     "young": "Joven",
     "adult": "Adulto",
     "senior": "Senior",
+    "puppyWithRange": "Cachorro (0-1 año)",
+    "youngWithRange": "Joven (1-3 años)",
+    "adultWithRange": "Adulto (3-8 años)",
+    "seniorWithRange": "Senior (8+ años)",
     "male": "Macho",
     "female": "Hembra",
     "unknown": "Desconocido",
@@ -140,7 +144,6 @@
     "previous": "Anterior",
     "next": "Siguiente",
     "backToAnimals": "Volver a animales",
-    "energyFilter": "Energía",
     "compatibilityFilter": "Compatible con",
     "goodWithKids": "Niños",
     "goodWithDogs": "Perros",
@@ -149,10 +152,6 @@
     "faqSubtitle": "Resolvemos tus dudas más comunes",
     "weight": "Peso",
     "weightUnit": "{value} kg",
-    "energyLevel": "Nivel de energía",
-    "energyLow": "Bajo",
-    "energyMedium": "Medio",
-    "energyHigh": "Alto",
     "coatColor": "Color del pelaje",
     "houseTrained": "Entrenado para casa",
     "microchip": "Microchip",
@@ -255,6 +254,68 @@
     "privacyTitle": "Privacidad de tus datos",
     "privacyBody": "Esta información la usa el equipo de Mi Huella para verificar tu refugio y contactarte. En el listado público de refugios se muestran nombre, ciudad y descripción; otros datos pueden verse en la ficha completa cuando tu perfil esté verificado. Si no quieres exponer algo, déjalo vacío o ajústalo después en configuración.",
     "websiteOptional": "Sitio web (opcional)"
+  },
+  "shelterApplication": {
+    "title": "Postularte como refugio",
+    "subtitle": "Completa tu postulación formal. Nuestro equipo la revisará y, una vez aprobada, podrás administrar tu refugio en Tuhuella.",
+    "stepCounter": "Paso {current} de {total}",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "submit": "Enviar postulación",
+    "submitting": "Enviando...",
+    "reapply": "Volver a postular",
+    "goToDashboard": "Ir al panel del refugio",
+    "notAvailableForRole": "Tu cuenta no puede iniciar este proceso. Si crees que es un error, contáctanos.",
+    "statusTitle": "Estado de tu postulación",
+    "statusLabel": "Estado actual",
+    "rejectionReasonLabel": "Motivo",
+    "status_submitted": "Enviada",
+    "status_under_review": "En revisión",
+    "status_approved": "Aprobada",
+    "status_rejected": "Rechazada",
+    "statusBody_submitted": "Tu postulación está en cola de revisión. Te avisaremos por correo cuando un administrador la revise.",
+    "statusBody_under_review": "Estamos revisando tu postulación. Pronto recibirás una respuesta por correo.",
+    "statusBody_approved": "¡Felicidades! Tu refugio fue aprobado. Ya puedes acceder al panel de administración.",
+    "statusBody_rejected": "Tu postulación no fue aprobada en esta ocasión. Puedes revisar el motivo abajo y volver a postular cuando quieras.",
+    "step1": { "title": "Datos del refugio" },
+    "step2": { "title": "Datos legales" },
+    "step3": {
+      "title": "Documentos de soporte",
+      "uploadTitle": "Documentación legal",
+      "uploadHelp": "Una vez aprobada tu cuenta, podrás cargar el certificado de existencia, el RUT y la cédula del representante legal desde el panel del refugio.",
+      "uploadDeferred": "La carga de archivos se habilitará en la siguiente etapa del proceso."
+    },
+    "step4": { "title": "Motivación y experiencia" },
+    "fields": {
+      "shelterName": "Nombre del refugio",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Cuéntanos sobre tu refugio, misión, historia...",
+      "city": "Ciudad",
+      "address": "Dirección",
+      "phone": "Teléfono",
+      "email": "Email del refugio",
+      "website": "Sitio web (opcional)",
+      "legalName": "Razón social",
+      "taxId": "NIT / RUT",
+      "repName": "Nombre del representante legal",
+      "repId": "Documento del representante",
+      "motivation": "Motivación",
+      "motivationPlaceholder": "¿Por qué quieres registrar tu refugio en Tuhuella?",
+      "previousExperience": "Experiencia previa con animales",
+      "capacityEstimate": "Capacidad estimada (nº de animales)"
+    },
+    "errors": {
+      "shelterNameRequired": "El nombre del refugio es obligatorio",
+      "descriptionRequired": "La descripción es obligatoria",
+      "cityRequired": "La ciudad es obligatoria",
+      "phoneRequired": "El teléfono es obligatorio",
+      "legalNameRequired": "La razón social es obligatoria",
+      "taxIdRequired": "El NIT / RUT es obligatorio",
+      "repNameRequired": "El nombre del representante es obligatorio",
+      "repIdRequired": "El documento del representante es obligatorio",
+      "motivationRequired": "Cuéntanos brevemente tu motivación",
+      "submitFailed": "No pudimos enviar tu postulación. Intenta de nuevo."
+    }
   },
   "auth": {
     "signInTitle": "Iniciar sesión",
@@ -463,7 +524,19 @@
     "pendingShelters": "Refugios por verificar",
     "submittedApplications": "Solicitudes nuevas",
     "pendingCampaigns": "Campañas por revisar",
-    "newCampaign": "Nueva campaña"
+    "newCampaign": "Nueva campaña",
+    "detail": {
+      "back": "Volver a solicitudes",
+      "loading": "Cargando solicitud...",
+      "notFound": "No encontramos la solicitud.",
+      "applicant": "Solicitante",
+      "submittedOn": "Enviada el {date}"
+    },
+    "followUp": {
+      "label": "Próximo recordatorio de seguimiento",
+      "dueIn": "Programado en {days} día(s)",
+      "overdue": "Vencido hace {days} día(s)"
+    }
   },
   "adoption": {
     "title": "Solicitud de adopción para {animalName}",
@@ -570,7 +643,40 @@
     "viewApplications": "Ver mis solicitudes",
     "exploreAnimals": "Explorar animales",
     "backToAnimal": "Volver a {animalName}",
-    "errorDefault": "Error al enviar la solicitud"
+    "errorDefault": "Error al enviar la solicitud",
+    "contact": {
+      "cardTitle": "Comunícate por WhatsApp",
+      "introToShelter": "Ahora puedes coordinar la entrevista para adoptar a {animal} directamente con el refugio.",
+      "introToApplicant": "Coordina la entrevista para la adopción de {animal} con el adoptante.",
+      "chatWithShelter": "Escribir al refugio",
+      "chatWithApplicant": "Escribir al adoptante",
+      "messageToShelter": "Hola, soy el adoptante interesado en {animal}. Quisiera coordinar la entrevista.",
+      "messageToApplicant": "Hola, te escribimos del refugio {shelter} para coordinar la entrevista de adopción de {animal}."
+    },
+    "events": {
+      "timelineTitle": "Eventos del proceso",
+      "empty": "Aún no se han registrado eventos para esta solicitud.",
+      "addEvent": "Registrar evento",
+      "modalTitle": "Registrar evento de seguimiento",
+      "fieldDate": "Fecha del evento",
+      "fieldDescription": "Descripción",
+      "descriptionPlaceholder": "Describe brevemente el avance, llamada, visita o decisión...",
+      "validationDescription": "La descripción es obligatoria.",
+      "validationDate": "La fecha es inválida.",
+      "validationFutureDate": "La fecha del evento no puede ser futura.",
+      "submitError": "No pudimos registrar el evento. Intenta de nuevo.",
+      "cancel": "Cancelar",
+      "submit": "Guardar evento",
+      "submitting": "Guardando...",
+      "close": "Cerrar",
+      "role": {
+        "web_manager": "Web manager",
+        "shelter_admin": "Refugio",
+        "admin": "Administrador",
+        "veterinarian": "Veterinario",
+        "adopter": "Adoptante"
+      }
+    }
   },
   "lookingToAdopt": {
     "title": "Busco Adoptar",
@@ -593,7 +699,10 @@
     "email": "Email",
     "website": "Sitio web",
     "viewAnimals": "Ver animales de este refugio",
-    "gallery": "Galería de fotos"
+    "gallery": "Galería de fotos",
+    "playVideo": "Ver video",
+    "videoModalTitle": "Video del refugio",
+    "closeVideo": "Cerrar video"
   },
   "profile": {
     "title": "Mi Perfil",
@@ -604,6 +713,12 @@
     "myActivity": "Mi actividad",
     "applications": "Mis Solicitudes",
     "applicationsDesc": "Revisa el estado de tus solicitudes de adopción",
+    "applyAsShelter": "Postularte como refugio",
+    "applyAsShelterDesc": "Formaliza tu postulación para registrar tu refugio en Tuhuella",
+    "applyAsShelterStatus_submitted": "Postulación enviada — en cola de revisión",
+    "applyAsShelterStatus_under_review": "Tu postulación está siendo revisada",
+    "applyAsShelterStatus_approved": "¡Aprobada! Ya eres administrador de refugio",
+    "applyAsShelterStatus_rejected": "Postulación rechazada — ver detalles",
     "donations": "Mis Donaciones",
     "donationsDesc": "Historial de tus donaciones a campañas",
     "sponsorships": "Mis Apadrinamientos",
@@ -698,6 +813,13 @@
       "back": "Volver a mis solicitudes",
       "loading": "Cargando...",
       "clinicalHistoryTitle": "Historia clínica"
+    },
+    "detail": {
+      "back": "Volver a mis solicitudes",
+      "loading": "Cargando solicitud...",
+      "notFound": "No encontramos la solicitud o no tienes acceso.",
+      "submittedOn": "Enviada el {date}",
+      "viewClinicalHistory": "Ver historia clínica"
     }
   },
   "myDonations": {

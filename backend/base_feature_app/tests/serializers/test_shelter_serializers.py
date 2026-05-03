@@ -1,4 +1,5 @@
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 from base_feature_app.serializers.shelter_create_update import (
     ShelterCreateUpdateSerializer,
@@ -57,6 +58,33 @@ def test_shelter_create_update_serializer_rejects_missing_name():
 
     assert not serializer.is_valid()
     assert 'name' in serializer.errors
+
+
+@pytest.mark.django_db
+def test_shelter_detail_serializer_video_url_empty_when_no_video(shelter):
+    """video_url is an empty string when the shelter has no uploaded video."""
+    data = ShelterDetailSerializer(shelter).data
+
+    assert 'video_url' in data
+    assert data['video_url'] == ''
+
+
+@pytest.mark.django_db
+def test_shelter_detail_serializer_video_url_populated_when_video_set(
+    shelter, settings, tmp_path
+):
+    """video_url returns the uploaded file URL under /media/shelters/videos/."""
+    settings.MEDIA_ROOT = str(tmp_path)
+
+    shelter.video = SimpleUploadedFile(
+        'demo.mp4', b'\x00\x00\x00\x18ftypmp42', content_type='video/mp4'
+    )
+    shelter.save()
+
+    data = ShelterDetailSerializer(shelter).data
+
+    assert data['video_url'].startswith('/media/shelters/videos/')
+    assert data['video_url'].endswith('.mp4')
 
 
 @pytest.mark.django_db

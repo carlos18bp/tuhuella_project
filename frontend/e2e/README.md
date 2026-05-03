@@ -75,12 +75,12 @@ npm run e2e:coverage:module -- auth
 npx playwright test e2e/auth/
 
 # Filter by flow tag or metadata tags
-npx playwright test --grep @flow:catalog-browse
+npx playwright test --grep @flow:animal-browse
 npx playwright test --grep @module:auth
 npx playwright test --grep @priority:P1
 
 # Single file
-npx playwright test e2e/app/cart.spec.ts
+npx playwright test e2e/app/animal.spec.ts
 
 # View report
 npx playwright show-report

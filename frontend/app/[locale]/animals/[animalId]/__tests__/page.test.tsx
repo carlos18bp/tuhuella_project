@@ -209,13 +209,6 @@ describe('AnimalDetailPage', () => {
     expect(screen.getByText('18.5 kg')).toBeInTheDocument();
   });
 
-  it('renders energy level in details section', () => {
-    setupMocks({ loading: false, animal: mockAnimal });
-    render(<AnimalDetailPage />);
-    expect(screen.getByText('Nivel de energía')).toBeInTheDocument();
-    expect(screen.getByText('Medio')).toBeInTheDocument();
-  });
-
   it('renders coat color when provided', () => {
     setupMocks({ loading: false, animal: mockAnimal });
     render(<AnimalDetailPage />);
@@ -323,17 +316,4 @@ describe('AnimalDetailPage', () => {
     expect(screen.getByText(/Gatos.*Sí/)).toBeInTheDocument();
   });
 
-  it('renders low energy icon and label', () => {
-    const lowEnergy = { ...mockAnimal, energy_level: 'low' };
-    setupMocks({ loading: false, animal: lowEnergy });
-    render(<AnimalDetailPage />);
-    expect(screen.getByText('Bajo')).toBeInTheDocument();
-  });
-
-  it('renders high energy icon and label', () => {
-    const highEnergy = { ...mockAnimal, energy_level: 'high' };
-    setupMocks({ loading: false, animal: highEnergy });
-    render(<AnimalDetailPage />);
-    expect(screen.getByText('Alto')).toBeInTheDocument();
-  });
 });

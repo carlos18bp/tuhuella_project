@@ -6,8 +6,8 @@ Use this document to understand each flow's steps, branching conditions, role re
 
 > **Flow IDs in this document match `e2e/flow-definitions.json` and `e2e/helpers/flow-tags.ts` exactly.**
 
-**Version:** 5.7.0
-**Last Updated:** 2026-04-20
+**Version:** 5.8.0
+**Last Updated:** 2026-05-03
 
 ---
 
@@ -35,7 +35,8 @@ Use this document to understand each flow's steps, branching conditions, role re
 20. [Veterinarian Module](#veterinarian-module)
 21. [Web Manager Module](#web-manager-module)
 22. [Manual Module](#manual-module) _(updated Phase 19: all authenticated roles; role-based filtering)_
-23. [Cross-Reference](#cross-reference)
+23. [Shelter Application Module](#shelter-application-module) _(Phase 22: adopter formal shelter onboarding)_
+24. [Cross-Reference](#cross-reference)
 
 ---
 
@@ -68,7 +69,7 @@ Use this document to understand each flow's steps, branching conditions, role re
 | `animal-gallery` | Animal gallery interaction | animal | P3 | shared | `/animals/[animalId]` |
 | `shelter-browse` | Browse shelters listing | shelter | P2 | shared | `/shelters` |
 | `shelter-detail` | View shelter profile | shelter | P2 | shared | `/shelters/[shelterId]` |
-| `shelter-onboarding` | Shelter registration form | shelter | P1 | shelter_admin | `/shelter/onboarding` |
+| `shelter-onboarding` | Legacy onboarding redirect | shelter | P4 | shared | `/shelter/onboarding` → `/shelter-application` |
 | `campaign-browse` | Browse campaigns | campaign | P2 | shared | `/campaigns` |
 | `campaign-detail` | View campaign detail | campaign | P2 | shared | `/campaigns/[campaignId]` |
 | `adoption-submit` | Submit adoption application | adoption | P1 | adopter | `/animals/[animalId]` |
@@ -116,6 +117,7 @@ Use this document to understand each flow's steps, branching conditions, role re
 | `campaign-tab-toggle` | Campaign tab toggle | campaign | P3 | shared | `/campaigns` |
 | `campaign-donate-cta` | Campaign donate CTA | campaign | P2 | shared | `/campaigns/[campaignId]` |
 | `shelter-detail-gallery` | Shelter detail gallery lightbox | shelter | P3 | shared | `/shelters/[shelterId]` |
+| `shelter-detail-video` | Shelter detail video modal | shelter | P3 | shared | `/shelters/[shelterId]` |
 | `home-featured-animals-carousel` | Home featured animals carousel | home | P3 | shared | `/` |
 | `home-active-campaigns-carousel` | Home active campaigns carousel | home | P3 | shared | `/` |
 | `public-about` | About page | public | P4 | shared | `/about` |
@@ -157,6 +159,16 @@ Use this document to understand each flow's steps, branching conditions, role re
 | `auth-password-change` | Authenticated password change | auth | P2 | all authenticated | `/my-profile/edit` |
 | `shelter-invite-send` | Shelter admin sends adopter invite | adopter-intent | P3 | shelter_admin | `/looking-to-adopt` |
 | `shelter-invite-respond` | Adopter responds to shelter invite | adopter-intent | P3 | adopter | `/my-profile` |
+| `shelter-application-submit` | Adopter submits shelter application wizard | shelter-application | P1 | adopter | `/shelter-application` |
+| `shelter-application-status` | Adopter views application status | shelter-application | P2 | adopter | `/shelter-application` |
+| `shelter-application-review` | Admin/web-manager approves or rejects application | shelter-application | P1 | web_manager, admin | (Django admin + API) |
+| `adoption-detail-adopter` | Adopter views application detail with WhatsApp + event timeline | adoption | P2 | adopter | `/my-applications/[id]` |
+| `adoption-whatsapp-shelter` | Adopter opens WhatsApp link to shelter on `interview` | adoption | P2 | adopter | `/my-applications/[id]` |
+| `adoption-whatsapp-applicant` | Shelter or web_manager opens WhatsApp link to adopter on `interview` | adoption | P2 | shelter_admin, web_manager | `/shelter/applications`, `/web-manager/applications/[id]` |
+| `adoption-event-create-shelter` | Shelter admin logs an event on an adoption application | adoption | P1 | shelter_admin | `/shelter/applications` |
+| `adoption-event-create-web-manager` | Web manager logs an event on an adoption application | adoption | P1 | web_manager | `/web-manager/applications/[id]` |
+| `adoption-detail-web-manager` | Web manager views application detail with follow-up badge + event timeline | adoption | P2 | web_manager | `/web-manager/applications/[id]` |
+| `adoption-followup-reminder` | Cron-driven email reminder to web_managers every 5 days for `interview` applications | adoption | P3 | web_manager | (Huey periodic task → email) |
 
 ---
 
@@ -825,21 +837,28 @@ Use this document to understand each flow's steps, branching conditions, role re
 
 | Field | Value |
 |-------|-------|
-| **Priority** | P1 |
-| **Roles** | shelter_admin |
-| **Frontend route** | `/refugio/onboarding` |
-| **API endpoints** | `POST /api/shelters/create/` |
+| **Priority** | P4 |
+| **Roles** | shared |
+| **Frontend route** | `/shelter/onboarding` (legacy redirect → `/shelter-application`) |
+| **API endpoints** | none (page is a client-side redirect) |
 
-**Preconditions:** User is authenticated.
+**Preconditions:** None.
 
 **Steps:**
 
-1. User navigates to `/refugio/onboarding`.
-2. Form renders: name (required), legal_name, description, city (required), address, phone, email, website.
-3. User fills form and submits.
-4. Frontend sends `POST /api/shelters/create/` with form data.
-5. Backend creates `Shelter` with `verification_status=pending` (HTTP 201).
-6. Redirect to `/refugio/dashboard`.
+1. User (any role, even guest) lands on `/shelter/onboarding` (e.g., from a stale bookmark or external link).
+2. Page mounts and immediately calls `router.replace('/shelter-application')`.
+3. User ends up on `/shelter-application`, where the formal Phase 22 wizard runs (or the status view if they already have an application). Guests are funneled to `/sign-in` by `useRequireAuth` on the destination page.
+
+**Branching conditions:**
+
+| Condition | Outcome |
+|-----------|---------|
+| Guest | `/shelter-application` redirects them to `/sign-in` |
+| Authenticated `adopter` | Lands in the wizard or status view |
+| Authenticated `shelter_admin` | Lands in `/shelter-application` and is bounced back to `/my-profile` |
+
+**Note:** the old form that called `POST /api/shelters/create/` was removed in the cleanup after Phase 22. The endpoint itself still exists but is now restricted to `admin` and `web_manager` roles for operational use; adopters and shelter_admins receive HTTP 403 with a hint to use the formal application flow.
 
 ---
 
@@ -880,6 +899,28 @@ Use this document to understand each flow's steps, branching conditions, role re
 3. User clicks an image to open lightbox modal.
 4. Lightbox displays full-size image.
 5. User clicks outside image or X button to close lightbox.
+
+---
+
+### shelter-detail-video
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P3 |
+| **Roles** | shared |
+| **Frontend route** | `/shelters/[shelterId]` |
+
+**Preconditions:** Shelter has a `video_url` value (set by platform staff from Django admin).
+
+**Steps:**
+
+1. User is on shelter detail page.
+2. A "Ver video" button is rendered above the gallery section.
+3. User clicks the button.
+4. A modal opens with an HTML5 `<video controls>` player whose `src` matches `shelter.video_url`.
+5. User closes the modal via the close button, the backdrop, or the `Escape` key — the video stops playing.
+
+When the shelter has no `video_url`, the button is not rendered.
 
 ---
 
@@ -1122,12 +1163,150 @@ Use this document to understand each flow's steps, branching conditions, role re
 2. Page loads adoption applications from `GET /api/adoptions/`.
 3. Each application card shows animal name, shelter name, submission date, and status badge.
 4. Status badges display: Submitted, Reviewing, Interview, Approved, Rejected.
+5. Each card links to `/my-applications/[id]` for the new follow-up detail view.
 
 **Branching conditions:**
 
 | Condition | Behavior |
 |-----------|----------|
 | No applications | Empty state message shown |
+
+---
+
+### adoption-detail-adopter
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | adopter |
+| **Frontend route** | `/my-applications/[id]` |
+| **API endpoints** | `GET /api/adoptions/<pk>/` |
+
+**Preconditions:** Authenticated `adopter` is the applicant of the requested application.
+
+**Steps:**
+
+1. Adopter opens a card from `/my-applications`.
+2. Page calls `GET /api/adoptions/<pk>/`; serializer returns `events`, `next_follow_up_due_at`, `shelter_whatsapp` (only when status is `interview` or `approved`), and `applicant_whatsapp` (always `null` for the adopter themself).
+3. Page renders the status badge, the linear timeline, the WhatsApp card to the shelter when `shelter_whatsapp` is present, the read-only event timeline, and a link to `/my-applications/[id]/history`.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| Status is `submitted` / `reviewing` / `rejected` | WhatsApp card hidden |
+| `events` empty | Timeline shows neutral empty-state copy |
+| Application not found or unauthorized | "Not found" message |
+
+---
+
+### adoption-whatsapp-shelter
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | adopter |
+| **Frontend route** | `/my-applications/[id]` |
+| **API endpoints** | (none — opens `wa.me/<digits>` in a new tab) |
+
+**Preconditions:** Application status is `interview` or `approved` and the shelter has a phone on file.
+
+**Steps:**
+
+1. Backend exposes `shelter_whatsapp = Shelter.phone` only when the gating conditions hold.
+2. Frontend renders `WhatsAppContactCard` with a `wa.me/<sanitized-digits>?text=<encoded-prefilled-message>` link in a new tab.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| `Shelter.phone` is empty after sanitization (no digits) | Card returns `null` |
+
+---
+
+### adoption-event-create-shelter
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P1 |
+| **Roles** | shelter_admin |
+| **Frontend route** | `/shelter/applications` (inline expansion) |
+| **API endpoints** | `POST /api/adoptions/<pk>/events/`, `GET /api/adoptions/<pk>/` |
+
+**Preconditions:** Application is in `interview` or `approved` status; the user manages the shelter that owns the animal.
+
+**Steps:**
+
+1. Shelter admin clicks "Detalle" on an application card; the detail is fetched and cached in `applicationsById`.
+2. `AdoptionEventTimeline` shows "Registrar evento" because the role can write.
+3. The modal validates the date is not in the future and the description is non-empty (≤ 2000 chars).
+4. `POST /api/adoptions/<pk>/events/` creates the event; backend resets `application.next_follow_up_due_at = now() + 5d`.
+5. Store applies the same optimistic update so the badge in the web_manager view does not need a refetch.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| User does not manage the shelter | 403 Permission denied |
+| Description blank or only whitespace | 400 with `description` field error |
+| `event_date` in the future | 400 with `event_date` field error |
+
+---
+
+### adoption-event-create-web-manager
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P1 |
+| **Roles** | web_manager, admin |
+| **Frontend route** | `/web-manager/applications/[id]` |
+| **API endpoints** | `POST /api/adoptions/<pk>/events/`, `GET /api/adoptions/<pk>/` |
+
+**Preconditions:** Authenticated user has role `web_manager` or `admin`. The application is in `interview` or `approved` status (button hidden otherwise).
+
+**Steps:**
+
+1. Web manager opens the detail page from the table on `/web-manager/applications`.
+2. Header shows the "Próximo recordatorio en N días" amber badge using `next_follow_up_due_at`.
+3. Web manager registers an event; `_bump_follow_up()` reprograms the timer to +5 days.
+4. The page does not refetch — the store's optimistic update reflects both the new event and the new `next_follow_up_due_at`.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| `next_follow_up_due_at` is in the past | Badge swaps "Programado en" for "Vencido hace" copy |
+| Status leaves `interview` (e.g., approved/rejected) | `clear_follow_up()` runs server-side; badge disappears |
+
+---
+
+### adoption-followup-reminder
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P3 |
+| **Roles** | web_manager |
+| **Frontend route** | n/a (Huey → email) |
+| **API endpoints** | n/a (background task) |
+
+**Preconditions:**
+- `ADOPTION_FOLLOW_UPS_ENABLED=True` in env (default).
+- `tuhuella-huey.service` runs with `--periodic`.
+
+**Steps:**
+
+1. Cron `crontab(hour='9', minute='0')` runs `adoption_interview_follow_ups`.
+2. Service queries applications in `interview` with `next_follow_up_due_at__lte=now()` (annotated with `Max('events__event_date')`).
+3. For each due application, every active `User.role=='web_manager'` receives `dispatch_notification('adoption_interview_follow_up_due', manager, ctx)`.
+4. The application's `next_follow_up_due_at` is reset to `now() + 5 days` even if no event was logged, so the next reminder is exactly five days later.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| Flag `ADOPTION_FOLLOW_UPS_ENABLED=False` | Task no-ops with a `logger.info` message |
+| No active web managers | Task logs and returns 0 dispatches |
+| Application archived (`archived_at__isnull=False`) | Excluded from the query |
 
 ---
 
@@ -2132,7 +2311,7 @@ Use this document to understand each flow's steps, branching conditions, role re
 3. Navigation links: Animales, Refugios, Campañas, Busco Adoptar, Blog, Nosotros dropdown (Quiénes Somos, Trabaja con Nosotros, Aliados Estratégicos).
 4. Unauthenticated: Sign In and Sign Up links.
 5. Authenticated — **Panel dropdown** (role-specific): shelter_admin opens "Panel Refugio" (7 items: Dashboard, Animales, Solicitudes, Campañas, Donaciones, Actualizaciones, Ajustes); web_manager opens "Panel Web Manager" (3 items: Solicitudes, Refugios, Campañas); admin opens "Admin" (6 items: Dashboard, Aprobar refugios, Moderación, Pagos, Métricas, Blog); veterinarian gets a direct link to "Panel Veterinario".
-6. Authenticated — **Avatar/Account dropdown**: Mi Perfil, Favoritos, Mis solicitudes, Mis donaciones, Mis apadrinamientos, Notificaciones, Manual (staff only), Cerrar sesión.
+6. Authenticated — **Avatar/Account dropdown**: Mi Perfil, Favoritos, Mis solicitudes, Mis donaciones, Mis apadrinamientos, Notificaciones, Manual (all authenticated roles — content is filtered per role inside the page), Cerrar sesión.
 7. Mobile (`< lg:`): bell icon beside hamburger links to /my-profile/notifications (with unread badge); drawer contains Panel section and Mi cuenta section.
 
 ---
@@ -3053,6 +3232,114 @@ Use this document to understand each flow's steps, branching conditions, role re
 |-----------|---------|
 | Unauthenticated access | Redirected to `/sign-in` |
 | No follow-ups assigned | Empty state message shown below stat cards |
+
+---
+
+## Shelter Application Module
+
+### shelter-application-submit
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P1 |
+| **Roles** | adopter |
+| **Frontend route** | `/shelter-application` |
+| **API endpoints** | `POST /api/shelter-applications/`, `GET /api/shelter-applications/me/` |
+
+**Preconditions:** User is authenticated as `adopter`. User has no active application (status `submitted` or `under_review`).
+
+**Steps:**
+
+1. Adopter navigates to `/my-profile`.
+2. Profile page shows "Postularte como refugio" card as the second adopter activity link.
+3. Adopter clicks the card; navigated to `/shelter-application`.
+4. Page renders Step 1 — basic shelter data: `shelter_name`, `description_es`, `city`, `address`, `phone`, `email`, `website`.
+5. Adopter fills required fields and clicks "Siguiente". Per-step validation fires; missing required fields block advancement.
+6. Step 2 renders — legal/fiscal data: `legal_name`, `tax_id`, `legal_representative_name`, `legal_representative_id`.
+7. Adopter fills required fields and clicks "Siguiente".
+8. Step 3 renders — documents notice (backend `GalleryField` ready; file upload UI deferred).
+9. Adopter clicks "Siguiente".
+10. Step 4 renders — motivation: `motivation`, `previous_experience`, `capacity_estimate`.
+11. Adopter fills required fields and clicks "Enviar postulación".
+12. `POST /api/shelter-applications/` is called with the full payload.
+13. On 201 response: toast "Postulación enviada" shown, adopter redirected to `/my-profile`.
+14. Profile page now shows the "Postularte como refugio" card with status label "Postulación enviada — en cola de revisión".
+
+**Branching conditions:**
+
+| Condition | Outcome |
+|-----------|---------|
+| Unauthenticated access | Redirected to `/sign-in` |
+| `role !== 'adopter'` | Redirected to `/my-profile` |
+| Required field missing | Per-step inline error; "Siguiente" disabled |
+| API returns 400 | Error toast displayed |
+
+---
+
+### shelter-application-status
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | adopter |
+| **Frontend route** | `/shelter-application` |
+| **API endpoints** | `GET /api/shelter-applications/me/` |
+
+**Preconditions:** User is authenticated as `adopter` and has an existing application.
+
+**Steps:**
+
+1. Adopter navigates to `/shelter-application` (or clicks the profile card).
+2. `GET /api/shelter-applications/me/` is called; page detects an existing application.
+3. Instead of the wizard, a **status view** is rendered.
+4. Status `submitted` → informational banner "Tu postulación está en cola de revisión".
+5. Status `under_review` → banner "Tu postulación está siendo revisada".
+6. Status `approved` → success banner "¡Aprobada! Ya eres administrador de refugio" + CTA to `/shelter/dashboard`.
+7. Status `rejected` → rejection reason displayed + "Volver a postular" button (clears state and shows wizard).
+
+**Branching conditions:**
+
+| Condition | Outcome |
+|-----------|---------|
+| No existing application | Wizard renders instead of status view |
+| `GET /me/` returns 404 | Treated as no application; wizard renders |
+
+---
+
+### shelter-application-review
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P1 |
+| **Roles** | web_manager, admin |
+| **Frontend route** | (Django admin `/admin-site/` + API endpoints) |
+| **API endpoints** | `GET /api/shelter-applications/`, `GET /api/shelter-applications/<pk>/`, `POST /api/shelter-applications/<pk>/approve/`, `POST /api/shelter-applications/<pk>/reject/` |
+
+**Preconditions:** User is authenticated as `admin` or `web_manager`. At least one application in `submitted` or `under_review` status.
+
+**Steps (approve path):**
+
+1. Reviewer opens Django admin (`/admin-site/`) → `ShelterApplication` list.
+2. Sees application in `submitted` status with all 4 data sections visible.
+3. Reviewer calls `POST /api/shelter-applications/<pk>/approve/` (or uses admin custom action when implemented).
+4. Atomic transaction: new `Shelter` created (name=`shelter_name`, `verification_status=verified`, `verified_at=now()`), `applicant.role` promoted to `shelter_admin`, `created_shelter` linked, application `status` → `approved`.
+5. Notification dispatched to applicant (`shelter_application_approved` template).
+6. Applicant re-logs in → role is now `shelter_admin` → `/shelter/dashboard` accessible.
+
+**Steps (reject path):**
+
+1. Reviewer calls `POST /api/shelter-applications/<pk>/reject/` with `{ "rejection_reason": "..." }`.
+2. Application `status` → `rejected`, `rejection_reason` saved, `reviewed_by` + `reviewed_at` set.
+3. Notification dispatched to applicant (`shelter_application_rejected` template).
+4. Applicant navigates to `/shelter-application` → sees rejection reason + option to re-apply.
+
+**Branching conditions:**
+
+| Condition | Outcome |
+|-----------|---------|
+| Application already `approved` or `rejected` | 400 error returned |
+| `reject` without `rejection_reason` | 400 validation error |
+| Non-admin/web-manager calls approve/reject | 403 Forbidden |
 
 ---
 

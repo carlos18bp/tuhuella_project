@@ -97,10 +97,10 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=
 
 | Asset | Count |
 |-------|-------|
-| Backend model classes | 30 (27 files) |
-| Backend serializers | 43 |
-| Backend views | 24 |
-| Backend URL modules | 23 |
+| Backend model classes | 31 (28 files) |
+| Backend serializers | 45 |
+| Backend views | 25 |
+| Backend URL modules | 24 |
 | Backend services | 3 (email, notification, notification_templates) |
 | Management commands | 21 |
 | Admin classes | 26 (model admins + MiHuellaAdminSite) |

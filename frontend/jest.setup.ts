@@ -29,9 +29,12 @@ function resolveNestedKey(obj: Record<string, unknown>, key: string): unknown {
 
 jest.mock('next-intl', () => ({
   useTranslations: (namespace?: string) => {
-    const messages = namespace ? (esMessages as Record<string, unknown>)[namespace] || {} : esMessages;
+    const resolved = namespace
+      ? resolveNestedKey(esMessages as Record<string, unknown>, namespace)
+      : esMessages;
+    const messages = (resolved && typeof resolved === 'object' ? resolved : {}) as Record<string, unknown>;
     return (key: string, params?: Record<string, string | number>) => {
-      const value = resolveNestedKey(messages as Record<string, unknown>, key);
+      const value = resolveNestedKey(messages, key);
       if (typeof value !== 'string') return key;
       if (!params) return value;
       return value.replace(/\{(\w+)\}/g, (_, k: string) => String(params[k] ?? `{${k}}`));

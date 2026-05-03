@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from base_feature_app.models import Shelter
+from base_feature_app.models import Shelter, User
 from base_feature_app.serializers.shelter_list import ShelterListSerializer
 from base_feature_app.utils.shelter_access import shelters_managed_by_user
 from base_feature_app.serializers.shelter_detail import ShelterDetailSerializer
@@ -35,6 +35,11 @@ def shelter_detail(request, pk):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def shelter_create(request):
+    if request.user.role not in (User.Role.ADMIN, User.Role.WEB_MANAGER):
+        return Response(
+            {'detail': 'Use POST /api/shelter-applications/ to apply as a shelter.'},
+            status=status.HTTP_403_FORBIDDEN,
+        )
     serializer = ShelterCreateUpdateSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
         serializer.save(owner=request.user)

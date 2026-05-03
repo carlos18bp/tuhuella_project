@@ -32,7 +32,7 @@ export default function Footer() {
         { label: t('supportPlatform'), href: ROUTES.PLATFORM_SUPPORT },
         { label: t('workWithUs'), href: ROUTES.WORK_WITH_US },
         { label: t('strategicAllies'), href: ROUTES.STRATEGIC_ALLIES },
-        { label: t('registerShelter'), href: ROUTES.SHELTER_ONBOARDING },
+        { label: t('registerShelter'), href: ROUTES.SHELTER_APPLICATION },
         { label: t('terms'), href: ROUTES.TERMS },
       ],
     },

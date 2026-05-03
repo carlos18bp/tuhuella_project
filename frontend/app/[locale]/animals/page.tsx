@@ -25,7 +25,6 @@ export default function AnimalesPage() {
   const [species, setSpecies] = useState<string[]>([]);
   const [size, setSize] = useState<string[]>([]);
   const [ageRange, setAgeRange] = useState<string[]>([]);
-  const [energyLevel, setEnergyLevel] = useState<string[]>([]);
   const [goodWith, setGoodWith] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
 
@@ -42,16 +41,10 @@ export default function AnimalesPage() {
   ];
 
   const ageOptions: MultiSelectOption[] = [
-    { value: 'puppy', label: t('puppy') },
-    { value: 'young', label: t('young') },
-    { value: 'adult', label: t('adult') },
-    { value: 'senior', label: t('senior') },
-  ];
-
-  const energyOptions: MultiSelectOption[] = [
-    { value: 'low', label: t('energyLow') },
-    { value: 'medium', label: t('energyMedium') },
-    { value: 'high', label: t('energyHigh') },
+    { value: 'puppy', label: t('puppyWithRange') },
+    { value: 'young', label: t('youngWithRange') },
+    { value: 'adult', label: t('adultWithRange') },
+    { value: 'senior', label: t('seniorWithRange') },
   ];
 
   const goodWithOptions: MultiSelectOption[] = [
@@ -65,7 +58,6 @@ export default function AnimalesPage() {
     if (species.length > 0) filters.species = species.join(',');
     if (size.length > 0) filters.size = size.join(',');
     if (ageRange.length > 0) filters.age_range = ageRange.join(',');
-    if (energyLevel.length > 0) filters.energy_level = energyLevel.join(',');
     // Good-with filters: each selected value maps to a separate query param with value 'yes'
     for (const gw of goodWith) {
       if (gw === 'kids') filters.good_with_kids = 'yes';
@@ -74,7 +66,7 @@ export default function AnimalesPage() {
     }
     setFilters(filters);
     void fetchAnimals(filters, locale, 1);
-  }, [species, size, ageRange, energyLevel, goodWith, fetchAnimals, setFilters, locale]);
+  }, [species, size, ageRange, goodWith, fetchAnimals, setFilters, locale]);
 
   const renderPagination = () => {
     if (!pagination || pagination.totalPages <= 1) return null;
@@ -168,13 +160,6 @@ export default function AnimalesPage() {
           options={ageOptions}
           selected={ageRange}
           onChange={setAgeRange}
-        />
-        <MultiSelectDropdown
-          className="w-full sm:w-auto"
-          label={t('energyFilter')}
-          options={energyOptions}
-          selected={energyLevel}
-          onChange={setEnergyLevel}
         />
         <MultiSelectDropdown
           className="w-full sm:w-auto"

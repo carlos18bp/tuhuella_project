@@ -74,6 +74,7 @@ export type Shelter = {
   logo_url?: string;
   cover_image_url?: string;
   gallery_urls?: string[];
+  video_url?: string;
   owner_email: string;
   created_at: string;
   updated_at?: string;
@@ -111,7 +112,6 @@ export type AnimalGender = 'male' | 'female' | 'unknown';
 export type AnimalSize = 'small' | 'medium' | 'large';
 export type AnimalStatus = 'draft' | 'published' | 'in_process' | 'adopted' | 'archived';
 export type AnimalCompatibility = 'yes' | 'no' | 'unknown';
-export type AnimalEnergyLevel = 'low' | 'medium' | 'high';
 
 export type DiseaseResult = 'positive' | 'negative' | 'not_tested';
 
@@ -147,7 +147,6 @@ export type Animal = {
   good_with_kids: AnimalCompatibility;
   good_with_dogs: AnimalCompatibility;
   good_with_cats: AnimalCompatibility;
-  energy_level: AnimalEnergyLevel;
   coat_color?: string;
   intake_date?: string;
   microchip_id?: string;
@@ -215,6 +214,19 @@ export type PostAdoptionFollowUp = {
 export type AdoptionApplicationStatus =
   | 'submitted' | 'reviewing' | 'interview' | 'approved' | 'rejected';
 
+export type AdoptionApplicationEvent = {
+  id: number;
+  application: number;
+  event_date: string;
+  description: string;
+  created_by: number;
+  created_by_name: string;
+  created_by_role: UserRole;
+  created_by_email: string;
+  created_at: string;
+  updated_at?: string;
+};
+
 export type AdoptionApplication = {
   id: number;
   animal: number;
@@ -229,6 +241,10 @@ export type AdoptionApplication = {
   form_answers: Record<string, unknown>;
   notes?: string;
   reviewed_at?: string | null;
+  next_follow_up_due_at?: string | null;
+  shelter_whatsapp?: string | null;
+  applicant_whatsapp?: string | null;
+  events?: AdoptionApplicationEvent[];
   created_at: string;
   updated_at?: string;
 };

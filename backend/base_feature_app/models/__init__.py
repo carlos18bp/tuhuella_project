@@ -2,9 +2,11 @@ from .mixins import ArchivableModel
 from .user import User
 from .password_code import PasswordCode
 from .shelter import Shelter
+from .shelter_application import ShelterApplication
 from .animal import Animal
 from .animal_disease import AnimalDiseaseScreening
 from .adoption import AdoptionApplication
+from .adoption_event import AdoptionApplicationEvent
 from .campaign import Campaign
 from .campaign_message import CampaignMessage
 from .donation import Donation

@@ -324,6 +324,8 @@ DBBACKUP_CLEANUP_KEEP = 4
 BACKUPS_ENABLED = config('BACKUPS_ENABLED', default=True, cast=bool)
 # Slow queries report: solo tiene sentido con tráfico real (desactivar en staging)
 ENABLE_SLOW_QUERIES_REPORT = config('ENABLE_SLOW_QUERIES_REPORT', default=True, cast=bool)
+# Adoption interview follow-ups: cron diario que avisa al web_manager cada 5 días.
+ADOPTION_FOLLOW_UPS_ENABLED = config('ADOPTION_FOLLOW_UPS_ENABLED', default=True, cast=bool)
 DBBACKUP_CLEANUP_KEEP_MEDIA = 4
 
 # ---------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth';
 import { useAdoptionStore } from '@/lib/stores/adoptionStore';
@@ -11,8 +11,12 @@ import {
   shelterPillRed,
   shelterPillTeal,
 } from '@/lib/ui/shelterPanelBadges';
+import WhatsAppContactCard from '@/components/adoption/WhatsAppContactCard';
+import AdoptionEventTimeline from '@/components/adoption/AdoptionEventTimeline';
+import { useTranslations } from 'next-intl';
+import type { AdoptionApplicationStatus } from '@/lib/types';
 
-const statusLabels: Record<string, { label: string; color: string }> = {
+const statusLabels: Record<AdoptionApplicationStatus, { label: string; color: string }> = {
   submitted: { label: 'Enviada', color: shelterPillNeutralSecondary },
   reviewing: { label: 'En revisión', color: shelterPillAmber },
   interview: { label: 'Entrevista', color: shelterPillTeal },
@@ -22,22 +26,49 @@ const statusLabels: Record<string, { label: string; color: string }> = {
 
 export default function ShelterSolicitudesPage() {
   useRequireAuth();
+  const tContact = useTranslations('adoption.contact');
   const applications = useAdoptionStore((s) => s.applications);
+  const applicationsById = useAdoptionStore((s) => s.applicationsById);
   const loading = useAdoptionStore((s) => s.loading);
   const fetchApplications = useAdoptionStore((s) => s.fetchApplications);
+  const fetchApplication = useAdoptionStore((s) => s.fetchApplication);
   const updateStatus = useAdoptionStore((s) => s.updateStatus);
+  const createEvent = useAdoptionStore((s) => s.createEvent);
+
+  const [expandedId, setExpandedId] = useState<number | null>(null);
 
   useEffect(() => {
     void fetchApplications();
   }, [fetchApplications]);
 
-  const handleStatusChange = async (id: number, newStatus: 'reviewing' | 'interview' | 'approved' | 'rejected') => {
+  const handleStatusChange = async (id: number, newStatus: AdoptionApplicationStatus) => {
     try {
       await updateStatus(id, newStatus);
-      void fetchApplications();
     } catch {
-      // Handle error
+      // Surface to telemetry; UI remains optimistic
     }
+  };
+
+  const toggleExpand = async (id: number) => {
+    if (expandedId === id) {
+      setExpandedId(null);
+      return;
+    }
+    setExpandedId(id);
+    if (!applicationsById[id]?.events) {
+      try {
+        await fetchApplication(id);
+      } catch {
+        // Fall back to list-level data
+      }
+    }
+  };
+
+  const handleCreateEvent = async (
+    applicationId: number,
+    payload: { event_date: string; description: string },
+  ) => {
+    await createEvent(applicationId, payload);
   };
 
   return (
@@ -59,6 +90,9 @@ export default function ShelterSolicitudesPage() {
         <div className="mt-8 space-y-4">
           {applications.map((app) => {
             const st = statusLabels[app.status] ?? { label: app.status, color: 'bg-surface-tertiary text-text-secondary' };
+            const detail = applicationsById[app.id];
+            const isExpanded = expandedId === app.id;
+            const showFollowUpUI = isExpanded && detail && (detail.status === 'interview' || detail.status === 'approved');
             return (
               <div key={app.id} role="article" className="rounded-xl border border-border-primary bg-surface-primary p-5">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -71,6 +105,13 @@ export default function ShelterSolicitudesPage() {
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className={`text-xs px-2 py-0.5 rounded-full ${st.color}`}>{st.label}</span>
+                    <button
+                      type="button"
+                      onClick={() => toggleExpand(app.id)}
+                      className="inline-flex items-center justify-center min-h-11 sm:min-h-9 text-xs px-3 py-1 rounded-full border border-border-primary text-text-secondary hover:bg-surface-hover transition-colors"
+                    >
+                      {isExpanded ? 'Ocultar' : 'Detalle'}
+                    </button>
                     {app.status === 'submitted' && (
                       <button
                         onClick={() => handleStatusChange(app.id, 'reviewing')}
@@ -115,6 +156,28 @@ export default function ShelterSolicitudesPage() {
                 </div>
                 {app.notes && (
                   <p className="mt-3 text-sm text-text-secondary bg-surface-secondary rounded-lg p-3">{app.notes}</p>
+                )}
+
+                {showFollowUpUI && (
+                  <div className="mt-5 space-y-4">
+                    {detail.applicant_whatsapp ? (
+                      <WhatsAppContactCard
+                        phone={detail.applicant_whatsapp}
+                        contactName={detail.user_email}
+                        intro={tContact('introToApplicant', { animal: detail.animal_name })}
+                        buttonLabel={tContact('chatWithApplicant')}
+                        prefilledMessage={tContact('messageToApplicant', {
+                          animal: detail.animal_name,
+                          shelter: detail.shelter_name ?? '',
+                        })}
+                      />
+                    ) : null}
+                    <AdoptionEventTimeline
+                      events={detail.events ?? []}
+                      canCreate
+                      onCreate={(payload) => handleCreateEvent(detail.id, payload)}
+                    />
+                  </div>
                 )}
               </div>
             );

@@ -1,6 +1,6 @@
 # Tuhuella — Feature Task Plan
 
-> Last updated: 2026-04-20 (Phase 21 — Platform Support 5th Donation Flow)
+> Last updated: 2026-05-03 (Phase 24 — Adoption Interview Follow-Up + WhatsApp + Event Timeline)
 
 ## Status Legend
 - ✅ Done
@@ -366,6 +366,84 @@
 | `my-profile/page.tsx`: iconMap + getDescription extended (8 new cases); new icons (Stethoscope, CheckCircle2, PawPrint) | ✅ | |
 | `messages/{es,en}.json`: 8 new activity* keys (activityAnimalAdded…activityShelterVerified) | ✅ | |
 | Backend check + 23 profile view tests passing; tsc clean on changed files | ✅ | |
+
+## Phase 22 — Shelter Application Workflow (2026-05-03)
+| Task | Status | Notes |
+|------|--------|-------|
+| `ShelterApplication` model + migration `0022_shelterapplication.py` | ✅ | `ArchivableModel`; partial unique constraint on (applicant, status in submitted/under_review); `documents` `GalleryField`; `created_shelter` OneToOne to Shelter |
+| `ShelterApplicationCreateSerializer` | ✅ | Rejects users that already have an active application or are `shelter_admin` |
+| `ShelterApplicationDetailSerializer` | ✅ | Includes applicant info, document URLs, reviewed_by_email, created_shelter_id |
+| `views/shelter_application.py` (FBV) | ✅ | create_or_list (POST adopter / GET admin+web_manager), `me/`, detail (owner or admin), approve (atomic), reject (with reason) |
+| `urls/shelter_application.py` mounted at `/api/shelter-applications/` | ✅ | 5 routes; included from `urls/__init__.py` |
+| Notification templates `shelter_application_submitted/approved/rejected` (ES+EN) | ✅ | In `services/notification_templates.py` |
+| `dispatch_notification` to all admins/web_managers on submit; to applicant on approve/reject | ✅ | Atomic approve also creates `Shelter` (verified) + flips `user.role` to `shelter_admin` |
+| `ShelterApplicationAdmin` on custom `admin_site` | ✅ | Grouped fieldsets (Shelter info / Legal / Documents / Motivation) |
+| Backend tests (model + views) | ✅ | 14 tests passing (constraint, reapply after rejection, submit, dup, shelter_admin block, me/ 404 + latest, approve creates+promotes, reject requires reason, RBAC) |
+| `lib/stores/shelterApplicationStore.ts` (Zustand) | ✅ | `fetchMine` (404→null), `submit`, `reset`; types `ShelterApplication`, `ShelterApplicationPayload` |
+| `lib/constants.ts`: `ROUTES.SHELTER_APPLICATION` + 5 API endpoints | ✅ | |
+| `app/[locale]/shelter-application/page.tsx` 4-step wizard | ✅ | Steps: datos refugio / legales / documentos diferidos / motivación; per-step validation; status view when application exists; rejection view with reason + reapply |
+| Profile entry "Postularte como refugio" inserted as 2nd `adopterActivityLinks` item | ✅ | Building2 icon (emerald); dynamic status copy via `profile.applyAsShelterStatus_*` |
+| i18n keys (es+en): `profile.applyAsShelter*` (6) + `shelterApplication` namespace (full wizard chrome, fields, errors, status copy) | ✅ | |
+| E2E flow tag `SHELTER_APPLICATION` + spec `e2e/app/shelter-application.spec.ts` | ✅ | Spec written (redirect, happy path, status view); not executed live (dev servers down) |
+| Frontend Jest tests | ✅ | 5 tests passing (mount, step-1 validation, 4-step submit, status view, rejection view) |
+| **Pending (deferred)** | ⏳ | |
+| Document upload UI on step 3 of the wizard | ⏳ | Backend already accepts `documents` GalleryField; UI currently shows "deferred to next stage" — wire later using the same uploader pattern as Animal/Shelter gallery |
+| Web-manager/admin UI for reviewing applications (list + approve/reject buttons) | ⏳ | Endpoints exist; for now reviewers act via Django admin (`/admin-site/`) or direct API call |
+| Replace/redirect legacy `/shelter/onboarding` page | ⏳ | Kept reachable for now to avoid breaking external links; can later 302 to `/shelter-application` |
+
+## Phase 23 — Shelter Video on Detail Page (2026-05-03)
+| Task | Status | Notes |
+|------|--------|-------|
+| `Shelter.video` `FileField(upload_to='shelters/videos/')` + `FileExtensionValidator` (mp4/webm/mov/ogg) | ✅ | First plain `FileField` in `base_feature_app` — `django_attachments` Library is image-oriented, so video skips it |
+| `Shelter.delete()` extended to also `self.video.delete(save=False)` | ✅ | Hard delete only; soft delete via `archived_at` keeps the file |
+| Migration `0023_shelter_video.py` | ✅ | Single `AddField` |
+| `ShelterDetailSerializer.video_url` (SerializerMethodField) | ✅ | Returns `obj.video.url` or `''`; added to `Meta.fields`; list/create_update serializers untouched (admin-managed only) |
+| `ShelterAdmin` — implicit field render | ✅ | No `fields`/`fieldsets` override; works automatically (Library mixin only manages Library-backed fields) |
+| Backend tests (model + 2× serializer + endpoint) | ✅ | 19/19 passing; serializer test uses `settings.MEDIA_ROOT = str(tmp_path)` to avoid writing into real `backend/media/` |
+| `Shelter.video_url?: string` in `lib/types.ts` | ✅ | |
+| `mockShelter` fixture gets `video_url` | ✅ | Other mocks left empty to cover the "no video" branch |
+| i18n keys (`shelterDetail.playVideo`, `videoModalTitle`, `closeVideo`) in es+en | ✅ | |
+| `components/ui/ShelterVideoModal.tsx` | ✅ | Controlled modal patterned after `TermsModal`: backdrop click + Escape close, `<video controls preload="metadata">` inside `aspect-video max-w-4xl`, pause on close; exported from `components/ui/index.ts` |
+| `app/[locale]/shelters/[shelterId]/page.tsx`: conditional "Ver video" button (Play icon) + modal mount | ✅ | Both gated on `shelter.video_url` |
+| Frontend tests | ✅ | 7/7 in `ShelterVideoModal.test.tsx` (render, default/custom title, backdrop/close-btn/Escape close), 2 added in `page.test.tsx` (button hidden without video, click opens modal with right `src`) |
+| **Pending (deferred)** | ⏳ | |
+| Shelter-side UI to upload/replace the video from the shelter dashboard | ⏳ | Backend `ShelterCreateUpdateSerializer` does not expose `video` yet; today only `/admin-site/` writes it |
+| Optional file-size validator (e.g. ≤ 100 MB) | ⏳ | Currently bounded only by `DATA_UPLOAD_MAX_MEMORY_SIZE` and nginx upload limit |
+| E2E coverage of "open video modal" flow on `shelter.spec.ts` | ⏳ | Unit covers it; E2E flow tag not yet added |
+
+## Phase 24 — Adoption Interview Follow-Up + WhatsApp + Event Timeline (2026-05-03)
+| Task | Status | Notes |
+|------|--------|-------|
+| `AdoptionApplicationEvent` model (`models/adoption_event.py`, `ArchivableModel`) | ✅ | FK application (CASCADE, related_name='events'), FK created_by (PROTECT), event_date (no future), description ≤2000 chars; ordering `-event_date,-created_at` |
+| `AdoptionApplication` field `next_follow_up_due_at` + helpers `schedule_follow_up()` / `clear_follow_up()` | ✅ | DateTimeField db_index=True; +5d window |
+| Migration `0024_adoption_followup_and_event.py` | ✅ | AddField + CreateModel in one migration |
+| `AdoptionEventCreateUpdateSerializer` + `AdoptionEventDetailSerializer` | ✅ | Validates event_date ≤ now and description non-empty; detail exposes created_by_name/role/email |
+| `AdoptionDetailSerializer` extended | ✅ | Adds `events`, `next_follow_up_due_at`, `shelter_whatsapp`, `applicant_whatsapp` (gated by status `interview`/`approved` and viewer role; adopter never sees own number echoed) |
+| Endpoints `GET/POST /api/adoptions/<pk>/events/` + `PATCH/DELETE /api/adoptions/<pk>/events/<event_pk>/` | ✅ | FBV; permissions consolidated in `_can_view_application` / `_can_write_event` |
+| `application_update_status` schedules/clears follow-up | ✅ | Schedules on transition to `interview`; clears on `approved`/`rejected` |
+| Service `services/adoption_follow_up.py:dispatch_due_follow_ups()` | ✅ | Filters `status=interview, archived_at__isnull=True, next_follow_up_due_at__lte=now()`; dispatches to every active web_manager and reprograms +5d |
+| Huey periodic task `adoption_interview_follow_ups` (crontab 09:00 UTC) | ✅ | Gated by `ADOPTION_FOLLOW_UPS_ENABLED` flag (settings + `.env.example`, default True) |
+| Notification template `adoption_interview_follow_up_due` (es+en) | ✅ | Includes animal/shelter/applicant/days_since_last_update + deep link |
+| Admin `AdoptionApplicationEventAdmin` registered in "Adoption Management" section | ✅ | list_display + soft-delete via `delete_queryset` |
+| `AdoptionApplicationEventFactory` in `tests/factories.py` | ✅ | Default web_manager author |
+| Backend tests | ✅ | 21 passing (4 model + 11 endpoints + 6 service); covers RBAC, follow-up scheduling/clearing, WhatsApp visibility, dispatch flag |
+| Frontend types (`AdoptionApplicationEvent` + extended `AdoptionApplication`) in `lib/types.ts` | ✅ | |
+| `lib/constants.ts` API endpoints `ADOPTION_EVENTS`/`ADOPTION_EVENT_DETAIL` + ROUTES `MY_APPLICATION_DETAIL`/`WEB_MANAGER_APPLICATION_DETAIL` | ✅ | |
+| `adoptionStore` extended (`applicationsById`, `fetchApplication`, `createEvent`, `updateEvent`, `archiveEvent`) | ✅ | Cache-aware updates |
+| `components/adoption/WhatsAppContactCard` | ✅ | `wa.me/<digits>?text=…`, sanitiza no-dígitos, mensaje pre-rellenado |
+| `components/adoption/AdoptionEventTimeline` + `AdoptionEventCreateModal` | ✅ | Timeline read-only/editable según `canCreate`; modal con datetime-local + textarea (≤2000 chars) |
+| Page `app/[locale]/my-applications/[id]/page.tsx` (adopter detail) | ✅ | Header + `ApplicationStatusBadge` + `ApplicationTimeline` + WhatsApp del refugio + timeline read-only + link a clinical history |
+| Page `app/[locale]/web-manager/applications/[id]/page.tsx` (web manager detail) | ✅ | Header + badge "Próximo recordatorio en N días" + timeline editable |
+| `app/[locale]/shelter/applications/page.tsx` extendido | ✅ | Botón "Detalle" expande inline con WhatsApp del adoptante + timeline editable |
+| `app/[locale]/my-applications/page.tsx` linkea a detail | ✅ | Antes navegaba al animal |
+| `AdminApplicationsTable` row clickable a detail | ✅ | Animal name → `WEB_MANAGER_APPLICATION_DETAIL` |
+| i18n keys (es+en): `adoption.contact.*`, `adoption.events.*`, `myApplications.detail.*`, `webManager.detail.*`, `webManager.followUp.*` | ✅ | JSON validado en ambos idiomas |
+| Bug fix: `jest.setup.ts` `useTranslations` mock soporta namespaces con punto | ✅ | Antes resolvía solo el primer nivel; afecta tests futuros con namespaces como `'adoption.events'` |
+| Frontend Jest tests `AdoptionEventTimeline.test.tsx` | ✅ | 5 passing (empty state, render, gating de creación, payload normalizado) |
+| **Pending (deferred)** | ⏳ | |
+| Backfill `next_follow_up_due_at = now() + 5d` para solicitudes existentes en `interview` | ⏳ | Decisión opcional al desplegar — actualmente nuevas transiciones y eventos lo programan; existentes quedan fuera hasta que ocurra alguna |
+| E2E spec específico para WhatsApp + timeline en `e2e/app/adoption.spec.ts` | ⏳ | Coverage actual via unit; flow tag por agregar |
+| UI para editar/archivar eventos individuales | ⏳ | Endpoints PATCH/DELETE existen; los componentes solo crean por ahora |
 
 ## Known Issues
 - Wompi payment SDK not integrated (placeholder only)

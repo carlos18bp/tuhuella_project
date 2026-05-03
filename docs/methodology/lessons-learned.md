@@ -5,7 +5,7 @@ description: Project intelligence and lessons learned. Reference for project-spe
 
 # Lessons Learned — Tuhuella
 
-> Last updated: 2026-04-10
+> Last updated: 2026-05-03 (added FileField vs Library decision + MEDIA_ROOT test override)
 
 This file captures important patterns, preferences, and project intelligence that help work more effectively with this codebase. Updated as new insights are discovered.
 
@@ -35,6 +35,12 @@ This file captures important patterns, preferences, and project intelligence tha
 - `Shelter.logo`, `Shelter.cover_image`, `Campaign.cover_image` use `SingleImageField`
 - `Campaign.evidence_gallery` uses `GalleryField` for completed campaign evidence photos
 - `django-cleanup` auto-deletes orphaned files on model delete
+
+### Non-Image Media: plain `FileField`, not `django_attachments`
+- `django_attachments`'s `Library` model is image-oriented (`ThumbnailerField`, `image_width`/`image_height`); using it for video, audio, or PDF makes the admin UI try to thumbnail and fight the format.
+- For non-image uploads use a plain `models.FileField(upload_to='<scope>/<kind>/', null=True, blank=True, validators=[FileExtensionValidator([...])])`. Reference: `Shelter.video` (Phase 23) — `upload_to='shelters/videos/'` with extensions `mp4/webm/mov/ogg`.
+- Plain `FileField` is **not** auto-cleaned by `django-cleanup` in the same way Library files are. If hard delete is expected, override the model's `delete()` to call `self.<field>.delete(save=False)` after super() OR within the cleanup loop. Soft delete (`archived_at`) intentionally preserves the file.
+- The serializer pattern stays the same as image URLs: a `SerializerMethodField` named `<field>_url` returning `obj.<field>.url` or `''`, exposed only in the detail serializer if the field is admin-managed.
 
 ### Email Architecture
 - All email functions centralized in `utils/email_utils.py` (single source of truth)
@@ -148,6 +154,12 @@ source venv/bin/activate && <command>
 - Fix: added `fetchMe()` that calls `GET /auth/validate_token/` when tokens exist but user is null
 - Validate_token endpoint must return all user fields the frontend needs (including phone, city)
 
+### When Opening a Feature to More Roles, Audit Every Gate (Lesson Learned)
+- Phase 19 (2026-04-20) opened the in-app manual to all authenticated users by removing `canAccessStaffArea` from `manual/layout.tsx`, but the **Header link gate** in `components/layout/Header.tsx` was missed and stayed staff-only — non-staff roles had no entry point unless they typed `/manual` directly.
+- Symptom is delayed and confusing: the user remembered building the manual but couldn't find it, so it looked deleted.
+- Lesson: when widening audience for a feature, grep for **every** instance of the prior gate helper (in this case `canAccessStaffArea`) — page guards, route guards, middleware, navigation links, footer links, breadcrumbs — and decide each one explicitly. The page-level gate alone is not enough; if the link is hidden, the feature is effectively missing for the affected roles.
+- Bonus: when removing a per-feature gate, also check whether the remaining `const canAccessFoo = …` becomes dead code (always-true) inside its render context. Both Manual call sites already lived inside `isAuthenticated`-gated branches, so the boolean and its `{… && …}` wrappers were redundant after the gate switch and should be deleted, not just relaxed.
+
 ### Stale Template References (Lesson Learned)
 - When transforming from a template project, **ALL** test files must be audited
 - Not just test files for deleted models — also helpers, utilities, conftest fixtures
@@ -181,6 +193,19 @@ source venv/bin/activate && <command>
 - Multi-select with floating action bar: user checks 2–3 items → fixed bottom bar shows count + "Compare" button
 - Comparison rendered in a modal with a side-by-side table (columns = selected items, rows = attributes)
 - Selection state managed locally in the page component, not in a global store
+
+### Testing `FileField` upload — override `MEDIA_ROOT` to a tmp dir
+- Saving a `SimpleUploadedFile` to a model with a `FileField` triggers Django's `FileSystemStorage`, which writes under the project's real `MEDIA_ROOT` (e.g. `backend/media/`). On the dev box this directory is **not writable by the test runner's user** and you get `PermissionError: [Errno 13] Permission denied: '<MEDIA_ROOT>/<upload_to>'`.
+- Fix: use pytest's built-in `settings` and `tmp_path` fixtures together so the override applies and is cleaned up automatically:
+  ```python
+  @pytest.mark.django_db
+  def test_serializer_returns_video_url(shelter, settings, tmp_path):
+      settings.MEDIA_ROOT = str(tmp_path)
+      shelter.video = SimpleUploadedFile('demo.mp4', b'\x00...', content_type='video/mp4')
+      shelter.save()
+      assert ShelterDetailSerializer(shelter).data['video_url'].startswith('/media/')
+  ```
+- This pattern applies to **any** `FileField` test that actually saves bytes to disk. Without it the test pollutes (or fails to write to) the live media directory.
 
 ### DRF Throttle Rate Testing — monkey-patch `get_rate`, not `@override_settings`
 - `@override_settings(REST_FRAMEWORK={...})` has NO effect on DRF throttle rates during tests.

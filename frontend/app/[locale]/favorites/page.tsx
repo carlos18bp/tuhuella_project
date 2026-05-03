@@ -39,7 +39,6 @@ function favoriteToAnimal(fav: Favorite): Animal {
     good_with_kids: 'unknown',
     good_with_dogs: 'unknown',
     good_with_cats: 'unknown',
-    energy_level: 'medium',
     shelter: 0,
     shelter_name: fav.shelter_name,
     shelter_city: fav.shelter_city,

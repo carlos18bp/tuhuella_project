@@ -132,6 +132,26 @@ TEMPLATES = {
             '— Mi Huella'
         ),
     },
+    'adoption_interview_follow_up_due': {
+        'subject_es': 'Solicitud en entrevista: pendiente revisar estado de {animal_name}',
+        'subject_en': 'Interview-stage application needs check-in: {animal_name}',
+        'body_es': (
+            'Hola {user_name},\n\n'
+            'La solicitud de adopción para {animal_name} en el refugio {shelter_name} '
+            'lleva {days_since_last_update} días sin actualización en la etapa de entrevista.\n'
+            'Adoptante: {applicant_email}\n\n'
+            'Por favor consulta cómo va el proceso y registra un evento aquí: {link}\n\n'
+            '— Mi Huella'
+        ),
+        'body_en': (
+            'Hi {user_name},\n\n'
+            'The adoption application for {animal_name} at {shelter_name} has been '
+            'in the interview stage without updates for {days_since_last_update} days.\n'
+            'Applicant: {applicant_email}\n\n'
+            'Please check on the process and log an event here: {link}\n\n'
+            '— Mi Huella'
+        ),
+    },
     'adoption_interview_scheduled': {
         'subject_es': 'Entrevista agendada para adopción de {animal_name}',
         'subject_en': 'Interview scheduled for {animal_name} adoption',
@@ -379,6 +399,58 @@ TEMPLATES = {
             'The campaign "{campaign_title}" by {shelter_name} was rejected.\n'
             'Reason: {reason}\n\n'
             'Edit the campaign and resubmit for review.\n\n'
+            '— Mi Huella'
+        ),
+    },
+    'shelter_application_submitted': {
+        'subject_es': 'Nueva postulación de refugio: {shelter_name}',
+        'subject_en': 'New shelter application: {shelter_name}',
+        'body_es': (
+            'Hola,\n\n'
+            '{user_name} ha enviado una postulación para registrar el refugio "{shelter_name}".\n'
+            'Revísala en el panel de administración.\n\n'
+            '— Mi Huella'
+        ),
+        'body_en': (
+            'Hi,\n\n'
+            '{user_name} has submitted an application to register the shelter "{shelter_name}".\n'
+            'Review it in the admin panel.\n\n'
+            '— Mi Huella'
+        ),
+    },
+    'shelter_application_approved': {
+        'subject_es': '¡Tu postulación de refugio fue aprobada!',
+        'subject_en': 'Your shelter application was approved!',
+        'body_es': (
+            'Hola {user_name},\n\n'
+            'Tu postulación para registrar el refugio "{shelter_name}" ha sido aprobada.\n'
+            'Ahora eres administrador de refugio en Tuhuella y puedes acceder a tu panel.\n\n'
+            'Acceder al panel: {link}\n\n'
+            '— Mi Huella'
+        ),
+        'body_en': (
+            'Hi {user_name},\n\n'
+            'Your application to register the shelter "{shelter_name}" has been approved.\n'
+            'You are now a shelter admin on Tuhuella and can access your dashboard.\n\n'
+            'Open dashboard: {link}\n\n'
+            '— Mi Huella'
+        ),
+    },
+    'shelter_application_rejected': {
+        'subject_es': 'Tu postulación de refugio no fue aprobada',
+        'subject_en': 'Your shelter application was not approved',
+        'body_es': (
+            'Hola {user_name},\n\n'
+            'Tu postulación para registrar el refugio "{shelter_name}" no fue aprobada.\n'
+            'Motivo: {reason}\n\n'
+            'Puedes revisar el detalle y volver a postular más adelante.\n\n'
+            '— Mi Huella'
+        ),
+        'body_en': (
+            'Hi {user_name},\n\n'
+            'Your application to register the shelter "{shelter_name}" was not approved.\n'
+            'Reason: {reason}\n\n'
+            'You can review the details and apply again later.\n\n'
             '— Mi Huella'
         ),
     },

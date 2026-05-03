@@ -28,7 +28,10 @@ def test_shelter_detail_returns_existing(api_client, shelter):
     response = api_client.get(reverse('shelter-detail', args=[shelter.pk]))
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json()['name'] == 'Happy Paws'
+    body = response.json()
+    assert body['name'] == 'Happy Paws'
+    assert 'video_url' in body
+    assert body['video_url'] == ''
 
 
 @pytest.mark.django_db
@@ -53,22 +56,64 @@ def test_shelter_create_requires_auth(api_client):
 
 
 @pytest.mark.django_db
-def test_shelter_create_success(authenticated_client, existing_user):
-    """Authenticated user can create a shelter."""
+def test_shelter_create_blocks_adopter(authenticated_client):
+    """Adopters cannot bypass the formal ShelterApplication flow via /api/shelters/create/."""
     response = authenticated_client.post(
         reverse('shelter-create'),
         {
-            'name': 'New Shelter',
+            'name': 'Bypass Shelter',
             'city': 'Cali',
             'description_es': 'A new place',
             'phone': '3009876543',
-            'email': 'new@shelter.org',
+            'email': 'bypass@shelter.org',
+        },
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert Shelter.objects.filter(name='Bypass Shelter').count() == 0
+
+
+@pytest.mark.django_db
+def test_shelter_create_blocks_shelter_admin(shelter_admin_client):
+    """Even shelter_admin role cannot create new shelters directly — only admin/web_manager can."""
+    response = shelter_admin_client.post(
+        reverse('shelter-create'),
+        {
+            'name': 'Second Shelter',
+            'city': 'Cali',
+            'description_es': 'A new place',
+            'phone': '3009876543',
+            'email': 'second@shelter.org',
+        },
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@pytest.mark.django_db
+def test_shelter_create_allows_web_manager(api_client, db):
+    """Web managers can create shelters directly (e.g., bulk import or operational tasks)."""
+    from base_feature_app.tests.factories import WebManagerUserFactory
+
+    web_manager = WebManagerUserFactory()
+    api_client.force_authenticate(user=web_manager)
+
+    response = api_client.post(
+        reverse('shelter-create'),
+        {
+            'name': 'Web Manager Shelter',
+            'city': 'Cali',
+            'description_es': 'Created by web manager',
+            'phone': '3009876543',
+            'email': 'wm@shelter.org',
         },
         format='json',
     )
 
     assert response.status_code == status.HTTP_201_CREATED
-    assert Shelter.objects.filter(name='New Shelter', owner=existing_user).exists()
+    assert Shelter.objects.filter(name='Web Manager Shelter', owner=web_manager).exists()
 
 
 @pytest.mark.django_db

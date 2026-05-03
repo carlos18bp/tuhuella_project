@@ -1,6 +1,6 @@
 # Tuhuella — Architecture Overview
 
-> Last updated: 2026-04-19
+> Last updated: 2026-05-03 (Phase 24 — Adoption Interview Follow-Up)
 
 ## System Diagram
 
@@ -65,6 +65,8 @@ erDiagram
     Animal ||--o{ ClinicalHistoryEntry : has
     Animal ||--o{ PostAdoptionFollowUp : has
 
+    AdoptionApplication ||--o{ AdoptionApplicationEvent : logs
+
     Campaign ||--o{ Donation : receives
 
     Sponsorship ||--o| Subscription : has
@@ -88,14 +90,14 @@ erDiagram
     ClinicalHistoryEntry }o--o| PostAdoptionFollowUp : linked_follow_up
 ```
 
-## Models (30 classes across 27 files)
+## Models (32 classes across 29 files)
 
 | # | Model | Key Fields |
 |---|-------|------------|
 | 1 | User | email, role (adopter/shelter_admin/admin/veterinarian/web_manager), city, avatar, bio, housing_type, has_yard, has_other_pets, experience_level |
 | 2 | Shelter | name, logo, cover_image, gallery, verification_status |
 | 3 | Animal | species, age, gender, size, GalleryField, is_dewormed, vaccinated_at, sterilized_at, last_vet_checkup, medical_notes_es/en |
-| 4 | Adoption (AdoptionApplication) | form_answers (JSON — includes has_pets + pets.cats/dogs/others since Fase 1), status |
+| 4 | Adoption (AdoptionApplication) | form_answers (JSON — includes has_pets + pets.cats/dogs/others since Fase 1), status, next_follow_up_due_at (programa recordatorios al `web_manager` cada 5 días en estado `interview`) |
 | 5 | Campaign | goal_amount, raised_amount, progress_percentage, evidence_gallery |
 | 6 | Donation | amount, shelter FK, campaign FK (both nullable) |
 | 7 | Sponsorship | frequency (monthly/one_time), animal FK |
@@ -122,6 +124,8 @@ erDiagram
 | 28 | AnimalDiseaseScreening | animal FK, disease_key, result (positive/negative/not_tested), tested_on, notes; unique_together (animal, disease_key) |
 | 29 | PostAdoptionFollowUp (ArchivableModel) | OneToOneField AdoptionApplication, animal FK, adopter FK, assigned_veterinarian FK (role=vet), status (pending/in_progress/completed/overdue), scheduled_date (+30d from approval) |
 | 30 | ClinicalHistoryEntry | animal FK, follow_up FK (nullable), author FK, entry_type (checkup/vaccination/treatment/observation/incident), title, body_es/en, occurred_at, attachment_urls (JSON) |
+| 31 | ShelterApplication (ArchivableModel) | applicant FK, shelter basic info (name/description_es/city/address/phone/email/website), legal info (legal_name/tax_id/legal_representative_name/legal_representative_id), `documents` GalleryField, motivation/previous_experience/capacity_estimate, status (submitted/under_review/approved/rejected), reviewed_by FK, reviewed_at, rejection_reason, `created_shelter` OneToOne Shelter; partial unique constraint on (applicant, status in submitted/under_review) — one active app per user |
+| 32 | AdoptionApplicationEvent (ArchivableModel) | application FK (CASCADE, related_name='events'), created_by FK (PROTECT), event_date (no future), description (≤2000 chars). Bitácora del proceso de adopción registrable por shelter_admin / web_manager / admin; cada evento reinicia `AdoptionApplication.next_follow_up_due_at` |
 
 ## Request Flow
 
@@ -149,12 +153,12 @@ sequenceDiagram
 tuhuella_project/
 ├── backend/
 │   ├── base_feature_app/
-│   │   ├── models/          # 27 model files (30 classes)
-│   │   ├── serializers/     # 43 serializer files
-│   │   ├── views/           # 24 view modules (incl. web_manager_views, follow_up)
-│   │   ├── urls/            # 23 URL modules (incl. follow_up)
+│   │   ├── models/          # 28 model files (31 classes — incl. ShelterApplication)
+│   │   ├── serializers/     # 45 serializer files
+│   │   ├── views/           # 25 view modules (incl. web_manager_views, follow_up, shelter_application)
+│   │   ├── urls/            # 24 URL modules (incl. follow_up, shelter_application)
 │   │   ├── management/commands/  # 21 commands
-│   │   ├── services/        # email_service, notification_service, notification_templates
+│   │   ├── services/        # email_service, notification_service, notification_templates, adoption_follow_up
 │   │   ├── utils/           # auth_utils, email_utils, recaptcha, shelter_access (is_veterinarian, is_web_manager)
 │   │   ├── templates/emails/ # Branded HTML email templates (base + 4 specific, incl. password_reset_code_en.html)
 │   │   ├── tests/           # 99+ test files (models, serializers, views, services, utils, commands)

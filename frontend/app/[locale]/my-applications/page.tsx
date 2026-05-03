@@ -209,7 +209,7 @@ export default function MisSolicitudesPage() {
             return (
               <Link
                 key={app.id}
-                href={ROUTES.ANIMAL_DETAIL(app.animal)}
+                href={ROUTES.MY_APPLICATION_DETAIL(app.id)}
                 className="group block rounded-2xl border border-border-primary bg-surface-primary p-5 shadow-sm hover:shadow-md hover:border-border-secondary transition-all"
               >
                 <div className="flex gap-4">

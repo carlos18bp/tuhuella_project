@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.validators import FileExtensionValidator
 from django_attachments.fields import SingleImageField, GalleryField
 from django_attachments.models import Library
 
@@ -45,6 +46,14 @@ class Shelter(ArchivableModel):
         null=True,
         blank=True,
     )
+    video = models.FileField(
+        upload_to='shelters/videos/',
+        null=True,
+        blank=True,
+        validators=[
+            FileExtensionValidator(allowed_extensions=['mp4', 'webm', 'mov', 'ogg'])
+        ],
+    )
 
     verification_status = models.CharField(
         max_length=20,
@@ -73,4 +82,6 @@ class Shelter(ArchivableModel):
                     field.delete()
             except Library.DoesNotExist:
                 pass
+        if self.video:
+            self.video.delete(save=False)
         super().delete(*args, **kwargs)

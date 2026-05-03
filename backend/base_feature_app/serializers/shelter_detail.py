@@ -11,6 +11,7 @@ class ShelterDetailSerializer(serializers.ModelSerializer):
     logo_url = serializers.SerializerMethodField()
     cover_image_url = serializers.SerializerMethodField()
     gallery_urls = serializers.SerializerMethodField()
+    video_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Shelter
@@ -18,7 +19,7 @@ class ShelterDetailSerializer(serializers.ModelSerializer):
             'id', 'name', 'legal_name', 'description', 'city', 'address',
             'phone', 'email', 'website', 'verification_status', 'verified_at',
             'is_verified', 'owner_email', 'logo_url', 'cover_image_url',
-            'gallery_urls', 'created_at', 'updated_at',
+            'gallery_urls', 'video_url', 'created_at', 'updated_at',
         ]
 
     def get_description(self, obj):
@@ -41,3 +42,8 @@ class ShelterDetailSerializer(serializers.ModelSerializer):
             att.file.url
             for att in Attachment.objects.filter(library=obj.gallery).order_by('rank')
         ]
+
+    def get_video_url(self, obj):
+        if obj.video:
+            return obj.video.url
+        return ''

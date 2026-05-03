@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 
 import ShelterDetailPage from '../page';
 import { useShelterStore } from '@/lib/stores/shelterStore';
@@ -131,5 +131,26 @@ describe('ShelterDetailPage', () => {
     setupMock({ loading: false, shelter: withLogo });
     render(<ShelterDetailPage />);
     expect(screen.getByRole('img', { name: 'Patitas Felices logo' })).toHaveAttribute('src', 'http://example.com/logo.png');
+  });
+
+  it('hides the play-video button when shelter has no video_url', () => {
+    const noVideo = { ...mockShelter, video_url: undefined };
+    setupMock({ loading: false, shelter: noVideo });
+    render(<ShelterDetailPage />);
+    expect(screen.queryByRole('button', { name: /Ver video/ })).not.toBeInTheDocument();
+    expect(screen.queryByTestId('shelter-video-player')).not.toBeInTheDocument();
+  });
+
+  it('opens the video modal when the play-video button is clicked', () => {
+    setupMock({ loading: false, shelter: mockShelter });
+    render(<ShelterDetailPage />);
+
+    expect(screen.queryByTestId('shelter-video-player')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /Ver video/ }));
+
+    const player = screen.getByTestId('shelter-video-player') as HTMLVideoElement;
+    expect(player).toBeInTheDocument();
+    expect(player.getAttribute('src')).toBe(mockShelter.video_url);
   });
 });

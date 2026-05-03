@@ -15,7 +15,7 @@ def health_check(request):
 urlpatterns = [
     path('api/health/', health_check, name='health-check'),
     path('admin-gallery/', admin.site.urls),
-    path('admin-site/', admin_site.urls),
+    path('admin/', admin_site.urls),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', SafeTokenRefreshView.as_view(), name='token_refresh'),
     path('api/', include('base_feature_app.urls')),

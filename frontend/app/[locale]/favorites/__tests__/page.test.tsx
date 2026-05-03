@@ -370,7 +370,7 @@ describe('FavoritosPage', () => {
     const { useAnimalStore } = jest.requireActual('@/lib/stores/animalStore') as any;
     useAnimalStore.setState({
       animals: [
-        { id: 1, name: 'Popular Dog', species: 'dog', breed: 'Lab', age_range: 'adult', gender: 'male', size: 'large', status: 'published', is_vaccinated: true, is_sterilized: false, is_house_trained: false, good_with_kids: 'unknown', good_with_dogs: 'unknown', good_with_cats: 'unknown', energy_level: 'medium', shelter: 1, shelter_name: 'Shelter', shelter_city: 'City', gallery_urls: [], created_at: '2026-01-01' },
+        { id: 1, name: 'Popular Dog', species: 'dog', breed: 'Lab', age_range: 'adult', gender: 'male', size: 'large', status: 'published', is_vaccinated: true, is_sterilized: false, is_house_trained: false, good_with_kids: 'unknown', good_with_dogs: 'unknown', good_with_cats: 'unknown', shelter: 1, shelter_name: 'Shelter', shelter_city: 'City', gallery_urls: [], created_at: '2026-01-01' },
       ],
       loading: false,
       fetchAnimals: jest.fn(),

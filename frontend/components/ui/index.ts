@@ -24,6 +24,7 @@ export { default as ShelterCard } from './ShelterCard';
 export { default as SimilarAnimals } from './SimilarAnimals';
 export { default as ShelterGallery } from './ShelterGallery';
 export { default as ShelterProfile } from './ShelterProfile';
+export { default as ShelterVideoModal } from './ShelterVideoModal';
 export { default as StatsCounter } from './StatsCounter';
 export { default as StatusBadge } from './StatusBadge';
 export { default as TermsModal } from './TermsModal';

@@ -14,7 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from django_attachments.admin import AttachmentsAdminMixin
 
 from .models import (
-    User, PasswordCode, Shelter, Animal, AdoptionApplication,
+    User, PasswordCode, Shelter, ShelterApplication, Animal, AdoptionApplication,
     Campaign, CampaignMessage, Donation, Sponsorship, Payment, UpdatePost,
     AdopterIntent, ShelterInvite, Subscription, Favorite,
     NotificationPreference, NotificationLog, BlogPost,
@@ -23,6 +23,7 @@ from .models import (
     AnimalStatusHistory, PaymentHistory, ShelterMembership,
     AnimalDiseaseScreening,
     PostAdoptionFollowUp, ClinicalHistoryEntry,
+    AdoptionApplicationEvent,
 )
 from .utils.auth_utils import generate_auth_tokens
 
@@ -134,6 +135,23 @@ class ShelterAdmin(AttachmentsAdminMixin, admin.ModelAdmin):
     search_fields = ('name', 'legal_name', 'city', 'owner__email')
     list_filter = ('verification_status', 'city')
     readonly_fields = ('created_at', 'updated_at', 'verified_at')
+
+    def delete_queryset(self, request, queryset):
+        queryset.update(archived_at=timezone.now())
+
+
+class ShelterApplicationAdmin(AttachmentsAdminMixin, admin.ModelAdmin):
+    list_display = ('shelter_name', 'applicant', 'city', 'status', 'submitted_at', 'reviewed_at')
+    search_fields = ('shelter_name', 'legal_name', 'tax_id', 'applicant__email', 'city')
+    list_filter = ('status', 'city')
+    readonly_fields = ('submitted_at', 'reviewed_at', 'created_shelter')
+    fieldsets = (
+        (None, {'fields': ('applicant', 'status', 'submitted_at', 'reviewed_by', 'reviewed_at', 'rejection_reason', 'created_shelter')}),
+        (_('Shelter info'), {'fields': ('shelter_name', 'description_es', 'city', 'address', 'phone', 'email', 'website')}),
+        (_('Legal info'), {'fields': ('legal_name', 'tax_id', 'legal_representative_name', 'legal_representative_id')}),
+        (_('Documents'), {'fields': ('documents',)}),
+        (_('Motivation'), {'fields': ('motivation', 'previous_experience', 'capacity_estimate')}),
+    )
 
     def delete_queryset(self, request, queryset):
         queryset.update(archived_at=timezone.now())
@@ -264,9 +282,19 @@ class PaymentHistoryAdmin(admin.ModelAdmin):
 # ============================================================================
 
 class AdoptionApplicationAdmin(admin.ModelAdmin):
-    list_display = ('user', 'animal', 'status', 'archived_at', 'created_at', 'reviewed_at')
+    list_display = ('user', 'animal', 'status', 'next_follow_up_due_at', 'archived_at', 'created_at', 'reviewed_at')
     search_fields = ('user__email', 'animal__name')
     list_filter = ('status',)
+    readonly_fields = ('created_at', 'updated_at')
+
+    def delete_queryset(self, request, queryset):
+        queryset.update(archived_at=timezone.now())
+
+
+class AdoptionApplicationEventAdmin(admin.ModelAdmin):
+    list_display = ('id', 'application', 'created_by', 'event_date', 'archived_at', 'created_at')
+    search_fields = ('application__animal__name', 'application__user__email', 'created_by__email', 'description')
+    list_filter = ('event_date',)
     readonly_fields = ('created_at', 'updated_at')
 
     def delete_queryset(self, request, queryset):
@@ -472,7 +500,7 @@ class MiHuellaAdminSite(admin.AdminSite):
                 'app_label': 'adoption_management',
                 'models': [
                     m for m in base_app_models
-                    if m['object_name'] in ['AdoptionApplication', 'AdopterIntent', 'ShelterInvite']
+                    if m['object_name'] in ['AdoptionApplication', 'AdoptionApplicationEvent', 'AdopterIntent', 'ShelterInvite']
                 ],
             },
             {
@@ -583,6 +611,7 @@ admin_site = MiHuellaAdminSite(name='myadmin')
 admin_site.register(User, MiHuellaUserAdmin)
 admin_site.register(PasswordCode, PasswordCodeAdmin)
 admin_site.register(Shelter, ShelterAdmin)
+admin_site.register(ShelterApplication, ShelterApplicationAdmin)
 admin_site.register(ShelterMembership, ShelterMembershipAdmin)
 admin_site.register(Animal, AnimalAdmin)
 admin_site.register(AnimalDiseaseScreening, AnimalDiseaseScreeningAdmin)
@@ -591,6 +620,7 @@ admin_site.register(ClinicalHistoryEntry, ClinicalHistoryEntryAdmin)
 admin_site.register(AnimalStatusHistory, AnimalStatusHistoryAdmin)
 admin_site.register(Favorite, FavoriteAdmin)
 admin_site.register(AdoptionApplication, AdoptionApplicationAdmin)
+admin_site.register(AdoptionApplicationEvent, AdoptionApplicationEventAdmin)
 admin_site.register(AdopterIntent, AdopterIntentAdmin)
 admin_site.register(ShelterInvite, ShelterInviteAdmin)
 admin_site.register(Campaign, CampaignAdmin)

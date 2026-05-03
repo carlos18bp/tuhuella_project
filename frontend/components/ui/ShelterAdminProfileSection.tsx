@@ -76,7 +76,7 @@ export default function ShelterAdminProfileSection({
           {t('noShelterDescription')}
         </p>
         <Link
-          href={ROUTES.SHELTER_ONBOARDING}
+          href={ROUTES.SHELTER_APPLICATION}
           className="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-teal-700"
         >
           <Plus className="h-4 w-4" />

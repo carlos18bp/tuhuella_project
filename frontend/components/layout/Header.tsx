@@ -37,7 +37,6 @@ import {
 import { useAuthStore } from '@/lib/stores/authStore';
 import { useNotificationStore } from '@/lib/stores/notificationStore';
 import { ROUTES } from '@/lib/constants';
-import { canAccessStaffArea } from '@/lib/auth/permissions';
 import type { UserRole } from '@/lib/types';
 import LocaleSwitcher from './LocaleSwitcher';
 import ThemeToggle from './ThemeToggle';
@@ -66,8 +65,6 @@ export default function Header() {
   const tCommon = useTranslations('common');
   const tManual = useTranslations('manual');
   const tNotif = useTranslations('notifications');
-
-  const canAccessManual = canAccessStaffArea(user);
 
   const unreadCount = useNotificationStore((s) => s.unreadCount);
   const notifications = useNotificationStore((s) => s.notifications);
@@ -175,14 +172,10 @@ export default function Header() {
           {item.label}
         </AccountMenuItem>
       ))}
-      {canAccessManual && (
-        <>
-          <DropdownDivider />
-          <AccountMenuItem href={ROUTES.MANUAL} onClick={close} icon={<BookOpen className="h-4 w-4" />}>
-            {tManual('navLabel')}
-          </AccountMenuItem>
-        </>
-      )}
+      <DropdownDivider />
+      <AccountMenuItem href={ROUTES.MANUAL} onClick={close} icon={<BookOpen className="h-4 w-4" />}>
+        {tManual('navLabel')}
+      </AccountMenuItem>
       <DropdownDivider />
       <button
         type="button"
@@ -654,15 +647,13 @@ export default function Header() {
                     {item.label}
                   </Link>
                 ))}
-                {canAccessManual && (
-                  <Link
-                    href={ROUTES.MANUAL}
-                    className="px-3 py-3 pl-6 rounded-lg hover:bg-surface-hover text-violet-700"
-                    onClick={() => closeMobile()}
-                  >
-                    {tManual('navLabel')}
-                  </Link>
-                )}
+                <Link
+                  href={ROUTES.MANUAL}
+                  className="px-3 py-3 pl-6 rounded-lg hover:bg-surface-hover"
+                  onClick={() => closeMobile()}
+                >
+                  {tManual('navLabel')}
+                </Link>
                 <button
                   onClick={() => { signOut(); closeMobile(); }}
                   type="button"

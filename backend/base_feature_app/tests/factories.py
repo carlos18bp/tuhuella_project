@@ -20,6 +20,7 @@ from django.utils import timezone
 from base_feature_app.models import (
     AdopterIntent,
     AdoptionApplication,
+    AdoptionApplicationEvent,
     Animal,
     AnimalDiseaseScreening,
     BlogPost,
@@ -35,6 +36,7 @@ from base_feature_app.models import (
     Payment,
     PostAdoptionFollowUp,
     Shelter,
+    ShelterApplication,
     ShelterInvite,
     Sponsorship,
     SponsorshipAmountOption,
@@ -206,6 +208,51 @@ class AdoptionApplicationFactory(factory.django.DjangoModelFactory):
     status = AdoptionApplication.Status.SUBMITTED
     form_answers = factory.LazyFunction(lambda: {'reason': 'I love dogs'})
     notes = 'Please consider me'
+
+
+class AdoptionApplicationEventFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = AdoptionApplicationEvent
+
+    application = factory.SubFactory(AdoptionApplicationFactory)
+    created_by = factory.SubFactory(WebManagerUserFactory)
+    event_date = factory.LazyFunction(timezone.now)
+    description = 'Spoke with the adopter; everything on track.'
+
+
+class ShelterApplicationFactory(factory.django.DjangoModelFactory):
+    """
+    Creates a ShelterApplication in SUBMITTED status (the valid initial state).
+
+    The partial unique constraint allows only one active (submitted/under_review)
+    application per user. Use distinct applicants when creating multiple factories
+    in the same test, or use status=APPROVED/REJECTED for extra rows.
+    """
+
+    class Meta:
+        model = ShelterApplication
+
+    applicant = factory.SubFactory(UserFactory)
+    shelter_name = factory.Sequence(lambda n: f'Refugio Esperanza {n}')
+    description_es = 'Refugio sin fines de lucro dedicado al rescate animal.'
+    city = 'Bogotá'
+    address = 'Carrera 10 #45-67'
+    phone = factory.Sequence(lambda n: f'300{n:07d}')
+    email = factory.LazyAttribute(lambda o: f'contacto@{o.shelter_name.lower().replace(" ", "")}.org')
+    website = ''
+    legal_name = factory.LazyAttribute(lambda o: f'{o.shelter_name} Foundation')
+    tax_id = factory.Sequence(lambda n: f'9001{n:06d}-1')
+    legal_representative_name = factory.Faker('name', locale='es_CO')
+    legal_representative_id = factory.Sequence(lambda n: f'10{n:08d}')
+    motivation = 'Llevamos años rescatando animales en situación de calle.'
+    previous_experience = 'Hemos operado albergues informales durante 3 años.'
+    capacity_estimate = 30
+    status = ShelterApplication.Status.SUBMITTED
+
+
+class RejectedShelterApplicationFactory(ShelterApplicationFactory):
+    status = ShelterApplication.Status.REJECTED
+    rejection_reason = 'Documentación incompleta.'
 
 
 # ── Community ─────────────────────────────────────────────────────────────────

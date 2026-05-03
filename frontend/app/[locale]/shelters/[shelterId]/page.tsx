@@ -1,14 +1,14 @@
 'use client';
 
 import { Link } from '@/i18n/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { ArrowLeft, MapPin, Phone, Mail, Globe } from 'lucide-react';
+import { ArrowLeft, MapPin, Phone, Mail, Globe, Play } from 'lucide-react';
 
 import { useShelterStore } from '@/lib/stores/shelterStore';
-import { Container, ShelterGallery } from '@/components/ui';
+import { Container, ShelterGallery, ShelterVideoModal } from '@/components/ui';
 import { ROUTES } from '@/lib/constants';
 
 export default function ShelterDetailPage() {
@@ -19,6 +19,7 @@ export default function ShelterDetailPage() {
   const shelter = useShelterStore((s) => s.shelter);
   const loading = useShelterStore((s) => s.loading);
   const fetchShelter = useShelterStore((s) => s.fetchShelter);
+  const [videoOpen, setVideoOpen] = useState(false);
 
   useEffect(() => {
     if (shelterId) void fetchShelter(shelterId);
@@ -128,6 +129,19 @@ export default function ShelterDetailPage() {
           )}
         </div>
 
+        {shelter.video_url && (
+          <div className="mt-10">
+            <button
+              type="button"
+              onClick={() => setVideoOpen(true)}
+              className="inline-flex items-center justify-center gap-2 min-h-11 rounded-full px-6 py-3 font-medium text-white bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600 shadow-sm hover:shadow-md transition-all btn-base"
+            >
+              <Play className="h-4 w-4" />
+              {t('playVideo')}
+            </button>
+          </div>
+        )}
+
         {/* Gallery Carousel */}
         {galleryUrls.length > 0 && (
           <div className="mt-10">
@@ -146,6 +160,14 @@ export default function ShelterDetailPage() {
         </div>
       </div>
 
+      {shelter.video_url && (
+        <ShelterVideoModal
+          open={videoOpen}
+          onClose={() => setVideoOpen(false)}
+          videoUrl={shelter.video_url}
+          title={shelter.name}
+        />
+      )}
     </Container>
   );
 }

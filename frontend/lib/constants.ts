@@ -36,6 +36,7 @@ export const ROUTES = {
   MY_SPONSORSHIPS: '/my-sponsorships',
 
   SHELTER_ONBOARDING: '/shelter/onboarding',
+  SHELTER_APPLICATION: '/shelter-application',
   SHELTER_DASHBOARD: '/shelter/dashboard',
   SHELTER_ANIMALS: '/shelter/animals',
   SHELTER_APPLICATIONS: '/shelter/applications',
@@ -58,6 +59,8 @@ export const ROUTES = {
   WEB_MANAGER_SHELTERS: '/web-manager/shelters',
   WEB_MANAGER_SHELTER_DETAIL: (id: number | string) => `/web-manager/shelters/${id}`,
   WEB_MANAGER_APPLICATIONS: '/web-manager/applications',
+  WEB_MANAGER_APPLICATION_DETAIL: (id: number) => `/web-manager/applications/${id}`,
+  MY_APPLICATION_DETAIL: (id: number) => `/my-applications/${id}`,
   WEB_MANAGER_CAMPAIGNS: '/web-manager/campaigns',
   WEB_MANAGER_CAMPAIGN_DETAIL: (id: number | string) => `/web-manager/campaigns/${id}`,
   WEB_MANAGER_CAMPAIGN_NEW: '/web-manager/campaigns/new',
@@ -93,6 +96,12 @@ export const API_ENDPOINTS = {
   SHELTER_CREATE: '/shelters/create/',
   SHELTER_UPDATE: (id: number) => `/shelters/${id}/update/`,
 
+  SHELTER_APPLICATIONS: '/shelter-applications/',
+  SHELTER_APPLICATION_MINE: '/shelter-applications/me/',
+  SHELTER_APPLICATION_DETAIL: (id: number) => `/shelter-applications/${id}/`,
+  SHELTER_APPLICATION_APPROVE: (id: number) => `/shelter-applications/${id}/approve/`,
+  SHELTER_APPLICATION_REJECT: (id: number) => `/shelter-applications/${id}/reject/`,
+
   ANIMALS: '/animals/',
   ANIMAL_DETAIL: (id: number) => `/animals/${id}/`,
   ANIMAL_CREATE: '/animals/create/',
@@ -104,6 +113,8 @@ export const API_ENDPOINTS = {
   ADOPTION_DETAIL: (id: number) => `/adoptions/${id}/`,
   ADOPTION_CREATE: '/adoptions/create/',
   ADOPTION_UPDATE_STATUS: (id: number) => `/adoptions/${id}/status/`,
+  ADOPTION_EVENTS: (id: number) => `/adoptions/${id}/events/`,
+  ADOPTION_EVENT_DETAIL: (id: number, eventId: number) => `/adoptions/${id}/events/${eventId}/`,
 
   CAMPAIGNS: '/campaigns/',
   CAMPAIGNS_MINE: '/campaigns/mine/',

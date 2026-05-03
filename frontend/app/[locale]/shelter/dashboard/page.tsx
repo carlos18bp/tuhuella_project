@@ -78,7 +78,7 @@ export default function ShelterDashboardPage() {
         <h1 className="text-2xl font-bold text-text-primary">No tienes un refugio registrado</h1>
         <p className="mt-2 text-text-tertiary">Registra tu refugio para comenzar a gestionar animales.</p>
         <Link
-          href={ROUTES.SHELTER_ONBOARDING}
+          href={ROUTES.SHELTER_APPLICATION}
           className="mt-6 inline-flex items-center justify-center min-h-11 bg-teal-600 text-white rounded-full px-6 py-2.5 text-sm font-medium hover:bg-teal-700 btn-base shadow-sm"
         >
           Registrar refugio

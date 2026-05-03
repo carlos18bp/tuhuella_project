@@ -5,6 +5,7 @@ import {
   SHELTER_DETAIL,
   SHELTER_DETAIL_VIEW_ANIMALS,
   SHELTER_DETAIL_GALLERY,
+  SHELTER_DETAIL_VIDEO,
   SHELTER_ONBOARDING,
   SHELTER_PANEL_DASHBOARD,
   SHELTER_PANEL_ANIMALS,
@@ -68,6 +69,55 @@ test.describe('Shelter Public Pages', () => {
     }
   });
 
+  test('should open video modal on shelter detail page', { tag: [...SHELTER_DETAIL_VIDEO] }, async ({ page }) => {
+    const shelterWithVideo = {
+      id: 4242,
+      name: 'Refugio E2E con Video',
+      legal_name: '',
+      description: 'Refugio de prueba con video.',
+      city: 'Bogotá',
+      address: '',
+      phone: '+57 300 000 0000',
+      email: '',
+      website: '',
+      verification_status: 'verified',
+      verified_at: '2026-01-15T10:00:00Z',
+      is_verified: true,
+      owner_email: 'shelter@example.com',
+      logo_url: '',
+      cover_image_url: '',
+      gallery_urls: [],
+      video_url: '/media/shelters/videos/refugio-e2e.mp4',
+      created_at: '2026-01-01T08:00:00Z',
+    };
+
+    await page.route('**/api/shelters/4242/**', (route: any) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(shelterWithVideo),
+      }),
+    );
+
+    await page.goto('/shelters/4242');
+    await waitForPageLoad(page);
+
+    const playButton = page.getByRole('button', { name: /ver video/i });
+    await expect(playButton).toBeVisible({ timeout: 10_000 });
+
+    await playButton.click();
+
+    const dialog = page.getByRole('dialog', { name: /video/i });
+    await expect(dialog).toBeVisible({ timeout: 5_000 });
+
+    const player = page.getByTestId('shelter-video-player');
+    await expect(player).toBeVisible();
+    await expect(player).toHaveAttribute('src', shelterWithVideo.video_url);
+
+    await page.keyboard.press('Escape');
+    await expect(dialog).not.toBeVisible({ timeout: 5_000 });
+  });
+
   test('should open gallery lightbox on shelter detail page', { tag: [...SHELTER_DETAIL_GALLERY] }, async ({ page }) => {
     await page.goto('/shelters');
     await waitForPageLoad(page);
@@ -89,61 +139,13 @@ test.describe('Shelter Public Pages', () => {
   });
 });
 
-test.describe('Shelter Onboarding', () => {
-  test('should redirect unauthenticated user from onboarding', { tag: [...SHELTER_ONBOARDING] }, async ({ page }) => {
+test.describe('Shelter Onboarding (legacy redirect)', () => {
+  test('legacy /shelter/onboarding redirects to /shelter-application', { tag: [...SHELTER_ONBOARDING] }, async ({ page }) => {
     await page.goto('/shelter/onboarding');
-    await waitForPageLoad(page);
+    await page.waitForURL(/shelter-application|sign-in/, { timeout: 10_000 });
 
-    await expect(page).toHaveURL(/sign-in|onboarding/);
-  });
-
-  test('should display shelter registration form when accessible', { tag: [...SHELTER_ONBOARDING] }, async ({ page }) => {
-    await page.goto('/shelter/onboarding');
-    await waitForPageLoad(page);
-
-    if (new URL(page.url()).pathname.includes('onboarding')) {
-      await expect(page.getByRole('heading', { name: /Registrar Refugio/i })).toBeVisible();
-      await expect(page.getByLabel(/Nombre del refugio/i)).toBeVisible();
-      await expect(page.getByLabel(/Ciudad/i)).toBeVisible();
-      await expect(page.getByRole('button', { name: /Registrar refugio/i })).toBeVisible();
-    }
-  });
-
-  test('should fill and submit shelter registration form', { tag: [...SHELTER_ONBOARDING] }, async ({ page }) => {
-    await page.route('**/api/shelters/create/**', (route: any) =>
-      route.fulfill({
-        status: 201,
-        contentType: 'application/json',
-        body: JSON.stringify({ id: 99, name: 'Nuevo Refugio', verification_status: 'pending' }),
-      }),
-    );
-
-    await loginAndNavigate(page, 'adopter', '/shelter/onboarding');
-
-    await expect(page.getByRole('heading', { name: /Registrar Refugio/i })).toBeVisible({ timeout: 15_000 });
-
-    await page.getByLabel(/Nombre del refugio/i).fill('Nuevo Refugio Test');
-    await page.getByLabel(/Ciudad/i).fill('Bogotá');
-
-    const descriptionField = page.getByLabel(/Descripción/i);
-    if (await descriptionField.isVisible({ timeout: 2_000 }).catch(() => false)) {
-      await descriptionField.fill('Refugio dedicado al rescate de animales.');
-    }
-    const phoneField = page.getByLabel(/Teléfono/i);
-    if (await phoneField.isVisible({ timeout: 2_000 }).catch(() => false)) {
-      await phoneField.fill('+57 300 123 4567');
-    }
-
-    const createResponse = page.waitForResponse((res: any) => res.url().includes('/shelters/create'));
-    await page.getByRole('button', { name: /Registrar refugio/i }).click();
-    await createResponse;
-
-    // createResponse confirmed the mock returned 201; verify URL changed or no error shown
-    await page.waitForURL(/shelter\/dashboard|onboarding/, { timeout: 15_000 }).catch(() => {});
-    const url = page.url();
-    const isDashboard = url.includes('shelter/dashboard');
-    const hasError = await page.getByText(/Error al registrar/i).isVisible({ timeout: 2_000 }).catch(() => false);
-    expect(isDashboard || !hasError).toBe(true);
+    const pathname = new URL(page.url()).pathname;
+    expect(pathname.includes('/shelter-application') || pathname.includes('/sign-in')).toBe(true);
   });
 });
 
