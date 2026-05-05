@@ -54,10 +54,10 @@ export default function ShelterDetailPage() {
         {t('backToShelters')}
       </Link>
 
-      {/* Cover Photo + Logo Overlay */}
+      {/* Cover Photo + Play overlay + Logo Overlay */}
       <div className="mt-4 relative">
-        {shelter.cover_image_url ? (
-          <div className="relative rounded-2xl overflow-hidden h-64 md:h-80">
+        <div className="relative rounded-2xl overflow-hidden h-64 md:h-80">
+          {shelter.cover_image_url ? (
             <Image
               src={shelter.cover_image_url}
               alt={shelter.name}
@@ -66,13 +66,30 @@ export default function ShelterDetailPage() {
               className="object-cover"
               priority
             />
-          </div>
-        ) : (
-          <div className="rounded-2xl h-64 md:h-80 bg-gradient-to-br from-teal-500 to-teal-600 dark:from-teal-800 dark:to-teal-950" />
-        )}
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-teal-500 to-teal-600 dark:from-teal-800 dark:to-teal-950" />
+          )}
+
+          {shelter.video_url && (
+            <button
+              type="button"
+              onClick={() => setVideoOpen(true)}
+              aria-label={t('playVideo')}
+              className="absolute inset-0 flex items-center justify-center group focus:outline-none"
+            >
+              <span className="absolute inset-0 bg-black/25 group-hover:bg-black/35 transition-colors" />
+              <span className="relative flex items-center justify-center h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-white/95 backdrop-blur shadow-xl group-hover:scale-105 group-focus-visible:ring-4 group-focus-visible:ring-white/60 transition-transform">
+                <Play className="h-7 w-7 sm:h-9 sm:w-9 text-teal-700 fill-teal-700 ml-1" />
+              </span>
+              <span className="absolute bottom-4 right-4 text-xs sm:text-sm font-medium text-white drop-shadow-md tracking-wide">
+                {t('playVideo')}
+              </span>
+            </button>
+          )}
+        </div>
 
         {/* Logo as profile avatar */}
-        <div className="absolute -bottom-12 left-6">
+        <div className="absolute -bottom-12 left-6 pointer-events-none">
           <div className="relative h-24 w-24 rounded-full bg-surface-primary border-4 border-surface-primary shadow-lg flex items-center justify-center overflow-hidden">
             {shelter.logo_url ? (
               <Image src={shelter.logo_url} alt={`${shelter.name} logo`} fill sizes="96px" className="object-cover" />
@@ -128,19 +145,6 @@ export default function ShelterDetailPage() {
             </div>
           )}
         </div>
-
-        {shelter.video_url && (
-          <div className="mt-10">
-            <button
-              type="button"
-              onClick={() => setVideoOpen(true)}
-              className="inline-flex items-center justify-center gap-2 min-h-11 rounded-full px-6 py-3 font-medium text-white bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600 shadow-sm hover:shadow-md transition-all btn-base"
-            >
-              <Play className="h-4 w-4" />
-              {t('playVideo')}
-            </button>
-          </div>
-        )}
 
         {/* Gallery Carousel */}
         {galleryUrls.length > 0 && (
