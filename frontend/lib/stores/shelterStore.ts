@@ -36,7 +36,7 @@ export const useShelterStore = create<ShelterState>((set) => ({
   },
 
   fetchShelter: async (id: number, lang?: string) => {
-    set({ loading: true, error: null });
+    set({ shelter: null, loading: true, error: null });
     try {
       const response = await api.get(API_ENDPOINTS.SHELTER_DETAIL(id), {
         params: lang ? { lang } : {},
