@@ -12,12 +12,12 @@ import { useShelterStore } from '@/lib/stores/shelterStore';
 export default function ShelterConfiguracionPage() {
   useRequireAuth();
   const tForm = useTranslations('shelterForm');
-  const updateShelter = useShelterStore((s) => s.updateShelter);
 
   const [shelter, setShelter] = useState<Shelter | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
   const [form, setForm] = useState({
     name: '',
     legal_name: '',
@@ -67,9 +67,13 @@ export default function ShelterConfiguracionPage() {
     if (!shelter) return;
     setSaving(true);
     try {
-      const updated = await updateShelter(shelter.id, form);
-      setShelter(updated);
+      const payload = new FormData();
+      Object.entries(form).forEach(([k, v]) => payload.append(k, v));
+      if (videoFile) payload.append('video', videoFile);
+      const res = await api.patch(API_ENDPOINTS.SHELTER_UPDATE(shelter.id), payload);
+      setShelter(res.data as Shelter);
       setSuccess(true);
+      setVideoFile(null);
     } catch {
       // Handle error
     } finally {
@@ -167,6 +171,27 @@ export default function ShelterConfiguracionPage() {
             className={inputClass}
             placeholder="https://"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-text-secondary">Video del refugio</label>
+          {shelter.video_url && !videoFile && (
+            <p className="mt-1 text-sm text-text-tertiary">
+              Video actual:{' '}
+              <a href={shelter.video_url} target="_blank" rel="noopener noreferrer"
+                 className="text-teal-600 underline">Ver video</a>
+            </p>
+          )}
+          {videoFile && (
+            <p className="mt-1 text-sm text-text-tertiary">Seleccionado: {videoFile.name}</p>
+          )}
+          <input
+            type="file"
+            accept="video/mp4,video/webm,video/quicktime,video/ogg"
+            onChange={(e) => setVideoFile(e.target.files?.[0] ?? null)}
+            className="mt-1 block w-full text-sm text-text-secondary file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100 dark:file:bg-teal-950/40 dark:file:text-teal-300"
+          />
+          <p className="mt-1 text-xs text-text-quaternary">MP4, WebM, MOV u OGG. Máx. recomendado: 100 MB.</p>
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
