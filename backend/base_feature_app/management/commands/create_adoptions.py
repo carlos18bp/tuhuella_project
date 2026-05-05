@@ -45,6 +45,10 @@ class Command(BaseCommand):
             status = random.choice([
                 AdoptionApplication.Status.SUBMITTED,
                 AdoptionApplication.Status.SUBMITTED,
+                AdoptionApplication.Status.REVIEWING,
+                AdoptionApplication.Status.INTERVIEW,
+                AdoptionApplication.Status.INTERVIEW,
+                AdoptionApplication.Status.INTERVIEW,
                 AdoptionApplication.Status.APPROVED,
                 AdoptionApplication.Status.REJECTED,
             ])
@@ -52,7 +56,7 @@ class Command(BaseCommand):
                 AdoptionApplication.Status.APPROVED,
                 AdoptionApplication.Status.REJECTED,
             }
-            AdoptionApplication.objects.create(
+            application = AdoptionApplication(
                 user=user,
                 animal=animal,
                 status=status,
@@ -65,6 +69,9 @@ class Command(BaseCommand):
                 notes=fake.sentence() if random.random() < 0.3 else '',
                 reviewed_at=timezone.now() if status in reviewed_statuses else None,
             )
+            if status == AdoptionApplication.Status.INTERVIEW:
+                application.schedule_follow_up()
+            application.save()
 
             # Leave an audit trail when the application was approved
             if status == AdoptionApplication.Status.APPROVED:

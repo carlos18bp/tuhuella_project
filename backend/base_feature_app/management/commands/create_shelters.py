@@ -1,4 +1,9 @@
+import tempfile
+import urllib.request
+from pathlib import Path
+
 from faker import Faker
+from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from base_feature_app.models import User, Shelter, ShelterMembership
@@ -7,6 +12,9 @@ from .create_users import FIXED_SHELTER_ADMINS
 
 fake_es = Faker('es_CO')
 fake_en = Faker('en_US')
+
+SAMPLE_VIDEO_URL = 'https://www.w3schools.com/html/mov_bbb.mp4'
+SAMPLE_VIDEO_CACHE = Path(tempfile.gettempdir()) / 'tuhuella_sample_shelter_video.mp4'
 
 FIXED_SHELTER_ADMIN_EMAILS = [entry['email'] for entry in FIXED_SHELTER_ADMINS]
 
@@ -61,6 +69,25 @@ class Command(BaseCommand):
         parser.add_argument('--count', type=int, default=5,
                             help='Total number of shelters to create (fixed seeds count toward the total)')
 
+    def _load_sample_video_bytes(self):
+        if SAMPLE_VIDEO_CACHE.exists() and SAMPLE_VIDEO_CACHE.stat().st_size > 0:
+            return SAMPLE_VIDEO_CACHE.read_bytes()
+        try:
+            with urllib.request.urlopen(SAMPLE_VIDEO_URL, timeout=30) as response:
+                data = response.read()
+        except OSError as exc:
+            self.stdout.write(self.style.WARNING(
+                f'Could not download sample shelter video ({exc}); shelters will be created without video.'
+            ))
+            return None
+        SAMPLE_VIDEO_CACHE.write_bytes(data)
+        return data
+
+    def _attach_sample_video(self, shelter, video_bytes):
+        if not video_bytes:
+            return
+        shelter.video.save(f'shelter_{shelter.id}_sample.mp4', ContentFile(video_bytes), save=True)
+
     def handle(self, *args, **options):
         count = options['count']
         shelter_admins = list(User.objects.filter(role=User.Role.SHELTER_ADMIN))
@@ -77,6 +104,7 @@ class Command(BaseCommand):
         used_owner_ids = set()
         created = 0
         memberships_created = 0
+        video_bytes = self._load_sample_video_bytes()
 
         for idx, fixed in enumerate(FIXED_SHELTERS[:count]):
             admin_email = FIXED_SHELTER_ADMIN_EMAILS[idx]
@@ -101,6 +129,8 @@ class Command(BaseCommand):
             )
             if was_created:
                 created += 1
+            if was_created or not shelter.video:
+                self._attach_sample_video(shelter, video_bytes)
             used_owner_ids.add(owner.id)
 
             _, m_created = ShelterMembership.objects.get_or_create(
@@ -139,6 +169,7 @@ class Command(BaseCommand):
                 verified_at=timezone.now() if status == Shelter.VerificationStatus.VERIFIED else None,
             )
             created += 1
+            self._attach_sample_video(shelter, video_bytes)
             used_owner_ids.add(owner.id)
 
             _, m_created = ShelterMembership.objects.get_or_create(

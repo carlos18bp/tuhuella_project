@@ -28,6 +28,7 @@ describe('adoptionStore', () => {
     jest.clearAllMocks();
     useAdoptionStore.setState({
       applications: [],
+      applicationsById: {},
       loading: false,
       error: null,
     });
@@ -89,5 +90,42 @@ describe('adoptionStore', () => {
 
     expect(result.status).toBe('approved');
     expect(mockApi.patch).toHaveBeenCalledTimes(1);
+  });
+
+  it('creates an event, appends it to the cached application, and reschedules follow-up', async () => {
+    const cached = {
+      ...APPLICATION_FIXTURE,
+      status: 'interview',
+      events: [],
+      next_follow_up_due_at: null,
+    };
+    useAdoptionStore.setState({ applicationsById: { 1: cached as never } });
+
+    const newEvent = {
+      id: 99,
+      application: 1,
+      event_date: '2026-05-04T10:00:00Z',
+      description: 'Llamada inicial con el adoptante',
+      created_by_name: 'Refugio Tuhuella',
+      created_by_role: 'shelter_admin',
+    };
+    mockApi.post.mockResolvedValueOnce({ data: newEvent });
+
+    const result = await useAdoptionStore.getState().createEvent(1, {
+      event_date: '2026-05-04T10:00:00Z',
+      description: 'Llamada inicial con el adoptante',
+    });
+
+    expect(result.id).toBe(99);
+    expect(mockApi.post).toHaveBeenCalledWith('/adoptions/1/events/', {
+      event_date: '2026-05-04T10:00:00Z',
+      description: 'Llamada inicial con el adoptante',
+    });
+
+    const updatedCache = useAdoptionStore.getState().applicationsById[1];
+    expect(updatedCache.events).toHaveLength(1);
+    expect(updatedCache.events?.[0].id).toBe(99);
+    expect(updatedCache.next_follow_up_due_at).toBeTruthy();
+    expect(new Date(updatedCache.next_follow_up_due_at as string).getTime()).toBeGreaterThan(Date.now());
   });
 });

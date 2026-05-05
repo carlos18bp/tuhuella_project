@@ -25,6 +25,7 @@ STEPS = [
     None,
     # --- Adoption flow ---
     ('create_adoptions', ['--count', '20'], 'Adoption applications'),
+    ('create_adoption_events', [], 'Adoption events (interview)'),
     ('create_follow_ups', [], 'Post-adoption follow-ups'),
     ('create_adopter_intents', ['--count', '10'], 'Adopter intents'),
     ('create_shelter_invites', ['--count', '15'], 'Shelter invites'),
