@@ -7,6 +7,7 @@ from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from base_feature_app.models import User, Shelter, ShelterMembership
+from django_attachments.models import Library, Attachment
 
 from .create_users import FIXED_SHELTER_ADMINS
 
@@ -15,6 +16,8 @@ fake_en = Faker('en_US')
 
 SAMPLE_VIDEO_URL = 'https://www.w3schools.com/html/mov_bbb.mp4'
 SAMPLE_VIDEO_CACHE = Path(tempfile.gettempdir()) / 'tuhuella_sample_shelter_video.mp4'
+COVER_WIDTH = 1200
+COVER_HEIGHT = 600
 
 FIXED_SHELTER_ADMIN_EMAILS = [entry['email'] for entry in FIXED_SHELTER_ADMINS]
 
@@ -88,6 +91,35 @@ class Command(BaseCommand):
             return
         shelter.video.save(f'shelter_{shelter.id}_sample.mp4', ContentFile(video_bytes), save=True)
 
+    def _attach_cover_image(self, shelter):
+        if shelter.cover_image_id:
+            return
+        url = f'https://picsum.photos/seed/shelter-{shelter.id}/{COVER_WIDTH}/{COVER_HEIGHT}'
+        try:
+            req = urllib.request.Request(url, headers={'User-Agent': 'Tuhuella Seed Script'})
+            with urllib.request.urlopen(req, timeout=20) as response:
+                image_data = response.read()
+        except OSError as exc:
+            self.stdout.write(self.style.WARNING(
+                f'  ! Cover image download failed for shelter {shelter.id}: {exc}'
+            ))
+            return
+        library = Library.objects.create(title=f'Cover: {shelter.name}')
+        attachment = Attachment(
+            library=library,
+            rank=0,
+            original_name='cover.jpg',
+            filesize=len(image_data),
+            image_width=COVER_WIDTH,
+            image_height=COVER_HEIGHT,
+        )
+        attachment.file.save(f'shelter_{shelter.id}_cover.jpg', ContentFile(image_data), save=False)
+        attachment.save()
+        library.primary_attachment = attachment
+        library.save(update_fields=['primary_attachment'])
+        shelter.cover_image = library
+        shelter.save(update_fields=['cover_image'])
+
     def handle(self, *args, **options):
         count = options['count']
         shelter_admins = list(User.objects.filter(role=User.Role.SHELTER_ADMIN))
@@ -131,6 +163,7 @@ class Command(BaseCommand):
                 created += 1
             if was_created or not shelter.video:
                 self._attach_sample_video(shelter, video_bytes)
+            self._attach_cover_image(shelter)
             used_owner_ids.add(owner.id)
 
             _, m_created = ShelterMembership.objects.get_or_create(
@@ -170,6 +203,7 @@ class Command(BaseCommand):
             )
             created += 1
             self._attach_sample_video(shelter, video_bytes)
+            self._attach_cover_image(shelter)
             used_owner_ids.add(owner.id)
 
             _, m_created = ShelterMembership.objects.get_or_create(

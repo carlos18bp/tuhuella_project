@@ -18,6 +18,7 @@ export default function ShelterConfiguracionPage() {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
   const [form, setForm] = useState({
     name: '',
     legal_name: '',
@@ -70,10 +71,12 @@ export default function ShelterConfiguracionPage() {
       const payload = new FormData();
       Object.entries(form).forEach(([k, v]) => payload.append(k, v));
       if (videoFile) payload.append('video', videoFile);
+      if (coverFile) payload.append('cover_image_upload', coverFile);
       const res = await api.patch(API_ENDPOINTS.SHELTER_UPDATE(shelter.id), payload);
       setShelter(res.data as Shelter);
       setSuccess(true);
       setVideoFile(null);
+      setCoverFile(null);
     } catch {
       // Handle error
     } finally {
@@ -171,6 +174,27 @@ export default function ShelterConfiguracionPage() {
             className={inputClass}
             placeholder="https://"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-text-secondary">Foto de portada</label>
+          {shelter.cover_image_url && !coverFile && (
+            <p className="mt-1 text-sm text-text-tertiary">
+              Portada actual:{' '}
+              <a href={shelter.cover_image_url} target="_blank" rel="noopener noreferrer"
+                 className="text-teal-600 underline">Ver imagen</a>
+            </p>
+          )}
+          {coverFile && (
+            <p className="mt-1 text-sm text-text-tertiary">Seleccionada: {coverFile.name}</p>
+          )}
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={(e) => setCoverFile(e.target.files?.[0] ?? null)}
+            className="mt-1 block w-full text-sm text-text-secondary file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100 dark:file:bg-teal-950/40 dark:file:text-teal-300"
+          />
+          <p className="mt-1 text-xs text-text-quaternary">JPG, PNG o WebP. Recomendado 1200×600.</p>
         </div>
 
         <div>
