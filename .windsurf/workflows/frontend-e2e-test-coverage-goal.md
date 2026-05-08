@@ -1,6 +1,6 @@
 ---
-auto_execution_mode: 2
 description: End-to-End (E2E) Testing
+auto_execution_mode: 2
 ---
 # E2E Test Coverage Strategy
 
