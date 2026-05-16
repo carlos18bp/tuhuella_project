@@ -4,7 +4,7 @@ from base_feature_app.models import User
 
 fake = Faker()
 
-SEED_PASSWORD = 'Tuhuella2024!'
+SEED_PASSWORD = 'password'
 
 FIXED_ADMIN = {
     'email': 'admin@tuhuella.com',
