@@ -1,67 +1,17 @@
-# Tuhuella — Claude Compatibility Guide
+<!-- fleet-base:begin v=1 -->
+# CLAUDE.md — Tuhuella (`tuhuella_project`)
 
-## Source Of Truth
-- The canonical repo guidance is maintained in the Codex-native surfaces: `AGENTS.md`, `backend/AGENTS.md`, `frontend/AGENTS.md`, `.agents/skills/*`, `.codex/config.toml`.
-- This `CLAUDE.md` file is a compatibility mirror for mixed-tool teams and should stay aligned with the Codex guidance.
-- Long-lived project context lives in `docs/methodology/` and `tasks/`.
+Esta seccion es la **base comun del fleet** y se sincroniza desde
+`vps-ops-toolkit/workflows/.claude/base/CLAUDE.md.tmpl`. No editar manualmente:
+los cambios se pierden en el proximo sync. Para customizar este proyecto, usar
+la seccion `project-specific` mas abajo.
 
-## Project Overview
-- **What it is**: Tuhuella — an animal adoption + sponsorship + donation platform connecting users with partner shelters. Features: animal browsing/filtering, adoption applications with status tracking, monthly sponsorships, one-time donations to shelters or campaigns, fundraising campaigns, bilingual blog, volunteer positions, per-user dashboards (`my-applications`, `my-donations`, favorites, notifications), and shelter admin panels.
-- **Stack**: Django 6.0.2 + DRF (backend) / **Next.js 16.1.6 + React 19.2 + TypeScript** (frontend, App Router with `[locale]` segments) / MySQL 8 (`tuhuella_db`) / Redis / Huey / SMTP email.
-- **Single Django app**: `base_feature_app` (27 models). **Django module name is `base_feature_project`** — a generic boilerplate name **shared with `fernando_aragon_project`**. Settings module: `base_feature_project.settings_prod`.
-- **Production path**: `/home/ryzepeck/webapps/tuhuella_project`.
-- **Domain**: `tuhuella.projectapp.co`.
-- **Services** (THREE systemd units): `tuhuella_project.service` (backend Gunicorn), `tuhuella-huey.service` (queue worker), **`tuhuella-frontend.service` (Next.js Node 20 process on port 3001)**. All three must be running.
-- **Frontend runs as its own service** — it is **NOT** statically exported. nginx → Next.js (3001) → Next.js rewrites `/api/*` and `/media/*` back to Django (`8000`).
+## Convencion de lenguaje
 
-## Architecture Invariants
-- **Backend views are 100% function-based** with `@api_view`. Do not introduce CBV/`APIView`/`ViewSets`.
-- **Single business app `base_feature_app`** with 27 models. Do not introduce parallel apps unless absolutely necessary.
-- **Service layer is real**: `base_feature_app/services/` holds `EmailService`, `NotificationService`, `NotificationTemplates` (locale-aware). Always go through these services for email and notifications.
-- **Event-driven notifications**: app events create `NotificationLog` rows; a Huey task (`send_email_notification(log_id)`) renders the localized template, sends the email, and updates the log to SENT/FAILED.
-- **Bilingual content via paired fields** (`title_en`/`title_es`, etc.). Frontend reads the field that matches the active locale. Do not introduce `django.i18n` `.po` files.
-- **`python-dotenv`** is the env-loading standard (NOT `python-decouple`). Preserve this.
-- **JWT-only auth** on `/api/` (15-min access token, longer refresh). Admin uses session + CSRF.
-- **Custom `User`** model with email auth, profile fields, roles.
-- **Custom AdminSite** in `base_feature_app/admin.py`.
-- **Archivable mixin** for soft-delete (`archived_at`).
-- **Frontend uses Next.js 16 + React 19 + App Router** with **`app/[locale]/`** dynamic locale segments.
-- **NOT static export**: `next.config.ts` does NOT use `output: 'export'`. Instead, it defines URL rewrites that proxy `/api/*` and `/media/*` to the Django backend, and the Next.js process runs as a Node 20 service.
-- **State management is Zustand** (NOT Redux, NOT Context). Stores in `lib/stores/` (`animalStore`, `authStore`, `blogStore`, `shelterStore`, etc.).
-- **HTTP via Axios** wrapped in `lib/services/http.ts` with JWT interceptors and auto-refresh on 401.
-- **i18n via `next-intl`** with `messages/{es,en}.json` and `app/[locale]/` routing. Default locale is `es`.
-- **No shadcn/ui, no Material UI** — components are custom-built. Icons via `lucide-react` + `@heroicons/react`. Animations via `framer-motion`.
-- **Conditional Silk**: gated by `ENABLE_SILK=True`. Off by default.
+- Documentacion, comentarios y mensajes de commit en **espanol**.
+- Codigo, identificadores y nombres de variable en **ingles**.
+- Mensajes de error visibles al usuario final en el idioma del proyecto.
 
-## Working Rules
-- Prefer existing project patterns over generic framework advice.
-- Do not rename `base_feature_project` or `base_feature_app` to `tuhuella_*` — they are shared boilerplate names.
-- Do not switch from `python-dotenv` to `python-decouple` or vice versa.
-- Do not change old migrations; add new migrations when schema changes are required.
-- Keep security basics intact: validated serializer inputs, ORM-first queries, escaped rendering, secure cookies, no secrets in code.
-- Do not edit files inside `frontend/.next/` — they are build artifacts.
-- New email types should be added as methods on `EmailService` + a `NotificationTemplate`, not inlined into views.
-- Remember the **three-service** deployment: backend Gunicorn, Huey worker, **and** the Next.js frontend service.
-
-## Commands
-- Backend tests: `cd backend && source venv/bin/activate && pytest base_feature_app/tests/path/to/test_file.py -v`
-- Backend dev server: `cd backend && source venv/bin/activate && python manage.py runserver`
-- Frontend dev server: `cd frontend && npm run dev` (Next.js, default :3000; Node 20 required)
-- Frontend unit tests (Jest): `cd frontend && npm test -- path/to/file.test.tsx`
-- Frontend E2E (Playwright): `cd frontend && npm run e2e:module -- path/to/spec.ts`
-- Frontend build: `cd frontend && npm run build` (standalone build, NOT static export)
-
-## Testing Constraints
-- Never run the full test suite.
-- Maximum 20 tests per batch and 3 test commands per cycle.
-- Run only the smallest backend, frontend unit, or E2E slice needed for the changed behavior.
-- Frontend Jest coverage thresholds: 50% globally (branches/functions/lines/statements).
-
-## Memory Bank
-- Core files: `docs/methodology/{product_requirement_docs,architecture,technical,error-documentation,lessons-learned}.md`, `tasks/{tasks_plan,active_context}.md`.
-- Read `architecture.md` for the JWT auth flow and the notification pipeline.
-- Update memory files when the user asks, or when you have verified a meaningful change to runtime surfaces, architecture, or recurring workflow guidance.
-- Do not churn memory files after every routine code edit.
 <!-- session-start-protocol:begin -->
 ## Session Start Protocol
 
@@ -74,23 +24,7 @@ Al inicio de **cada sesión y antes de editar archivos**, debes invocar la skill
 
 **Importante:** Nunca uses `git pull --force`, `git reset --hard` ni stash automático para "resolver" el sync — usa siempre la skill `git-sync`, que es segura y reproducible.
 <!-- session-start-protocol:end -->
-<!-- e2e-user-flows-protocol:begin -->
-## E2E User Flows Check
 
-Cuando termines de implementar un cambio que afecte un **flujo de usuario en el frontend** — por ejemplo:
-- Crear o editar un formulario (agregar/quitar campos)
-- Nueva ruta, página o vista accesible al usuario
-- Cambios en flujos de autenticación, checkout, onboarding, búsqueda, perfil
-- Modificaciones a `docs/USER_FLOW_MAP.md` o `frontend/e2e/flow-definitions.json`
-
-…debes invocar la skill `e2e-user-flows-check` como **paso final** antes de reportar la implementación como completa. Esa skill audita la cobertura E2E del flujo modificado y reporta brechas/riesgos.
-
-**Por qué:** los flujos de usuario en frontend cambian las assumptions de los tests E2E. Sin auditoría, un campo eliminado deja tests "verdes" pero inválidos, y un form nuevo queda sin cobertura.
-
-**No aplica para:** correcciones aisladas que no cambian el flujo (typos, refactors internos, estilos puros, dependency bumps), ni cambios solo en backend que no alteren UX.
-
-**Recordatorio automático:** un hook `Stop` revisa al cierre del turno si hay cambios uncommitted bajo `frontend/src/`, `frontend/app/`, etc., y te lo inyecta como contexto. El hook es un recordatorio, no bloqueante — la regla aplica igual aunque el hook no dispare.
-<!-- e2e-user-flows-protocol:end -->
 <!-- git-branch-protocol:begin -->
 ## Reglas de trabajo con Git: ramas y commits
 
@@ -118,7 +52,7 @@ git branch -r | grep -vE 'origin/(HEAD|main|master|release-)' | sed 's@^[[:space
 - **Si hay VARIAS ramas feature activas**: pregunta al usuario en cuál commitear (no asumas).
 - **Si NO hay ninguna rama feature activa** (todas las que ves están mergeadas/cerradas o son ramas históricas abandonadas): crea rama nueva según el formato de la sección 3.
 
-**Por qué:** la convención del proyecto es **máximo 1 PR feature activo simultáneamente**. Todos los cambios en curso se acumulan como commits sucesivos sobre esa rama hasta que mergee. Crear ramas paralelas fragmenta el trabajo en múltiples PRs y hace difícil hacer code review unificado.
+**Por qué:** la convención del fleet es **máximo 1 PR feature activo simultáneamente** por proyecto. Todos los cambios en curso se acumulan como commits sucesivos sobre esa rama hasta que mergee. Crear ramas paralelas fragmenta el trabajo en múltiples PRs y hace difícil hacer code review unificado.
 
 **No pidas permiso para hacer el checkout** — sólo comunícalo: "Hay rama feature activa `<X>`, voy a commitear ahí."
 
@@ -203,3 +137,98 @@ Después de cada `git push` que cree una rama nueva en el remote, **siempre** te
 - Si por excepción se commiteó directo a `main`/`master` (sólo posible en proyectos sin esta regla), declara explícitamente: "PR URL: n/a (push directo a `main`)".
 - Si hubo cambios en varios proyectos en el mismo turno, entrega una **lista** con un `PR URL:` por proyecto.
 <!-- git-branch-protocol:end -->
+
+<!-- e2e-user-flows-protocol:begin -->
+## E2E User Flows Check
+
+Cuando termines de implementar un cambio que afecte un **flujo de usuario en el frontend** — por ejemplo:
+- Crear o editar un formulario (agregar/quitar campos)
+- Nueva ruta, página o vista accesible al usuario
+- Cambios en flujos de autenticación, checkout, onboarding, búsqueda, perfil
+- Modificaciones a `docs/USER_FLOW_MAP.md` o `frontend/e2e/flow-definitions.json`
+
+…debes invocar la skill `e2e-user-flows-check` como **paso final** antes de reportar la implementación como completa. Esa skill audita la cobertura E2E del flujo modificado y reporta brechas/riesgos.
+
+**Por qué:** los flujos de usuario en frontend cambian las assumptions de los tests E2E. Sin auditoría, un campo eliminado deja tests "verdes" pero inválidos, y un form nuevo queda sin cobertura.
+
+**No aplica para:** correcciones aisladas que no cambian el flujo (typos, refactors internos, estilos puros, dependency bumps), ni cambios solo en backend que no alteren UX.
+
+**Recordatorio automático:** un hook `Stop` revisa al cierre del turno si hay cambios uncommitted bajo `frontend/src/`, `frontend/app/`, etc., y te lo inyecta como contexto. El hook es un recordatorio, no bloqueante — la regla aplica igual aunque el hook no dispare.
+<!-- e2e-user-flows-protocol:end -->
+
+## Ecosistemas IA paralelos
+
+Este proyecto tiene tres ecosistemas activos en paralelo: Claude Code (este
+archivo + `.claude/`), Codex (`AGENTS.md` + `.agents/skills/` + `.codex/config.toml`)
+y Windsurf (`.windsurf/rules/` + `.windsurf/workflows/`). Los tres comparten el
+mismo cuerpo de instrucciones general; el frontmatter y la estructura cambian
+por ecosistema. La fuente de verdad es `vps-ops-toolkit/workflows/`.
+
+<!-- fleet-base:end -->
+
+<!-- project-specific:begin -->
+# Tuhuella — Claude Compatibility Guide
+
+## Source Of Truth
+- The canonical repo guidance is maintained in the Codex-native surfaces: `AGENTS.md`, `backend/AGENTS.md`, `frontend/AGENTS.md`, `.agents/skills/*`, `.codex/config.toml`.
+- This `CLAUDE.md` file is a compatibility mirror for mixed-tool teams and should stay aligned with the Codex guidance.
+- Long-lived project context lives in `docs/methodology/` and `tasks/`.
+
+## Project Overview
+- **What it is**: Tuhuella — an animal adoption + sponsorship + donation platform connecting users with partner shelters. Features: animal browsing/filtering, adoption applications with status tracking, monthly sponsorships, one-time donations to shelters or campaigns, fundraising campaigns, bilingual blog, volunteer positions, per-user dashboards (`my-applications`, `my-donations`, favorites, notifications), and shelter admin panels.
+- **Stack**: Django 6.0.2 + DRF (backend) / **Next.js 16.1.6 + React 19.2 + TypeScript** (frontend, App Router with `[locale]` segments) / MySQL 8 (`tuhuella_db`) / Redis / Huey / SMTP email.
+- **Single Django app**: `base_feature_app` (27 models). **Django module name is `base_feature_project`** — a generic boilerplate name **shared with `fernando_aragon_project`**. Settings module: `base_feature_project.settings_prod`.
+- **Production path**: `/home/ryzepeck/webapps/tuhuella_project`.
+- **Domain**: `tuhuella.projectapp.co`.
+- **Services** (THREE systemd units): `tuhuella_project.service` (backend Gunicorn), `tuhuella-huey.service` (queue worker), **`tuhuella-frontend.service` (Next.js Node 20 process on port 3001)**. All three must be running.
+- **Frontend runs as its own service** — it is **NOT** statically exported. nginx → Next.js (3001) → Next.js rewrites `/api/*` and `/media/*` back to Django (`8000`).
+
+## Architecture Invariants
+- **Backend views are 100% function-based** with `@api_view`. Do not introduce CBV/`APIView`/`ViewSets`.
+- **Single business app `base_feature_app`** with 27 models. Do not introduce parallel apps unless absolutely necessary.
+- **Service layer is real**: `base_feature_app/services/` holds `EmailService`, `NotificationService`, `NotificationTemplates` (locale-aware). Always go through these services for email and notifications.
+- **Event-driven notifications**: app events create `NotificationLog` rows; a Huey task (`send_email_notification(log_id)`) renders the localized template, sends the email, and updates the log to SENT/FAILED.
+- **Bilingual content via paired fields** (`title_en`/`title_es`, etc.). Frontend reads the field that matches the active locale. Do not introduce `django.i18n` `.po` files.
+- **`python-dotenv`** is the env-loading standard (NOT `python-decouple`). Preserve this.
+- **JWT-only auth** on `/api/` (15-min access token, longer refresh). Admin uses session + CSRF.
+- **Custom `User`** model with email auth, profile fields, roles.
+- **Custom AdminSite** in `base_feature_app/admin.py`.
+- **Archivable mixin** for soft-delete (`archived_at`).
+- **Frontend uses Next.js 16 + React 19 + App Router** with **`app/[locale]/`** dynamic locale segments.
+- **NOT static export**: `next.config.ts` does NOT use `output: 'export'`. Instead, it defines URL rewrites that proxy `/api/*` and `/media/*` to the Django backend, and the Next.js process runs as a Node 20 service.
+- **State management is Zustand** (NOT Redux, NOT Context). Stores in `lib/stores/` (`animalStore`, `authStore`, `blogStore`, `shelterStore`, etc.).
+- **HTTP via Axios** wrapped in `lib/services/http.ts` with JWT interceptors and auto-refresh on 401.
+- **i18n via `next-intl`** with `messages/{es,en}.json` and `app/[locale]/` routing. Default locale is `es`.
+- **No shadcn/ui, no Material UI** — components are custom-built. Icons via `lucide-react` + `@heroicons/react`. Animations via `framer-motion`.
+- **Conditional Silk**: gated by `ENABLE_SILK=True`. Off by default.
+
+## Working Rules
+- Prefer existing project patterns over generic framework advice.
+- Do not rename `base_feature_project` or `base_feature_app` to `tuhuella_*` — they are shared boilerplate names.
+- Do not switch from `python-dotenv` to `python-decouple` or vice versa.
+- Do not change old migrations; add new migrations when schema changes are required.
+- Keep security basics intact: validated serializer inputs, ORM-first queries, escaped rendering, secure cookies, no secrets in code.
+- Do not edit files inside `frontend/.next/` — they are build artifacts.
+- New email types should be added as methods on `EmailService` + a `NotificationTemplate`, not inlined into views.
+- Remember the **three-service** deployment: backend Gunicorn, Huey worker, **and** the Next.js frontend service.
+
+## Commands
+- Backend tests: `cd backend && source venv/bin/activate && pytest base_feature_app/tests/path/to/test_file.py -v`
+- Backend dev server: `cd backend && source venv/bin/activate && python manage.py runserver`
+- Frontend dev server: `cd frontend && npm run dev` (Next.js, default :3000; Node 20 required)
+- Frontend unit tests (Jest): `cd frontend && npm test -- path/to/file.test.tsx`
+- Frontend E2E (Playwright): `cd frontend && npm run e2e:module -- path/to/spec.ts`
+- Frontend build: `cd frontend && npm run build` (standalone build, NOT static export)
+
+## Testing Constraints
+- Never run the full test suite.
+- Maximum 20 tests per batch and 3 test commands per cycle.
+- Run only the smallest backend, frontend unit, or E2E slice needed for the changed behavior.
+- Frontend Jest coverage thresholds: 50% globally (branches/functions/lines/statements).
+
+## Memory Bank
+- Core files: `docs/methodology/{product_requirement_docs,architecture,technical,error-documentation,lessons-learned}.md`, `tasks/{tasks_plan,active_context}.md`.
+- Read `architecture.md` for the JWT auth flow and the notification pipeline.
+- Update memory files when the user asks, or when you have verified a meaningful change to runtime surfaces, architecture, or recurring workflow guidance.
+- Do not churn memory files after every routine code edit.
+<!-- project-specific:end -->
