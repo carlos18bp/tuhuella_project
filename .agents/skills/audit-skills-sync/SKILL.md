@@ -1,16 +1,17 @@
 ---
 name: audit-skills-sync
-description: "Audit bidirectional sync between this ops repo (workflows/) and project skills directories (.claude/skills, .agents/skills, .windsurf/workflows). Reports gaps in both directions; --apply-* arguments to fix."
+description: "Audit bidirectional sync entre este ops repo (workflows/) y (a) per-project skills y (b) user-level config ($HOME/.claude, $HOME/.codex). Reporta gaps en ambas direcciones; --apply-* arguments para arreglar."
 disable-model-invocation: true
 allowed-tools: Bash, Read
-argument-hint: "[--apply-import | --apply-distribute | --apply-all] (sin args = solo audita)"
+argument-hint: "[--apply-import | --apply-distribute | --apply-user-level | --apply-all] (sin args = solo audita)"
 ---
 
-# Audit Skills Sync — verificación bidireccional repo ↔ proyectos
+# Audit Skills Sync — verificación bidireccional repo ↔ proyectos ↔ $HOME
 
 Audita la sincronización del catálogo de skills/workflows entre:
-- **Repo ops** (`/home/ryzepeck/webapps/ops/vps/workflows/{.claude,.agents,.windsurf}/`)
+- **Repo ops** (`<ops>/workflows/{.claude,.agents,.windsurf,.local-skills,.user-level}/`)
 - **Proyectos del fleet** (`<proyecto>/.claude/skills/`, `<proyecto>/.agents/skills/`, `<proyecto>/.windsurf/workflows/`)
+- **User-level** (`$HOME/.claude/skills/`, `$HOME/.claude/settings.json`, `$HOME/.codex/config.toml`)
 
 Modo default: solo reporta. Argumentos opcionales aplican correcciones.
 
@@ -18,7 +19,8 @@ Modo default: solo reporta. Argumentos opcionales aplican correcciones.
 > - `/audit-skills-sync` — solo audita y reporta (no modifica nada).
 > - `/audit-skills-sync --apply-import` — importa al repo desde proyectos (cuando proyectos tienen skills nuevos no en repo).
 > - `/audit-skills-sync --apply-distribute` — distribuye del repo a proyectos (cuando proyectos tienen skills viejos/faltantes).
-> - `/audit-skills-sync --apply-all` — ambos en orden seguro (import primero, distribute después).
+> - `/audit-skills-sync --apply-user-level` — sincroniza `$HOME/.{claude,codex}/` desde `workflows/.user-level/` (skills, settings.json, config.toml).
+> - `/audit-skills-sync --apply-all` — los 3 en orden seguro (import → distribute → user-level).
 
 ---
 
@@ -61,6 +63,25 @@ grep -E "➕|🔄" /tmp/audit-sync-check.log | sort | uniq -c | sort -rn | head 
 
 ---
 
+## Phase 3b — User-level: ¿$HOME al día con `workflows/.user-level/`?
+
+Audita la 4ª capa: skills + settings.json + config.toml en `$HOME/.{claude,codex}/` contra el snapshot central. Los **26 skills baseline user-level** + `vuln-audit/` + `settings.json` + `config.toml` deben coincidir cross-machine.
+
+```bash
+cd /home/ryzepeck/webapps/ops/vps
+bash scripts/maintenance/sync-user-level.sh --check 2>&1 | tee /tmp/audit-userlevel-check.log
+
+# Extraer pendientes
+echo ""
+echo "=== Resumen sección C (user-level) ==="
+grep -E "➕|🔄|⚠️" /tmp/audit-userlevel-check.log | head -20
+grep -E "Identicos:|Pendientes:" /tmp/audit-userlevel-check.log
+```
+
+Hashes esperados iguales en dev y ambos VPS para `settings.json`, `config.toml`, y todos los archivos en `~/.claude/skills/`. Las exclusiones (`auth.json`, `history.jsonl`, `cache/`, `sessions/`, `settings.local.json`, etc.) NO se auditan — son estado local por máquina.
+
+---
+
 ## Phase 4 — Síntesis de hallazgos
 
 Después de ejecutar Phases 1-3, presentar un reporte estructurado:
@@ -82,6 +103,10 @@ Acción sugerida: revisar diff y decidir
 
 ## D. Skills propios (informativo, no acción)
 [lista de skills en examples/, qué proyecto los originó]
+
+## E. User-level drift ($HOME vs workflows/.user-level/)
+[archivos en $HOME desactualizados o faltantes vs el snapshot central]
+Acción sugerida: bash scripts/maintenance/sync-user-level.sh --apply
 ```
 
 ---
@@ -98,19 +123,26 @@ case "$ARGUMENTS" in
         echo "▸ Distribuyendo skills a proyectos..."
         bash scripts/maintenance/sync-shared-skills.sh
         ;;
+    --apply-user-level)
+        echo "▸ Sincronizando user-level (\$HOME) desde workflows/.user-level/..."
+        bash scripts/maintenance/sync-user-level.sh --apply
+        ;;
     --apply-all)
         echo "▸ Phase 1: importar al repo..."
         bash scripts/maintenance/import-skills-from-projects.sh
         echo ""
         echo "▸ Phase 2: distribuir a proyectos..."
         bash scripts/maintenance/sync-shared-skills.sh
+        echo ""
+        echo "▸ Phase 3: sincronizar user-level (\$HOME)..."
+        bash scripts/maintenance/sync-user-level.sh --apply
         ;;
     "")
         echo "ℹ️  Modo solo-audita (sin --apply-*). Re-invocar con un argumento para aplicar."
         ;;
     *)
         echo "❌ Argumento desconocido: $ARGUMENTS"
-        echo "Argumentos válidos: --apply-import | --apply-distribute | --apply-all"
+        echo "Argumentos válidos: --apply-import | --apply-distribute | --apply-user-level | --apply-all"
         exit 1
         ;;
 esac
@@ -126,11 +158,13 @@ Si se ejecutó cualquier `--apply-*`:
 echo "▸ Re-corriendo audit para verificar idempotencia..."
 bash scripts/maintenance/import-skills-from-projects.sh --check 2>&1 | grep -E "Resumen:|Final:" | head -2
 bash scripts/maintenance/sync-shared-skills.sh --check 2>&1 | grep -E "Summary:|Resumen" | head -2
+bash scripts/maintenance/sync-user-level.sh --check 2>&1 | grep -E "Identicos:|Pendientes:" | head -2
 ```
 
 Esperado tras `--apply-all`:
 - Import: `CREATE=0  OVERWRITE=0  OK_ALIGNED=N`
 - Sync: `applied=0` o ningún `➕` / `🔄`
+- User-level: `Pendientes: 0`
 
 ---
 
