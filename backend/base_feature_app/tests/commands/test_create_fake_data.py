@@ -250,12 +250,12 @@ def test_create_campaigns_creates_completed_campaign():
 
 
 @pytest.mark.django_db
-@patch('base_feature_app.management.commands.create_campaigns.urllib.request.urlopen',
-       side_effect=Exception('Network error'))
-def test_create_campaigns_evidence_images_skipped_on_network_failure(mock_urlopen):
+def test_create_campaigns_evidence_images_skipped_on_network_failure():
     """Network failures in _add_evidence_images are silently skipped; campaigns still created."""
     call_command('create_users', '--count', '4')
     call_command('create_shelters', '--count', '2')
-    call_command('create_campaigns', '--count', '3')
+    with patch('base_feature_app.management.commands.create_campaigns.urllib.request.urlopen',
+               side_effect=Exception('Network error')):
+        call_command('create_campaigns', '--count', '3')
 
     assert Campaign.objects.count() >= 1

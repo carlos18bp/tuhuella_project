@@ -11,7 +11,7 @@ import { mockShelter } from '@/lib/__tests__/fixtures';
 jest.mock('@/lib/hooks/useRequireAuth', () => ({ useRequireAuth: jest.fn() }));
 jest.mock('@/lib/stores/shelterStore', () => ({ useShelterStore: jest.fn() }));
 jest.mock('@/lib/services/http', () => ({
-  api: { get: jest.fn() },
+  api: { get: jest.fn(), patch: jest.fn() },
 }));
 
 const mockUseShelterStore = useShelterStore as unknown as jest.Mock;
@@ -100,6 +100,7 @@ describe('ShelterConfigPage', () => {
 
   it('calls updateShelter on form submission', async () => {
     mockApi.get.mockResolvedValueOnce({ data: [mockShelter] });
+    mockApi.patch.mockResolvedValueOnce({ data: mockShelter });
     render(<ShelterConfigPage />);
 
     await waitFor(() => {
@@ -109,12 +110,16 @@ describe('ShelterConfigPage', () => {
     await userEvent.click(screen.getByRole('button', { name: /Guardar/i }));
 
     await waitFor(() => {
-      expect(mockUpdateShelter).toHaveBeenCalledWith(1, expect.any(Object));
+      expect(mockApi.patch).toHaveBeenCalledWith(
+        expect.stringContaining('/'),
+        expect.any(FormData),
+      );
     });
   });
 
   it('shows success message after save', async () => {
     mockApi.get.mockResolvedValueOnce({ data: [mockShelter] });
+    mockApi.patch.mockResolvedValueOnce({ data: mockShelter });
     render(<ShelterConfigPage />);
 
     await waitFor(() => {
@@ -164,6 +169,7 @@ describe('ShelterConfigPage', () => {
 
   it('clears success message when form field is edited after save', async () => {
     mockApi.get.mockResolvedValueOnce({ data: [mockShelter] });
+    mockApi.patch.mockResolvedValueOnce({ data: mockShelter });
     render(<ShelterConfigPage />);
 
     await waitFor(() => {
@@ -184,7 +190,7 @@ describe('ShelterConfigPage', () => {
 
   it('shows Guardando text while saving', async () => {
     let resolveUpdate!: (v: any) => void;
-    mockUpdateShelter.mockReturnValueOnce(new Promise((res) => { resolveUpdate = res; }));
+    mockApi.patch.mockReturnValueOnce(new Promise((res) => { resolveUpdate = res; }));
     mockApi.get.mockResolvedValueOnce({ data: [mockShelter] });
     render(<ShelterConfigPage />);
 
@@ -198,6 +204,6 @@ describe('ShelterConfigPage', () => {
       expect(screen.getByRole('button', { name: /Guardando/i })).toBeDisabled();
     });
 
-    resolveUpdate(mockShelter);
+    resolveUpdate({ data: mockShelter });
   });
 });
