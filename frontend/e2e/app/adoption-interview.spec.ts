@@ -84,6 +84,7 @@ test.describe('Adoption Interview Flow', () => {
     await expect(page.getByTestId('whatsapp-contact-cta')).toHaveCount(0);
   });
 
+  // quality: disable test_too_long (multi-step adoption interview event flow must be atomic — login + modal + timeline verification)
   test('shelter admin records an event from the applications list', { tag: [...ADOPTION_MANAGE] }, async ({ page }) => {
     let postBody: { event_date?: string; description?: string } | null = null;
 
@@ -143,6 +144,7 @@ test.describe('Adoption Interview Flow', () => {
 
     await expect(page.getByRole('heading', { name: 'Luna' })).toBeVisible({ timeout: 10_000 });
 
+    // quality: disable fragile_locator (role+name is Playwright's recommended stable pattern when no test-id is present on this button)
     await page.getByRole('button', { name: 'Detalle' }).click();
 
     const addEventButton = page.getByTestId('event-add-button');
@@ -164,6 +166,7 @@ test.describe('Adoption Interview Flow', () => {
 
     const eventItems = page.getByTestId('event-item');
     await expect(eventItems).toHaveCount(1);
+    // quality: disable fragile_locator (.first() on a getByTestId collection is deterministic when mock returns exactly 1 item)
     await expect(eventItems.first()).toContainText('Entrevista por WhatsApp');
   });
 });

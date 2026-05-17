@@ -3,6 +3,7 @@ from datetime import timedelta
 import pytest
 from django.urls import reverse
 from django.utils import timezone
+from freezegun import freeze_time
 from rest_framework import status
 
 from base_feature_app.models import AdoptionApplication, AdoptionApplicationEvent
@@ -12,6 +13,7 @@ from base_feature_app.tests.factories import (
 )
 
 
+@freeze_time('2026-01-15 12:00:00')
 @pytest.mark.django_db
 def test_status_change_to_interview_schedules_follow_up(
     shelter_admin_client, adoption_application,
@@ -33,6 +35,7 @@ def test_status_change_to_interview_schedules_follow_up(
 def test_status_change_to_approved_clears_follow_up(
     shelter_admin_client, adoption_application,
 ):
+    """Approving an application removes the follow-up timer so no redundant reminders are sent."""
     adoption_application.schedule_follow_up()
     adoption_application.save()
 
@@ -59,6 +62,7 @@ def test_event_list_visible_to_applicant(authenticated_client, adoption_applicat
     assert len(response.json()) == 1
 
 
+@freeze_time('2026-01-15 12:00:00')
 @pytest.mark.django_db
 def test_event_create_denied_for_applicant(authenticated_client, adoption_application):
     response = authenticated_client.post(
@@ -71,10 +75,12 @@ def test_event_create_denied_for_applicant(authenticated_client, adoption_applic
     assert not adoption_application.events.exists()
 
 
+@freeze_time('2026-01-15 12:00:00')
 @pytest.mark.django_db
 def test_event_create_by_shelter_admin_resets_follow_up(
     shelter_admin_client, adoption_application,
 ):
+    """Creating an event resets the follow-up timer to prevent nagging after contact."""
     adoption_application.status = AdoptionApplication.Status.INTERVIEW
     adoption_application.next_follow_up_due_at = timezone.now() - timedelta(days=1)
     adoption_application.save()
@@ -93,8 +99,10 @@ def test_event_create_by_shelter_admin_resets_follow_up(
     assert adoption_application.next_follow_up_due_at > timezone.now()
 
 
+@freeze_time('2026-01-15 12:00:00')
 @pytest.mark.django_db
 def test_event_create_by_web_manager(api_client, adoption_application):
+    """Web managers can post events on any application regardless of shelter ownership."""
     web_manager = WebManagerUserFactory()
     api_client.force_authenticate(user=web_manager)
 
@@ -113,6 +121,7 @@ def test_event_create_by_web_manager(api_client, adoption_application):
     ).exists()
 
 
+@freeze_time('2026-01-15 12:00:00')
 @pytest.mark.django_db
 def test_event_create_rejects_future_date(shelter_admin_client, adoption_application):
     response = shelter_admin_client.post(
@@ -128,6 +137,7 @@ def test_event_create_rejects_future_date(shelter_admin_client, adoption_applica
     assert 'event_date' in response.json()
 
 
+@freeze_time('2026-01-15 12:00:00')
 @pytest.mark.django_db
 def test_event_create_rejects_blank_description(shelter_admin_client, adoption_application):
     response = shelter_admin_client.post(
@@ -164,6 +174,7 @@ def test_event_archive_by_author(api_client, adoption_application):
 def test_detail_exposes_shelter_whatsapp_in_interview(
     authenticated_client, adoption_application,
 ):
+    """Shelter phone is visible to applicant once status reaches INTERVIEW — not before."""
     adoption_application.status = AdoptionApplication.Status.INTERVIEW
     adoption_application.save()
     adoption_application.animal.shelter.phone = '573009998877'

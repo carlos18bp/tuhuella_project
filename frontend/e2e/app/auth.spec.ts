@@ -14,8 +14,8 @@ test.describe('Auth — Sign-in form', () => {
 
     await expect(page.getByRole('heading', { name: /Iniciar sesión/i, level: 1 })).toBeVisible({ timeout: 10_000 });
 
-    const emailInput = page.locator('#signin-email');
-    const passwordInput = page.locator('#signin-password');
+    const emailInput = page.getByLabel('Correo electrónico');
+    const passwordInput = page.getByLabel('Contraseña', { exact: true });
     await expect(emailInput).toBeVisible();
     await expect(passwordInput).toBeVisible();
 
@@ -57,8 +57,8 @@ test.describe('Auth — Login invalid', () => {
     await page.goto('/sign-in');
     await waitForPageLoad(page);
 
-    await page.locator('#signin-email').fill('wrong@example.com');
-    await page.locator('#signin-password').fill('badpassword');
+    await page.getByLabel('Correo electrónico').fill('wrong@example.com');
+    await page.getByLabel('Contraseña', { exact: true }).fill('badpassword');
     await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click();
 
     await expect(page.getByText(/Credenciales inválidas/i)).toBeVisible({ timeout: 10_000 });
@@ -73,10 +73,10 @@ test.describe('Auth — Sign-up form', () => {
 
     await expect(page.getByRole('heading', { name: /crear cuenta/i, level: 1 })).toBeVisible({ timeout: 10_000 });
 
-    await expect(page.locator('#signup-firstname')).toBeVisible();
-    await expect(page.locator('#signup-lastname')).toBeVisible();
-    await expect(page.locator('input[type="email"]').first()).toBeVisible();
-    await expect(page.locator('input[type="password"]').first()).toBeVisible();
+    await expect(page.getByLabel('Nombre')).toBeVisible();
+    await expect(page.getByLabel('Apellido')).toBeVisible();
+    await expect(page.getByLabel('Correo electrónico')).toBeVisible();
+    await expect(page.getByLabel('Contraseña', { exact: true })).toBeVisible();
     await expect(page.getByRole('checkbox')).toBeVisible();
   });
 
@@ -84,12 +84,11 @@ test.describe('Auth — Sign-up form', () => {
     await page.goto('/sign-up');
     await waitForPageLoad(page);
 
-    await page.locator('#signup-firstname').fill('Test');
-    await page.locator('#signup-lastname').fill('User');
-    await page.locator('input[type="email"]').first().fill('newuser@example.com');
-    const passwords = page.locator('input[type="password"]');
-    await passwords.nth(0).fill('Str0ngPass!');
-    await passwords.nth(1).fill('Str0ngPass!');
+    await page.getByLabel('Nombre').fill('Test');
+    await page.getByLabel('Apellido').fill('User');
+    await page.getByLabel('Correo electrónico').fill('newuser@example.com');
+    await page.getByLabel('Contraseña', { exact: true }).fill('Str0ngPass!');
+    await page.getByLabel('Confirmar contraseña').fill('Str0ngPass!');
 
     await page.getByRole('button', { name: /crear cuenta/i }).click();
 
@@ -101,12 +100,11 @@ test.describe('Auth — Sign-up form', () => {
     await page.goto('/sign-up');
     await waitForPageLoad(page);
 
-    await page.locator('#signup-firstname').fill('Test');
-    await page.locator('#signup-lastname').fill('User');
-    await page.locator('input[type="email"]').first().fill('newuser@example.com');
-    const passwords = page.locator('input[type="password"]');
-    await passwords.nth(0).fill('Str0ngPass!');
-    await passwords.nth(1).fill('DifferentPass!');
+    await page.getByLabel('Nombre').fill('Test');
+    await page.getByLabel('Apellido').fill('User');
+    await page.getByLabel('Correo electrónico').fill('newuser@example.com');
+    await page.getByLabel('Contraseña', { exact: true }).fill('Str0ngPass!');
+    await page.getByLabel('Confirmar contraseña').fill('DifferentPass!');
     await page.getByRole('checkbox').check();
 
     await page.getByRole('button', { name: /crear cuenta/i }).click();

@@ -1,6 +1,7 @@
 import pytest
 from django.core.management import call_command
 from django.utils import timezone
+from freezegun import freeze_time
 
 from base_feature_app.models import (
     AdoptionApplication,
@@ -54,6 +55,7 @@ def test_create_adoption_events_only_for_interview_and_approved():
     assert not AdoptionApplicationEvent.objects.filter(application=rejected_app).exists()
 
 
+@freeze_time('2026-01-15 12:00:00')
 @pytest.mark.django_db
 def test_create_adoption_events_event_date_not_in_future():
     """All generated events have event_date <= now (serializer validator rejects future dates)."""

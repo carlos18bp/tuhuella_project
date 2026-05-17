@@ -15,9 +15,12 @@ const mockUseAdoptionStore = useAdoptionStore as unknown as jest.Mock;
 const setupMock = (overrides: Record<string, unknown> = {}) => {
   const defaults: Record<string, unknown> = {
     applications: [],
+    applicationsById: {},
     loading: false,
     fetchApplications: jest.fn(),
+    fetchApplication: jest.fn().mockResolvedValue({}),
     updateStatus: jest.fn().mockResolvedValue({}),
+    createEvent: jest.fn().mockResolvedValue({}),
   };
   const state = { ...defaults, ...overrides };
   mockUseAdoptionStore.mockImplementation((sel: any) => sel(state));
