@@ -15,7 +15,7 @@ test.describe('Auth — Sign-in form', () => {
     await expect(page.getByRole('heading', { name: /Iniciar sesión/i, level: 1 })).toBeVisible({ timeout: 10_000 });
 
     const emailInput = page.getByLabel('Correo electrónico');
-    const passwordInput = page.getByLabel('Contraseña');
+    const passwordInput = page.getByLabel('Contraseña', { exact: true });
     await expect(emailInput).toBeVisible();
     await expect(passwordInput).toBeVisible();
 
@@ -58,7 +58,7 @@ test.describe('Auth — Login invalid', () => {
     await waitForPageLoad(page);
 
     await page.getByLabel('Correo electrónico').fill('wrong@example.com');
-    await page.getByLabel('Contraseña').fill('badpassword');
+    await page.getByLabel('Contraseña', { exact: true }).fill('badpassword');
     await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click();
 
     await expect(page.getByText(/Credenciales inválidas/i)).toBeVisible({ timeout: 10_000 });
@@ -76,7 +76,7 @@ test.describe('Auth — Sign-up form', () => {
     await expect(page.getByLabel('Nombre')).toBeVisible();
     await expect(page.getByLabel('Apellido')).toBeVisible();
     await expect(page.getByLabel('Correo electrónico')).toBeVisible();
-    await expect(page.getByLabel('Contraseña')).toBeVisible();
+    await expect(page.getByLabel('Contraseña', { exact: true })).toBeVisible();
     await expect(page.getByRole('checkbox')).toBeVisible();
   });
 
@@ -87,7 +87,7 @@ test.describe('Auth — Sign-up form', () => {
     await page.getByLabel('Nombre').fill('Test');
     await page.getByLabel('Apellido').fill('User');
     await page.getByLabel('Correo electrónico').fill('newuser@example.com');
-    await page.getByLabel('Contraseña').fill('Str0ngPass!');
+    await page.getByLabel('Contraseña', { exact: true }).fill('Str0ngPass!');
     await page.getByLabel('Confirmar contraseña').fill('Str0ngPass!');
 
     await page.getByRole('button', { name: /crear cuenta/i }).click();
@@ -103,7 +103,7 @@ test.describe('Auth — Sign-up form', () => {
     await page.getByLabel('Nombre').fill('Test');
     await page.getByLabel('Apellido').fill('User');
     await page.getByLabel('Correo electrónico').fill('newuser@example.com');
-    await page.getByLabel('Contraseña').fill('Str0ngPass!');
+    await page.getByLabel('Contraseña', { exact: true }).fill('Str0ngPass!');
     await page.getByLabel('Confirmar contraseña').fill('DifferentPass!');
     await page.getByRole('checkbox').check();
 
