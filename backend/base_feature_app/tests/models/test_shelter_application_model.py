@@ -34,6 +34,7 @@ def test_create_shelter_application_defaults_to_submitted():
 
 @pytest.mark.django_db
 def test_unique_active_application_per_user():
+    # quality: disable no_assertions (pytest.raises IS the assertion — verifies IntegrityError on duplicate active application)
     user = UserFactory()
     _make_app(user)
     with pytest.raises(IntegrityError):

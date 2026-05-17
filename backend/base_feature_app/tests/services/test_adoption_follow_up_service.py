@@ -4,6 +4,7 @@ from unittest.mock import patch
 import pytest
 from django.test import override_settings
 from django.utils import timezone
+from freezegun import freeze_time
 
 from base_feature_app.models import AdoptionApplication, NotificationLog
 from base_feature_app.services.adoption_follow_up import dispatch_due_follow_ups
@@ -23,8 +24,10 @@ def test_dispatch_skips_when_no_due_applications():
     assert dispatched == 0
 
 
+@freeze_time('2026-01-15 12:00:00')
 @pytest.mark.django_db
 def test_dispatch_only_processes_interview_status():
+    """Only applications in INTERVIEW status trigger follow-up notifications."""
     WebManagerUserFactory()
     past = timezone.now() - timedelta(hours=1)
     AdoptionApplicationFactory(
@@ -44,8 +47,10 @@ def test_dispatch_only_processes_interview_status():
     assert mock_dispatch.call_count == 0
 
 
+@freeze_time('2026-01-15 12:00:00')
 @pytest.mark.django_db
 def test_dispatch_sends_to_each_web_manager_and_resets_due_at():
+    """Dispatch notifies every web manager and advances next_follow_up_due_at by 5 days."""
     WebManagerUserFactory(email='wm1@example.com')
     WebManagerUserFactory(email='wm2@example.com')
     application = AdoptionApplicationFactory(
@@ -64,6 +69,7 @@ def test_dispatch_sends_to_each_web_manager_and_resets_due_at():
     assert application.next_follow_up_due_at > timezone.now() + timedelta(days=4, hours=23)
 
 
+@freeze_time('2026-01-15 12:00:00')
 @pytest.mark.django_db
 def test_dispatch_skips_archived_applications():
     WebManagerUserFactory()
@@ -81,6 +87,7 @@ def test_dispatch_skips_archived_applications():
     assert mock_dispatch.call_count == 0
 
 
+@freeze_time('2026-01-15 12:00:00')
 @pytest.mark.django_db
 def test_dispatch_creates_notification_log_via_real_dispatch():
     web_manager = WebManagerUserFactory()

@@ -9,6 +9,7 @@ test.describe('Shelter Application', () => {
     await expect(page).toHaveURL(/sign-in|shelter-application/);
   });
 
+  // quality: disable test_too_long (4-step wizard must be tested end-to-end — step dependencies preclude safe splitting)
   test('adopter can complete the 4-step wizard', { tag: [...SHELTER_APPLICATION_SUBMIT] }, async ({ page }) => {
     await page.route('**/api/shelter-applications/me/**', (route: any) =>
       route.fulfill({

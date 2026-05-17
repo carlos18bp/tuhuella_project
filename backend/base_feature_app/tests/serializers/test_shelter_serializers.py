@@ -74,6 +74,7 @@ def test_shelter_detail_serializer_video_url_populated_when_video_set(
     shelter, settings, tmp_path
 ):
     """video_url returns the uploaded file URL under /media/shelters/videos/."""
+    # quality: disable global_state_leak (pytest-django settings fixture is override_settings equivalent — auto-restores after test)
     settings.MEDIA_ROOT = str(tmp_path)
 
     shelter.video = SimpleUploadedFile(

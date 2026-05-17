@@ -63,6 +63,7 @@ def test_anonymous_cannot_submit_application(api_client):
 
 @pytest.mark.django_db
 def test_cannot_submit_when_active_application_exists(adopter_client, adopter_user):
+    """400 prevents duplicate active shelter applications — enforced at API layer."""
     ShelterApplication.objects.create(
         applicant=adopter_user,
         shelter_name='Existing',
@@ -97,6 +98,7 @@ def test_my_application_returns_404_when_none(adopter_client):
 
 @pytest.mark.django_db
 def test_my_application_returns_latest(adopter_client, adopter_user):
+    """GET /me/ returns the most-recently created application when multiple exist."""
     app = ShelterApplication.objects.create(
         applicant=adopter_user,
         shelter_name='Mine',
@@ -118,6 +120,7 @@ def test_my_application_returns_latest(adopter_client, adopter_user):
 
 @pytest.mark.django_db
 def test_approve_creates_shelter_and_promotes_user(web_manager_client, adopter_user):
+    # quality: disable too_many_assertions (integration flow verifies coordinated state across ShelterApplication, Shelter and User — setup duplication outweighs split benefit)
     application = ShelterApplication.objects.create(
         applicant=adopter_user,
         shelter_name='New Shelter',
@@ -195,6 +198,7 @@ def test_reject_requires_reason(web_manager_client, adopter_user):
 
 @pytest.mark.django_db
 def test_reject_records_reason_and_does_not_change_role(web_manager_client, adopter_user):
+    """Rejection stores the reason and leaves the applicant's role unchanged — no Shelter created."""
     application = ShelterApplication.objects.create(
         applicant=adopter_user,
         shelter_name='X', description_es='x', city='x', phone='x',
