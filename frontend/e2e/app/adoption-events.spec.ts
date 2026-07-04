@@ -50,7 +50,7 @@ async function mockShelterApplications(page: Page) {
         }),
       });
     }
-    if (/\/adoptions\/5\/(\?.*)?$/.test(url)) {
+    if (url.includes('/adoptions/5/')) {
       return route.fulfill({
         status: 200,
         contentType: 'application/json',

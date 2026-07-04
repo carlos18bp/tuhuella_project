@@ -27,6 +27,7 @@ def test_topic_slug_must_be_unique():
     with pytest.raises(IntegrityError):
         with transaction.atomic():
             FAQTopicFactory(slug='adopcion')
+    assert FAQTopic.objects.filter(slug='adopcion').count() == 1
 
 
 @pytest.mark.django_db

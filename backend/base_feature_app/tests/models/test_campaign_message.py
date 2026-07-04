@@ -1,5 +1,6 @@
+from datetime import datetime, timezone as dt_timezone
+
 import pytest
-from django.utils import timezone
 
 from base_feature_app.models import CampaignMessage
 from base_feature_app.tests.factories import CampaignFactory, CampaignMessageFactory
@@ -43,7 +44,7 @@ def test_messages_ordered_by_creation_time():
     older = CampaignMessageFactory(campaign=campaign, body='primero')
     CampaignMessageFactory(campaign=campaign, body='segundo')
     CampaignMessage.objects.filter(pk=older.pk).update(
-        created_at=timezone.now() - timezone.timedelta(hours=1),
+        created_at=datetime(2020, 1, 1, 12, 0, tzinfo=dt_timezone.utc),
     )
 
     bodies = list(campaign.messages.values_list('body', flat=True))

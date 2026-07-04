@@ -123,7 +123,7 @@ test.describe('Adoption application detail', () => {
     async ({ page }) => {
       await page.route('**/api/adoptions/**', (route: Route) => {
         const url = route.request().url();
-        if (/\/adoptions\/5\/(\?.*)?$/.test(url)) {
+        if (url.includes('/adoptions/5/')) {
           return route.fulfill({
             status: 200,
             contentType: 'application/json',
