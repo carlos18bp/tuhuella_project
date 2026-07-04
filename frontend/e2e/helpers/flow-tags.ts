@@ -214,3 +214,16 @@ export const AUTH_PASSWORD_CHANGE = ['@flow:auth-password-change', '@module:auth
 // ── Adopter Intent (shelter invites) ──
 export const SHELTER_INVITE_SEND = ['@flow:shelter-invite-send', '@module:adopter-intent', '@priority:P3'];
 export const SHELTER_INVITE_RESPOND = ['@flow:shelter-invite-respond', '@module:adopter-intent', '@priority:P3'];
+
+// ── Campaign approval messaging (shelter + web-manager) ──
+export const SHELTER_PANEL_CAMPAIGN_MESSAGES = ['@flow:shelter-panel-campaign-messages', '@module:shelter-panel', '@priority:P2'];
+export const WEB_MANAGER_CAMPAIGN_MESSAGES = ['@flow:web-manager-campaign-messages', '@module:web-manager', '@priority:P2'];
+
+// ── Notification (mark all read) ──
+export const NOTIFICATION_MARK_ALL_READ = ['@flow:notification-mark-all-read', '@module:navigation', '@priority:P3'];
+
+// ── Campaign (completed updates feed) ──
+export const CAMPAIGN_UPDATES_FEED = ['@flow:campaign-updates-feed', '@module:campaign', '@priority:P3'];
+
+// ── Profile (recent activity timeline) ──
+export const PROFILE_ACTIVITY_FEED = ['@flow:profile-activity-feed', '@module:adopter', '@priority:P3'];

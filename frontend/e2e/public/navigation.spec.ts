@@ -10,6 +10,7 @@ import {
   NAVIGATION_FOOTER,
   LOCALE_SWITCH,
   NOTIFICATION_BELL,
+  NOTIFICATION_MARK_ALL_READ,
 } from '../helpers/flow-tags';
 
 test.describe('Navigation', () => {
@@ -232,4 +233,53 @@ test.describe('Notification Bell (authenticated)', () => {
     // Verify dropdown has the notifications title header
     await expect(dropdown.getByText('Notificaciones', { exact: true })).toBeVisible();
   });
+});
+
+test.describe('Notification Mark All Read', () => {
+  test(
+    'user marks all notifications as read from the bell dropdown',
+    { tag: [...NOTIFICATION_MARK_ALL_READ] },
+    async ({ page }) => {
+      let markAllReadCalled = false;
+
+      const logs = {
+        results: [
+          { id: 1, event_key: 'adoption_submitted', channel: 'in_app', status: 'sent', metadata: {}, is_read: false, sent_at: '2026-05-01T10:00:00Z', created_at: '2026-05-01T10:00:00Z' },
+          { id: 2, event_key: 'donation_paid', channel: 'in_app', status: 'sent', metadata: {}, is_read: false, sent_at: '2026-05-02T10:00:00Z', created_at: '2026-05-02T10:00:00Z' },
+        ],
+        unread_count: 3,
+      };
+
+      // General notifications handler (covers logs list); register first.
+      await page.route('**/api/notifications/**', (route) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(logs) }),
+      );
+      // Unread count must be > 0 for the mark-all-read control to render; register after the general one.
+      await page.route('**/api/notifications/unread-count/**', (route) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ unread_count: 3 }) }),
+      );
+      // Mark-all-read POST; register last so it wins for its path.
+      await page.route('**/api/notifications/logs/mark-all-read/**', (route) => {
+        markAllReadCalled = true;
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true }) });
+      });
+
+      await loginAndNavigate(page, 'adopter', '/');
+      await waitForPageLoad(page);
+
+      const bellButton = page.getByRole('button', { name: /Notificaciones/i });
+      await expect(bellButton).toBeVisible({ timeout: 10_000 });
+      await bellButton.click();
+
+      const dropdown = page.getByTestId('notification-dropdown');
+      await expect(dropdown).toBeVisible({ timeout: 5000 });
+
+      const markAllButton = dropdown.getByRole('button', { name: /Marcar todo leído/i });
+      await expect(markAllButton).toBeVisible({ timeout: 5000 });
+      await markAllButton.click();
+
+      await expect.poll(() => markAllReadCalled, { timeout: 5_000 }).toBe(true);
+      await expect(markAllButton).toBeHidden({ timeout: 10_000 });
+    },
+  );
 });

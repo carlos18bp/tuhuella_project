@@ -1,6 +1,6 @@
 {
-  "version": "5.9.0",
-  "lastUpdated": "2026-05-03",
+  "version": "5.10.0",
+  "lastUpdated": "2026-07-04",
   "flows": {
     "home-loads": {
       "name": "Home page loads",
@@ -1215,7 +1215,10 @@
       ],
       "priority": "P3",
       "description": "Shelter admin opens an existing animal record from /shelter/animals and updates its fields (description, photos, health info, status) via the edit form at /shelter/animals/[id] or an inline modal.",
-      "expectedSpecs": 1
+      "expectedSpecs": 0,
+      "knownGaps": [
+        "No reachable UI as of 2026-07-04: /shelter/animals is a read-only list linking to the public animal detail; animalStore.updateAnimal and the /shelter/animals/[id] edit route are unused/absent. Restore expectedSpecs to 1 when an edit form/route lands."
+      ]
     },
     "shelter-panel-animal-archive": {
       "name": "Shelter archive animal",
@@ -1225,7 +1228,10 @@
       ],
       "priority": "P3",
       "description": "Shelter admin archives (soft-deletes) an animal from /shelter/animals with a confirmation step; archived animals are hidden from public listings and excluded from shelter stats.",
-      "expectedSpecs": 1
+      "expectedSpecs": 0,
+      "knownGaps": [
+        "No reachable UI as of 2026-07-04: /shelter/animals has no archive/delete control and animalStore has no archive method (ANIMAL_DELETE unused). Restore expectedSpecs to 1 when an archive control is added."
+      ]
     },
     "auth-password-change": {
       "name": "Authenticated password change",
@@ -1239,7 +1245,10 @@
       ],
       "priority": "P2",
       "description": "Authenticated user changes their password via PATCH /api/auth/update_password/ from the profile edit page; requires current password confirmation and new password strength validation before saving.",
-      "expectedSpecs": 1
+      "expectedSpecs": 0,
+      "knownGaps": [
+        "No reachable UI as of 2026-07-04: /my-profile/edit has no password fields and API_ENDPOINTS.UPDATE_PASSWORD is referenced by no page/store (dead endpoint). Restore expectedSpecs to 1 when a password-change form is wired up."
+      ]
     },
     "shelter-invite-send": {
       "name": "Shelter admin sends adopter invite",
@@ -1249,7 +1258,10 @@
       ],
       "priority": "P3",
       "description": "Shelter admin browses public adopter intents at /looking-to-adopt, views a matching profile, and sends a shelter invite via POST /api/shelter-invites/create/; adopter receives an in-app and email notification.",
-      "expectedSpecs": 1
+      "expectedSpecs": 0,
+      "knownGaps": [
+        "No reachable UI as of 2026-07-04: /looking-to-adopt is a static info page with no adopter-intent cards or invite button; SHELTER_INVITE_CREATE is referenced by no page/store. Restore expectedSpecs to 1 when the shelter invite UI lands."
+      ]
     },
     "shelter-invite-respond": {
       "name": "Adopter responds to shelter invite",
@@ -1259,6 +1271,68 @@
       ],
       "priority": "P3",
       "description": "Adopter with pending shelter invites sees invite count on /my-profile stats banner, navigates to manage invites, and accepts or rejects via PATCH /api/shelter-invites/[pk]/respond/; invite count updates accordingly.",
+      "expectedSpecs": 0,
+      "knownGaps": [
+        "No reachable UI as of 2026-07-04: the /my-profile invites banner links to /my-intent (a dead-end with no accept/reject UI); SHELTER_INVITE_RESPOND is unused by any page/store. Restore expectedSpecs to 1 when a manage-invites screen lands."
+      ]
+    },
+    "shelter-panel-campaign-messages": {
+      "name": "Shelter reads and sends campaign approval messages",
+      "module": "shelter-panel",
+      "roles": [
+        "shelter_admin"
+      ],
+      "priority": "P2",
+      "description": "Shelter admin opens a campaign detail at /shelter/campaigns/[id] and reads/sends messages in the approval thread with the platform team via GET/POST /api/campaigns/[pk]/messages/.",
+      "expectedSpecs": 1
+    },
+    "web-manager-campaign-messages": {
+      "name": "Web manager reads and sends campaign approval messages",
+      "module": "web-manager",
+      "roles": [
+        "web_manager",
+        "admin"
+      ],
+      "priority": "P2",
+      "description": "Web manager or admin opens a campaign detail at /web-manager/campaigns/[id] and reads/sends messages in the approval thread with the shelter via GET/POST /api/campaigns/[pk]/messages/.",
+      "expectedSpecs": 1
+    },
+    "notification-mark-all-read": {
+      "name": "Mark all notifications as read",
+      "module": "navigation",
+      "roles": [
+        "adopter",
+        "shelter_admin",
+        "web_manager",
+        "admin",
+        "veterinarian"
+      ],
+      "priority": "P3",
+      "description": "Authenticated user opens the notification bell dropdown in the header and clicks 'mark all read', clearing the unread badge via POST /api/notifications/logs/mark-all-read/.",
+      "expectedSpecs": 1
+    },
+    "campaign-updates-feed": {
+      "name": "Read updates feed on a completed campaign",
+      "module": "campaign",
+      "roles": [
+        "shared"
+      ],
+      "priority": "P3",
+      "description": "Visitor opens a completed campaign detail page at /campaigns/[campaignId] and reads the progress-updates feed loaded via GET /api/updates/.",
+      "expectedSpecs": 1
+    },
+    "profile-activity-feed": {
+      "name": "View recent activity timeline on profile",
+      "module": "adopter",
+      "roles": [
+        "adopter",
+        "shelter_admin",
+        "web_manager",
+        "admin",
+        "veterinarian"
+      ],
+      "priority": "P3",
+      "description": "Authenticated user views the recent-activity timeline (applications, donations, sponsorships, favorites) on /my-profile, populated via GET /api/user/activity/.",
       "expectedSpecs": 1
     }
   }

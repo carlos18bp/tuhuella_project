@@ -20,6 +20,7 @@ import {
   SHELTER_PANEL_CAMPAIGN_DETAIL,
   SHELTER_PANEL_CAMPAIGN_CREATE,
   SHELTER_PANEL_ANIMAL_CREATE,
+  SHELTER_PANEL_CAMPAIGN_MESSAGES,
 } from '../helpers/flow-tags';
 import {
   mockShelterAnimals,
@@ -509,4 +510,46 @@ test.describe('Shelter Panel — Animal Create', () => {
     await page.waitForURL(/animals\/nuevo/, { timeout: 10_000 });
     await expect(page).toHaveURL(/animals\/nuevo/);
   });
+});
+
+test.describe('Shelter Panel Campaign Messages', () => {
+  test(
+    'shelter admin reads and sends a campaign approval message',
+    { tag: [...SHELTER_PANEL_CAMPAIGN_MESSAGES] },
+    async ({ page }) => {
+      let sentBody: string | null = null;
+
+      await page.route('**/api/campaigns/3/**', (route) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockCampaignDetail) }),
+      );
+      // Registered after the general campaign route so it wins for the messages path.
+      await page.route('**/api/campaigns/3/messages/**', (route) => {
+        if (route.request().method() === 'POST') {
+          sentBody = (route.request().postDataJSON() as { body?: string })?.body ?? null;
+          return route.fulfill({
+            status: 201,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              id: 99, campaign: 3, author: 1, author_name: 'María López',
+              author_role: 'shelter_admin', body: sentBody ?? '', is_system: false,
+              created_at: '2026-05-04T10:00:00Z',
+            }),
+          });
+        }
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockCampaignMessages) });
+      });
+
+      await loginAndNavigate(page, 'shelter_admin', '/shelter/campaigns/3');
+
+      await expect(page.getByText(/Conversación/i)).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByText('Falta imagen de portada para la campaña.')).toBeVisible({ timeout: 10_000 });
+
+      const composer = page.getByPlaceholder(/Escribe un mensaje/i);
+      await composer.fill('Ya subí la imagen de portada, quedo atenta.');
+      await page.getByRole('button', { name: 'Enviar' }).click();
+
+      await expect.poll(() => sentBody, { timeout: 5_000 }).toContain('Ya subí la imagen de portada');
+      await expect(page.getByText('Ya subí la imagen de portada, quedo atenta.')).toBeVisible({ timeout: 10_000 });
+    },
+  );
 });
