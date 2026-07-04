@@ -4,6 +4,7 @@ import { loginAndNavigate } from '../fixtures';
 import {
   ADOPTION_DETAIL_ADOPTER,
   ADOPTION_DETAIL_WEB_MANAGER,
+  ADOPTION_FOLLOWUP_REMINDER,
   ADOPTION_WHATSAPP_APPLICANT,
   ADOPTION_WHATSAPP_SHELTER,
 } from '../helpers/flow-tags';
@@ -66,6 +67,30 @@ test.describe('Adoption application detail', () => {
         timeout: 15_000,
       });
       await expect(page.getByText(/adopter@example\.com/)).toBeVisible();
+    },
+  );
+
+  test(
+    'web manager sees the follow-up reminder on an interview application',
+    { tag: [...ADOPTION_FOLLOWUP_REMINDER] },
+    async ({ page }) => {
+      await mockApplicationDetail(page, {
+        id: 5,
+        animal_name: 'Luna',
+        shelter_name: 'Patitas Felices',
+        shelter_city: 'Bogotá',
+        user_email: 'adopter@example.com',
+        status: 'interview',
+        next_follow_up_due_at: '2099-01-01T00:00:00Z',
+        created_at: '2026-01-10T00:00:00Z',
+        events: [],
+      });
+
+      await loginAndNavigate(page, 'web_manager', '/es/web-manager/applications/5');
+
+      await expect(page.getByText('Próximo recordatorio de seguimiento')).toBeVisible({
+        timeout: 15_000,
+      });
     },
   );
 
