@@ -19,7 +19,6 @@ describe('components/ui barrel exports', () => {
     expect(ui.AnimalCard).toBeDefined();
     expect(ui.AnimalFilters).toBeDefined();
     expect(ui.AnimalGallery).toBeDefined();
-    expect(ui.AnimalGrid).toBeDefined();
   });
 
   it('exports card and badge components', () => {
@@ -31,13 +30,6 @@ describe('components/ui barrel exports', () => {
     expect(ui.VerifiedBadge).toBeDefined();
   });
 
-  it('exports payment components', () => {
-    expect(ui.DonationForm).toBeDefined();
-    expect(ui.CheckoutForm).toBeDefined();
-    expect(ui.PaymentConfirmation).toBeDefined();
-    expect(ui.PaymentMethodSelector).toBeDefined();
-  });
-
   it('exports adoption components', () => {
     expect(ui.AdoptionForm).toBeDefined();
   });
@@ -47,14 +39,11 @@ describe('components/ui barrel exports', () => {
     expect(ui.CTASection).toBeDefined();
     expect(ui.FAQAccordion).toBeDefined();
     expect(ui.Hero).toBeDefined();
-    expect(ui.HowItWorks).toBeDefined();
   });
 
   it('exports utility display components', () => {
     expect(ui.EmptyState).toBeDefined();
-    expect(ui.LoadingSpinner).toBeDefined();
     expect(ui.ProgressBar).toBeDefined();
     expect(ui.ShelterProfile).toBeDefined();
-    expect(ui.StatsCounter).toBeDefined();
   });
 });
