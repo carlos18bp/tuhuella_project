@@ -6,8 +6,8 @@ Use this document to understand each flow's steps, branching conditions, role re
 
 > **Flow IDs in this document match `e2e/flow-definitions.json` and `e2e/helpers/flow-tags.ts` exactly.**
 
-**Version:** 5.8.0
-**Last Updated:** 2026-05-03
+**Version:** 5.10.0
+**Last Updated:** 2026-07-04
 
 ---
 
@@ -87,6 +87,7 @@ Use this document to understand each flow's steps, branching conditions, role re
 | `adopter-intent-create` | Create adopter intent | adopter-intent | P3 | adopter | `/my-intent` |
 | `adopter-intent-browse` | Browse adopter intents | adopter-intent | P3 | shared | `/looking-to-adopt` |
 | `adopter-profile` | Adopter profile view | adopter | P2 | adopter | `/my-profile` |
+| `profile-activity-feed` | View recent activity timeline on profile | adopter | P3 | adopter, shelter_admin, web_manager, admin, veterinarian | `/my-profile` |
 | `shelter-admin-profile` | Shelter admin profile view | shelter-panel | P2 | shelter_admin | `/my-profile` |
 | `admin-profile` | Admin profile view | admin | P2 | admin | `/my-profile` |
 | `shelter-panel-dashboard` | Shelter dashboard | shelter-panel | P1 | shelter_admin | `/shelter/dashboard` |
@@ -110,12 +111,14 @@ Use this document to understand each flow's steps, branching conditions, role re
 | `sponsorship-checkout-submit` | Sponsorship checkout form submission | sponsorship | P1 | adopter | `/checkout/sponsorship` |
 | `notification-preferences` | Notification preferences management | adopter | P2 | adopter | `/my-profile/notifications` |
 | `notification-bell` | Notification bell interaction | navigation | P2 | adopter, shelter_admin, web_manager, admin, veterinarian | all pages |
+| `notification-mark-all-read` | Mark all notifications as read | navigation | P3 | adopter, shelter_admin, web_manager, admin, veterinarian | all pages |
 | `shelter-panel-updates` | Shelter manage update posts | shelter-panel | P2 | shelter_admin | `/shelter/updates` |
 | `shelter-panel-update-create` | Shelter create update post | shelter-panel | P2 | shelter_admin | `/shelter/updates/create` |
 | `shelter-detail-view-animals` | Shelter detail view animals link | shelter | P2 | shared | `/shelters/[shelterId]` |
 | `locale-switch` | Locale switcher toggle | navigation | P2 | shared | all pages |
 | `campaign-tab-toggle` | Campaign tab toggle | campaign | P3 | shared | `/campaigns` |
 | `campaign-donate-cta` | Campaign donate CTA | campaign | P2 | shared | `/campaigns/[campaignId]` |
+| `campaign-updates-feed` | Read updates feed on a completed campaign | campaign | P3 | shared | `/campaigns/[campaignId]` |
 | `shelter-detail-gallery` | Shelter detail gallery lightbox | shelter | P3 | shared | `/shelters/[shelterId]` |
 | `shelter-detail-video` | Shelter detail video modal | shelter | P3 | shared | `/shelters/[shelterId]` |
 | `home-featured-animals-carousel` | Home featured animals carousel | home | P3 | shared | `/` |
@@ -145,9 +148,11 @@ Use this document to understand each flow's steps, branching conditions, role re
 | `adoption-application-history` | Adoption application clinical history | adoption | P3 | adopter | `/my-applications/[id]/history` |
 | `shelter-panel-campaign-detail` | Shelter campaign detail and edit | shelter-panel | P2 | shelter_admin | `/shelter/campaigns/[id]` |
 | `shelter-panel-campaign-create` | Shelter create new campaign | shelter-panel | P2 | shelter_admin | `/shelter/campaigns/nueva` |
+| `shelter-panel-campaign-messages` | Shelter reads and sends campaign approval messages | shelter-panel | P2 | shelter_admin | `/shelter/campaigns/[id]` |
 | `web-manager-campaigns` | Web manager campaigns list | web-manager | P2 | web_manager, admin | `/web-manager/campaigns` |
 | `web-manager-campaign-detail` | Web manager campaign approve/reject | web-manager | P2 | web_manager, admin | `/web-manager/campaigns/[id]` |
 | `web-manager-campaign-create` | Web manager create campaign | web-manager | P2 | web_manager, admin | `/web-manager/campaigns/new` |
+| `web-manager-campaign-messages` | Web manager reads and sends campaign approval messages | web-manager | P2 | web_manager, admin | `/web-manager/campaigns/[id]` |
 | `manual-browse` | Interactive manual page load | manual | P2 | all authenticated | `/manual` |
 | `manual-search` | Manual search and process navigation | manual | P2 | all authenticated | `/manual` |
 | `manual-role-filter` | Manual content filtered by role | manual | P3 | adopter, shelter_admin, veterinarian | `/manual` |
@@ -1028,6 +1033,33 @@ When the shelter has no `video_url`, the button is not rendered.
 
 ## Adoption Module
 
+### campaign-updates-feed
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P3 |
+| **Roles** | shared |
+| **Frontend route** | `/campaigns/[campaignId]` |
+| **API endpoints** | `GET /api/campaigns/[pk]/`, `GET /api/updates/` |
+
+**Preconditions:** A campaign with status `completed` exists.
+
+**Steps:**
+
+1. Visitor navigates to `/campaigns/[campaignId]` of a completed campaign.
+2. Page loads the campaign via `GET /api/campaigns/[pk]/`.
+3. When `campaign.status === 'completed'`, the progress-updates feed loads via `GET /api/updates/`.
+4. Each update renders its title, body, and image when present.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| Campaign not completed | Updates feed hidden |
+| No updates for the campaign | Empty state / feed omitted |
+
+---
+
 ### adoption-submit
 
 | Field | Value |
@@ -1250,6 +1282,60 @@ When the shelter has no `video_url`, the button is not rendered.
 | User does not manage the shelter | 403 Permission denied |
 | Description blank or only whitespace | 400 with `description` field error |
 | `event_date` in the future | 400 with `event_date` field error |
+
+---
+
+### adoption-whatsapp-applicant
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | shelter_admin, web_manager |
+| **Frontend route** | `/shelter/applications` |
+| **API endpoints** | `GET /api/adoptions/`, `GET /api/adoptions/[pk]/` |
+
+**Preconditions:** Shelter admin (or web manager) is authenticated; the application status is `interview` or `approved` and the applicant has a WhatsApp number on file.
+
+**Steps:**
+
+1. Shelter admin opens `/shelter/applications` and expands an application row ("Detalle").
+2. The application detail loads via `GET /api/adoptions/[pk]/`.
+3. When the status is `interview`/`approved` and `applicant_whatsapp` is set, a "Escribir al adoptante" WhatsApp card renders.
+4. Clicking it opens `https://wa.me/<applicant_number>` with a prefilled message in a new tab.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| No `applicant_whatsapp` | WhatsApp card not shown |
+| Status not interview/approved | WhatsApp card not shown |
+
+---
+
+### adoption-detail-web-manager
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | web_manager, admin |
+| **Frontend route** | `/web-manager/applications/[id]` |
+| **API endpoints** | `GET /api/adoptions/[pk]/` |
+
+**Preconditions:** Web manager or admin is authenticated.
+
+**Steps:**
+
+1. Web manager navigates to `/web-manager/applications/[id]`.
+2. The application loads via `GET /api/adoptions/[pk]/`.
+3. The detail renders the animal name (H1), applicant email ("Solicitante"), submission date, status badge, and the process-events timeline.
+4. When the status is `interview` and a follow-up is due, a follow-up reminder banner shows.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| Application not found | "No encontramos la solicitud." |
+| Still loading | "Cargando solicitud..." |
 
 ---
 
@@ -1614,7 +1700,7 @@ When the shelter has no `video_url`, the button is not rendered.
 | **Priority** | P3 |
 | **Roles** | adopter |
 | **Frontend route** | `/mi-intencion` |
-| **API endpoints** | `POST /api/adopter-intents/create/`, `GET /api/adopter-intents/me/` |
+| **API endpoints** | `POST /api/adopter-intents/create/`, `GET /api/adopter-intents/me/`, `PATCH /api/adopter-intents/me/` (edit existing intent) |
 
 **Preconditions:** User is authenticated.
 
@@ -1746,6 +1832,32 @@ When the shelter has no `video_url`, the button is not rendered.
 | No stats loaded | Activity cards show zero/empty states |
 | `adopter_intent` present | Completeness reaches 100% |
 | Pending shelter invites | Invite banner rendered above cards |
+
+---
+
+### profile-activity-feed
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P3 |
+| **Roles** | adopter, shelter_admin, web_manager, admin, veterinarian |
+| **Frontend route** | `/my-profile` |
+| **API endpoints** | `GET /api/user/activity/` |
+
+**Preconditions:** User is authenticated.
+
+**Steps:**
+
+1. User navigates to `/my-profile`.
+2. Page calls `GET /api/user/activity/` on load (via `authStore.fetchActivity`).
+3. The recent-activity timeline renders combined events (applications, donations, sponsorships, favorites), most recent first.
+4. Each entry shows an icon, label, and relative timestamp.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| No activity yet | Empty state message |
 
 ---
 
@@ -2190,6 +2302,34 @@ When the shelter has no `video_url`, the button is not rendered.
 
 ## Admin Module
 
+### shelter-panel-campaign-messages
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | shelter_admin |
+| **Frontend route** | `/shelter/campaigns/[id]` |
+| **API endpoints** | `GET /api/campaigns/[pk]/messages/`, `POST /api/campaigns/[pk]/messages/` |
+
+**Preconditions:** Shelter admin is authenticated and owns a campaign under review.
+
+**Steps:**
+
+1. Shelter admin navigates to `/shelter/campaigns/[id]`.
+2. The `CampaignMessageThread` loads existing messages via `GET /api/campaigns/[pk]/messages/`.
+3. Admin types a message in the compose textarea coordinating the approval.
+4. Admin clicks "Enviar".
+5. Frontend sends `POST /api/campaigns/[pk]/messages/`; the new message appends to the thread.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| Empty message body | Send does nothing / no request |
+| No prior messages | Empty thread with compose box |
+
+---
+
 ### admin-dashboard
 
 | Field | Value |
@@ -2370,6 +2510,33 @@ When the shelter has no `video_url`, the button is not rendered.
 6. Frontend sends `PUT /api/notifications/logs/mark-all-read/`.
 7. Unread count resets to 0, badge disappears.
 8. User can click **View all notifications** link to navigate to full notifications page.
+
+---
+
+### notification-mark-all-read
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P3 |
+| **Roles** | adopter, shelter_admin, web_manager, admin, veterinarian |
+| **Frontend route** | all pages (header notification bell) |
+| **API endpoints** | `GET /api/notifications/logs/`, `GET /api/notifications/unread-count/`, `POST /api/notifications/logs/mark-all-read/` |
+
+**Preconditions:** User is authenticated and has at least one unread notification.
+
+**Steps:**
+
+1. User clicks the notification bell in the header.
+2. The dropdown opens; the "mark all read" control renders while `unreadCount > 0`.
+3. User clicks "mark all read".
+4. Frontend sends `POST /api/notifications/logs/mark-all-read/`.
+5. The unread badge clears and listed notifications render as read.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| No unread notifications | "mark all read" control is not shown |
 
 ---
 
@@ -3085,6 +3252,33 @@ When the shelter has no `video_url`, the button is not rendered.
 ---
 
 ## Manual Module
+
+### web-manager-campaign-messages
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P2 |
+| **Roles** | web_manager, admin |
+| **Frontend route** | `/web-manager/campaigns/[id]` |
+| **API endpoints** | `GET /api/campaigns/[pk]/messages/`, `POST /api/campaigns/[pk]/messages/` |
+
+**Preconditions:** Web manager or admin is authenticated and reviewing a campaign.
+
+**Steps:**
+
+1. Web manager navigates to `/web-manager/campaigns/[id]`.
+2. The `CampaignMessageThread` loads existing messages via `GET /api/campaigns/[pk]/messages/`.
+3. Reviewer types a message stating what the shelter needs to fix for approval.
+4. Reviewer clicks "Enviar".
+5. Frontend sends `POST /api/campaigns/[pk]/messages/`; the message appends to the thread.
+
+**Branching conditions:**
+
+| Condition | Behavior |
+|-----------|----------|
+| Empty message body | Send does nothing / no request |
+
+---
 
 ### manual-browse
 

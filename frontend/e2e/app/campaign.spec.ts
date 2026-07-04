@@ -1,6 +1,7 @@
 import { test, expect } from '../test-with-coverage';
 import { waitForPageLoad } from '../fixtures';
-import { CAMPAIGN_BROWSE, CAMPAIGN_DETAIL, CAMPAIGN_TAB_TOGGLE, CAMPAIGN_DONATE_CTA } from '../helpers/flow-tags';
+import { CAMPAIGN_BROWSE, CAMPAIGN_DETAIL, CAMPAIGN_TAB_TOGGLE, CAMPAIGN_DONATE_CTA, CAMPAIGN_UPDATES_FEED } from '../helpers/flow-tags';
+import { mockCampaignDetail } from '../helpers/mock-data';
 
 test.describe('Campaign Browse & Detail', () => {
   test('should display campaigns listing page', { tag: [...CAMPAIGN_BROWSE] }, async ({ page }) => {
@@ -60,5 +61,37 @@ test.describe('Campaign Browse & Detail', () => {
       await page.waitForURL(/.*(?:checkout\/donation|sign-in)/, { timeout: 10_000 });
       await expect(page).toHaveURL(/.*(?:checkout\/donation|sign-in)/);
     }
+  });
+});
+
+test.describe('Campaign Updates Feed', () => {
+  test('reads the progress-updates feed on a completed campaign', { tag: [...CAMPAIGN_UPDATES_FEED] }, async ({ page }) => {
+    // Updates feed renders only when campaign.status === 'completed'.
+    await page.route('**/api/campaigns/3/**', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ ...mockCampaignDetail, status: 'completed' }),
+      }),
+    );
+    await page.route('**/api/updates/**', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          { id: 1, title: 'Meta alcanzada: 20 esterilizaciones', image_url: null, shelter_name: 'Refugio E2E', created_at: '2026-05-01T10:00:00Z' },
+        ]),
+      }),
+    );
+    // FAQ lookups on the detail page are best-effort; stub to keep the network quiet.
+    await page.route('**/api/faqs/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
+    );
+
+    await page.goto('/campaigns/3');
+    await waitForPageLoad(page);
+
+    await expect(page.getByRole('heading', { name: /Actualizaciones y evidencias/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('heading', { name: /Meta alcanzada: 20 esterilizaciones/i })).toBeVisible({ timeout: 10_000 });
   });
 });

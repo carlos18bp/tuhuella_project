@@ -23,8 +23,10 @@ from base_feature_app.models import (
     AdoptionApplicationEvent,
     Animal,
     AnimalDiseaseScreening,
+    AnimalStatusHistory,
     BlogPost,
     Campaign,
+    CampaignMessage,
     ClinicalHistoryEntry,
     Donation,
     DonationAmountOption,
@@ -33,16 +35,20 @@ from base_feature_app.models import (
     Favorite,
     NotificationLog,
     NotificationPreference,
+    PasswordCode,
     Payment,
+    PaymentHistory,
     PostAdoptionFollowUp,
     Shelter,
     ShelterApplication,
     ShelterInvite,
+    ShelterMembership,
     Sponsorship,
     SponsorshipAmountOption,
     Subscription,
     StrategicAlly,
     UpdatePost,
+    VolunteerApplication,
     VolunteerPosition,
 )
 
@@ -449,3 +455,68 @@ class ClinicalHistoryEntryFactory(factory.django.DjangoModelFactory):
     body_es = 'Revisión general sin novedad.'
     body_en = 'General checkup, no issues.'
     occurred_at = factory.LazyFunction(timezone.now)
+
+
+# ── Auth, Membership & Audit Trails ───────────────────────────────────────────
+
+
+class PasswordCodeFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = PasswordCode
+
+    user = factory.SubFactory(UserFactory)
+    code = factory.Sequence(lambda n: f'{n % 1000000:06d}')
+    used = False
+
+
+class ShelterMembershipFactory(factory.django.DjangoModelFactory):
+    """One membership row per (shelter, user) — unique_together enforced."""
+
+    class Meta:
+        model = ShelterMembership
+
+    shelter = factory.SubFactory(ShelterFactory)
+    user = factory.SubFactory(ShelterAdminUserFactory)
+    role = ShelterMembership.Role.STAFF
+
+
+class AnimalStatusHistoryFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = AnimalStatusHistory
+
+    animal = factory.SubFactory(AnimalFactory)
+    previous_status = Animal.Status.DRAFT
+    new_status = Animal.Status.PUBLISHED
+    reason = 'Publicado tras revisión del refugio.'
+    changed_by = factory.SubFactory(ShelterAdminUserFactory)
+
+
+class PaymentHistoryFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = PaymentHistory
+
+    payment = factory.SubFactory(PaymentFactory)
+    previous_status = Payment.Status.PENDING
+    new_status = Payment.Status.APPROVED
+    source = PaymentHistory.Source.WEBHOOK
+    metadata = factory.LazyFunction(dict)
+
+
+class CampaignMessageFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = CampaignMessage
+
+    campaign = factory.SubFactory(CampaignFactory)
+    author = factory.SubFactory(WebManagerUserFactory)
+    body = 'Revisamos tu campaña y todo está en orden.'
+    is_system = False
+
+
+class VolunteerApplicationFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = VolunteerApplication
+
+    position = factory.SubFactory(VolunteerPositionFactory)
+    user = factory.SubFactory(UserFactory)
+    motivation = 'Quiero ayudar a los animales rescatados en mi tiempo libre.'
+    status = VolunteerApplication.Status.PENDING

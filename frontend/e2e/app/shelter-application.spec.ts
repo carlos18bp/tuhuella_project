@@ -1,6 +1,11 @@
 import { test, expect } from '../test-with-coverage';
 import { loginAndNavigate, waitForPageLoad } from '../fixtures';
-import { SHELTER_APPLICATION_STATUS, SHELTER_APPLICATION_SUBMIT } from '../helpers/flow-tags';
+import {
+  SHELTER_APPLICATION_REVIEW,
+  SHELTER_APPLICATION_STATUS,
+  SHELTER_APPLICATION_SUBMIT,
+} from '../helpers/flow-tags';
+import { mockPendingShelters } from '../helpers/mock-data';
 
 test.describe('Shelter Application', () => {
   test('redirects unauthenticated user to sign-in', { tag: [...SHELTER_APPLICATION_SUBMIT] }, async ({ page }) => {
@@ -84,5 +89,25 @@ test.describe('Shelter Application', () => {
     await loginAndNavigate(page, 'adopter', '/shelter-application');
     await expect(page.getByText(/Estado de tu postulación/i)).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/Enviada/i)).toBeVisible();
+  });
+
+  test('admin reviews and approves a pending shelter application', { tag: [...SHELTER_APPLICATION_REVIEW] }, async ({ page }) => {
+    let pending = [...mockPendingShelters];
+    await page.route('**/api/admin/shelters/pending/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(pending) }),
+    );
+    await page.route('**/api/admin/shelters/approve/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'approved' }) }),
+    );
+
+    await loginAndNavigate(page, 'admin', '/admin/shelters/approve');
+
+    await expect(page.getByRole('heading', { name: /Aprobar Refugios/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('heading', { name: 'Refugio Nuevo', level: 3 })).toBeVisible({ timeout: 10_000 });
+
+    await page.getByRole('button', { name: /Aprobar/i }).first().click();
+    pending = pending.filter((s) => s.id !== 10);
+
+    await expect(page.getByRole('heading', { name: 'Refugio Nuevo', level: 3 })).toBeHidden({ timeout: 10_000 });
   });
 });

@@ -8,6 +8,9 @@ import {
   WEB_MANAGER_SHELTER_DETAIL,
   WEB_MANAGER_APPLICATIONS,
   WEB_MANAGER_PROFILE,
+  WEB_MANAGER_CAMPAIGN_MESSAGES,
+  ADOPTION_DETAIL_WEB_MANAGER,
+  ADOPTION_EVENT_CREATE_WEB_MANAGER,
 } from '../helpers/flow-tags';
 import {
   mockAdminCampaigns,
@@ -274,6 +277,142 @@ test.describe('Web Manager — Profile', () => {
       await loginAndNavigate(page, 'web_manager', '/my-profile');
 
       await expect(page.getByRole('link', { name: /Nueva campaña/i })).toBeVisible({ timeout: 15_000 });
+    },
+  );
+});
+
+test.describe('Web Manager Campaign Messages', () => {
+  test(
+    'web manager reads and sends a campaign approval message',
+    { tag: [...WEB_MANAGER_CAMPAIGN_MESSAGES] },
+    async ({ page }) => {
+      let sentBody: string | null = null;
+
+      await page.route('**/api/campaigns/3/**', (route) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockCampaignDetail) }),
+      );
+      // Registered after the general campaign route so it wins for the messages path.
+      await page.route('**/api/campaigns/3/messages/**', (route) => {
+        if (route.request().method() === 'POST') {
+          sentBody = (route.request().postDataJSON() as { body?: string })?.body ?? null;
+          return route.fulfill({
+            status: 201,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              id: 99, campaign: 3, author: 5, author_name: 'Laura Gómez',
+              author_role: 'web_manager', body: sentBody ?? '', is_system: false,
+              created_at: '2026-05-04T10:00:00Z',
+            }),
+          });
+        }
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockCampaignMessages) });
+      });
+
+      await loginAndNavigate(page, 'web_manager', '/web-manager/campaigns/3');
+
+      await expect(page.getByText(/Conversación/i)).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByText('Falta imagen de portada para la campaña.')).toBeVisible({ timeout: 10_000 });
+
+      const composer = page.getByPlaceholder(/Escribe un mensaje/i);
+      await composer.fill('Falta corregir la portada antes de aprobar.');
+      await page.getByRole('button', { name: 'Enviar' }).click();
+
+      await expect.poll(() => sentBody, { timeout: 5_000 }).toContain('Falta corregir la portada');
+      await expect(page.getByText('Falta corregir la portada antes de aprobar.')).toBeVisible({ timeout: 10_000 });
+    },
+  );
+});
+
+const baseWmApplication = {
+  id: 1,
+  animal: 10,
+  animal_name: 'Luna',
+  animal_species: 'dog',
+  shelter_name: 'Refugio E2E',
+  shelter_city: 'Bogotá',
+  thumbnail_url: null,
+  user: 2,
+  user_email: 'adopter-e2e@example.com',
+  status: 'interview',
+  form_answers: { reason: 'Love animals' },
+  notes: '',
+  reviewed_at: null,
+  next_follow_up_due_at: '2026-07-12T12:00:00Z',
+  shelter_whatsapp: '+57 300 111 2233',
+  applicant_whatsapp: '+57 311 222 3344',
+  events: [],
+  created_at: '2026-04-20T12:00:00Z',
+};
+
+test.describe('Web Manager Application Detail', () => {
+  test(
+    'web manager views an application detail with applicant and status',
+    { tag: [...ADOPTION_DETAIL_WEB_MANAGER] },
+    async ({ page }) => {
+      await page.route('**/api/adoptions/1/**', (route) => {
+        if (route.request().method() === 'GET') {
+          return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(baseWmApplication) });
+        }
+        return route.fallback();
+      });
+
+      await loginAndNavigate(page, 'web_manager', '/web-manager/applications/1');
+
+      await expect(page.getByRole('heading', { level: 1, name: 'Luna' })).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByText(/Solicitante/i)).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByText('adopter-e2e@example.com')).toBeVisible();
+    },
+  );
+
+  test(
+    'web manager records a follow-up event on an application',
+    { tag: [...ADOPTION_EVENT_CREATE_WEB_MANAGER] },
+    async ({ page }) => {
+      let postBody: { event_date?: string; description?: string } | null = null;
+
+      await page.route('**/api/adoptions/1/', (route) => {
+        if (route.request().method() === 'GET') {
+          return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(baseWmApplication) });
+        }
+        return route.fallback();
+      });
+      await page.route('**/api/adoptions/1/events/', (route) => {
+        if (route.request().method() === 'POST') {
+          postBody = route.request().postDataJSON();
+          return route.fulfill({
+            status: 201,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              id: 55,
+              application: 1,
+              event_date: postBody?.event_date ?? '2026-05-04T10:00:00Z',
+              description: postBody?.description ?? '',
+              created_by: 5,
+              created_by_name: 'Laura Gómez',
+              created_by_role: 'web_manager',
+              created_by_email: 'webmanager-e2e@example.com',
+              created_at: '2026-05-04T10:00:00Z',
+            }),
+          });
+        }
+        return route.fallback();
+      });
+
+      await loginAndNavigate(page, 'web_manager', '/web-manager/applications/1');
+
+      await expect(page.getByRole('heading', { level: 1, name: 'Luna' })).toBeVisible({ timeout: 15_000 });
+
+      const addEventButton = page.getByTestId('event-add-button');
+      await expect(addEventButton).toBeVisible({ timeout: 10_000 });
+      await addEventButton.click();
+
+      await expect(page.getByRole('dialog')).toBeVisible();
+      await page.getByTestId('event-description-input').fill('Entrevista telefónica coordinada con el adoptante.');
+      await page.getByTestId('event-submit').click();
+
+      await expect(page.getByRole('dialog')).toHaveCount(0, { timeout: 10_000 });
+      await expect.poll(() => postBody?.description ?? null, { timeout: 5_000 }).toContain('Entrevista telefónica');
+      await expect.poll(() => postBody?.event_date ?? null).not.toBeNull();
     },
   );
 });

@@ -13,6 +13,7 @@ import {
   PROFILE_EDIT,
   NOTIFICATION_PREFERENCES,
   ADOPTION_APPLICATION_HISTORY,
+  PROFILE_ACTIVITY_FEED,
 } from '../helpers/flow-tags';
 import {
   mockProfileStats,
@@ -560,6 +561,29 @@ test.describe('Adoption Application History', () => {
       await loginAndNavigate(page, 'adopter', '/my-applications/1/history');
 
       await expect(page.getByRole('heading', { name: /Historia clínica/i })).toBeVisible({ timeout: 15_000 });
+    },
+  );
+});
+
+test.describe('Profile Activity Feed', () => {
+  test(
+    'adopter sees the recent-activity timeline on their profile',
+    { tag: [...PROFILE_ACTIVITY_FEED] },
+    async ({ page }) => {
+      await page.route('**/user/activity/**', (route) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockActivity) }),
+      );
+      await page.route('**/user/profile-stats/**', (route) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockProfileStats) }),
+      );
+      await page.route('**/api/shelter-applications/me/**', (route) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({}) }),
+      );
+
+      await loginAndNavigate(page, 'adopter', '/my-profile');
+
+      await expect(page.getByRole('heading', { name: /Actividad reciente/i })).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByText(/Aplicaste para adoptar a Luna/i)).toBeVisible({ timeout: 10_000 });
     },
   );
 });
