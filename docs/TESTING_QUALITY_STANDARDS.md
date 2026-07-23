@@ -12,43 +12,13 @@ This document applies to:
 
 | Test Type | Location | Runner |
 |-----------|----------|--------|
-| Backend unit/integration | `backend/base_feature_app/tests/**` | pytest |
-| Frontend unit/component | `frontend/**/__tests__/**` (p. ej. `app/`, `components/`, `lib/`) | Jest |
+| Backend unit/integration | `backend/<app>/tests/**` | pytest |
+| Frontend unit/component | `frontend/test/**` or `frontend/src/**/__tests__/**` | Jest / Vitest |
 | Frontend E2E flows | `frontend/e2e/**` | Playwright |
 
+> The exact location of frontend unit tests depends on the project structure. Common patterns: `frontend/test/` (standalone test dir), `src/**/__tests__/` (co-located). Configure the pattern in `jest.config.cjs` / `vitest.config.js`.
+
 > **Note:** These standards focus on test quality and maintainability only. They do not change production business logic.
-
-### Umbrales de cobertura (CI vs objetivos por capa)
-
-- **Jest** ([frontend/jest.config.cjs](frontend/jest.config.cjs)): umbral **global** actual de statements/branches/functions/lines (**50%**). Falla el job si el global cae por debajo.
-- **Objetivos por capa** (orientación del equipo, p. ej. stores ~75%, componentes ~60%): conviene vigilarlos en revisiones y con reportes puntuales (`--collectCoverageFrom`); no están forzados por separado en CI salvo que se añadan scripts o umbrales adicionales.
-
-### Formato para describir cobertura en un PR
-
-Tras añadir o ampliar tests, incluye bloques breves como estos (sustituye valores reales).
-
-**Backend**
-
-```
-### File: base_feature_app/tests/path/test_file.py
-- Tests added: <n>
-- Coverage before: <X%>
-- Coverage after: <Y%>
-- Command executed: pytest base_feature_app/tests/path/test_file.py -v
-```
-
-**Frontend**
-
-```
-### Layer: State Management | Shared Logic | UI Component
-### File: lib/stores/exampleStore.ts
-### Test File: lib/stores/__tests__/exampleStore.test.ts
-**Coverage before:** X% statements, Y% branches
-**Coverage after:** …
-**Tests added:** (lista breve)
-**Command executed:** npm test -- lib/stores/__tests__/exampleStore.test.ts
-**Result:** Pass
-```
 
 ---
 
@@ -142,32 +112,41 @@ Tests must be organized by domain/layer, not by coverage goals.
 **Backend Structure:**
 
 ```
-backend/base_feature_app/tests/
+backend/<app>/tests/
+├── conftest.py       # Shared pytest fixtures
+├── factories.py      # Model factories and payload helpers
 ├── models/           # Model unit tests (validation, properties, methods)
+│   ├── test_user.py
+│   └── test_product.py
 ├── serializers/      # Serializer unit tests (validation, transformation)
+│   └── test_product_serializers.py
 ├── views/            # API endpoint tests (integration-light)
-├── services/         # Business logic service tests
+│   └── test_product_views.py
+├── services/         # Business logic service tests (if services/ exists)
 ├── utils/            # Utility function tests
-├── commands/         # Management command tests
-└── …                 # tasks, factories, conftest, etc.
+├── contracts/        # OpenAPI/schema contract tests
+├── integration/      # Cross-layer integration tests
+├── management/       # Management command tests
+└── test_admin.py     # Django admin tests (standalone)
 ```
 
 **Frontend Structure:**
 
 ```
 frontend/
-├── app/__tests__/           # Unit/component tests (Jest)
-│   ├── stores/              # Global state tests (Zustand/RTK)
-│   ├── components/          # React component tests
-│   ├── hooks/               # Custom hook tests
-│   ├── services/            # HTTP service tests
-│   └── views/               # Page-level component tests
+├── test/                    # Unit/component tests (Jest / Vitest)
+│   ├── stores/              # Store tests (Pinia / Redux / Zustand)
+│   ├── components/          # Component tests (Vue Test Utils / React Testing Library)
+│   ├── composables/         # Composable / custom hook tests
+│   ├── router/              # Router guard tests
+│   └── shared/              # Shared test utilities
 └── e2e/                     # E2E flows (Playwright)
     ├── auth/                # Authentication flows
-    ├── app/                 # Protected app flows
-    ├── public/              # Public page flows
-    └── fixtures.ts          # Shared fixtures
+    ├── products/            # Product management flows
+    └── helpers/             # E2E utilities and mocks
 ```
+
+> Location of unit tests may differ by project: `frontend/test/` (standalone) or `src/**/__tests__/` (co-located). Both are valid — configure the pattern in your test runner config.
 
 ---
 
@@ -437,8 +416,7 @@ Consider using `factory_boy` for models or custom builders for API payloads.
 @pytest.fixture
 def mock_payment_gateway(mocker):
     return mocker.patch(
-        # Patch the symbol as imported by **your** calling module (import path matters).
-        'your_app.services.billing.stripe_client.create_charge',
+        'core_app.services.payment_service.stripe.Charge.create',
         return_value={'id': 'ch_test123', 'status': 'succeeded'}
     )
 
@@ -1320,7 +1298,7 @@ scripts/
     ├── patterns.py               # Compiled regex patterns
     ├── backend_analyzer.py       # Python/pytest analyzer (AST-based)
     ├── js_ast_bridge.py          # Bridge to Node.js Babel parser
-    ├── frontend_unit_analyzer.py # Jest/React Testing Library analyzer
+    ├── frontend_unit_analyzer.py # Jest / Vitest unit analyzer (framework-agnostic)
     └── frontend_e2e_analyzer.py  # Playwright E2E analyzer
 
 frontend/scripts/
