@@ -43,8 +43,8 @@ test.describe('Animal browse — display via UI navigation', () => {
     await expect(async () => {
       const entry = await page.goto('/');
       if (entry?.status() === 429) throw new Error('entry document rate limited (HTTP 429)');
-      await page.waitForLoadState('networkidle');
-
+      // goto already waits for 'load'; the paced click below carries its own
+      // timeout — networkidle is banned by the repo's eslint-playwright config.
       await page.locator('header').getByRole('link', { name: 'Animales' }).click({ timeout: 10_000 });
       await page.waitForURL(/\/animals/, { timeout: 20_000 });
 
