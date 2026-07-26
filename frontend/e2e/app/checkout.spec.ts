@@ -17,7 +17,7 @@ test.describe('Checkout Flows', () => {
     await page.goto('/checkout/sponsorship');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|sponsorship/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should display payment confirmation page', { tag: [...PAYMENT_CONFIRMATION] }, async ({ page }) => {
@@ -48,7 +48,7 @@ test.describe('Platform Support', () => {
   test('should redirect unauthenticated user from platform checkout', { tag: [...DONATION_PLATFORM_CHECKOUT] }, async ({ page }) => {
     await page.goto('/checkout/platform');
     await waitForPageLoad(page);
-    await expect(page).toHaveURL(/sign-in|platform/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 });
 

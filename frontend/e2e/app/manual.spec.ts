@@ -7,7 +7,7 @@ test.describe('Manual — Unauthenticated', () => {
     await page.goto('/manual');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|manual/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 });
 

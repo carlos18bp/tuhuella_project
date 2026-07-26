@@ -68,7 +68,7 @@ test.describe('Platform Donation Checkout @flow:donation-platform-checkout', () 
     await page.goto('/checkout/platform');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|platform/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('displays platform checkout page when authenticated', { tag: [...DONATION_PLATFORM_CHECKOUT] }, async ({ page }) => {

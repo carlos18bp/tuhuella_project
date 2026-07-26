@@ -112,35 +112,35 @@ test.describe('Adopter Pages — Protected Routes', () => {
     await page.goto('/favorites');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|favorites/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should redirect unauthenticated user from donation history', { tag: [...DONATION_HISTORY] }, async ({ page }) => {
     await page.goto('/my-donations');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|my-donations/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should redirect unauthenticated user from sponsorship history', { tag: [...SPONSORSHIP_HISTORY] }, async ({ page }) => {
     await page.goto('/my-sponsorships');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|my-sponsorships/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should redirect unauthenticated user from adopter intent', { tag: [...ADOPTER_INTENT_CREATE] }, async ({ page }) => {
     await page.goto('/my-intent');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|my-intent/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should redirect unauthenticated user from profile', { tag: [...ADOPTER_PROFILE] }, async ({ page }) => {
     await page.goto('/my-profile');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|my-profile/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 });
 

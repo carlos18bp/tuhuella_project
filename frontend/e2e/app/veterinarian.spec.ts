@@ -8,14 +8,14 @@ test.describe('Veterinarian — Unauthenticated', () => {
     await page.goto('/veterinarian/follow-ups');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|veterinarian/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should redirect unauthenticated user from follow-up detail', { tag: [...VET_FOLLOW_UP_DETAIL] }, async ({ page }) => {
     await page.goto('/veterinarian/follow-ups/1');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|veterinarian/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 });
 
