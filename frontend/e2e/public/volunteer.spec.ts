@@ -50,7 +50,7 @@ test.describe('Volunteer Application', () => {
     await page.goto('/work-with-us/apply/1');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|apply/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should display volunteer application form when authenticated', { tag: [...VOLUNTEER_APPLY] }, async ({ page }) => {

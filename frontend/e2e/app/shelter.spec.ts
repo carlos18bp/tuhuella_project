@@ -155,7 +155,7 @@ test.describe('Shelter Panel', () => {
     await page.goto('/shelter/dashboard');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|dashboard/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should display shelter dashboard or redirect when unauthenticated', { tag: [...SHELTER_PANEL_DASHBOARD] }, async ({ page }) => {
@@ -172,28 +172,28 @@ test.describe('Shelter Panel', () => {
     await page.goto('/shelter/animals');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|animals/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should redirect unauthenticated user from shelter campaigns', { tag: [...SHELTER_PANEL_CAMPAIGNS] }, async ({ page }) => {
     await page.goto('/shelter/campaigns');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|campaigns/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should redirect unauthenticated user from shelter donations', { tag: [...SHELTER_PANEL_DONATIONS] }, async ({ page }) => {
     await page.goto('/shelter/donations');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|donations/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should redirect unauthenticated user from shelter settings', { tag: [...SHELTER_PANEL_SETTINGS] }, async ({ page }) => {
     await page.goto('/shelter/settings');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|settings/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 });
 
@@ -446,7 +446,7 @@ test.describe('Shelter Campaign Detail & Create', () => {
     await page.goto('/shelter/campaigns/3');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|campaigns/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should display campaign request form', { tag: [...SHELTER_PANEL_CAMPAIGN_CREATE] }, async ({ page }) => {
@@ -464,7 +464,7 @@ test.describe('Shelter Campaign Detail & Create', () => {
     await page.goto('/shelter/campaigns/nueva');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|nueva/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 });
 
@@ -473,7 +473,7 @@ test.describe('Shelter Panel — Animal Create', () => {
     await page.goto('/shelter/animals/nuevo');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|nuevo/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should show "Agregar animal" CTA on animals list', { tag: [...SHELTER_PANEL_ANIMAL_CREATE] }, async ({ page }) => {

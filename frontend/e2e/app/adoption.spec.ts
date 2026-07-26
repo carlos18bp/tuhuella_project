@@ -57,7 +57,7 @@ test.describe('Adoption Flows', () => {
     await page.goto('/my-applications');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|my-applications/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should show adoption CTA on animal detail for unauthenticated user', { tag: [...ADOPTION_SUBMIT] }, async ({ page }) => {
@@ -77,7 +77,7 @@ test.describe('Adoption Flows', () => {
     await page.goto('/shelter/applications');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|applications/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 });
 

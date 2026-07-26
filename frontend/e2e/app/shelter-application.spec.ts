@@ -11,7 +11,7 @@ test.describe('Shelter Application', () => {
   test('redirects unauthenticated user to sign-in', { tag: [...SHELTER_APPLICATION_SUBMIT] }, async ({ page }) => {
     await page.goto('/shelter-application');
     await waitForPageLoad(page);
-    await expect(page).toHaveURL(/sign-in|shelter-application/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   // quality: disable test_too_long (4-step wizard must be tested end-to-end — step dependencies preclude safe splitting)

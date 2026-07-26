@@ -21,7 +21,7 @@ test.describe('Admin Panel — Unauthenticated', () => {
     await page.goto('/admin/dashboard');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|dashboard/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should display admin dashboard when accessible', { tag: [...ADMIN_DASHBOARD] }, async ({ page }) => {
@@ -52,28 +52,28 @@ test.describe('Admin Panel — Unauthenticated', () => {
     await page.goto('/admin/shelters/approve');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|approve/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should redirect unauthenticated user from moderation', { tag: [...ADMIN_MODERATION] }, async ({ page }) => {
     await page.goto('/admin/moderation');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|moderation/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should redirect unauthenticated user from metrics', { tag: [...ADMIN_METRICS] }, async ({ page }) => {
     await page.goto('/admin/metrics');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|metrics/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should redirect unauthenticated user from payments', { tag: [...ADMIN_PAYMENTS] }, async ({ page }) => {
     await page.goto('/admin/payments');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|payments/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 });
 

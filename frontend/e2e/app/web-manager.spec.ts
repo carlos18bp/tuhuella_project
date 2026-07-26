@@ -27,21 +27,21 @@ test.describe('Web Manager — Unauthenticated (Shelters & Applications)', () =>
     await page.goto('/web-manager/shelters');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|web-manager/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should redirect unauthenticated user from shelter detail', { tag: [...WEB_MANAGER_SHELTER_DETAIL] }, async ({ page }) => {
     await page.goto('/web-manager/shelters/1');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|web-manager/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should redirect unauthenticated user from applications board', { tag: [...WEB_MANAGER_APPLICATIONS] }, async ({ page }) => {
     await page.goto('/web-manager/applications');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|web-manager/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 });
 
@@ -110,21 +110,21 @@ test.describe('Web Manager — Unauthenticated', () => {
     await page.goto('/web-manager/campaigns');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|web-manager/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should redirect unauthenticated user from campaign detail', { tag: [...WEB_MANAGER_CAMPAIGN_DETAIL] }, async ({ page }) => {
     await page.goto('/web-manager/campaigns/3');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|web-manager/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should redirect unauthenticated user from campaign create', { tag: [...WEB_MANAGER_CAMPAIGN_CREATE] }, async ({ page }) => {
     await page.goto('/web-manager/campaigns/new');
     await waitForPageLoad(page);
 
-    await expect(page).toHaveURL(/sign-in|web-manager/);
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 });
 
