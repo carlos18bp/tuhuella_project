@@ -28,6 +28,84 @@ async function paceRequestsUnderRateLimit(page: Page, minGapMs = 110): Promise<v
   });
 }
 
+/**
+ * The listing rows CI serves, mirroring the deployed payload field for field.
+ *
+ * CI builds its database with `migrate --no-input` and no fixtures (see
+ * .github/workflows/ci.yml), so there the real endpoint answers
+ * `{count: 0, results: []}` and no card can ever render — the live-data run
+ * (PLAYWRIGHT_BASE_URL set) is what exercises the real payload. Shape copied
+ * from a deployed GET /api/animals/ response (AnimalListSerializer, 17 fields)
+ * so the fixture cannot drift into asserting something the API never sends.
+ * Two rows keep the leading-card assertions meaningful: a grid that lost the
+ * payload's order fails them instead of matching whichever card it likes.
+ */
+const CI_LISTING = {
+  count: 2,
+  page: 1,
+  page_size: 20,
+  total_pages: 1,
+  results: [
+    {
+      id: 4101,
+      name: 'Nube',
+      species: 'dog',
+      breed: 'Criollo',
+      age_range: 'young',
+      gender: 'female',
+      size: 'medium',
+      status: 'published',
+      is_vaccinated: true,
+      is_sterilized: true,
+      energy_level: 'medium',
+      good_with_kids: 'yes',
+      good_with_dogs: 'yes',
+      good_with_cats: 'unknown',
+      shelter: 1,
+      shelter_name: 'Refugio Patitas Felices',
+      created_at: '2026-05-01T10:00:00Z',
+    },
+    {
+      id: 4102,
+      name: 'Trueno',
+      species: 'cat',
+      breed: 'Criollo',
+      age_range: 'adult',
+      gender: 'male',
+      size: 'small',
+      status: 'published',
+      is_vaccinated: false,
+      is_sterilized: false,
+      energy_level: 'low',
+      good_with_kids: 'unknown',
+      good_with_dogs: 'unknown',
+      good_with_cats: 'yes',
+      shelter: 1,
+      shelter_name: 'Refugio Patitas Felices',
+      created_at: '2026-04-01T10:00:00Z',
+    },
+  ],
+};
+
+/**
+ * Serve the listing endpoint from CI_LISTING.
+ *
+ * Registered AFTER the pacing route deliberately: Playwright matches handlers in
+ * reverse registration order, so this one wins for the listing while every other
+ * request still falls through to pacing (verified against a deployed target).
+ */
+async function mockAnimalsListing(page: Page): Promise<void> {
+  await page.route(
+    (url) => url.pathname === '/api/animals/',
+    (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(CI_LISTING),
+      }),
+  );
+}
+
 test.describe('Animal browse — display via UI navigation', () => {
   // Bug it catches: the header route to the listing breaking (renamed route,
   // locale prefix regression) or the listing rendering without its data grid —
@@ -36,7 +114,13 @@ test.describe('Animal browse — display via UI navigation', () => {
     test.slow(); // paced requests trade wall time for a deterministic transition
     await paceRequestsUnderRateLimit(page);
 
-    let expected: ListedAnimal | undefined;
+    // Against a deployed target the real payload IS the point of this spec; on
+    // CI's empty database the rows come from the fixture instead, the repo's
+    // convention for data-dependent e2e (see campaign.spec.ts).
+    const deployedTarget = Boolean(process.env.PLAYWRIGHT_BASE_URL);
+    if (!deployedTarget) await mockAnimalsListing(page);
+
+    let expected: ListedAnimal | undefined = deployedTarget ? undefined : CI_LISTING.results[0];
 
     // Retried only to absorb a limiter bucket left empty by a neighbouring spec:
     // pacing alone is what keeps the hop from being rate limited.
@@ -51,6 +135,8 @@ test.describe('Animal browse — display via UI navigation', () => {
       // The listing defaults to list view; the cards grid is behind the view toggle.
       await page.getByRole('button', { name: 'Vista cuadrícula' }).click({ timeout: 10_000 });
       await page.getByTestId('animal-card-link').first().waitFor({ timeout: 20_000 });
+
+      if (!deployedTarget) return; // fixture rows already pinned above
 
       // Expected values come from the endpoint the page itself reads, so they cannot
       // rot as content changes; the listing order is server-side and deterministic.
