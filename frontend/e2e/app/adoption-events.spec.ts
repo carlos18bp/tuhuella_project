@@ -132,7 +132,16 @@ test.describe('Adoption event creation', () => {
       await page.getByTestId('event-submit').click();
       await createResponse;
 
-      await expect(page.getByText(NEW_EVENT_DESCRIPTION)).toBeVisible({ timeout: 10_000 });
+      // Scoped to the timeline row on purpose: React mirrors a controlled
+      // textarea's value into the DOM as its child text, so between the POST
+      // response and the modal unmounting the description exists twice. A bare
+      // getByText then dies of strict mode instead of waiting it out — that is
+      // the "resolved to 2 elements" flake, the <p> plus the <textarea>.
+      const created = page.getByTestId('event-item').filter({ hasText: NEW_EVENT_DESCRIPTION });
+      await expect(created).toHaveCount(1, { timeout: 10_000 });
+      // Author comes from the POST response, so the row is rendered from what
+      // the server returned and not from what was typed into the form.
+      await expect(created).toContainText('Laura Gómez');
     },
   );
 
@@ -159,7 +168,11 @@ test.describe('Adoption event creation', () => {
       await page.getByTestId('event-submit').click();
       await createResponse;
 
-      await expect(page.getByText(SHELTER_EVENT_DESCRIPTION)).toBeVisible({ timeout: 10_000 });
+      // Same reason as above: the modal's textarea holds the same text until it
+      // unmounts, so the assertion is scoped to the created timeline row.
+      const created = page.getByTestId('event-item').filter({ hasText: SHELTER_EVENT_DESCRIPTION });
+      await expect(created).toHaveCount(1, { timeout: 10_000 });
+      await expect(created).toContainText('María López');
     },
   );
 });

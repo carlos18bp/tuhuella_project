@@ -3,6 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 
 from base_feature_app.models import UpdatePost
+from base_feature_app.tests.factories import CampaignFactory, UpdatePostFactory
 
 
 @pytest.mark.django_db
@@ -25,6 +26,30 @@ def test_update_post_list_filter_by_shelter(api_client, update_post):
 
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 1
+
+
+@pytest.mark.django_db
+def test_update_post_list_filter_by_campaign_excludes_other_campaigns_post(api_client):
+    """Fails if the `campaign` query param stops filtering update_post_list —
+    e.g. the param is typoed or the `if campaign_id:` branch is dropped in a
+    refactor — which would leak another campaign's update post into a public
+    campaign feed."""
+    campaign_a = CampaignFactory()
+    campaign_b = CampaignFactory()
+    post_a = UpdatePostFactory(campaign=campaign_a, title_es='Campaign A update')
+    post_b = UpdatePostFactory(campaign=campaign_b, title_es='Campaign B update')
+
+    response = api_client.get(
+        reverse('update-post-list'),
+        {'campaign': campaign_a.pk},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    body = response.json()
+    returned_ids = [post['id'] for post in body]
+    assert returned_ids == [post_a.pk]
+    assert body[0]['title'] == 'Campaign A update'
+    assert post_b.pk not in returned_ids
 
 
 @pytest.mark.django_db
