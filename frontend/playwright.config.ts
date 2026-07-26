@@ -17,22 +17,25 @@ export default defineConfig({
     ['html', { open: 'never' }],
     ['json', { outputFile: 'e2e-results/playwright-results.json' }],
   ],
-  webServer: [
-    {
-      command: '../backend/venv/bin/python ../backend/manage.py runserver 127.0.0.1:8000',
-      url: 'http://127.0.0.1:8000/api/health/',
-      reuseExistingServer: !process.env.CI,
-      timeout: 180_000, // 3 minutes for server startup
-      stdout: 'ignore',
-      stderr: 'ignore',
-    },
-    {
-      command: 'npm run dev -- --port 3000',
-      url: 'http://localhost:3000',
-      reuseExistingServer: !process.env.CI,
-      timeout: 180_000, // 3 minutes for server startup
-    },
-  ],
+  // Remote-target validation runs (PLAYWRIGHT_BASE_URL set) need no local servers.
+  webServer: process.env.PLAYWRIGHT_BASE_URL
+    ? undefined
+    : [
+        {
+          command: '../backend/venv/bin/python ../backend/manage.py runserver 127.0.0.1:8000',
+          url: 'http://127.0.0.1:8000/api/health/',
+          reuseExistingServer: !process.env.CI,
+          timeout: 180_000, // 3 minutes for server startup
+          stdout: 'ignore',
+          stderr: 'ignore',
+        },
+        {
+          command: 'npm run dev -- --port 3000',
+          url: 'http://localhost:3000',
+          reuseExistingServer: !process.env.CI,
+          timeout: 180_000, // 3 minutes for server startup
+        },
+      ],
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
     trace: 'on-first-retry',

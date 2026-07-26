@@ -168,10 +168,17 @@ export async function loginAndNavigate(page: any, role: 'adopter' | 'shelter_adm
     // Backend unavailable — use mock tokens
   }
 
-  // Set auth cookies in the browser context
+  // Set auth cookies in the browser context. Derive the cookie's URL from the same
+  // env var that drives `baseURL` (see playwright.config.ts) instead of hardcoding
+  // domain: 'localhost' — a fixed 'localhost' domain silently fails to attach when
+  // PLAYWRIGHT_BASE_URL points at a remote host (e.g. staging), because the cookie
+  // domain never matches the navigated-to origin and the app treats the session as
+  // unauthenticated. No behavior change for local/CI runs (PLAYWRIGHT_BASE_URL unset
+  // still resolves to http://localhost:3000, same domain/path as before).
+  const cookieBaseUrl = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000';
   await page.context().addCookies([
-    { name: 'access_token', value: accessToken, domain: 'localhost', path: '/' },
-    { name: 'refresh_token', value: refreshToken, domain: 'localhost', path: '/' },
+    { name: 'access_token', value: accessToken, url: cookieBaseUrl },
+    { name: 'refresh_token', value: refreshToken, url: cookieBaseUrl },
   ]);
 
   // Mock token refresh to prevent 401 → clearTokens → redirect loop with mock tokens
