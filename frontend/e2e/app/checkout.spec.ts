@@ -21,7 +21,11 @@ test.describe('Checkout Flows', () => {
   });
 
   test('should display payment confirmation page', { tag: [...PAYMENT_CONFIRMATION] }, async ({ page }) => {
-    await page.goto('/checkout/confirmation?type=donation&status=approved');
+    // The whole /checkout prefix is gated server-side by proxy.ts PROTECTED_PREFIXES:
+    // without an access_token cookie the confirmation URL 302s to /sign-in before the
+    // page ever renders (that is exactly what the first test in this file asserts).
+    // loginAndNavigate seeds the cookie and then navigates, so we land on the real page.
+    await loginAndNavigate(page, 'adopter', '/checkout/confirmation?type=donation&status=approved');
     await waitForPageLoad(page);
 
     // Real success heading for a completed (non-placeholder) donation — catches a

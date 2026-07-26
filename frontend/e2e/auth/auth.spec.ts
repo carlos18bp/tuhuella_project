@@ -95,14 +95,20 @@ test.describe('Authentication', () => {
   });
 
   test('should navigate to backoffice page', { tag: [...AUTH_PROTECTED_REDIRECT] }, async ({ page }) => {
-    // /backoffice has no matching route in this app — use /web-manager (guarded
-    // at the layout level) so the redirect is genuinely exercised.
-    await page.goto('/web-manager');
+    // Neither /backoffice nor a bare /web-manager is a route here: web-manager has a
+    // layout but no root page.tsx, so the URL 404s and the layout (where the guard
+    // lives) never mounts — CI sat on /es/web-manager with no redirect at all.
+    // /web-manager/campaigns is a real page under that layout, so the guard runs.
+    // Unlike the sibling /shelter/dashboard test (blocked server-side by proxy.ts),
+    // /web-manager is absent from PROTECTED_PREFIXES: here the only thing standing
+    // between a guest and the back office is useRequireAuth in the layout.
+    await page.goto('/web-manager/campaigns');
     await waitForPageLoad(page);
 
-    // Catches an auth-guard regression that lets the web-manager area render
-    // without a session instead of redirecting to sign-in.
-    await page.waitForURL(/\/sign-in/, { timeout: 10_000 });
+    // Catches an auth-guard regression that lets the web-manager back office render
+    // without a session instead of redirecting to sign-in. This redirect is issued by
+    // useRequireAuth after hydration, not by a server 302, hence the wider budget.
+    await page.waitForURL(/\/sign-in/, { timeout: 15_000 });
     await expect(page).toHaveURL(/\/sign-in/);
   });
 
