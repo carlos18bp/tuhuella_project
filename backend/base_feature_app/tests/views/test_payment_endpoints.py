@@ -121,3 +121,29 @@ def test_payment_list_allows_is_staff_user(api_client, payment, existing_user):
     response = api_client.get(reverse('payment-list'))
     assert response.status_code == status.HTTP_200_OK
     assert isinstance(response.json(), list)
+
+
+@pytest.mark.django_db
+def test_create_payment_intent_rejects_negative_amount(authenticated_client, donation):
+    """Negative amount must 400 and create zero new Payment rows.
+
+    Bug this catches: create_payment_intent() only checks
+    `if not amount or not payment_type or not reference_id`, and a numeric
+    string like "-50000" is truthy, so it never validated the sign before
+    calling Payment.objects.create(amount=amount, ...) — which bypasses
+    full_clean() entirely, so a negative payment was created and returned 201.
+    """
+    before = Payment.objects.count()
+
+    response = authenticated_client.post(
+        reverse('payment-create-intent'),
+        {
+            'amount': '-50000',
+            'type': 'donation',
+            'reference_id': donation.pk,
+        },
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert Payment.objects.count() == before

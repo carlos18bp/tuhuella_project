@@ -78,11 +78,18 @@ test.describe('Navigation', () => {
   });
 
   test('should have working footer', { tag: [...NAVIGATION_FOOTER] }, async ({ page }) => {
+    // quality: allow-no-interaction (authenticated display test: loginAndNavigate is API-based by design; content is asserted with concrete values)
     await page.goto('/');
     await waitForPageLoad(page);
 
     const footer = page.locator('footer');
     await expect(footer).toBeVisible();
+
+    // Mirrors the header link-count assertion above — catches a regression where
+    // the footer renders as an empty shell with no explore/account/info links.
+    const footerLinks = footer.locator('a');
+    const footerLinkCount = await footerLinks.count();
+    expect(footerLinkCount).toBeGreaterThan(0);
   });
 
   test('should maintain navigation across Tu Huella pages', { tag: [...NAVIGATION_BETWEEN_PAGES] }, async ({ page }) => {

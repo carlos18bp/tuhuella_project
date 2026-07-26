@@ -1,5 +1,8 @@
+from decimal import Decimal
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models
 
 from base_feature_app.models.mixins import ArchivableModel
@@ -41,7 +44,13 @@ class Donation(ArchivableModel):
         choices=Destination.choices,
         default=Destination.SHELTER,
     )
-    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    # Money is never zero or negative: enforced at the model layer so every
+    # write path (serializers, admin, full_clean) inherits the rule.
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('0.01'))],
+    )
     status = models.CharField(
         max_length=20,
         choices=Status.choices,

@@ -128,3 +128,27 @@ def test_sponsorship_update_status_returns_404_for_missing(authenticated_client)
     )
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+def test_sponsorship_create_rejects_negative_amount(authenticated_client, animal):
+    """Negative amount must 400 and never reach the DB.
+
+    Bug this catches: SponsorshipCreateUpdateSerializer is a bare
+    ModelSerializer with no validate()/validate_amount(), and
+    Sponsorship.amount carries no MinValueValidator, so
+    amount="-20000.00" was silently accepted and persisted as a negative
+    sponsorship pledge.
+    """
+    response = authenticated_client.post(
+        reverse('sponsorship-create'),
+        {
+            'animal': animal.pk,
+            'amount': '-20000.00',
+            'frequency': 'monthly',
+        },
+        format='json',
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert Sponsorship.objects.filter(amount__lt=0).exists() is False

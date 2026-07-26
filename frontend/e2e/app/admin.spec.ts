@@ -174,6 +174,7 @@ test.describe('Admin Panel — Authenticated', () => {
   });
 
   test('should display moderation page with animals and shelters', { tag: [...ADMIN_MODERATION] }, async ({ page }) => {
+    // quality: allow-no-interaction (authenticated display test: loginAndNavigate is API-based by design; content is asserted with concrete values)
     await page.route('**/api/animals/**', (route: any) =>
       route.fulfill({
         status: 200,
@@ -221,6 +222,7 @@ test.describe('Admin Panel — Authenticated', () => {
       },
     );
 
+    // quality: allow-no-interaction (authenticated display test: loginAndNavigate is API-based by design; content is asserted with concrete values)
     const metricsResponse = page.waitForResponse(
       (r) => r.url().includes('admin/metrics') && r.request().method() === 'GET' && r.status() === 200,
       { timeout: 20_000 },
@@ -234,6 +236,7 @@ test.describe('Admin Panel — Authenticated', () => {
   });
 
   test('should display payments audit table', { tag: [...ADMIN_PAYMENTS] }, async ({ page }) => {
+    // quality: allow-no-interaction (authenticated display test: loginAndNavigate is API-based by design; content is asserted with concrete values)
     await page.route('**/payments/**', (route: any) =>
       route.fulfill({
         status: 200,

@@ -3,10 +3,15 @@
 import { Link } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, XCircle } from 'lucide-react';
 
 import { Container } from '@/components/ui';
 import { ROUTES } from '@/lib/constants';
+
+// Wompi (and any future gateway) can report a payment back in any of these
+// terminal-failure states. Anything NOT in this set and NOT 'placeholder'
+// used to fall through to the success copy below.
+const FAILURE_STATUSES = new Set(['declined', 'error', 'failed', 'voided']);
 
 function ConfirmacionContent() {
   const searchParams = useSearchParams();
@@ -15,22 +20,34 @@ function ConfirmacionContent() {
 
   const isSponsorship = type === 'sponsorship';
   const isPlaceholder = status === 'placeholder';
+  const isFailure = FAILURE_STATUSES.has(status);
 
   return (
     <Container className="py-10 min-w-0">
     <div className="mx-auto max-w-xl text-center">
-      <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-950/40 dark:to-emerald-900/25 flex items-center justify-center shadow-sm ring-1 ring-emerald-200/60 dark:ring-emerald-700/40">
-        <CheckCircle2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+      <div className={isFailure
+        ? "mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-red-100 to-red-200 dark:from-red-950/40 dark:to-red-900/25 flex items-center justify-center shadow-sm ring-1 ring-red-200/60 dark:ring-red-700/40"
+        : "mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-950/40 dark:to-emerald-900/25 flex items-center justify-center shadow-sm ring-1 ring-emerald-200/60 dark:ring-emerald-700/40"
+      }>
+        {isFailure
+          ? <XCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
+          : <CheckCircle2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />}
       </div>
 
       <h1 className="mt-6 text-2xl sm:text-3xl font-bold text-text-primary">
-        {isSponsorship ? 'Apadrinamiento registrado' : 'Donación registrada'}
+        {isFailure
+          ? (isSponsorship ? 'Tu apadrinamiento no pudo procesarse' : 'Tu donación no pudo procesarse')
+          : (isSponsorship ? 'Apadrinamiento registrado' : 'Donación registrada')}
       </h1>
 
       <p className="mt-3 text-text-tertiary max-w-md mx-auto">
-        {isSponsorship
-          ? 'Tu apadrinamiento ha sido registrado exitosamente. El animal que elegiste ahora cuenta con tu apoyo.'
-          : 'Tu donación ha sido registrada exitosamente. Gracias por tu generosidad.'}
+        {isFailure
+          ? (isSponsorship
+              ? 'No pudimos confirmar el pago de tu apadrinamiento. No se realizó ningún cobro; podés intentarlo de nuevo cuando quieras.'
+              : 'No pudimos confirmar el pago de tu donación. No se realizó ningún cobro; podés intentarlo de nuevo cuando quieras.')
+          : (isSponsorship
+              ? 'Tu apadrinamiento ha sido registrado exitosamente. El animal que elegiste ahora cuenta con tu apoyo.'
+              : 'Tu donación ha sido registrada exitosamente. Gracias por tu generosidad.')}
       </p>
 
       {isPlaceholder && (
@@ -41,16 +58,16 @@ function ConfirmacionContent() {
 
       <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
         <Link
-          href={ROUTES.ANIMALS}
+          href={isFailure ? ROUTES.CHECKOUT_DONATION : ROUTES.ANIMALS}
           className="inline-flex items-center justify-center min-h-11 w-full sm:w-auto bg-teal-600 text-white rounded-full px-6 py-2.5 text-sm font-medium hover:bg-teal-700 btn-base shadow-sm"
         >
-          Explorar animales
+          {isFailure ? 'Intentar de nuevo' : 'Explorar animales'}
         </Link>
         <Link
-          href={isSponsorship ? ROUTES.MY_SPONSORSHIPS : ROUTES.MY_DONATIONS}
+          href={isFailure ? ROUTES.ANIMALS : (isSponsorship ? ROUTES.MY_SPONSORSHIPS : ROUTES.MY_DONATIONS)}
           className="inline-flex items-center justify-center min-h-11 w-full sm:w-auto border border-border-secondary text-text-secondary rounded-full px-6 py-2.5 text-sm font-medium hover:bg-surface-hover dark:hover:bg-surface-hover btn-base"
         >
-          {isSponsorship ? 'Ver mis apadrinamientos' : 'Ver mis donaciones'}
+          {isFailure ? 'Explorar animales' : (isSponsorship ? 'Ver mis apadrinamientos' : 'Ver mis donaciones')}
         </Link>
       </div>
 

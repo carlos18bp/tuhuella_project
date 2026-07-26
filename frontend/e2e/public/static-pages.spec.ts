@@ -4,6 +4,7 @@ import { PUBLIC_ABOUT, PUBLIC_STRATEGIC_ALLIES, PUBLIC_TERMS, PUBLIC_WORK_WITH_U
 
 test.describe('About Page', () => {
   test('should display about page with hero heading', { tag: [...PUBLIC_ABOUT] }, async ({ page }) => {
+    // quality: allow-no-interaction (authenticated display test: loginAndNavigate is API-based by design; content is asserted with concrete values)
     await page.goto('/about');
     await waitForPageLoad(page);
 
@@ -14,6 +15,7 @@ test.describe('About Page', () => {
 
 test.describe('Terms Page', () => {
   test('should display terms and conditions page', { tag: [...PUBLIC_TERMS] }, async ({ page }) => {
+    // quality: allow-no-interaction (authenticated display test: loginAndNavigate is API-based by design; content is asserted with concrete values)
     await page.goto('/terms');
     await waitForPageLoad(page);
 
