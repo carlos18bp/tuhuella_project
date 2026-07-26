@@ -1,3 +1,5 @@
+from decimal import Decimal, InvalidOperation
+
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -44,6 +46,22 @@ def create_payment_intent(request):
     if not amount or not payment_type or not reference_id:
         return Response(
             {'error': 'amount, type, and reference_id are required'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # A truthiness check passes the string "-50000": parse and require a
+    # positive amount before any Payment row is created (objects.create()
+    # does not run model validators).
+    try:
+        parsed_amount = Decimal(str(amount))
+    except (InvalidOperation, TypeError, ValueError):
+        return Response(
+            {'error': 'amount must be a valid number'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    if parsed_amount <= 0:
+        return Response(
+            {'error': 'amount must be greater than zero'},
             status=status.HTTP_400_BAD_REQUEST,
         )
 

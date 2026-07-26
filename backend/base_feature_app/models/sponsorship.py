@@ -1,4 +1,7 @@
+from decimal import Decimal
+
 from django.conf import settings
+from django.core.validators import MinValueValidator
 from django.db import models
 
 from base_feature_app.models.mixins import ArchivableModel
@@ -25,7 +28,13 @@ class Sponsorship(ArchivableModel):
         on_delete=models.CASCADE,
         related_name='sponsorships',
     )
-    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    # Money is never zero or negative: enforced at the model layer so every
+    # write path (serializers, admin, full_clean) inherits the rule.
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('0.01'))],
+    )
     frequency = models.CharField(
         max_length=10,
         choices=Frequency.choices,

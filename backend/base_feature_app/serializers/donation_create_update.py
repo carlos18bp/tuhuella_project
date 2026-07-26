@@ -8,6 +8,12 @@ class DonationCreateUpdateSerializer(serializers.ModelSerializer):
         model = Donation
         fields = ['id', 'destination', 'shelter', 'campaign', 'amount', 'message']
 
+    def validate_amount(self, value):
+        """Reject zero/negative donations before they reach the DB."""
+        if value is not None and value <= 0:
+            raise serializers.ValidationError('amount must be greater than zero')
+        return value
+
     def validate(self, attrs):
         dest = attrs.get('destination', Donation.Destination.SHELTER)
         shelter = attrs.get('shelter')

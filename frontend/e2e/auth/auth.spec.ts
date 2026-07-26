@@ -82,19 +82,34 @@ test.describe('Authentication', () => {
   });
 
   test('should navigate to dashboard page', { tag: [...AUTH_PROTECTED_REDIRECT] }, async ({ page }) => {
-    await page.goto('/dashboard');
+    // /dashboard has no matching route in this app (only /admin/dashboard and
+    // /shelter/dashboard exist) — use a real protected route so the redirect is
+    // genuinely exercised instead of trivially matching a 404 that never navigates.
+    await page.goto('/shelter/dashboard');
     await waitForPageLoad(page);
-    
-    // Either redirected to sign-in or the dashboard is shown
-    await expect(page).toHaveURL(/dashboard|sign-in/);
+
+    // Catches an auth-guard regression that lets a protected dashboard render
+    // without a session instead of redirecting to sign-in.
+    await page.waitForURL(/\/sign-in/, { timeout: 10_000 });
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should navigate to backoffice page', { tag: [...AUTH_PROTECTED_REDIRECT] }, async ({ page }) => {
-    await page.goto('/backoffice');
+    // Neither /backoffice nor a bare /web-manager is a route here: web-manager has a
+    // layout but no root page.tsx, so the URL 404s and the layout (where the guard
+    // lives) never mounts — CI sat on /es/web-manager with no redirect at all.
+    // /web-manager/campaigns is a real page under that layout, so the guard runs.
+    // Unlike the sibling /shelter/dashboard test (blocked server-side by proxy.ts),
+    // /web-manager is absent from PROTECTED_PREFIXES: here the only thing standing
+    // between a guest and the back office is useRequireAuth in the layout.
+    await page.goto('/web-manager/campaigns');
     await waitForPageLoad(page);
-    
-    // Either redirected to sign-in or the backoffice is shown
-    await expect(page).toHaveURL(/backoffice|sign-in/);
+
+    // Catches an auth-guard regression that lets the web-manager back office render
+    // without a session instead of redirecting to sign-in. This redirect is issued by
+    // useRequireAuth after hydration, not by a server 302, hence the wider budget.
+    await page.waitForURL(/\/sign-in/, { timeout: 15_000 });
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should display sign-up page heading', { tag: [...AUTH_SIGN_UP_FORM] }, async ({ page }) => {
@@ -199,12 +214,16 @@ test.describe('Authentication', () => {
 
   test('should not persist session across fresh navigation without cookies', { tag: [...AUTH_SESSION_PERSISTENCE] }, async ({ page, context }) => {
     // @flow:auth-session-persistence — verify cookies drive session
+    // /my-profile (root) has no auth guard of its own; /my-profile/notifications
+    // does call useRequireAuth, so clearing cookies is genuinely exercised there.
     await context.clearCookies();
-    await page.goto('/my-profile');
+    await page.goto('/my-profile/notifications');
     await waitForPageLoad(page);
 
-    // Without cookies, protected routes should redirect
-    await expect(page).toHaveURL(/sign-in|my-profile/);
+    // Without cookies, the guard must redirect to sign-in — catches a session check
+    // that trusts stale client state instead of the cleared cookie jar.
+    await page.waitForURL(/\/sign-in/, { timeout: 10_000 });
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('should display Google sign-in option on login page', { tag: [...AUTH_GOOGLE_LOGIN] }, async ({ page }) => {

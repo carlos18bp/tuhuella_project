@@ -229,6 +229,7 @@ test.describe('Shelter Panel — Authenticated', () => {
   });
 
   test('should display shelter campaigns with progress', { tag: [...SHELTER_PANEL_CAMPAIGNS] }, async ({ page }) => {
+    // quality: allow-no-interaction (authenticated display test: loginAndNavigate is API-based by design; content is asserted with concrete values)
     await page.route('**/api/campaigns/**', (route: any) =>
       route.fulfill({
         status: 200,

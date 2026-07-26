@@ -120,6 +120,7 @@ test.describe('Blog — Admin', () => {
   });
 
   test('should display admin blog list for staff users', { tag: [...BLOG_ADMIN_LIST] }, async ({ page }) => {
+    // quality: allow-no-interaction (authenticated display test: loginAndNavigate is API-based by design; content is asserted with concrete values)
     await loginAndNavigate(page, 'admin', '/admin/blog');
     await waitForPageLoad(page);
 
