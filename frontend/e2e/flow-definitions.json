@@ -284,7 +284,9 @@
       ],
       "priority": "P1",
       "description": "User submits adoption application from animal detail page",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "adoption-track": {
       "name": "Track adoption applications",
@@ -294,7 +296,9 @@
       ],
       "priority": "P2",
       "description": "Adopter accesses /my-applications: unauthenticated users are redirected to sign-in; authenticated list and badges are covered by my-applications-list (same test may carry both flow tags)",
-      "expectedSpecs": 2
+      "outcomes": [
+        "success"
+      ]
     },
     "adoption-manage": {
       "name": "Manage adoption applications (shelter)",
@@ -304,7 +308,9 @@
       ],
       "priority": "P1",
       "description": "Shelter admin reviews and updates application status at /shelter/applications (same screen as shelter-panel-applications; adoption domain framing)",
-      "expectedSpecs": 2
+      "outcomes": [
+        "success"
+      ]
     },
     "campaign-browse": {
       "name": "Browse campaigns",
@@ -334,7 +340,9 @@
       ],
       "priority": "P1",
       "description": "User selects amount, payment method, and submits donation at /checkout/donation",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "donation-history": {
       "name": "View donation history",
@@ -344,7 +352,9 @@
       ],
       "priority": "P2",
       "description": "User views donation history at /my-donations (redirect when guest; authenticated list when signed in)",
-      "expectedSpecs": 2
+      "outcomes": [
+        "display"
+      ]
     },
     "sponsorship-checkout": {
       "name": "Sponsorship checkout flow",
@@ -354,7 +364,9 @@
       ],
       "priority": "P1",
       "description": "User selects amount, frequency, payment method at /checkout/sponsorship",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "sponsorship-history": {
       "name": "View sponsorships",
@@ -364,7 +376,9 @@
       ],
       "priority": "P2",
       "description": "User views sponsorships at /my-sponsorships (redirect when guest; authenticated list when signed in)",
-      "expectedSpecs": 2
+      "outcomes": [
+        "display"
+      ]
     },
     "favorite-toggle": {
       "name": "Toggle animal favorite",
@@ -534,7 +548,10 @@
       ],
       "priority": "P2",
       "description": "User sees confirmation page after donation/sponsorship checkout",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success",
+        "failure"
+      ]
     },
     "auth-sign-out": {
       "name": "Sign out",
@@ -712,7 +729,10 @@
       ],
       "priority": "P1",
       "description": "Authenticated adopter completes the 3-step adoption wizard (6-section questionnaire, review, submit) for a specific animal",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success",
+        "error"
+      ]
     },
     "donation-checkout-submit": {
       "name": "Donation checkout form submission",
@@ -722,7 +742,9 @@
       ],
       "priority": "P1",
       "description": "Authenticated user selects preset amount, chooses payment method (card/PSE/Nequi), fills optional message, and submits donation form",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "sponsorship-checkout-submit": {
       "name": "Sponsorship checkout form submission",
@@ -732,7 +754,9 @@
       ],
       "priority": "P1",
       "description": "Authenticated user selects frequency (monthly/one-time), preset amount, payment method, and submits sponsorship form",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "notification-preferences": {
       "name": "Notification preferences management",
@@ -906,7 +930,9 @@
       ],
       "priority": "P2",
       "description": "Authenticated adopter views submitted applications at /my-applications with status badges and application details",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "vet-follow-ups-list": {
       "name": "Veterinarian follow-ups list",
@@ -966,7 +992,9 @@
       ],
       "priority": "P3",
       "description": "Adopter views clinical history entries for their adoption application's animal at /my-applications/[id]/history",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "adoption-detail-adopter": {
       "name": "Adoption application detail (adopter)",
@@ -976,7 +1004,9 @@
       ],
       "priority": "P2",
       "description": "Adopter opens /my-applications/[id]; sees status badge, ApplicationTimeline, WhatsApp card to shelter when status is interview/approved, read-only event timeline, link to clinical history",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "adoption-whatsapp-shelter": {
       "name": "Adopter contacts shelter via WhatsApp",
@@ -986,7 +1016,9 @@
       ],
       "priority": "P2",
       "description": "On /my-applications/[id] when status is interview/approved, adopter clicks the WhatsApp card; opens wa.me/<digits>?text=<prefilled> in a new tab using Shelter.phone",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "adoption-whatsapp-applicant": {
       "name": "Shelter or web manager contacts adopter via WhatsApp",
@@ -997,7 +1029,9 @@
       ],
       "priority": "P2",
       "description": "From /shelter/applications (expanded card) or /web-manager/applications/[id], the reviewer clicks the WhatsApp card to open wa.me/<digits> using User.phone of the adopter",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "adoption-event-create-shelter": {
       "name": "Shelter admin logs an adoption process event",
@@ -1007,7 +1041,11 @@
       ],
       "priority": "P1",
       "description": "On /shelter/applications, shelter admin expands an interview/approved application, opens the event modal, fills date + description, submits POST /api/adoptions/<pk>/events/; timeline updates and follow-up timer resets to +5 days",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success",
+        "error",
+        "failure"
+      ]
     },
     "adoption-event-create-web-manager": {
       "name": "Web manager logs an adoption process event",
@@ -1017,7 +1055,11 @@
       ],
       "priority": "P1",
       "description": "On /web-manager/applications/[id], web manager opens the event modal, fills date + description, submits POST /api/adoptions/<pk>/events/; the badge 'Próximo recordatorio en N días' refreshes optimistically",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success",
+        "error",
+        "failure"
+      ]
     },
     "adoption-detail-web-manager": {
       "name": "Adoption application detail (web manager)",
@@ -1027,7 +1069,9 @@
       ],
       "priority": "P2",
       "description": "Web manager opens /web-manager/applications/[id] from the table; sees applicant email, status badge, follow-up reminder badge when status=interview, and editable event timeline",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "adoption-followup-reminder": {
       "name": "Cron-driven follow-up reminder to web managers",
@@ -1220,7 +1264,9 @@
       ],
       "priority": "P2",
       "description": "User views /apoya-la-plataforma: hero renders with CTA to checkout, cost breakdown cards visible, transparency section visible, comparison grid with 5 ways visible.",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "donation-platform-checkout": {
       "name": "Platform donation checkout flow",
@@ -1230,7 +1276,9 @@
       ],
       "priority": "P1",
       "description": "Authenticated adopter navigates to /checkout/platform, selects an amount, submits, and is redirected to /checkout/confirmation with dest=platform in the query string.",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "shelter-panel-animal-create": {
       "name": "Shelter create new animal",

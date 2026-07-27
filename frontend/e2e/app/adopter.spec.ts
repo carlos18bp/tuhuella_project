@@ -438,7 +438,7 @@ test.describe('Favorite toggle — authenticated', () => {
 });
 
 test.describe('Donation history — authenticated', () => {
-  test('should display donation history when adopter has donations', { tag: [...DONATION_HISTORY] }, async ({ page }) => {
+  test('should display donation history when adopter has donations', { tag: [...DONATION_HISTORY, '@outcome:display'] }, async ({ page }) => {
     const mockDonation = {
       id: 1,
       user: 1,
@@ -473,7 +473,7 @@ test.describe('Donation history — authenticated', () => {
 });
 
 test.describe('Sponsorship history — authenticated', () => {
-  test('should display sponsorship history when adopter has sponsorships', { tag: [...SPONSORSHIP_HISTORY] }, async ({ page }) => {
+  test('should display sponsorship history when adopter has sponsorships', { tag: [...SPONSORSHIP_HISTORY, '@outcome:display'] }, async ({ page }) => {
     const mockSponsorship = {
       id: 1,
       user: 1,
@@ -545,7 +545,7 @@ test.describe('Adopter intent — authenticated', () => {
 test.describe('Adoption Application History', () => {
   test(
     'should display clinical history page for an adoption application',
-    { tag: [...ADOPTION_APPLICATION_HISTORY] },
+    { tag: [...ADOPTION_APPLICATION_HISTORY, '@outcome:display'] },
     async ({ page }) => {
       await page.route('**/api/adoptions/1/**', (route: any) =>
         route.fulfill({

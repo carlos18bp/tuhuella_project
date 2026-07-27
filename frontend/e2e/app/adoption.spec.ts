@@ -60,7 +60,7 @@ test.describe('Adoption Flows', () => {
     await expect(page).toHaveURL(/\/sign-in/);
   });
 
-  test('should show adoption CTA on animal detail for unauthenticated user', { tag: [...ADOPTION_SUBMIT] }, async ({ page }) => {
+  test('should show adoption CTA on animal detail for unauthenticated user', { tag: [...ADOPTION_SUBMIT, '@outcome:display'] }, async ({ page }) => {
     await page.goto('/animals');
     await waitForPageLoad(page);
 
@@ -116,7 +116,7 @@ test.describe.serial('Adoption Flows — Authenticated', () => {
     });
   });
 
-  test('should display my applications list or empty state', { tag: [...MY_APPLICATIONS_LIST, ...ADOPTION_TRACK] }, async ({ page }) => {
+  test('should display my applications list or empty state', { tag: [...MY_APPLICATIONS_LIST, ...ADOPTION_TRACK, '@outcome:display'] }, async ({ page }) => {
     await loginAndNavigate(page, 'adopter', '/my-applications');
 
     // Verify heading is visible

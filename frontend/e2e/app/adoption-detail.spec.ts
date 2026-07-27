@@ -23,7 +23,7 @@ async function mockApplicationDetail(page: Page, detail: Record<string, unknown>
 test.describe('Adoption application detail', () => {
   test(
     'adopter sees their application detail',
-    { tag: [...ADOPTION_DETAIL_ADOPTER] },
+    { tag: [...ADOPTION_DETAIL_ADOPTER, '@outcome:display'] },
     async ({ page }) => {
       await mockApplicationDetail(page, {
         id: 5,
@@ -47,7 +47,7 @@ test.describe('Adoption application detail', () => {
 
   test(
     'web manager sees the applicant on the application detail',
-    { tag: [...ADOPTION_DETAIL_WEB_MANAGER] },
+    { tag: [...ADOPTION_DETAIL_WEB_MANAGER, '@outcome:display'] },
     async ({ page }) => {
       await mockApplicationDetail(page, {
         id: 5,

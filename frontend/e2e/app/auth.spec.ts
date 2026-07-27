@@ -14,7 +14,7 @@ import {
 } from '../helpers/flow-tags';
 
 test.describe('Auth — Sign-in form', () => {
-  test('renders email and password fields and lets the user type', { tag: [...AUTH_SIGN_IN_FORM] }, async ({ page }) => {
+  test('renders email and password fields and lets the user type', { tag: [...AUTH_SIGN_IN_FORM, '@outcome:display'] }, async ({ page }) => {
     await page.goto('/sign-in');
     await waitForPageLoad(page);
 
@@ -34,7 +34,7 @@ test.describe('Auth — Sign-in form', () => {
     await expect(page.getByRole('button', { name: 'Iniciar sesión', exact: true })).toBeEnabled();
   });
 
-  test('exposes the forgot-password and registration links', { tag: [...AUTH_SIGN_IN_FORM] }, async ({ page }) => {
+  test('exposes the forgot-password and registration links', { tag: [...AUTH_SIGN_IN_FORM, '@outcome:display'] }, async ({ page }) => {
     await page.goto('/sign-in');
     await waitForPageLoad(page);
 
@@ -73,7 +73,7 @@ test.describe('Auth — Login invalid', () => {
 });
 
 test.describe('Auth — Sign-up form', () => {
-  test('renders all required registration fields and the terms checkbox', { tag: [...AUTH_SIGN_UP_FORM] }, async ({ page }) => {
+  test('renders all required registration fields and the terms checkbox', { tag: [...AUTH_SIGN_UP_FORM, '@outcome:display'] }, async ({ page }) => {
     await page.goto('/sign-up');
     await waitForPageLoad(page);
 
@@ -86,7 +86,7 @@ test.describe('Auth — Sign-up form', () => {
     await expect(page.getByRole('checkbox')).toBeVisible();
   });
 
-  test('blocks submission when terms checkbox is not checked', { tag: [...AUTH_SIGN_UP_FORM] }, async ({ page }) => {
+  test('blocks submission when terms checkbox is not checked', { tag: [...AUTH_SIGN_UP_FORM, '@outcome:error'] }, async ({ page }) => {
     await page.goto('/sign-up');
     await waitForPageLoad(page);
 
@@ -102,7 +102,7 @@ test.describe('Auth — Sign-up form', () => {
     await expect(page.getByRole('checkbox')).not.toBeChecked();
   });
 
-  test('shows a mismatch error when password and confirm-password differ', { tag: [...AUTH_SIGN_UP_FORM] }, async ({ page }) => {
+  test('shows a mismatch error when password and confirm-password differ', { tag: [...AUTH_SIGN_UP_FORM, '@outcome:error'] }, async ({ page }) => {
     await page.goto('/sign-up');
     await waitForPageLoad(page);
 
@@ -121,7 +121,7 @@ test.describe('Auth — Sign-up form', () => {
 });
 
 test.describe('Auth — Forgot password form', () => {
-  test('should display forgot password form', { tag: [...AUTH_FORGOT_PASSWORD_FORM] }, async ({ page }) => {
+  test('should display forgot password form', { tag: [...AUTH_FORGOT_PASSWORD_FORM, '@outcome:display'] }, async ({ page }) => {
     // quality: allow-no-interaction (public form's static content on load — the
     // click-through arrival is already driven by the sibling 'should navigate from
     // sign-in to forgot password' test below; this test's only job is pinning the
@@ -140,7 +140,7 @@ test.describe('Auth — Forgot password form', () => {
     await expect(page.getByRole('link', { name: /Volver a iniciar sesión/i })).toBeVisible();
   });
 
-  test('should navigate from sign-in to forgot password', { tag: [...AUTH_FORGOT_PASSWORD_FORM] }, async ({ page }) => {
+  test('should navigate from sign-in to forgot password', { tag: [...AUTH_FORGOT_PASSWORD_FORM, '@outcome:display'] }, async ({ page }) => {
     await page.goto('/sign-in');
     await waitForPageLoad(page);
 
@@ -233,7 +233,7 @@ test.describe('Auth — Protected route redirect', () => {
 });
 
 test.describe('Auth — Login redirect', () => {
-  test('should redirect to original path after sign-in with redirect param', { tag: [...AUTH_LOGIN_REDIRECT] }, async ({ page }) => {
+  test('should redirect to original path after sign-in with redirect param', { tag: [...AUTH_LOGIN_REDIRECT, '@outcome:success'] }, async ({ page }) => {
     await page.route('**/api/google-captcha/site-key/**', (route: any) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ site_key: '' }) }),
     );
@@ -269,7 +269,7 @@ test.describe('Auth — Login redirect', () => {
 });
 
 test.describe('Auth — Sign-up success', () => {
-  test('should register new account and redirect to home', { tag: [...AUTH_SIGN_UP_SUCCESS] }, async ({ page }) => {
+  test('should register new account and redirect to home', { tag: [...AUTH_SIGN_UP_SUCCESS, '@outcome:success'] }, async ({ page }) => {
     await page.route('**/api/google-captcha/site-key/**', (route: any) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ site_key: '' }) }),
     );
