@@ -92,7 +92,7 @@ test.describe('Navigation', () => {
     expect(footerLinkCount).toBeGreaterThan(0);
   });
 
-  test('should maintain navigation across Tu Huella pages', { tag: [...NAVIGATION_BETWEEN_PAGES] }, async ({ page }) => {
+  test('should maintain navigation across Tu Huella pages', { tag: [...NAVIGATION_BETWEEN_PAGES, '@outcome:success'] }, async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveURL(/\/(es\/?)?$/);
 

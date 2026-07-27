@@ -175,7 +175,7 @@ test.describe.serial('Adopter Pages — Authenticated', () => {
 test.describe('Adopter Profile — Authenticated', () => {
   test.describe.configure({ mode: 'serial' });
 
-  test('should display profile dashboard with stats and activity', { tag: [...ADOPTER_PROFILE] }, async ({ page }) => {
+  test('should display profile dashboard with stats and activity', { tag: [...ADOPTER_PROFILE, '@outcome:display'] }, async ({ page }) => {
     await page.route('**/user/profile-stats/**', (route: any) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockProfileStats) }),
     );
@@ -247,7 +247,7 @@ test.describe('Adopter Profile — Authenticated', () => {
 test.describe('Favorites — Authenticated', () => {
   test.describe.configure({ mode: 'serial' });
 
-  test('should display favorites list with animal cards', { tag: [...FAVORITE_LIST] }, async ({ page }) => {
+  test('should display favorites list with animal cards', { tag: [...FAVORITE_LIST, '@outcome:display'] }, async ({ page }) => {
     await mockFavoritesRoute(page);
     await loginAndNavigate(page, 'adopter', '/favorites');
 
@@ -568,7 +568,7 @@ test.describe('Adoption Application History', () => {
 test.describe('Profile Activity Feed', () => {
   test(
     'adopter sees the recent-activity timeline on their profile',
-    { tag: [...PROFILE_ACTIVITY_FEED] },
+    { tag: [...PROFILE_ACTIVITY_FEED, '@outcome:display'] },
     async ({ page }) => {
       await page.route('**/user/activity/**', (route) =>
         route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockActivity) }),

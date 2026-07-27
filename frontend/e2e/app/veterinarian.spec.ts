@@ -20,13 +20,13 @@ test.describe('Veterinarian — Unauthenticated', () => {
 });
 
 test.describe('Veterinarian — Follow-Ups List', () => {
-  test('should show access denied for adopter role', { tag: [...VET_FOLLOW_UPS_LIST] }, async ({ page }) => {
+  test('should show access denied for adopter role', { tag: [...VET_FOLLOW_UPS_LIST, '@outcome:display'] }, async ({ page }) => {
     await loginAndNavigate(page, 'adopter', '/veterinarian/follow-ups');
 
     await expect(page.getByText(/Acceso denegado/i)).toBeVisible({ timeout: 10_000 });
   });
 
-  test('should display follow-ups list with animal cards for admin user', { tag: [...VET_FOLLOW_UPS_LIST] }, async ({ page }) => {
+  test('should display follow-ups list with animal cards for admin user', { tag: [...VET_FOLLOW_UPS_LIST, '@outcome:display'] }, async ({ page }) => {
     await page.route('**/api/follow-ups/**', (route: any) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockFollowUps) }),
     );
@@ -38,7 +38,7 @@ test.describe('Veterinarian — Follow-Ups List', () => {
     await expect(page.getByText('Milo')).toBeVisible({ timeout: 10_000 });
   });
 
-  test('should show empty state when no follow-ups are assigned', { tag: [...VET_FOLLOW_UPS_LIST] }, async ({ page }) => {
+  test('should show empty state when no follow-ups are assigned', { tag: [...VET_FOLLOW_UPS_LIST, '@outcome:display'] }, async ({ page }) => {
     await page.route('**/api/follow-ups/**', (route: any) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
     );
@@ -50,7 +50,7 @@ test.describe('Veterinarian — Follow-Ups List', () => {
 });
 
 test.describe('Veterinarian — Follow-Up Detail', () => {
-  test('should display follow-up detail with animal name and clinical history', { tag: [...VET_FOLLOW_UP_DETAIL] }, async ({ page }) => {
+  test('should display follow-up detail with animal name and clinical history', { tag: [...VET_FOLLOW_UP_DETAIL, '@outcome:display'] }, async ({ page }) => {
     await page.route('**/api/follow-ups/1/**', (route: any) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockFollowUpDetail) }),
     );
@@ -62,7 +62,7 @@ test.describe('Veterinarian — Follow-Up Detail', () => {
     await expect(page.getByText('Primera revisión')).toBeVisible({ timeout: 10_000 });
   });
 
-  test('should show mark-complete button when follow-up status is pending', { tag: [...VET_FOLLOW_UP_DETAIL] }, async ({ page }) => {
+  test('should show mark-complete button when follow-up status is pending', { tag: [...VET_FOLLOW_UP_DETAIL, '@outcome:display'] }, async ({ page }) => {
     await page.route('**/api/follow-ups/1/**', (route: any) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockFollowUpDetail) }),
     );
@@ -100,7 +100,7 @@ async function setupVetProfile(page: any) {
 test.describe('Veterinarian — Profile', () => {
   test(
     'should display profile page for veterinarian with common profile elements',
-    { tag: [...VETERINARIAN_PROFILE] },
+    { tag: [...VETERINARIAN_PROFILE, '@outcome:display'] },
     async ({ page }) => {
       await setupVetProfile(page);
       await page.goto('/my-profile');
@@ -114,7 +114,7 @@ test.describe('Veterinarian — Profile', () => {
 
   test(
     'should show VeterinarianProfileSection heading and stat cards',
-    { tag: [...VETERINARIAN_PROFILE] },
+    { tag: [...VETERINARIAN_PROFILE, '@outcome:display'] },
     async ({ page }) => {
       await setupVetProfile(page);
       await page.route('**/api/follow-ups/**', (route: any) =>
@@ -135,7 +135,7 @@ test.describe('Veterinarian — Profile', () => {
 
   test(
     'should show follow-up quick action link in VeterinarianProfileSection',
-    { tag: [...VETERINARIAN_PROFILE] },
+    { tag: [...VETERINARIAN_PROFILE, '@outcome:display'] },
     async ({ page }) => {
       await setupVetProfile(page);
       await page.route('**/api/follow-ups/**', (route: any) =>

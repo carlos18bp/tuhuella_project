@@ -23,7 +23,8 @@ test.describe('Contact page', () => {
     });
   });
 
-  test('should display contact page with form and WhatsApp', { tag: [...PUBLIC_CONTACT] }, async ({ page }) => {
+  test('should display contact page with form and WhatsApp', { tag: [...PUBLIC_CONTACT, '@outcome:display'] }, async ({ page }) => {
+    // quality: allow-no-interaction (public display render of the contact form; the submit interaction belongs to the success/error tests of this flow)
     await page.goto('/contactanos');
     await waitForPageLoad(page);
 

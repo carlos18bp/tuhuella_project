@@ -10,7 +10,9 @@
       ],
       "priority": "P1",
       "description": "Home page renders with hero, featured animals, and shelter spotlight",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "home-to-animals": {
       "name": "Navigate from home to animals",
@@ -20,7 +22,9 @@
       ],
       "priority": "P2",
       "description": "User clicks explore animals CTA on home page and navigates to /animals",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "home-to-shelters": {
       "name": "Navigate from home to shelters",
@@ -30,7 +34,9 @@
       ],
       "priority": "P2",
       "description": "User clicks shelter spotlight and navigates to /shelters",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "home-to-campaigns": {
       "name": "Navigate from home to campaigns",
@@ -40,7 +46,9 @@
       ],
       "priority": "P3",
       "description": "User clicks active campaigns section and navigates to /campaigns",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "auth-admin-token-handoff": {
       "name": "Admin token handoff redirect",
@@ -259,7 +267,11 @@
       ],
       "priority": "P1",
       "description": "Adopter completes the 4-step wizard at /shelter-application (basic info, legal, deferred documents, motivation) and submits POST /api/shelter-applications/ to formally apply to become a shelter",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success",
+        "error",
+        "failure"
+      ]
     },
     "shelter-application-status": {
       "name": "Shelter application status view",
@@ -269,7 +281,9 @@
       ],
       "priority": "P2",
       "description": "Adopter with an existing application visits /shelter-application and sees the status view (submitted / under_review / approved / rejected) instead of the wizard",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "shelter-application-review": {
       "name": "Admin reviews shelter application",
@@ -326,7 +340,9 @@
       ],
       "priority": "P2",
       "description": "User visits /campaigns and sees campaign cards with progress bars",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "campaign-detail": {
       "name": "View campaign detail",
@@ -336,7 +352,9 @@
       ],
       "priority": "P2",
       "description": "User clicks campaign card and views detail with progress and donation CTA",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "donation-checkout": {
       "name": "Donation checkout flow",
@@ -394,7 +412,9 @@
       ],
       "priority": "P2",
       "description": "User favorites/unfavorites an animal on /animals/[id] (guest gate + authenticated toggle); list appears at /favorites",
-      "expectedSpecs": 2
+      "outcomes": [
+        "success"
+      ]
     },
     "favorite-list": {
       "name": "View favorites list",
@@ -404,7 +424,9 @@
       ],
       "priority": "P2",
       "description": "User views their favorited animals at /favorites",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "adopter-intent-create": {
       "name": "Create adopter intent",
@@ -414,7 +436,9 @@
       ],
       "priority": "P3",
       "description": "User creates or updates their adoption intent at /my-intent (redirect when guest; save when authenticated)",
-      "expectedSpecs": 2
+      "outcomes": [
+        "success"
+      ]
     },
     "adopter-intent-browse": {
       "name": "Browse adopter intents",
@@ -424,7 +448,10 @@
       ],
       "priority": "P3",
       "description": "User views public adopter intents at /looking-to-adopt",
-      "expectedSpecs": 1
+      "expectedSpecs": 0,
+      "knownGaps": [
+        "No reachable UI as of 2026-07-27: /looking-to-adopt (looking-to-adopt/page.tsx) is a static info page -- how-it-works list + FAQ accordion + an auth-gated CTA link (Mi Intención / Iniciar sesión) -- with zero adopter-intent cards. GET /api/adopter-intents/ (ADOPTER_INTENTS constant, constants.ts:149) is called by no page or store in the frontend. This is the same dead page already documented as the blocker for shelter-invite-send and shelter-invite-respond (knownGaps, 2026-07-04). Restore expectedSpecs to 1 when a public browsing UI lands."
+      ]
     },
     "shelter-panel-dashboard": {
       "name": "Shelter dashboard",
@@ -434,7 +461,9 @@
       ],
       "priority": "P1",
       "description": "Shelter admin views dashboard with navigation to management sections",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "shelter-panel-animals": {
       "name": "Shelter manage animals",
@@ -444,7 +473,9 @@
       ],
       "priority": "P1",
       "description": "Shelter admin views and filters their animals at /shelter/animals",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "shelter-panel-campaigns": {
       "name": "Shelter manage campaigns",
@@ -454,7 +485,9 @@
       ],
       "priority": "P2",
       "description": "Shelter admin views campaigns with progress at /shelter/campaigns",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "shelter-panel-donations": {
       "name": "Shelter view donations",
@@ -464,7 +497,9 @@
       ],
       "priority": "P2",
       "description": "Shelter admin views received donations at /shelter/donations",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "shelter-panel-settings": {
       "name": "Shelter settings",
@@ -474,7 +509,9 @@
       ],
       "priority": "P2",
       "description": "Shelter admin updates shelter info at /shelter/settings",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "admin-dashboard": {
       "name": "Admin dashboard metrics",
@@ -535,7 +572,9 @@
       ],
       "priority": "P2",
       "description": "Header renders on every page. Desktop at lg: (1024px+); below that hamburger drawer. Public links: Animales, Refugios, Campañas, Busco Adoptar, Blog, Nosotros dropdown. Authenticated: Panel dropdown per role (shelter_admin 7 items, web_manager 3, admin 6; veterinarian plain link) + Avatar dropdown (Mi Perfil, Favoritos, account items, Cerrar sesión). Mobile: bell link to /my-profile/notifications beside hamburger.",
-      "expectedSpecs": 3
+      "outcomes": [
+        "success"
+      ]
     },
     "navigation-footer": {
       "name": "Footer navigation",
@@ -545,7 +584,9 @@
       ],
       "priority": "P4",
       "description": "Footer element is visible with explore, account, and info links",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "navigation-between-pages": {
       "name": "Cross-page navigation",
@@ -555,7 +596,9 @@
       ],
       "priority": "P2",
       "description": "User navigates across home, /animals, /shelters, /campaigns, and sign-in pages (locale-prefixed URLs)",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "payment-confirmation": {
       "name": "Payment confirmation page",
@@ -616,7 +659,9 @@
       ],
       "priority": "P4",
       "description": "User navigates to /faq and sees frequently asked questions",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "public-contact": {
       "name": "Contact page",
@@ -626,7 +671,12 @@
       ],
       "priority": "P4",
       "description": "User opens /contactanos with contact form and WhatsApp; can submit message via POST /api/contact/",
-      "expectedSpecs": 2
+      "outcomes": [
+        "display",
+        "success",
+        "error",
+        "failure"
+      ]
     },
     "adopter-profile": {
       "name": "Adopter profile view",
@@ -636,7 +686,9 @@
       ],
       "priority": "P2",
       "description": "Adopter views their role-adaptive profile dashboard at /my-profile with stats, activity timeline, and completeness bar",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "shelter-admin-profile": {
       "name": "Shelter admin profile view",
@@ -646,7 +698,9 @@
       ],
       "priority": "P2",
       "description": "Shelter admin views their role-adaptive profile at /my-profile with ShelterAdminProfileSection (pending-applications widget, shelter stats) and activity timeline with animal_added, campaign_created, application_reviewed, and donation_received events.",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "admin-profile": {
       "name": "Admin profile view",
@@ -680,7 +734,10 @@
       ],
       "priority": "P2",
       "description": "User browses blog listing at /blog with category filters and search",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display",
+        "failure"
+      ]
     },
     "blog-detail": {
       "name": "Blog post detail",
@@ -690,7 +747,10 @@
       ],
       "priority": "P2",
       "description": "User reads a full blog post at /blog/:slug with content, progress bar, sharing",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display",
+        "failure"
+      ]
     },
     "blog-admin-list": {
       "name": "Admin blog list",
@@ -700,7 +760,9 @@
       ],
       "priority": "P2",
       "description": "Admin views all blog posts (published, draft, scheduled) with actions",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "blog-admin-create": {
       "name": "Admin blog create",
@@ -710,7 +772,12 @@
       ],
       "priority": "P2",
       "description": "Admin creates a new blog post via manual form or JSON import",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display",
+        "success",
+        "error",
+        "failure"
+      ]
     },
     "blog-admin-edit": {
       "name": "Admin blog edit",
@@ -720,7 +787,12 @@
       ],
       "priority": "P2",
       "description": "Admin edits an existing blog post fields, JSON content, SEO, cover image",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display",
+        "success",
+        "error",
+        "failure"
+      ]
     },
     "blog-admin-calendar": {
       "name": "Admin blog calendar",
@@ -730,7 +802,9 @@
       ],
       "priority": "P3",
       "description": "Admin views blog calendar with monthly post overview and status colors",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "shelter-panel-applications": {
       "name": "Shelter manage adoption applications",
@@ -740,7 +814,9 @@
       ],
       "priority": "P1",
       "description": "Shelter admin views received adoption applications and changes status (reviewing/interview/approved/rejected) at /shelter/applications",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "adoption-form-wizard": {
       "name": "Adoption form wizard completion",
@@ -787,7 +863,9 @@
       ],
       "priority": "P2",
       "description": "User visits /my-profile/notifications and toggles email/in_app notification preferences per event group",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "notification-bell": {
       "name": "Notification bell interaction",
@@ -801,7 +879,9 @@
       ],
       "priority": "P2",
       "description": "Authenticated user sees bell icon with unread count, opens dropdown, views notifications, and clicks mark all read",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "shelter-panel-updates": {
       "name": "Shelter manage update posts",
@@ -811,7 +891,9 @@
       ],
       "priority": "P2",
       "description": "Shelter admin views and manages update posts at /shelter/updates",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "shelter-panel-update-create": {
       "name": "Shelter create update post",
@@ -821,7 +903,10 @@
       ],
       "priority": "P2",
       "description": "Shelter admin creates a new update post with content and images at /shelter/updates/create",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success",
+        "failure"
+      ]
     },
     "shelter-detail-view-animals": {
       "name": "Shelter detail view animals link",
@@ -843,7 +928,9 @@
       ],
       "priority": "P2",
       "description": "User toggles ES/EN locale switcher in header and page content re-renders in the target language",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "campaign-tab-toggle": {
       "name": "Campaign tab toggle",
@@ -853,7 +940,9 @@
       ],
       "priority": "P3",
       "description": "User toggles between Active and Completed tabs on campaigns listing and sees correct campaigns in each",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "campaign-donate-cta": {
       "name": "Campaign donate CTA",
@@ -863,7 +952,9 @@
       ],
       "priority": "P2",
       "description": "User clicks Donate CTA on campaign detail page and is routed to donation checkout with campaign context",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "shelter-detail-gallery": {
       "name": "Shelter detail gallery lightbox",
@@ -897,7 +988,9 @@
       ],
       "priority": "P3",
       "description": "User interacts with featured animals carousel on home page (next/prev navigation, click card)",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "home-active-campaigns-carousel": {
       "name": "Home active campaigns carousel",
@@ -907,7 +1000,9 @@
       ],
       "priority": "P3",
       "description": "User interacts with active campaigns carousel on home page (next/prev navigation, click card)",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "public-about": {
       "name": "About page",
@@ -917,7 +1012,9 @@
       ],
       "priority": "P4",
       "description": "User visits /about and sees organization information",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "public-terms": {
       "name": "Terms page",
@@ -927,7 +1024,9 @@
       ],
       "priority": "P4",
       "description": "User visits /terms and sees terms of service content",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "public-work-with-us": {
       "name": "Work with us page",
@@ -937,7 +1036,9 @@
       ],
       "priority": "P4",
       "description": "User visits /work-with-us page",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "public-strategic-allies": {
       "name": "Strategic allies page",
@@ -947,7 +1048,9 @@
       ],
       "priority": "P4",
       "description": "User visits /strategic-allies and sees partner organizations",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "my-applications-list": {
       "name": "View my adoption applications",
@@ -969,7 +1072,9 @@
       ],
       "priority": "P2",
       "description": "Veterinarian views their assigned follow-up list at /veterinarian/follow-ups with status badges (pending, in_progress, completed, overdue)",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "vet-follow-up-detail": {
       "name": "Veterinarian follow-up detail",
@@ -979,7 +1084,10 @@
       ],
       "priority": "P2",
       "description": "Veterinarian views a follow-up detail, adds clinical history entries, and marks the follow-up as complete",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display",
+        "success"
+      ]
     },
     "web-manager-shelters": {
       "name": "Web manager shelter list",
@@ -1127,7 +1235,12 @@
       ],
       "priority": "P2",
       "description": "User fills out and submits volunteer application form at /work-with-us/apply/[positionId] with reCAPTCHA verification",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display",
+        "success",
+        "error",
+        "failure"
+      ]
     },
     "profile-edit": {
       "name": "Edit user profile",
@@ -1137,7 +1250,11 @@
       ],
       "priority": "P2",
       "description": "Authenticated user edits profile fields (name, phone, city) at /my-profile/edit and saves changes; role-specific sections shown for shelter_admin and admin",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success",
+        "error",
+        "failure"
+      ]
     },
     "favorites-compare": {
       "name": "Compare favorited animals",
@@ -1147,7 +1264,9 @@
       ],
       "priority": "P3",
       "description": "Authenticated user selects 2+ favorited animals and views side-by-side attribute comparison",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "favorite-note-edit": {
       "name": "Edit favorite animal note",
@@ -1157,7 +1276,9 @@
       ],
       "priority": "P3",
       "description": "Authenticated user edits the personal note on a favorited animal at /favorites via inline text input",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "blog-admin-delete": {
       "name": "Admin delete blog post",
@@ -1167,7 +1288,9 @@
       ],
       "priority": "P2",
       "description": "Admin deletes a blog post from the admin list with confirmation dialog",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "blog-admin-duplicate": {
       "name": "Admin duplicate blog post",
@@ -1177,7 +1300,9 @@
       ],
       "priority": "P3",
       "description": "Admin duplicates a blog post from the admin list, creating a new draft copy",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "shelter-panel-campaign-detail": {
       "name": "Shelter campaign detail and edit",
@@ -1187,7 +1312,10 @@
       ],
       "priority": "P2",
       "description": "Shelter admin views campaign detail, edits title/description/goal when pending or rejected, resubmits for approval, and exchanges messages via CampaignMessageThread at /shelter/campaigns/[id]",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success",
+        "display"
+      ]
     },
     "shelter-panel-campaign-create": {
       "name": "Shelter create new campaign",
@@ -1197,7 +1325,11 @@
       ],
       "priority": "P2",
       "description": "Shelter admin submits a new campaign request (title ES/EN, description, goal) at /shelter/campaigns/nueva; campaign is created as draft pending review",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success",
+        "error",
+        "failure"
+      ]
     },
     "web-manager-campaigns": {
       "name": "Web manager campaigns list",
@@ -1254,7 +1386,9 @@
       ],
       "priority": "P2",
       "description": "Any authenticated user navigates to /manual; unauthenticated users are redirected to /sign-in; page renders sticky search bar and collapsible sidebar with 9 process sections; web_manager/admin see all sections; other roles see only their relevant filtered sections (Phase 19 filterByRole). User expands a section and clicks an anchor link, which scrolls to the ProcessCard and fires a 1.6 s highlight ring.",
-      "expectedSpecs": 3
+      "outcomes": [
+        "display"
+      ]
     },
     "manual-search": {
       "name": "Manual search and process navigation",
@@ -1268,7 +1402,9 @@
       ],
       "priority": "P2",
       "description": "Authenticated user types a query (or Cmd/Ctrl+K) into the Fuse.js search bar on /manual; dropdown shows ranked results filtered by role; user selects a result via keyboard or click; page scrolls to the matching ProcessCard. Search index respects role-filtered section visibility (Phase 19).",
-      "expectedSpecs": 3
+      "outcomes": [
+        "success"
+      ]
     },
     "manual-role-filter": {
       "name": "Manual content filtered by role",
@@ -1280,7 +1416,9 @@
       ],
       "priority": "P3",
       "description": "Authenticated user with a non-staff role (adopter, shelter_admin, veterinarian) visits /manual and sees only the process sections relevant to their role (via filterByRole.ts). Staff roles (web_manager, admin) see all sections. Sections excluded from a role are not rendered in the sidebar or page body.",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "web-manager-profile": {
       "name": "Web manager profile view",
@@ -1302,7 +1440,9 @@
       ],
       "priority": "P3",
       "description": "Veterinarian views their profile at /my-profile: common elements (avatar, name, role badge, completeness bar) and role-specific activity timeline with clinical_entry and followup_completed events; VeterinarianProfileSection shows follow-up stat cards (pending/in_progress/completed/overdue) and quick action link.",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "platform-support-info": {
       "name": "Platform support landing page",
@@ -1336,7 +1476,10 @@
       ],
       "priority": "P1",
       "description": "Shelter admin adds a new animal record via the create form at /shelter/animals, filling required fields (name, species, breed, age, gender, status, description) and submitting; animal appears in the shelter's list.",
-      "expectedSpecs": 1
+      "expectedSpecs": 0,
+      "knownGaps": [
+        "No reachable UI as of 2026-07-27: /shelter/animals/nuevo has no page component anywhere in the app router (confirmed absent from git history: 'git log --all -- *animals/nuevo*' returns nothing). The '+ Agregar animal' link (shelter/animals/page.tsx:46) is a dead CTA for authenticated users -- Next.js serves its default not-found boundary there (no middleware/rewrite maps the path). Unauthenticated users only appear gated because proxy.ts's PROTECTED_PREFIXES matches the '/shelter' prefix before route resolution (proxy.ts:8-19,51-55), not because a create page exists. animalStore.createAnimal (animalStore.ts:96-98) is defined but consumed by no component. Restore expectedSpecs to 1 when a real create form/route lands."
+      ]
     },
     "shelter-panel-animal-edit": {
       "name": "Shelter edit existing animal",
@@ -1415,7 +1558,10 @@
       ],
       "priority": "P2",
       "description": "Shelter admin opens a campaign detail at /shelter/campaigns/[id] and reads/sends messages in the approval thread with the platform team via GET/POST /api/campaigns/[pk]/messages/.",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success",
+        "display"
+      ]
     },
     "web-manager-campaign-messages": {
       "name": "Web manager reads and sends campaign approval messages",
@@ -1443,7 +1589,9 @@
       ],
       "priority": "P3",
       "description": "Authenticated user opens the notification bell dropdown in the header and clicks 'mark all read', clearing the unread badge via POST /api/notifications/logs/mark-all-read/.",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "campaign-updates-feed": {
       "name": "Read updates feed on a completed campaign",
@@ -1453,7 +1601,9 @@
       ],
       "priority": "P3",
       "description": "Visitor opens a completed campaign detail page at /campaigns/[campaignId] and reads the progress-updates feed loaded via GET /api/updates/.",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "profile-activity-feed": {
       "name": "View recent activity timeline on profile",
@@ -1467,7 +1617,9 @@
       ],
       "priority": "P3",
       "description": "Authenticated user views the recent-activity timeline (applications, donations, sponsorships, favorites) on /my-profile, populated via GET /api/user/activity/.",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     }
   }
 }

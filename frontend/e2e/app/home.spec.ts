@@ -3,7 +3,7 @@ import { waitForPageLoad } from '../fixtures';
 import { HOME_LOADS } from '../helpers/flow-tags';
 
 test.describe('Home — Loads', () => {
-  test('renders the hero with badge, headline and primary CTA', { tag: [...HOME_LOADS] }, async ({ page }) => {
+  test('renders the hero with badge, headline and primary CTA', { tag: [...HOME_LOADS, '@outcome:display'] }, async ({ page }) => {
     // quality: allow-no-interaction (authenticated display test: loginAndNavigate is API-based by design; content is asserted with concrete values)
     await page.goto('/');
     await waitForPageLoad(page);

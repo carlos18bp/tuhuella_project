@@ -229,7 +229,7 @@ test.describe('Shelter Panel — Authenticated', () => {
     }
   });
 
-  test('should display shelter campaigns with progress', { tag: [...SHELTER_PANEL_CAMPAIGNS] }, async ({ page }) => {
+  test('should display shelter campaigns with progress', { tag: [...SHELTER_PANEL_CAMPAIGNS, '@outcome:display'] }, async ({ page }) => {
     // quality: allow-no-interaction (authenticated display test: loginAndNavigate is API-based by design; content is asserted with concrete values)
     await page.route('**/api/campaigns/**', (route: any) =>
       route.fulfill({
@@ -246,7 +246,7 @@ test.describe('Shelter Panel — Authenticated', () => {
     await expect(page.getByText(/Alimento para refugio/i)).toBeVisible();
   });
 
-  test('should display shelter donations with total', { tag: [...SHELTER_PANEL_DONATIONS] }, async ({ page }) => {
+  test('should display shelter donations with total', { tag: [...SHELTER_PANEL_DONATIONS, '@outcome:display'] }, async ({ page }) => {
     await page.route('**/api/donations/**', (route: any) =>
       route.fulfill({
         status: 200,
@@ -379,7 +379,7 @@ test.describe('Shelter Admin Profile — Authenticated', () => {
     shelter_stats: { animals_count: 5, pending_applications: 3, active_campaigns: 1 },
   };
 
-  test('should display shelter admin role section and NOT adopter cards', { tag: [...SHELTER_ADMIN_PROFILE] }, async ({ page }) => {
+  test('should display shelter admin role section and NOT adopter cards', { tag: [...SHELTER_ADMIN_PROFILE, '@outcome:display'] }, async ({ page }) => {
     await page.route('**/user/profile/**', (route: any) => {
       if (route.request().method() === 'GET') {
         return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockShelterProfile) });
@@ -398,7 +398,7 @@ test.describe('Shelter Admin Profile — Authenticated', () => {
     await expect(page.getByRole('main').getByText(/Mis Donaciones/i)).not.toBeVisible();
   });
 
-  test('should display pending-applications widget with correct count', { tag: [...SHELTER_ADMIN_PROFILE] }, async ({ page }) => {
+  test('should display pending-applications widget with correct count', { tag: [...SHELTER_ADMIN_PROFILE, '@outcome:display'] }, async ({ page }) => {
     await page.route('**/user/profile/**', (route: any) => {
       if (route.request().method() === 'GET') {
         return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockShelterProfile) });
@@ -413,7 +413,7 @@ test.describe('Shelter Admin Profile — Authenticated', () => {
 });
 
 test.describe('Shelter Campaign Detail & Create', () => {
-  test('should display campaign detail with approval status', { tag: [...SHELTER_PANEL_CAMPAIGN_DETAIL] }, async ({ page }) => {
+  test('should display campaign detail with approval status', { tag: [...SHELTER_PANEL_CAMPAIGN_DETAIL, '@outcome:display'] }, async ({ page }) => {
     await page.route('**/api/campaigns/3/**', (route: any) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockCampaignDetail) }),
     );
@@ -428,7 +428,7 @@ test.describe('Shelter Campaign Detail & Create', () => {
     await expect(page.getByText(/Conversación/i)).toBeVisible({ timeout: 10_000 });
   });
 
-  test('should show edit and resubmit buttons on rejected campaign', { tag: [...SHELTER_PANEL_CAMPAIGN_DETAIL] }, async ({ page }) => {
+  test('should show edit and resubmit buttons on rejected campaign', { tag: [...SHELTER_PANEL_CAMPAIGN_DETAIL, '@outcome:display'] }, async ({ page }) => {
     await page.route('**/api/campaigns/4/**', (route: any) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockRejectedCampaignDetail) }),
     );
@@ -517,7 +517,7 @@ test.describe('Shelter Panel — Animal Create', () => {
 test.describe('Shelter Panel Campaign Messages', () => {
   test(
     'shelter admin reads and sends a campaign approval message',
-    { tag: [...SHELTER_PANEL_CAMPAIGN_MESSAGES] },
+    { tag: [...SHELTER_PANEL_CAMPAIGN_MESSAGES, '@outcome:display'] },
     async ({ page }) => {
       let sentBody: string | null = null;
 

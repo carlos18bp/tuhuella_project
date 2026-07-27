@@ -74,7 +74,7 @@ test.describe('Blog — Public', () => {
     await expect(page.getByTestId('post-card').first()).toBeVisible({ timeout: 15_000 });
   });
 
-  test('should navigate to blog post detail page', { tag: [...BLOG_DETAIL] }, async ({ page }) => {
+  test('should navigate to blog post detail page', { tag: [...BLOG_DETAIL, '@outcome:display'] }, async ({ page }) => {
     await page.goto('/blog');
     await waitForPageLoad(page);
 
@@ -119,7 +119,7 @@ test.describe('Blog — Admin', () => {
     );
   });
 
-  test('should display admin blog list for staff users', { tag: [...BLOG_ADMIN_LIST] }, async ({ page }) => {
+  test('should display admin blog list for staff users', { tag: [...BLOG_ADMIN_LIST, '@outcome:display'] }, async ({ page }) => {
     // quality: allow-no-interaction (authenticated display test: loginAndNavigate is API-based by design; content is asserted with concrete values)
     await loginAndNavigate(page, 'admin', '/admin/blog');
     await waitForPageLoad(page);
@@ -129,7 +129,8 @@ test.describe('Blog — Admin', () => {
     await expect(page.getByRole('link', { name: /Calendario/i })).toBeVisible();
   });
 
-  test('should display admin blog create page', { tag: [...BLOG_ADMIN_CREATE] }, async ({ page }) => {
+  test('should display admin blog create page', { tag: [...BLOG_ADMIN_CREATE, '@outcome:display'] }, async ({ page }) => {
+    // quality: allow-no-interaction (authenticated display render: loginAndNavigate is API-based by design; form structure asserted)
     await loginAndNavigate(page, 'admin', '/admin/blog/crear');
     await waitForPageLoad(page);
 
@@ -139,7 +140,7 @@ test.describe('Blog — Admin', () => {
     await expect(page.getByRole('button', { name: /Importar JSON/i })).toBeVisible();
   });
 
-  test('should display admin blog edit page', { tag: [...BLOG_ADMIN_EDIT] }, async ({ page }) => {
+  test('should display admin blog edit page', { tag: [...BLOG_ADMIN_EDIT, '@outcome:display'] }, async ({ page }) => {
     // Mock the individual blog post endpoint for the edit page
     await page.route('**/api/blog/admin/1/**', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ...mockBlogPost, id: 1, status: 'published' }) }),

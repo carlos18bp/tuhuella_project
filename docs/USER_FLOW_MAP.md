@@ -3608,3 +3608,20 @@ distinct failure copy (admin dashboard/metrics `loadError`) DOES earn `failure`.
 The display-entry rule is live: display-tagged tests must arrive via UI (one
 allow-deep-link escape documented on the shelter video spec, whose listing
 navigation is owned by the shelter-detail click test).
+
+**Batch 4 — final (home/navigation/public/blog/blog-admin/campaign/volunteer +
+shelter-panel/adopter/favorite/veterinarian/manual/shelter-application/
+adopter-intent, 63 flows): the map is now 100% outcome-class migrated — 116
+flows carry `outcomes:` and 12 are `exempt`; `expectedSpecs` no longer gates
+anything.** Systemic lesson from this batch: an untagged test is credited only
+toward `success`, so a flow whose sole class is `display`/`error`/`failure`
+reads `missing` even when junk evidence exists — "missing" can silently mean
+"junk, mislabeled". The attribution tags added here (~26 `@outcome:display`)
+convert those masked states into explicit `junk-only`, which ranks first on the
+worklist. Two flows were reclassified `exempt` with `knownGaps` (the
+shelter-panel animal-create route never existed; the adopter-intent browse page
+is static) — dead surface is not a coverage gap. False greens corrected:
+`blog-admin-edit`'s success credit came from a `toHaveURL` that never saves;
+`blog-admin-delete` dropped a `failure` class its uncaught delete path cannot
+surface; `campaign-updates-feed`'s silent `.catch(() => {})` earns neither
+error nor failure. Authoring worklists live in the batch-4 QA record.

@@ -71,7 +71,7 @@ test.describe('Shelter Application', () => {
     expect(url.includes('my-profile') || url.includes('shelter-application')).toBe(true);
   });
 
-  test('shows status view when an application already exists', { tag: [...SHELTER_APPLICATION_STATUS] }, async ({ page }) => {
+  test('shows status view when an application already exists', { tag: [...SHELTER_APPLICATION_STATUS, '@outcome:display'] }, async ({ page }) => {
     await page.route('**/api/shelter-applications/me/**', (route: any) =>
       route.fulfill({
         status: 200,
