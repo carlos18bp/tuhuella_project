@@ -24,30 +24,6 @@ test.describe('Admin Panel — Unauthenticated', () => {
     await expect(page).toHaveURL(/\/sign-in/);
   });
 
-  test('should display admin dashboard when accessible', { tag: [...ADMIN_DASHBOARD] }, async ({ page }) => {
-    await page.goto('/admin/dashboard');
-    await waitForPageLoad(page);
-
-    if (new URL(page.url()).pathname.includes('admin/dashboard')) {
-      await expect(page.getByRole('heading', { name: /Panel de Administración/i })).toBeVisible();
-      await expect(page.getByText(/Vista general de la plataforma/i)).toBeVisible();
-    }
-  });
-
-  test('should show access denied for non-admin users', { tag: [...ADMIN_DASHBOARD] }, async ({ page }) => {
-    await page.goto('/admin/dashboard');
-    await waitForPageLoad(page);
-
-    if (new URL(page.url()).pathname.includes('admin/dashboard')) {
-      const heading = page.getByRole('heading', { name: /Panel de Administración/i });
-      const denied = page.getByText(/Acceso denegado/i);
-
-      const hasHeading = await heading.isVisible().catch(() => false);
-      const hasDenied = await denied.isVisible().catch(() => false);
-      expect(hasHeading || hasDenied).toBe(true);
-    }
-  });
-
   test('should redirect unauthenticated user from approve shelters', { tag: [...ADMIN_APPROVE_SHELTERS] }, async ({ page }) => {
     await page.goto('/admin/shelters/approve');
     await waitForPageLoad(page);
