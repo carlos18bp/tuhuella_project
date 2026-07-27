@@ -3572,7 +3572,7 @@ When the shelter has no `video_url`, the button is not rendered.
 - **Removing a flow:** Remove from this document, `e2e/flow-definitions.json`, and all `@flow:` tags in specs.
 - **Bump `Version` and `Last Updated`** on every change.
 
-## Outcome-class migration — Batch 1 (auth, animal)
+## Outcome-class migration — Batches 1-2 (auth, animal, donation, sponsorship, adoption)
 
 `frontend/e2e/flow-definitions.json` is migrating from `expectedSpecs` counts to
 an `outcomes: [...]` declaration per flow (see `scripts/flow_coverage_audit.py`).
@@ -3585,4 +3585,15 @@ pad, do not shrink what the code shows. Tagging caveat: the audit credits a
 class only when the backing test carries a matching `@outcome:` tag (untagged
 tests default to `success`) — several auth flows report `partial` from missing
 tags on already-good tests; the follow-up worklist lives in the batch-1 QA
+record.
+
+**Batch 2 (donation/sponsorship/adoption, 21 flows):** two systematic
+corrections vs the heuristic pass — the checkout submit pages are placeholders
+today (no real payment call exists from those entry points, so error/failure
+there would be unclosable padding), and `adoption-submit` is a plain Link (the
+real POST lives in `adoption-form-wizard`). The event-creation modals earned a
+genuine three-class declaration (client validation = error, flattened DRF body
+vs network fallback = failure). Eight `@outcome:display` tags were added to
+existing qualifying tests in the same change (the untagged-defaults-to-success
+mechanic). Remaining partials are real untested branches, tracked in the batch
 record.

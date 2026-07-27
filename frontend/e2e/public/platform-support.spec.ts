@@ -12,7 +12,7 @@ test.describe('Platform Support Landing Page @flow:platform-support-info', () =>
     );
   });
 
-  test('renders hero and CTA to checkout', { tag: [...PLATFORM_SUPPORT_INFO] }, async ({ page }) => {
+  test('renders hero and CTA to checkout', { tag: [...PLATFORM_SUPPORT_INFO, '@outcome:display'] }, async ({ page }) => {
     await page.goto('/apoya-la-plataforma');
     await waitForPageLoad(page);
 
