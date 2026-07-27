@@ -3572,7 +3572,7 @@ When the shelter has no `video_url`, the button is not rendered.
 - **Removing a flow:** Remove from this document, `e2e/flow-definitions.json`, and all `@flow:` tags in specs.
 - **Bump `Version` and `Last Updated`** on every change.
 
-## Outcome-class migration — Batches 1-2 (auth, animal, donation, sponsorship, adoption)
+## Outcome-class migration — Batches 1-3 (auth, animal, donation, sponsorship, adoption, shelter, web-manager, admin)
 
 `frontend/e2e/flow-definitions.json` is migrating from `expectedSpecs` counts to
 an `outcomes: [...]` declaration per flow (see `scripts/flow_coverage_audit.py`).
@@ -3597,3 +3597,14 @@ vs network fallback = failure). Eight `@outcome:display` tags were added to
 existing qualifying tests in the same change (the untagged-defaults-to-success
 mechanic). Remaining partials are real untested branches, tracked in the batch
 record.
+
+**Batch 3 (shelter/web-manager/admin, 20 flows):** four false greens exposed
+(web-manager campaigns/campaign-detail, admin approve-shelters/metrics — each
+was `covered` under the single-bucket regime while a declared class had zero
+qualifying evidence). Pattern lessons applied: silent catches and optimistic-UI
+swallows never earn an `error` class; a `try/finally` with no catch (campaign
+approve/reject, message send) is an unhandled rejection, not a failure surface;
+distinct failure copy (admin dashboard/metrics `loadError`) DOES earn `failure`.
+The display-entry rule is live: display-tagged tests must arrive via UI (one
+allow-deep-link escape documented on the shelter video spec, whose listing
+navigation is owned by the shelter-detail click test).

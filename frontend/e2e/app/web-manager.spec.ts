@@ -46,7 +46,7 @@ test.describe('Web Manager — Unauthenticated (Shelters & Applications)', () =>
 });
 
 test.describe('Web Manager — Shelters List', () => {
-  test('should display shelters list with verification filter chips', { tag: [...WEB_MANAGER_SHELTERS] }, async ({ page }) => {
+  test('should display shelters list with verification filter chips', { tag: [...WEB_MANAGER_SHELTERS, '@outcome:display'] }, async ({ page }) => {
     await page.route('**/api/admin/shelters/**', (route: any) =>
       route.fulfill({
         status: 200,
@@ -64,7 +64,7 @@ test.describe('Web Manager — Shelters List', () => {
 });
 
 test.describe('Web Manager — Shelter Detail', () => {
-  test('should display shelter detail with info and applications tabs', { tag: [...WEB_MANAGER_SHELTER_DETAIL] }, async ({ page }) => {
+  test('should display shelter detail with info and applications tabs', { tag: [...WEB_MANAGER_SHELTER_DETAIL, '@outcome:display'] }, async ({ page }) => {
     await page.route('**/api/admin/shelters/1/applications/**', (route: any) =>
       route.fulfill({
         status: 200,
@@ -141,7 +141,7 @@ test.describe('Web Manager — Campaign List', () => {
     await expect(page.getByRole('button', { name: /Pendientes/i })).toBeVisible({ timeout: 10_000 });
   });
 
-  test('should navigate to create campaign page from list', { tag: [...WEB_MANAGER_CAMPAIGNS] }, async ({ page }) => {
+  test('should navigate to create campaign page from list', { tag: [...WEB_MANAGER_CAMPAIGNS, '@outcome:success'] }, async ({ page }) => {
     await page.route('**/api/admin/campaigns/**', (route: any) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAdminCampaigns) }),
     );
@@ -154,7 +154,7 @@ test.describe('Web Manager — Campaign List', () => {
 });
 
 test.describe('Web Manager — Campaign Detail', () => {
-  test('should display campaign detail with approve and reject buttons', { tag: [...WEB_MANAGER_CAMPAIGN_DETAIL] }, async ({ page }) => {
+  test('should display campaign detail with approve and reject buttons', { tag: [...WEB_MANAGER_CAMPAIGN_DETAIL, '@outcome:display'] }, async ({ page }) => {
     await page.route('**/api/campaigns/3/**', (route: any) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockCampaignDetail) }),
     );
@@ -170,7 +170,7 @@ test.describe('Web Manager — Campaign Detail', () => {
     await expect(page.getByText(/Conversación/i)).toBeVisible({ timeout: 10_000 });
   });
 
-  test('should expand rejection textarea when reject button is clicked', { tag: [...WEB_MANAGER_CAMPAIGN_DETAIL] }, async ({ page }) => {
+  test('should expand rejection textarea when reject button is clicked', { tag: [...WEB_MANAGER_CAMPAIGN_DETAIL, '@outcome:success'] }, async ({ page }) => {
     await page.route('**/api/campaigns/3/**', (route: any) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockCampaignDetail) }),
     );
@@ -284,7 +284,7 @@ test.describe('Web Manager — Profile', () => {
 test.describe('Web Manager Campaign Messages', () => {
   test(
     'web manager reads and sends a campaign approval message',
-    { tag: [...WEB_MANAGER_CAMPAIGN_MESSAGES] },
+    { tag: [...WEB_MANAGER_CAMPAIGN_MESSAGES, '@outcome:display', '@outcome:success'] },
     async ({ page }) => {
       let sentBody: string | null = null;
 

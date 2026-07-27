@@ -33,14 +33,14 @@ import {
 } from '../helpers/mock-data';
 
 test.describe('Shelter Public Pages', () => {
-  test('should display shelters listing page', { tag: [...SHELTER_BROWSE] }, async ({ page }) => {
+  test('should display shelters listing page', { tag: [...SHELTER_BROWSE, '@outcome:display'] }, async ({ page }) => {
     await page.goto('/shelters');
     await waitForPageLoad(page);
 
     await expect(page).toHaveURL(/.*shelters/);
   });
 
-  test('should navigate to shelter detail from listing', { tag: [...SHELTER_DETAIL] }, async ({ page }) => {
+  test('should navigate to shelter detail from listing', { tag: [...SHELTER_DETAIL, '@outcome:display'] }, async ({ page }) => {
     await page.goto('/shelters');
     await waitForPageLoad(page);
 
@@ -53,7 +53,7 @@ test.describe('Shelter Public Pages', () => {
     }
   });
 
-  test('should show view-animals link on shelter detail and navigate to filtered animals', { tag: [...SHELTER_DETAIL_VIEW_ANIMALS] }, async ({ page }) => {
+  test('should show view-animals link on shelter detail and navigate to filtered animals', { tag: [...SHELTER_DETAIL_VIEW_ANIMALS, '@outcome:success'] }, async ({ page }) => {
     await page.goto('/shelters');
     await waitForPageLoad(page);
 
@@ -70,7 +70,8 @@ test.describe('Shelter Public Pages', () => {
     }
   });
 
-  test('should open video modal on shelter detail page', { tag: [...SHELTER_DETAIL_VIDEO] }, async ({ page }) => {
+  test('should open video modal on shelter detail page', { tag: [...SHELTER_DETAIL_VIDEO, '@outcome:display'] }, async ({ page }) => {
+    // quality: allow-deep-link (listing→detail navigation is owned by shelter-detail's click test; this spec isolates the video modal on an already-reached page)
     const shelterWithVideo = {
       id: 4242,
       name: 'Refugio E2E con Video',
@@ -119,7 +120,7 @@ test.describe('Shelter Public Pages', () => {
     await expect(dialog).not.toBeVisible({ timeout: 5_000 });
   });
 
-  test('should open gallery lightbox on shelter detail page', { tag: [...SHELTER_DETAIL_GALLERY] }, async ({ page }) => {
+  test('should open gallery lightbox on shelter detail page', { tag: [...SHELTER_DETAIL_GALLERY, '@outcome:display'] }, async ({ page }) => {
     await page.goto('/shelters');
     await waitForPageLoad(page);
 
@@ -141,7 +142,7 @@ test.describe('Shelter Public Pages', () => {
 });
 
 test.describe('Shelter Onboarding (legacy redirect)', () => {
-  test('legacy /shelter/onboarding redirects to /shelter-application', { tag: [...SHELTER_ONBOARDING] }, async ({ page }) => {
+  test('legacy /shelter/onboarding redirects to /shelter-application', { tag: [...SHELTER_ONBOARDING, '@outcome:success'] }, async ({ page }) => {
     await page.goto('/shelter/onboarding');
     await page.waitForURL(/shelter-application|sign-in/, { timeout: 10_000 });
 

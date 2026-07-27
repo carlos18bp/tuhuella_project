@@ -56,7 +56,7 @@ test.describe('Admin Panel — Unauthenticated', () => {
 test.describe('Admin Panel — Authenticated', () => {
   test.describe.configure({ mode: 'serial' });
 
-  test('should display approve shelters page with pending list', { tag: [...ADMIN_APPROVE_SHELTERS] }, async ({ page }) => {
+  test('should display approve shelters page with pending list', { tag: [...ADMIN_APPROVE_SHELTERS, '@outcome:display'] }, async ({ page }) => {
     const pendingResponse = page.waitForResponse((res: any) => res.url().includes('/admin/shelters/pending'));
     await page.route('**/api/admin/shelters/pending/**', (route: any) =>
       route.fulfill({
@@ -77,7 +77,7 @@ test.describe('Admin Panel — Authenticated', () => {
     await expect(page.getByRole('button', { name: /Rechazar/i }).first()).toBeVisible();
   });
 
-  test('should approve a pending shelter and remove it from list', { tag: [...ADMIN_APPROVE_SHELTERS] }, async ({ page }) => {
+  test('should approve a pending shelter and remove it from list', { tag: [...ADMIN_APPROVE_SHELTERS, '@outcome:success'] }, async ({ page }) => {
     let pendingList = [...mockPendingShelters];
 
     await page.route('**/api/admin/shelters/pending/**', (route: any) =>
@@ -109,7 +109,7 @@ test.describe('Admin Panel — Authenticated', () => {
     await expect(page.getByRole('heading', { name: 'Patitas Felices', level: 3 })).toBeVisible();
   });
 
-  test('should reject a pending shelter', { tag: [...ADMIN_APPROVE_SHELTERS] }, async ({ page }) => {
+  test('should reject a pending shelter', { tag: [...ADMIN_APPROVE_SHELTERS, '@outcome:success'] }, async ({ page }) => {
     await page.route('**/api/admin/shelters/pending/**', (route: any) =>
       route.fulfill({
         status: 200,
@@ -134,7 +134,7 @@ test.describe('Admin Panel — Authenticated', () => {
     await expect(page.getByRole('heading', { name: 'Refugio Nuevo', level: 3 })).toBeHidden({ timeout: 10_000 });
   });
 
-  test('should display empty state when no pending shelters', { tag: [...ADMIN_APPROVE_SHELTERS] }, async ({ page }) => {
+  test('should display empty state when no pending shelters', { tag: [...ADMIN_APPROVE_SHELTERS, '@outcome:display'] }, async ({ page }) => {
     await page.route('**/api/admin/shelters/pending/**', (route: any) =>
       route.fulfill({
         status: 200,
@@ -149,7 +149,7 @@ test.describe('Admin Panel — Authenticated', () => {
     await expect(page.getByText(/No hay refugios pendientes/i)).toBeVisible({ timeout: 10_000 });
   });
 
-  test('should display moderation page with animals and shelters', { tag: [...ADMIN_MODERATION] }, async ({ page }) => {
+  test('should display moderation page with animals and shelters', { tag: [...ADMIN_MODERATION, '@outcome:display'] }, async ({ page }) => {
     // quality: allow-no-interaction (authenticated display test: loginAndNavigate is API-based by design; content is asserted with concrete values)
     await page.route('**/api/animals/**', (route: any) =>
       route.fulfill({
@@ -177,7 +177,7 @@ test.describe('Admin Panel — Authenticated', () => {
     await expect(page.getByText('Refugio Amor').first()).toBeVisible();
   });
 
-  test('should display metrics page with dashboard cards', { tag: [...ADMIN_METRICS] }, async ({ page }) => {
+  test('should display metrics page with dashboard cards', { tag: [...ADMIN_METRICS, '@outcome:display'] }, async ({ page }) => {
     // XHR/fetch to admin metrics only — do not match locale page URL /es/admin/metrics (same path segment)
     await page.route(
       (url) => {
@@ -211,7 +211,7 @@ test.describe('Admin Panel — Authenticated', () => {
     await expect(page.getByRole('main')).toContainText(/\$[\d.,]+|[\d.,]+%|\d+%/, { timeout: 20_000 });
   });
 
-  test('should display payments audit table', { tag: [...ADMIN_PAYMENTS] }, async ({ page }) => {
+  test('should display payments audit table', { tag: [...ADMIN_PAYMENTS, '@outcome:display'] }, async ({ page }) => {
     // quality: allow-no-interaction (authenticated display test: loginAndNavigate is API-based by design; content is asserted with concrete values)
     await page.route('**/payments/**', (route: any) =>
       route.fulfill({
