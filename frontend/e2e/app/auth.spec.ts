@@ -1,11 +1,16 @@
 import { test, expect } from '../test-with-coverage';
 import { waitForPageLoad, loginAndNavigate } from '../fixtures';
 import {
+  AUTH_FORGOT_PASSWORD_FORM,
+  AUTH_FORGOT_PASSWORD_RESET,
   AUTH_LOGIN_INVALID,
+  AUTH_LOGIN_REDIRECT,
   AUTH_PROTECTED_REDIRECT,
+  AUTH_SESSION_PERSISTENCE,
   AUTH_SIGN_IN_FORM,
   AUTH_SIGN_OUT,
   AUTH_SIGN_UP_FORM,
+  AUTH_SIGN_UP_SUCCESS,
 } from '../helpers/flow-tags';
 
 test.describe('Auth — Sign-in form', () => {
@@ -115,16 +120,200 @@ test.describe('Auth — Sign-up form', () => {
   });
 });
 
+test.describe('Auth — Forgot password form', () => {
+  test('should display forgot password form', { tag: [...AUTH_FORGOT_PASSWORD_FORM] }, async ({ page }) => {
+    // quality: allow-no-interaction (public form's static content on load — the
+    // click-through arrival is already driven by the sibling 'should navigate from
+    // sign-in to forgot password' test below; this test's only job is pinning the
+    // field/button/link set via concrete accessible-name locators)
+    await page.goto('/forgot-password');
+    await waitForPageLoad(page);
+
+    await expect(page).toHaveURL(/.*forgot-password/);
+    await expect(page.getByRole('heading', { name: /Recuperar contraseña/i })).toBeVisible();
+
+    // Step A: email input and send code button
+    await expect(page.getByLabel(/Correo electrónico/i)).toBeVisible();
+    await expect(page.getByRole('button', { name: /Enviar código de verificación/i })).toBeVisible();
+
+    // Link back to sign-in
+    await expect(page.getByRole('link', { name: /Volver a iniciar sesión/i })).toBeVisible();
+  });
+
+  test('should navigate from sign-in to forgot password', { tag: [...AUTH_FORGOT_PASSWORD_FORM] }, async ({ page }) => {
+    await page.goto('/sign-in');
+    await waitForPageLoad(page);
+
+    // Click forgot password link
+    const forgotLink = page.getByRole('link', { name: /Olvidaste tu contraseña/i });
+    await expect(forgotLink).toBeVisible();
+    await forgotLink.click();
+    await page.waitForURL(/.*forgot-password/, { timeout: 10_000 });
+
+    await expect(page).toHaveURL(/.*forgot-password/);
+    await expect(page.getByRole('heading', { name: /Recuperar contraseña/i })).toBeVisible();
+  });
+});
+
+test.describe('Auth — Forgot password reset', () => {
+  test('should complete forgot-password reset wizard end-to-end', { tag: [...AUTH_FORGOT_PASSWORD_RESET] }, async ({ page }) => {
+    await page.route('**/api/google-captcha/site-key/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ site_key: '' }) }),
+    );
+    await page.route('**/api/auth/send_passcode/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'Code sent' }) }),
+    );
+    await page.route('**/api/auth/verify_passcode_and_reset_password/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'Password reset' }) }),
+    );
+
+    await page.goto('/forgot-password');
+    await waitForPageLoad(page);
+    await expect(page.getByLabel(/Correo electrónico/i)).toBeVisible();
+
+    // Step 1 — enter email and request code
+    await page.getByLabel(/Correo electrónico/i).fill('test@example.com');
+    await page.getByRole('button', { name: /Enviar código/i }).click();
+
+    // Step 2 — code input and new password inputs appear
+    await expect(page.getByLabel(/Código/i)).toBeVisible({ timeout: 5_000 });
+    await page.getByLabel(/Código/i).fill('123456');
+    await page.getByLabel(/Nueva contraseña/i).fill('NewPass123!');
+    await page.getByLabel(/Confirmar contraseña/i).fill('NewPass123!');
+
+    // Submit reset — canonical role query (was a bare `button[type="submit"]` CSS
+    // locator, indistinguishable from any other submit button on the page)
+    await page.getByRole('button', { name: /Restablecer contraseña/i }).click();
+
+    // On success → redirect to sign-in
+    await page.waitForURL(/sign-in/, { timeout: 10_000 });
+    await expect(page).toHaveURL(/sign-in/);
+  });
+});
+
 test.describe('Auth — Protected route redirect', () => {
   test('unauthenticated visit to a protected route redirects to /sign-in', { tag: [...AUTH_PROTECTED_REDIRECT] }, async ({ page }) => {
+    // quality: allow-no-interaction (an anonymous visit's whole behavior IS the
+    // server-side redirect — there is nothing to interact with before it fires)
     await page.goto('/my-applications/1/history');
     await page.waitForURL(/\/sign-in/, { timeout: 15_000 });
     await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test('unauthenticated visit to /admin/payments redirects to /sign-in', { tag: [...AUTH_PROTECTED_REDIRECT] }, async ({ page }) => {
+    // quality: allow-no-interaction (an anonymous visit's whole behavior IS the
+    // server-side redirect — there is nothing to interact with before it fires)
     await page.goto('/admin/payments');
     await page.waitForURL(/\/sign-in/, { timeout: 15_000 });
+    await expect(page).toHaveURL(/\/sign-in/);
+  });
+
+  test('should navigate to backoffice page', { tag: [...AUTH_PROTECTED_REDIRECT] }, async ({ page }) => {
+    // quality: allow-no-interaction (an anonymous visit's whole behavior IS the
+    // client-side useRequireAuth redirect — /web-manager has no entry in proxy.ts's
+    // PROTECTED_PREFIXES, so there is nothing to interact with before the hook fires
+    // the redirect post-hydration)
+    //
+    // Neither /backoffice nor a bare /web-manager is a route here: web-manager has a
+    // layout but no root page.tsx, so the URL 404s and the layout (where the guard
+    // lives) never mounts — a bare visit sits with no redirect at all. /web-manager/
+    // campaigns is a real page under that layout, so the guard runs. Unlike the
+    // sibling tests above (blocked server-side by proxy.ts), /web-manager is absent
+    // from PROTECTED_PREFIXES: here the only thing standing between a guest and the
+    // back office is useRequireAuth in the layout.
+    await page.goto('/web-manager/campaigns');
+    await waitForPageLoad(page);
+
+    // Catches an auth-guard regression that lets the web-manager back office render
+    // without a session instead of redirecting to sign-in. This redirect is issued by
+    // useRequireAuth after hydration, not by a server 302, hence the wider budget.
+    await page.waitForURL(/\/sign-in/, { timeout: 15_000 });
+    await expect(page).toHaveURL(/\/sign-in/);
+  });
+});
+
+test.describe('Auth — Login redirect', () => {
+  test('should redirect to original path after sign-in with redirect param', { tag: [...AUTH_LOGIN_REDIRECT] }, async ({ page }) => {
+    await page.route('**/api/google-captcha/site-key/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ site_key: '' }) }),
+    );
+    await page.route('**/api/auth/sign_in/**', (route: any) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ access: 'mock-access', refresh: 'mock-refresh' }),
+      }),
+    );
+    await page.route('**/api/token/refresh/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ access: 'mock-access' }) }),
+    );
+    await page.route('**/api/auth/validate_token/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ valid: true }) }),
+    );
+
+    await page.goto('/sign-in?redirect=/my-profile');
+    await waitForPageLoad(page);
+    await expect(page).toHaveURL(/sign-in/);
+
+    // Canonical exact-label queries (were case-insensitive substring regexes
+    // /correo/i and /contraseña/i, which would also match "Confirmar contraseña"
+    // on any form that has both fields on screen at once).
+    await page.getByLabel('Correo electrónico').fill('adopter-e2e@example.com');
+    await page.getByLabel('Contraseña', { exact: true }).fill('testpass123');
+    await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click();
+
+    // After login → should navigate away from sign-in
+    await page.waitForURL(/(?!.*sign-in)/, { timeout: 10_000 });
+    await expect(page).not.toHaveURL(/sign-in/);
+  });
+});
+
+test.describe('Auth — Sign-up success', () => {
+  test('should register new account and redirect to home', { tag: [...AUTH_SIGN_UP_SUCCESS] }, async ({ page }) => {
+    await page.route('**/api/google-captcha/site-key/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ site_key: '' }) }),
+    );
+    await page.route('**/api/auth/sign_up/**', (route: any) =>
+      route.fulfill({
+        status: 201,
+        contentType: 'application/json',
+        body: JSON.stringify({ access: 'mock-access', refresh: 'mock-refresh', user: { id: 99, email: 'newuser@example.com' } }),
+      }),
+    );
+
+    await page.goto('/sign-up');
+    await waitForPageLoad(page);
+
+    await page.getByLabel(/^Nombre$/i).fill('María');
+    await page.getByLabel(/Apellido/i).fill('García');
+    await page.getByLabel(/Correo electrónico/i).fill('newuser@example.com');
+    await page.getByLabel('Contraseña', { exact: true }).fill('SecurePass123!');
+    await page.getByLabel(/Confirmar contraseña/i).fill('SecurePass123!');
+    await page.getByRole('checkbox').check();
+    await expect(page.getByRole('checkbox')).toBeChecked();
+
+    await page.getByRole('button', { name: /Crear cuenta/i }).click();
+
+    // On success → router.replace(ROUTES.HOME), so user leaves sign-up
+    await page.waitForURL((url) => !url.toString().includes('sign-up'), { timeout: 10_000 });
+    await expect(page).not.toHaveURL(/sign-up/);
+  });
+});
+
+test.describe('Auth — Session persistence', () => {
+  test('should not persist session across fresh navigation without cookies', { tag: [...AUTH_SESSION_PERSISTENCE] }, async ({ page, context }) => {
+    // quality: allow-no-interaction (an anonymous visit's whole behavior IS the
+    // server-side redirect — there is nothing to interact with before it fires)
+    // /my-profile (root) has no auth guard of its own; /my-profile/notifications
+    // does call useRequireAuth AND sits under proxy.ts's /my-profile PROTECTED_PREFIXES
+    // entry, so clearing cookies is genuinely exercised at the server redirect here.
+    await context.clearCookies();
+    await page.goto('/my-profile/notifications');
+    await waitForPageLoad(page);
+
+    // Without cookies, the guard must redirect to sign-in — catches a session check
+    // that trusts stale client state instead of the cleared cookie jar.
+    await page.waitForURL(/\/sign-in/, { timeout: 10_000 });
     await expect(page).toHaveURL(/\/sign-in/);
   });
 });

@@ -49,8 +49,8 @@
         "admin"
       ],
       "priority": "P3",
-      "description": "Browser lands on /admin-login with access+refresh tokens in URL params; tokens are stored in cookies and user is redirected to the target page (or / if absent). Missing tokens redirect to /sign-in.",
-      "expectedSpecs": 1
+      "description": "Browser lands on /admin-login with access+refresh tokens in URL params; tokens are stored in cookies and user is redirected to the target page (or / if absent). Missing tokens redirect to /sign-in. Out of Playwright scope: all 4 token-handoff branches (missing token, tokens + redirect param, tokens + no redirect param, loading state) are pinned by app/[locale]/admin-login/__tests__/page.test.tsx with concrete redirect-target assertions (toHaveBeenCalledWith)",
+      "expectedSpecs": 0
     },
     "auth-sign-in-form": {
       "name": "Sign-in form display and interaction",
@@ -141,8 +141,8 @@
         "admin"
       ],
       "priority": "P2",
-      "description": "Authenticated user sees role-specific navigation links in header",
-      "expectedSpecs": 1
+      "description": "Authenticated user sees role-specific navigation links in header. Out of Playwright scope: role-specific nav is pinned at the unit layer (components/layout/__tests__/Header.test.tsx asserts the per-role dropdown contents for shelter_admin/web_manager/admin); the only e2e spec that ever existed for this flow was a mistagged unauthenticated-redirect copy of auth-protected-redirect, not a real role-based-nav check",
+      "expectedSpecs": 0
     },
     "animal-browse": {
       "name": "Browse animals listing",
@@ -536,8 +536,8 @@
         "guest"
       ],
       "priority": "P2",
-      "description": "User clicks Google sign-in button, completes OAuth, is authenticated and redirected",
-      "expectedSpecs": 1
+      "description": "User clicks Google sign-in button, completes OAuth, is authenticated and redirected. Out of Playwright scope: OAuth happens inside a real Google-hosted popup and cannot be driven headlessly without live Google credentials; the button's render/click wiring is unit territory",
+      "expectedSpecs": 0
     },
     "public-faq": {
       "name": "FAQ page",

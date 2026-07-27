@@ -320,6 +320,8 @@ Use this document to understand each flow's steps, branching conditions, role re
 | `access` or `refresh` missing from URL | Redirect to `/sign-in` immediately |
 | `redirect` param absent | Redirect to `/` |
 
+**Note:** Not covered by Playwright e2e (`expectedSpecs: 0` in `flow-definitions.json`) — all 4 token-handoff branches (missing token → `/sign-in`, tokens + redirect param → redirect target, tokens + no redirect param → `/`, loading state) are pinned by `app/[locale]/admin-login/__tests__/page.test.tsx` with concrete redirect-target assertions (`toHaveBeenCalledWith`).
+
 ---
 
 ### auth-sign-in-form
@@ -562,6 +564,8 @@ Use this document to understand each flow's steps, branching conditions, role re
    - **shelter_admin**: Panel Refugio (with sub-nav to dashboard, animales, etc.)
    - **admin**: Admin panel links (Dashboard, Aprobar Refugios, etc.)
 
+**Note:** Not covered by Playwright e2e (`expectedSpecs: 0` in `flow-definitions.json`) — role-specific nav is pinned at the unit layer (`components/layout/__tests__/Header.test.tsx` asserts the per-role dropdown contents for shelter_admin/web_manager/admin). The only e2e spec that ever existed for this flow was a mistagged copy of the unauthenticated-redirect check already covered by `auth-protected-redirect`.
+
 ---
 
 ### auth-sign-out
@@ -644,6 +648,8 @@ Use this document to understand each flow's steps, branching conditions, role re
 | Audience mismatch (prod) | `401 { error: "Invalid Google client" }` |
 | New user | User created with unusable password; `created: true` |
 | Existing user | Matched by email; names updated if blank |
+
+**Note:** Not covered by Playwright e2e (`expectedSpecs: 0` in `flow-definitions.json`) — OAuth happens inside a real Google-hosted popup and cannot be driven headlessly without live Google credentials; the button's render/click wiring is unit territory.
 
 ---
 
