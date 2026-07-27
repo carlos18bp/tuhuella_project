@@ -44,7 +44,7 @@ test.describe('Auth — Sign-in form', () => {
 });
 
 test.describe('Auth — Login invalid', () => {
-  test('keeps the user on /sign-in and shows an error when credentials are rejected', { tag: [...AUTH_LOGIN_INVALID] }, async ({ page }) => {
+  test('keeps the user on /sign-in and shows an error when credentials are rejected', { tag: [...AUTH_LOGIN_INVALID, '@outcome:error'] }, async ({ page }) => {
     await page.route('**/google-captcha/site-key/**', (route: any) =>
       route.fulfill({
         status: 200,
