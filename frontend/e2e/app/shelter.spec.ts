@@ -1,5 +1,5 @@
 import { test, expect } from '../test-with-coverage';
-import { waitForPageLoad, loginAndNavigate } from '../fixtures';
+import { waitForPageLoad, loginAndNavigate, loginAs } from '../fixtures';
 import {
   SHELTER_BROWSE,
   SHELTER_DETAIL,
@@ -27,6 +27,8 @@ import {
   mockShelterCampaigns,
   mockShelterDonations,
   mockShelterData,
+  mockShelterMetrics,
+  mockShelterUpdates,
   mockCampaignDetail,
   mockRejectedCampaignDetail,
   mockCampaignMessages,
@@ -159,14 +161,24 @@ test.describe('Shelter Panel', () => {
     await expect(page).toHaveURL(/\/sign-in/);
   });
 
-  test('should display shelter dashboard or redirect when unauthenticated', { tag: [...SHELTER_PANEL_DASHBOARD] }, async ({ page }) => {
-    await page.goto('/shelter/dashboard');
-    await waitForPageLoad(page);
+  test('should display shelter dashboard or redirect when unauthenticated', { tag: [...SHELTER_PANEL_DASHBOARD, '@outcome:display'] }, async ({ page }) => {
+    await page.route('**/api/shelters/**', (route: any) => {
+      if (route.request().method() === 'GET') {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockShelterData) });
+      }
+      return route.continue();
+    });
+    await page.route('**/api/admin/shelter/metrics/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockShelterMetrics) }),
+    );
 
-    const pathname = new URL(page.url()).pathname;
-    const isSignIn = pathname.includes('sign-in');
-    const isDashboard = pathname.includes('shelter/dashboard');
-    expect(isSignIn || isDashboard).toBe(true);
+    await loginAs(page, 'shelter_admin');
+    await page.getByRole('button', { name: 'Panel Refugio' }).click();
+    await page.getByRole('menuitem', { name: 'Dashboard' }).click();
+    await page.waitForURL(/\/shelter\/dashboard/, { timeout: 10_000 });
+
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(mockShelterData[0].name);
+    await expect(page.getByText(/Resumen de tu refugio/i)).toBeVisible({ timeout: 10_000 });
   });
 
   test('should redirect unauthenticated user from shelter animals', { tag: [...SHELTER_PANEL_ANIMALS] }, async ({ page }) => {
@@ -255,14 +267,18 @@ test.describe('Shelter Panel — Authenticated', () => {
       }),
     );
 
-    await loginAndNavigate(page, 'shelter_admin', '/shelter/donations');
+    await loginAs(page, 'shelter_admin');
+    await page.getByRole('button', { name: 'Panel Refugio' }).click();
+    await page.getByRole('menuitem', { name: 'Donaciones' }).click();
+    await page.waitForURL(/\/shelter\/donations/, { timeout: 10_000 });
 
     await expect(page.getByRole('heading', { name: /Donaciones Recibidas/i })).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/50.000|50,000/i).first()).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText(/donor1@example.com/i)).toBeVisible();
   });
 
-  test('should display shelter settings form with current data', { tag: [...SHELTER_PANEL_SETTINGS] }, async ({ page }) => {
+  test('should display shelter settings form with current data', { tag: [...SHELTER_PANEL_SETTINGS, '@outcome:success'] }, async ({ page }) => {
+    let patchBody = '';
     await page.route('**/api/shelters/**', (route: any) => {
       if (route.request().method() === 'GET') {
         return route.fulfill({
@@ -272,6 +288,7 @@ test.describe('Shelter Panel — Authenticated', () => {
         });
       }
       if (route.request().method() === 'PATCH' || route.request().method() === 'PUT') {
+        patchBody = route.request().postData() ?? '';
         return route.fulfill({
           status: 200,
           contentType: 'application/json',
@@ -285,20 +302,15 @@ test.describe('Shelter Panel — Authenticated', () => {
 
     await expect(page.getByRole('heading', { name: /Configuración del Refugio/i })).toBeVisible({ timeout: 15_000 });
     await expect(page.getByLabel(/Nombre/i).first()).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByRole('button', { name: /Guardar cambios/i })).toBeVisible();
+
+    await page.getByLabel(/Nombre/i).first().fill('Refugio E2E Editado');
+    await page.getByRole('button', { name: /Guardar cambios/i }).click();
+
+    await expect(page.getByText('Cambios guardados correctamente')).toBeVisible({ timeout: 10_000 });
+    await expect.poll(() => patchBody, { timeout: 5_000 }).toContain('Refugio E2E Editado');
   });
 
-  test('should display shelter applications page with heading', { tag: [...SHELTER_PANEL_APPLICATIONS] }, async ({ page }) => {
-    await loginAndNavigate(page, 'shelter_admin', '/shelter/applications');
-
-    await expect(page.getByRole('heading', { name: /Solicitudes de Adopción/i })).toBeVisible({ timeout: 15_000 });
-
-    const hasApplications = page.getByRole('article').first();
-    const emptyState = page.getByText(/No hay solicitudes de adopción/i);
-    await expect(hasApplications.or(emptyState)).toBeVisible({ timeout: 10_000 });
-  });
-
-  test('should move submitted adoption application to reviewing status', { tag: [...ADOPTION_MANAGE] }, async ({ page }) => {
+  test('should move submitted adoption application to reviewing status', { tag: [...ADOPTION_MANAGE, ...SHELTER_PANEL_APPLICATIONS, '@outcome:success'] }, async ({ page }) => {
     const baseApp = {
       id: 501,
       animal: 1,
@@ -341,23 +353,92 @@ test.describe('Shelter Panel — Authenticated', () => {
     await expect(page.getByText('En revisión')).toBeVisible({ timeout: 10_000 });
   });
 
-  test('should display shelter updates page with heading', { tag: [...SHELTER_PANEL_UPDATES] }, async ({ page }) => {
+  test('should display shelter updates page with heading', { tag: [...SHELTER_PANEL_UPDATES, '@outcome:success'] }, async ({ page }) => {
+    await page.route('**/api/shelters/**', (route: any) => {
+      if (route.request().method() === 'GET') {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockShelterData) });
+      }
+      return route.continue();
+    });
+    await page.route('**/api/updates/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockShelterUpdates) }),
+    );
+    // Registered after the general updates route so it wins for the delete call.
+    await page.route(/\/api\/updates\/\d+\/delete\//, (route: any) => route.fulfill({ status: 204, body: '' }));
+
     await loginAndNavigate(page, 'shelter_admin', '/shelter/updates');
 
     await expect(page.getByRole('heading', { name: /Mis actualizaciones/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(mockShelterUpdates[0].title)).toBeVisible({ timeout: 10_000 });
 
-    const hasUpdates = page.getByRole('article').first();
-    const emptyState = page.getByText(/No has publicado actualizaciones/i);
-    await expect(hasUpdates.or(emptyState)).toBeVisible({ timeout: 10_000 });
+    page.once('dialog', (dialog) => dialog.accept());
+    await page.getByRole('button', { name: /Eliminar/i }).first().click();
+
+    await expect(page.getByText(mockShelterUpdates[0].title)).not.toBeVisible({ timeout: 10_000 });
   });
 
-  test('should display shelter update create form with required fields', { tag: [...SHELTER_PANEL_UPDATE_CREATE] }, async ({ page }) => {
+  test('should display shelter update create form with required fields', { tag: [...SHELTER_PANEL_UPDATE_CREATE, '@outcome:success'] }, async ({ page }) => {
+    await page.route('**/api/shelters/**', (route: any) => {
+      if (route.request().method() === 'GET') {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockShelterData) });
+      }
+      return route.continue();
+    });
+    await page.route('**/api/campaigns/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
+    );
+    await page.route('**/api/animals/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
+    );
+    await page.route('**/api/updates/create/**', (route: any) =>
+      route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ id: 55, title: 'Vacunación al día', shelter: 1 }) }),
+    );
+
     await loginAndNavigate(page, 'shelter_admin', '/shelter/updates/create');
 
     await expect(page.getByRole('heading', { name: /Publicar actualización/i })).toBeVisible();
     await expect(page.getByText(/Título \(Español\)/i)).toBeVisible();
     await expect(page.getByText(/Contenido \(Español\)/i)).toBeVisible();
     await expect(page.getByRole('button', { name: /Publicar/i })).toBeVisible();
+
+    // Labels here have no htmlFor/id (accessibility gap in updates/create/page.tsx:98-110),
+    // so getByLabel cannot resolve them; role+position is the stable fallback (all four
+    // fields share role="textbox" in fixed DOM order: title ES, title EN, content ES, content EN).
+    const fields = page.locator('form').getByRole('textbox');
+    await fields.nth(0).fill('Vacunación al día');
+    await fields.nth(2).fill('Todos los animales fueron vacunados esta semana.');
+    await page.getByRole('button', { name: /Publicar actualización/i }).click();
+
+    await expect(page).toHaveURL(/shelter\/updates$/, { timeout: 10_000 });
+  });
+
+  test('shows an error message when publishing an update fails', { tag: [...SHELTER_PANEL_UPDATE_CREATE, '@outcome:failure'] }, async ({ page }) => {
+    await page.route('**/api/shelters/**', (route: any) => {
+      if (route.request().method() === 'GET') {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockShelterData) });
+      }
+      return route.continue();
+    });
+    await page.route('**/api/campaigns/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
+    );
+    await page.route('**/api/animals/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
+    );
+    // Body has neither `error` nor `detail`, so ShelterUpdateCreatePage falls back to its
+    // translated copy (updates/create/page.tsx:73) instead of echoing the response.
+    await page.route('**/api/updates/create/**', (route: any) =>
+      route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({}) }),
+    );
+
+    await loginAndNavigate(page, 'shelter_admin', '/shelter/updates/create');
+
+    const fields = page.locator('form').getByRole('textbox');
+    await fields.nth(0).fill('Vacunación al día');
+    await fields.nth(2).fill('Todos los animales fueron vacunados esta semana.');
+    await page.getByRole('button', { name: /Publicar actualización/i }).click();
+
+    await expect(page.getByText('Error al publicar la actualización')).toBeVisible({ timeout: 10_000 });
   });
 });
 
@@ -414,6 +495,9 @@ test.describe('Shelter Admin Profile — Authenticated', () => {
 
 test.describe('Shelter Campaign Detail & Create', () => {
   test('should display campaign detail with approval status', { tag: [...SHELTER_PANEL_CAMPAIGN_DETAIL, '@outcome:display'] }, async ({ page }) => {
+    await page.route('**/api/campaigns/mine/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockShelterCampaigns) }),
+    );
     await page.route('**/api/campaigns/3/**', (route: any) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockCampaignDetail) }),
     );
@@ -421,19 +505,36 @@ test.describe('Shelter Campaign Detail & Create', () => {
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockCampaignMessages) }),
     );
 
-    await loginAndNavigate(page, 'shelter_admin', '/shelter/campaigns/3');
+    await loginAs(page, 'shelter_admin');
+    await page.getByRole('button', { name: 'Panel Refugio' }).click();
+    await page.getByRole('menuitem', { name: 'Campañas' }).click();
+    await page.waitForURL(/\/shelter\/campaigns$/, { timeout: 10_000 });
+
+    await page.getByRole('link', { name: /Esterilización urgente/i }).click();
+    await page.waitForURL(/\/shelter\/campaigns\/3/, { timeout: 10_000 });
 
     await expect(page.getByText(/Esterilización urgente/i)).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/pending/i)).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText(/Conversación/i)).toBeVisible({ timeout: 10_000 });
   });
 
-  test('should show edit and resubmit buttons on rejected campaign', { tag: [...SHELTER_PANEL_CAMPAIGN_DETAIL, '@outcome:display'] }, async ({ page }) => {
+  test('should show edit and resubmit buttons on rejected campaign', { tag: [...SHELTER_PANEL_CAMPAIGN_DETAIL, '@outcome:display', '@outcome:success'] }, async ({ page }) => {
     await page.route('**/api/campaigns/4/**', (route: any) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockRejectedCampaignDetail) }),
     );
     await page.route('**/api/campaigns/4/messages/**', (route: any) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockCampaignMessages) }),
+    );
+    // Registered after the general campaign route so it wins for the resubmit action —
+    // submitForApproval sets `campaign` straight from this response (campaignStore.ts:101-107),
+    // so without this override the blanket /campaigns/4/** handler above would answer the
+    // resubmit POST too and the campaign would silently stay 'rejected'.
+    await page.route('**/api/campaigns/4/submit/**', (route: any) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ ...mockRejectedCampaignDetail, approval_status: 'pending', reviewed_at: null, reviewed_by: null, reviewed_by_name: null }),
+      }),
     );
 
     await loginAndNavigate(page, 'shelter_admin', '/shelter/campaigns/4');
@@ -441,6 +542,11 @@ test.describe('Shelter Campaign Detail & Create', () => {
     await expect(page.getByText(/Rescate de temporada/i)).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/Reenviar a revisión/i)).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText(/Falta imagen de portada/i).first()).toBeVisible({ timeout: 10_000 });
+
+    await page.getByRole('button', { name: 'Reenviar a revisión' }).click();
+
+    await expect(page.getByText(/Estado de revisión:\s*pending/i)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('button', { name: 'Reenviar a revisión' })).not.toBeVisible({ timeout: 10_000 });
   });
 
   test('should redirect unauthenticated user from campaign detail', { tag: [...SHELTER_PANEL_CAMPAIGN_DETAIL] }, async ({ page }) => {
@@ -450,15 +556,35 @@ test.describe('Shelter Campaign Detail & Create', () => {
     await expect(page).toHaveURL(/\/sign-in/);
   });
 
-  test('should display campaign request form', { tag: [...SHELTER_PANEL_CAMPAIGN_CREATE] }, async ({ page }) => {
-    await page.route('**/api/shelters/**', (route: any) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ count: 1, page: 1, total_pages: 1, results: mockShelterData }) }),
+  test('should display campaign request form', { tag: [...SHELTER_PANEL_CAMPAIGN_CREATE, '@outcome:success'] }, async ({ page }) => {
+    // The page reads `res.data` as a plain array of owned shelters (nueva/page.tsx:29-31),
+    // not the paginated {count,results} shape — the previous mock's wrapper meant
+    // `.map()` threw silently (swallowed by the missing catch) and shelterId never
+    // resolved; harmless for a visibility-only check, fatal for an actual submit.
+    await page.route('**/api/shelters/**', (route: any) => {
+      if (route.request().method() === 'GET') {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockShelterData) });
+      }
+      return route.continue();
+    });
+    await page.route('**/api/campaigns/create/**', (route: any) =>
+      route.fulfill({
+        status: 201,
+        contentType: 'application/json',
+        body: JSON.stringify({ ...mockCampaignDetail, id: 42, title: 'Campaña de esterilización E2E', title_es: 'Campaña de esterilización E2E' }),
+      }),
     );
 
     await loginAndNavigate(page, 'shelter_admin', '/shelter/campaigns/nueva');
 
     await expect(page.getByRole('heading', { name: /Solicitar nueva campaña/i })).toBeVisible({ timeout: 15_000 });
     await expect(page.getByRole('button', { name: /Enviar para revisión/i })).toBeVisible({ timeout: 10_000 });
+
+    await page.getByLabel('Título').fill('Campaña de esterilización E2E');
+    await page.getByLabel(/Meta/i).fill('500000');
+    await page.getByRole('button', { name: /Enviar para revisión/i }).click();
+
+    await expect(page).toHaveURL(/shelter\/campaigns\/42/, { timeout: 10_000 });
   });
 
   test('should redirect unauthenticated user from campaign create', { tag: [...SHELTER_PANEL_CAMPAIGN_CREATE] }, async ({ page }) => {

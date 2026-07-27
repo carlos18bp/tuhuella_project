@@ -1,14 +1,63 @@
+import type { Page } from '@playwright/test';
 import { test, expect } from '../test-with-coverage';
 import { waitForPageLoad } from '../fixtures';
 import { CAMPAIGN_BROWSE, CAMPAIGN_DETAIL, CAMPAIGN_TAB_TOGGLE, CAMPAIGN_DONATE_CTA, CAMPAIGN_UPDATES_FEED } from '../helpers/flow-tags';
 import { mockCampaignDetail } from '../helpers/mock-data';
 
-test.describe('Campaign Browse & Detail', () => {
-  test('should display campaigns listing page', { tag: [...CAMPAIGN_BROWSE, '@outcome:display'] }, async ({ page }) => {
-    await page.goto('/campaigns');
-    await waitForPageLoad(page);
+/**
+ * Space this page's requests just under the deployed rate limit.
+ *
+ * Mirrors animal-browse-display.spec.ts's pacing helper: the fleet serves every
+ * site behind nginx rate limiting and Next.js prefetches every header/footer
+ * link on load, so an unpaced home-page hop can come back 429 before the click
+ * even lands. See that file for the full measured rationale.
+ */
+async function paceRequestsUnderRateLimit(page: Page, minGapMs = 110): Promise<void> {
+  let nextAt = 0;
+  await page.route('**/*', async (route) => {
+    const now = Date.now();
+    const at = Math.max(now, nextAt);
+    nextAt = at + minGapMs;
+    const delay = at - now;
+    if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay));
+    await route.continue();
+  });
+}
 
-    await expect(page).toHaveURL(/.*campaigns/);
+/**
+ * CI builds its database with `migrate --no-input` and no fixtures, so there the
+ * real /campaigns/ endpoint answers an empty list. Mocked only off a deployed
+ * target, and registered AFTER pacing so it wins for the campaigns endpoint
+ * while every other request still falls through to pacing (same reverse-
+ * registration convention as animal-browse-display.spec.ts).
+ */
+async function mockCampaignsListingCI(page: Page): Promise<void> {
+  await page.route(
+    (url) => url.pathname === '/api/campaigns/',
+    (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
+  );
+}
+
+test.describe('Campaign Browse & Detail', () => {
+  // Bug it catches: the header route to the campaigns listing breaking (renamed
+  // route, locale-prefix regression) or the page rendering without its heading —
+  // the deep-link `goto('/campaigns')` + URL-only assertion this replaces could
+  // not see either.
+  test('should display campaigns listing page', { tag: [...CAMPAIGN_BROWSE, '@outcome:display'] }, async ({ page }) => {
+    test.slow(); // paced requests trade wall time for a deterministic transition
+    await paceRequestsUnderRateLimit(page);
+
+    const deployedTarget = Boolean(process.env.PLAYWRIGHT_BASE_URL);
+    if (!deployedTarget) await mockCampaignsListingCI(page);
+
+    await expect(async () => {
+      const entry = await page.goto('/');
+      if (entry?.status() === 429) throw new Error('entry document rate limited (HTTP 429)');
+      await page.locator('header').getByRole('link', { name: 'Campañas' }).click({ timeout: 10_000 });
+      await page.waitForURL(/\/campaigns$/, { timeout: 20_000 });
+    }).toPass({ timeout: 120_000, intervals: [3_000, 6_000] });
+
+    await expect(page.getByRole('heading', { name: /Campañas activas/i })).toBeVisible({ timeout: 15_000 });
   });
 
   test('should navigate to campaign detail from listing', { tag: [...CAMPAIGN_DETAIL] }, async ({ page }) => {
