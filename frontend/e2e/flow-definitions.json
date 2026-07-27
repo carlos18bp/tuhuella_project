@@ -1,6 +1,6 @@
 {
   "version": "5.10.0",
-  "lastUpdated": "2026-07-04",
+  "lastUpdated": "2026-07-27",
   "flows": {
     "home-loads": {
       "name": "Home page loads",
@@ -60,7 +60,11 @@
       ],
       "priority": "P1",
       "description": "User navigates to /sign-in, sees form fields and can type in them",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success",
+        "error",
+        "display"
+      ]
     },
     "auth-login-invalid": {
       "name": "Login with invalid credentials",
@@ -70,7 +74,9 @@
       ],
       "priority": "P1",
       "description": "User submits invalid credentials and stays on sign-in page with error",
-      "expectedSpecs": 1
+      "outcomes": [
+        "error"
+      ]
     },
     "auth-sign-up-form": {
       "name": "Sign-up form display and validation",
@@ -80,7 +86,10 @@
       ],
       "priority": "P1",
       "description": "User navigates to /sign-up and sees registration form with client-side validation",
-      "expectedSpecs": 1
+      "outcomes": [
+        "error",
+        "display"
+      ]
     },
     "auth-forgot-password-form": {
       "name": "Forgot password form display",
@@ -90,7 +99,9 @@
       ],
       "priority": "P2",
       "description": "User navigates to /forgot-password and sees email input and send code button",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "auth-forgot-password-reset": {
       "name": "Forgot password complete reset wizard",
@@ -100,7 +111,11 @@
       ],
       "priority": "P2",
       "description": "User completes the full reset wizard on /forgot-password: (1) enters email and sends code, (2) enters the 6-digit code, (3) sets a new password that passes strength validation, (4) sees success state and is redirected to /sign-in",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success",
+        "error",
+        "failure"
+      ]
     },
     "auth-login-redirect": {
       "name": "Sign-in with post-login redirect",
@@ -110,7 +125,9 @@
       ],
       "priority": "P2",
       "description": "User arrives at /sign-in?redirect=/some-path (from a protected-route gate), signs in successfully, and is redirected to /some-path instead of /. Unsafe targets (absolute URLs, protocol-relative //host) fall back to /",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "auth-sign-up-success": {
       "name": "Sign-up successful submission",
@@ -120,7 +137,11 @@
       ],
       "priority": "P2",
       "description": "User fills all required sign-up fields with valid data (matching passwords, accepted terms), submits, and is redirected to /sign-in (or home) after the account is created",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success",
+        "error",
+        "failure"
+      ]
     },
     "auth-protected-redirect": {
       "name": "Protected route redirect",
@@ -130,7 +151,9 @@
       ],
       "priority": "P1",
       "description": "Unauthenticated user accessing protected routes is redirected to /sign-in",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "auth-role-redirect": {
       "name": "Role-based navigation",
@@ -152,7 +175,9 @@
       ],
       "priority": "P1",
       "description": "User visits /animals and sees animal cards grid",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "animal-filter": {
       "name": "Filter animals by species/size/age",
@@ -162,7 +187,9 @@
       ],
       "priority": "P2",
       "description": "User applies species/size/age filters and sees filtered results",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "animal-detail": {
       "name": "View animal detail",
@@ -172,7 +199,9 @@
       ],
       "priority": "P1",
       "description": "User clicks an animal card and views detail page with info and gallery",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "animal-gallery": {
       "name": "Animal gallery interaction",
@@ -182,7 +211,9 @@
       ],
       "priority": "P3",
       "description": "Animal detail page displays gallery images",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "shelter-browse": {
       "name": "Browse shelters listing",
@@ -515,7 +546,9 @@
       ],
       "priority": "P2",
       "description": "Authenticated user clicks sign out, tokens are cleared, redirected to /sign-in",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "auth-session-persistence": {
       "name": "Session persistence and token refresh",
@@ -527,7 +560,9 @@
       ],
       "priority": "P2",
       "description": "User with valid tokens accesses protected route; expired access token triggers refresh",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "auth-google-login": {
       "name": "Google OAuth login",

@@ -3571,3 +3571,18 @@ When the shelter has no `video_url`, the button is not rendered.
 - **Modifying a flow:** Update steps and branches in this document first, then update tests accordingly.
 - **Removing a flow:** Remove from this document, `e2e/flow-definitions.json`, and all `@flow:` tags in specs.
 - **Bump `Version` and `Last Updated`** on every change.
+
+## Outcome-class migration — Batch 1 (auth, animal)
+
+`frontend/e2e/flow-definitions.json` is migrating from `expectedSpecs` counts to
+an `outcomes: [...]` declaration per flow (see `scripts/flow_coverage_audit.py`).
+Batch 1 covers the `auth` and `animal` modules (10 of 14 `auth` flows — the four
+`expectedSpecs: 0` exemptions are untouched — plus all 4 `animal` flows). Class
+conventions: **success** (it works) · **error** (user-correctable rejection) ·
+**failure** (system-level: 5xx/network) · **display** (real data reached via UI).
+Declare a class only if the app genuinely has that behavior surface — do not
+pad, do not shrink what the code shows. Tagging caveat: the audit credits a
+class only when the backing test carries a matching `@outcome:` tag (untagged
+tests default to `success`) — several auth flows report `partial` from missing
+tags on already-good tests; the follow-up worklist lives in the batch-1 QA
+record.
