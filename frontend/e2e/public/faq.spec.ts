@@ -49,7 +49,7 @@ test.describe('FAQ Page', () => {
     await expect(page.getByText(/¿Cómo sé si un refugio es confiable/i)).toBeVisible();
   });
 
-  test('should display FAQ answers alongside questions', { tag: [...PUBLIC_FAQ] }, async ({ page }) => {
+  test('should display FAQ answers alongside questions', { tag: [...PUBLIC_FAQ, '@outcome:display'] }, async ({ page }) => {
     await page.goto('/faq');
     await waitForPageLoad(page);
 

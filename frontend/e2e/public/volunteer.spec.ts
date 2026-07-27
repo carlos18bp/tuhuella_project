@@ -23,7 +23,8 @@ function setupVolunteerMocks(page: any) {
 }
 
 test.describe('Volunteer Application', () => {
-  test('should display volunteer positions on work-with-us page', { tag: [...PUBLIC_WORK_WITH_US] }, async ({ page }) => {
+  test('should display volunteer positions on work-with-us page', { tag: [...PUBLIC_WORK_WITH_US, '@outcome:display'] }, async ({ page }) => {
+    // quality: allow-no-interaction (public display render; position titles asserted with fetched values)
     await page.route('**/volunteer-positions/**', (route: any) =>
       route.fulfill({
         status: 200,
@@ -53,7 +54,8 @@ test.describe('Volunteer Application', () => {
     await expect(page).toHaveURL(/\/sign-in/);
   });
 
-  test('should display volunteer application form when authenticated', { tag: [...VOLUNTEER_APPLY] }, async ({ page }) => {
+  test('should display volunteer application form when authenticated', { tag: [...VOLUNTEER_APPLY, '@outcome:display'] }, async ({ page }) => {
+    // quality: allow-no-interaction (authenticated display render: loginAndNavigate is API-based by design; form fields asserted)
     await setupVolunteerMocks(page);
     const positionsLoaded = page.waitForResponse((res: any) => res.url().includes('volunteer-positions'));
     await loginAndNavigate(page, 'adopter', '/work-with-us/apply/1');
@@ -96,7 +98,7 @@ test.describe('Volunteer Application', () => {
     await expect(page.getByText(/Application submitted successfully|enviada|éxito/i)).toBeVisible({ timeout: 10_000 });
   });
 
-  test('should show validation error for short motivation', { tag: [...VOLUNTEER_APPLY] }, async ({ page }) => {
+  test('should show validation error for short motivation', { tag: [...VOLUNTEER_APPLY, '@outcome:error'] }, async ({ page }) => {
     await setupVolunteerMocks(page);
     await page.route('**/volunteer-applications/**', (route: any) =>
       route.fulfill({

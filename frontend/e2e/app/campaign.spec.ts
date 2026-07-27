@@ -4,7 +4,7 @@ import { CAMPAIGN_BROWSE, CAMPAIGN_DETAIL, CAMPAIGN_TAB_TOGGLE, CAMPAIGN_DONATE_
 import { mockCampaignDetail } from '../helpers/mock-data';
 
 test.describe('Campaign Browse & Detail', () => {
-  test('should display campaigns listing page', { tag: [...CAMPAIGN_BROWSE] }, async ({ page }) => {
+  test('should display campaigns listing page', { tag: [...CAMPAIGN_BROWSE, '@outcome:display'] }, async ({ page }) => {
     await page.goto('/campaigns');
     await waitForPageLoad(page);
 
@@ -65,7 +65,9 @@ test.describe('Campaign Browse & Detail', () => {
 });
 
 test.describe('Campaign Updates Feed', () => {
-  test('reads the progress-updates feed on a completed campaign', { tag: [...CAMPAIGN_UPDATES_FEED] }, async ({ page }) => {
+  test('reads the progress-updates feed on a completed campaign', { tag: [...CAMPAIGN_UPDATES_FEED, '@outcome:display'] }, async ({ page }) => {
+    // quality: allow-no-interaction (display outcome: feed content asserted with concrete mocked values; the feed has no interactive surface)
+    // quality: allow-deep-link (campaign-detail's click test owns UI navigation into a campaign; this spec needs a specific completed campaign with seeded updates)
     // Updates feed renders only when campaign.status === 'completed'.
     await page.route('**/api/campaigns/3/**', (route) =>
       route.fulfill({
