@@ -168,8 +168,13 @@ test.describe('Blog — Admin', () => {
     await loginAndNavigate(page, 'admin', '/admin/blog/crear');
     await waitForPageLoad(page);
 
-    await page.getByLabel('Título (ES)').fill('Nuevo post E2E');
-    await page.getByLabel('Title (EN)').fill('New E2E Post');
+    // exact: true on the title fields — getByLabel matches a case-insensitive SUBSTRING, and the
+    // SEO fieldset of both admin blog forms carries 'Meta título (ES)' / 'Meta title (EN)'
+    // (crear/page.tsx:191-192, [id]/editar/page.tsx:222-223). Without exact the label resolves to
+    // two inputs and fill() aborts on a strict-mode violation; with it, the post title is targeted
+    // and a regression that renamed the SEO label could no longer silently satisfy this test.
+    await page.getByLabel('Título (ES)', { exact: true }).fill('Nuevo post E2E');
+    await page.getByLabel('Title (EN)', { exact: true }).fill('New E2E Post');
     await page.getByLabel('Resumen (ES)').fill('Resumen del post de prueba.');
     await page.getByLabel('Excerpt (EN)').fill('Summary of the test post.');
     await page.getByRole('button', { name: 'Crear Post' }).click();
@@ -191,8 +196,8 @@ test.describe('Blog — Admin', () => {
     await loginAndNavigate(page, 'admin', '/admin/blog/crear');
     await waitForPageLoad(page);
 
-    await page.getByLabel('Título (ES)').fill('Título incompleto');
-    await page.getByLabel('Title (EN)').fill('Incomplete title');
+    await page.getByLabel('Título (ES)', { exact: true }).fill('Título incompleto');
+    await page.getByLabel('Title (EN)', { exact: true }).fill('Incomplete title');
     await page.getByLabel('Resumen (ES)').fill('Resumen');
     await page.getByLabel('Excerpt (EN)').fill('Summary');
     await page.getByRole('button', { name: 'Crear Post' }).click();
@@ -208,8 +213,8 @@ test.describe('Blog — Admin', () => {
     await loginAndNavigate(page, 'admin', '/admin/blog/crear');
     await waitForPageLoad(page);
 
-    await page.getByLabel('Título (ES)').fill('Título con fallo de servidor');
-    await page.getByLabel('Title (EN)').fill('Server failure title');
+    await page.getByLabel('Título (ES)', { exact: true }).fill('Título con fallo de servidor');
+    await page.getByLabel('Title (EN)', { exact: true }).fill('Server failure title');
     await page.getByLabel('Resumen (ES)').fill('Resumen');
     await page.getByLabel('Excerpt (EN)').fill('Summary');
     await page.getByRole('button', { name: 'Crear Post' }).click();
@@ -252,7 +257,7 @@ test.describe('Blog — Admin', () => {
 
     await expect(page).toHaveURL(/\/admin\/blog\/\d+\/editar/);
 
-    await page.getByLabel('Título (ES)').fill('Cómo adoptar responsablemente (actualizado)');
+    await page.getByLabel('Título (ES)', { exact: true }).fill('Cómo adoptar responsablemente (actualizado)');
     await page.getByRole('button', { name: 'Guardar cambios' }).click();
 
     await expect(page.getByText('Post guardado correctamente.')).toBeVisible({ timeout: 10_000 });
@@ -277,7 +282,7 @@ test.describe('Blog — Admin', () => {
 
     await expect(page).toHaveURL(/\/admin\/blog\/\d+\/editar/);
 
-    await page.getByLabel('Título (ES)').fill('Intento de guardado fallido');
+    await page.getByLabel('Título (ES)', { exact: true }).fill('Intento de guardado fallido');
     await page.getByRole('button', { name: 'Guardar cambios' }).click();
 
     await expect(page.getByText('Request failed with status code 400')).toBeVisible({ timeout: 10_000 });
