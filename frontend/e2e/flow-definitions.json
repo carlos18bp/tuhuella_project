@@ -223,7 +223,9 @@
       ],
       "priority": "P2",
       "description": "User visits /shelters and sees shelter cards",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "shelter-detail": {
       "name": "View shelter profile",
@@ -233,7 +235,9 @@
       ],
       "priority": "P2",
       "description": "User clicks a shelter card and views profile with animals and campaigns",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "shelter-onboarding": {
       "name": "Shelter registration form",
@@ -243,7 +247,9 @@
       ],
       "priority": "P4",
       "description": "Legacy /shelter/onboarding now redirects to /shelter-application (the formal Phase 22 wizard). This flow only verifies the redirect lands correctly; the form itself is gone.",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "shelter-application-submit": {
       "name": "Shelter application wizard submit",
@@ -478,7 +484,10 @@
       ],
       "priority": "P1",
       "description": "Admin views platform metrics at /admin/dashboard",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display",
+        "failure"
+      ]
     },
     "admin-approve-shelters": {
       "name": "Admin approve/reject shelters",
@@ -488,7 +497,10 @@
       ],
       "priority": "P1",
       "description": "Admin approves or rejects pending shelters at /admin/shelters/approve",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display",
+        "success"
+      ]
     },
     "admin-moderation": {
       "name": "Admin moderation view",
@@ -498,7 +510,9 @@
       ],
       "priority": "P2",
       "description": "Admin reviews published content at /admin/moderation",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "admin-metrics": {
       "name": "Admin detailed metrics",
@@ -508,7 +522,10 @@
       ],
       "priority": "P2",
       "description": "Admin views financial and adoption metrics at /admin/metrics",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display",
+        "failure"
+      ]
     },
     "navigation-header": {
       "name": "Header navigation",
@@ -639,7 +656,9 @@
       ],
       "priority": "P2",
       "description": "Admin views their role-adaptive profile at /my-profile with AdminProfileSection (moderation-queue widget, platform stats) and activity timeline with shelter_verified events.",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "admin-payments": {
       "name": "Admin payment audit",
@@ -649,7 +668,9 @@
       ],
       "priority": "P2",
       "description": "Admin views payment audit table at /admin/payments",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "blog-browse": {
       "name": "Blog listing page",
@@ -810,7 +831,9 @@
       ],
       "priority": "P2",
       "description": "User clicks View Animals on shelter detail page and sees filtered animal list for that shelter",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success"
+      ]
     },
     "locale-switch": {
       "name": "Locale switcher toggle",
@@ -850,7 +873,9 @@
       ],
       "priority": "P3",
       "description": "User opens lightbox gallery on shelter detail page and navigates images",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "shelter-detail-video": {
       "name": "Shelter detail video modal",
@@ -860,7 +885,9 @@
       ],
       "priority": "P3",
       "description": "User opens the shelter presentation video in a modal player on the shelter detail page",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "home-featured-animals-carousel": {
       "name": "Home featured animals carousel",
@@ -962,7 +989,10 @@
       ],
       "priority": "P2",
       "description": "Web manager browses and filters shelters by verification status at /web-manager/shelters",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display",
+        "success"
+      ]
     },
     "web-manager-shelter-detail": {
       "name": "Web manager shelter detail",
@@ -972,7 +1002,10 @@
       ],
       "priority": "P2",
       "description": "Web manager views shelter info and adoption applications for a specific shelter at /web-manager/shelters/[id]",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display",
+        "success"
+      ]
     },
     "web-manager-applications": {
       "name": "Web manager applications list",
@@ -982,7 +1015,10 @@
       ],
       "priority": "P2",
       "description": "Web manager views all adoption applications with status filter at /web-manager/applications",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display",
+        "success"
+      ]
     },
     "adoption-application-history": {
       "name": "Adoption application clinical history",
@@ -1172,7 +1208,10 @@
       ],
       "priority": "P2",
       "description": "Web manager browses and filters campaigns by approval status (pending/approved/rejected/all) at /web-manager/campaigns and navigates to campaign detail or new campaign form",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display",
+        "success"
+      ]
     },
     "web-manager-campaign-detail": {
       "name": "Web manager campaign approve/reject",
@@ -1183,7 +1222,10 @@
       ],
       "priority": "P2",
       "description": "Web manager views campaign detail, approves or rejects it with a reason, and exchanges messages with the shelter admin via CampaignMessageThread at /web-manager/campaigns/[id]",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display",
+        "success"
+      ]
     },
     "web-manager-campaign-create": {
       "name": "Web manager create campaign",
@@ -1194,7 +1236,11 @@
       ],
       "priority": "P2",
       "description": "Web manager creates a campaign on behalf of any shelter (auto-approved) at /web-manager/campaigns/new using the shelter dropdown and bilingual form fields",
-      "expectedSpecs": 1
+      "outcomes": [
+        "success",
+        "error",
+        "failure"
+      ]
     },
     "manual-browse": {
       "name": "Interactive manual page load",
@@ -1244,7 +1290,9 @@
       ],
       "priority": "P3",
       "description": "Web manager views their profile at /my-profile: common elements (avatar, name, role badge, completeness bar, Edit Profile button) and role-specific activity timeline with campaign_reviewed events; WebManagerProfileSection shows stat cards (pending shelters, applications, campaigns) and quick action links.",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display"
+      ]
     },
     "veterinarian-profile": {
       "name": "Veterinarian profile view",
@@ -1378,7 +1426,10 @@
       ],
       "priority": "P2",
       "description": "Web manager or admin opens a campaign detail at /web-manager/campaigns/[id] and reads/sends messages in the approval thread with the shelter via GET/POST /api/campaigns/[pk]/messages/.",
-      "expectedSpecs": 1
+      "outcomes": [
+        "display",
+        "success"
+      ]
     },
     "notification-mark-all-read": {
       "name": "Mark all notifications as read",
