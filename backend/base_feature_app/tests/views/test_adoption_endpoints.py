@@ -91,6 +91,31 @@ def test_application_create_success(authenticated_client, shelter, animal):
 
 
 @pytest.mark.django_db
+def test_application_create_duplicate_returns_400_not_500(authenticated_client, animal):
+    """Resubmitting for the same animal is a clean 400, never an IntegrityError 500.
+
+    Bug it catches: `user` is not a serializer field, so DRF skips the
+    unique_together validator and the duplicate used to explode at
+    objects.create() — a raw 500 for a user retrying the wizard.
+    """
+    AdoptionApplication.objects.filter(user__email='user@example.com', animal=animal).delete()
+    payload = {
+        'animal': animal.pk,
+        'form_answers': {'reason': 'I want a companion'},
+        'notes': 'first submission',
+    }
+    first = authenticated_client.post(reverse('adoption-create'), payload, format='json')
+    assert first.status_code == status.HTTP_201_CREATED
+
+    second = authenticated_client.post(reverse('adoption-create'), payload, format='json')
+    assert second.status_code == status.HTTP_400_BAD_REQUEST
+    assert 'animal' in second.json()
+    assert AdoptionApplication.objects.filter(
+        user__email='user@example.com', animal=animal
+    ).count() == 1
+
+
+@pytest.mark.django_db
 def test_application_update_status_by_shelter_owner(
     shelter_admin_client, adoption_application
 ):
