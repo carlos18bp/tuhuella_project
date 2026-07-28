@@ -56,8 +56,12 @@ test.describe('Blog — Public', () => {
     });
   });
 
-  test('should display blog listing page with heading and filters', { tag: [...BLOG_BROWSE] }, async ({ page }) => {
-    await page.goto('/blog');
+  test('should display blog listing page with heading and filters', { tag: [...BLOG_BROWSE, '@outcome:display'] }, async ({ page }) => {
+    await page.goto('/');
+    await waitForPageLoad(page);
+
+    await page.locator('header').getByRole('link', { name: 'Blog' }).click();
+    await page.waitForURL(/\/blog$/, { timeout: 15_000 });
     await waitForPageLoad(page);
 
     await expect(page.getByRole('heading', { name: /Blog Mi Huella/i })).toBeVisible();
@@ -89,6 +93,21 @@ test.describe('Blog — Public', () => {
     // Should show back link and article heading
     const backLink = page.locator('main').getByRole('link', { name: 'Blog' }).first();
     await expect(backLink).toBeVisible();
+  });
+
+  test('shows an error message when the blog listing API fails', { tag: [...BLOG_BROWSE, '@outcome:failure'] }, async ({ page }) => {
+    // quality: allow-no-interaction (public failure render on load — the error state IS
+    // the behavior under test; there is no interactive surface to click before it renders)
+    // blogStore.fetchPosts stores the raw Axios error message (blogStore.ts:70-88), not
+    // app copy — the error container (blog/page.tsx:219-222) shows it verbatim.
+    await page.route('**/api/blog/**', (route) =>
+      route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ detail: 'Internal Server Error' }) }),
+    );
+
+    await page.goto('/blog');
+    await waitForPageLoad(page);
+
+    await expect(page.getByText(/request failed with status code 500/i)).toBeVisible({ timeout: 15_000 });
   });
 });
 
@@ -140,6 +159,69 @@ test.describe('Blog — Admin', () => {
     await expect(page.getByRole('button', { name: /Importar JSON/i })).toBeVisible();
   });
 
+  test('creates a new blog post and redirects to its edit page', { tag: [...BLOG_ADMIN_CREATE, '@outcome:success'] }, async ({ page }) => {
+    // Registered after the describe-level beforeEach's admin-blog catch-all so it wins for create.
+    await page.route('**/api/blog/admin/create/**', (route) =>
+      route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ id: 77, title: 'Nuevo post E2E', slug: 'nuevo-post-e2e' }) }),
+    );
+
+    await loginAndNavigate(page, 'admin', '/admin/blog/crear');
+    await waitForPageLoad(page);
+
+    // exact: true on the title fields — getByLabel matches a case-insensitive SUBSTRING, and the
+    // SEO fieldset of both admin blog forms carries 'Meta título (ES)' / 'Meta title (EN)'
+    // (crear/page.tsx:191-192, [id]/editar/page.tsx:222-223). Without exact the label resolves to
+    // two inputs and fill() aborts on a strict-mode violation; with it, the post title is targeted
+    // and a regression that renamed the SEO label could no longer silently satisfy this test.
+    await page.getByLabel('Título (ES)', { exact: true }).fill('Nuevo post E2E');
+    await page.getByLabel('Title (EN)', { exact: true }).fill('New E2E Post');
+    await page.getByLabel('Resumen (ES)').fill('Resumen del post de prueba.');
+    await page.getByLabel('Excerpt (EN)').fill('Summary of the test post.');
+    await page.getByRole('button', { name: 'Crear Post' }).click();
+
+    // handleManualSubmit redirects to the edit page for the created post, not the list
+    // (admin/blog/crear/page.tsx:90) — a stale assumption here would silently pass on a
+    // create that never actually reached the API.
+    await expect(page).toHaveURL(/\/admin\/blog\/77\/editar/, { timeout: 10_000 });
+  });
+
+  test('shows the API validation error when creating a post is rejected', { tag: [...BLOG_ADMIN_CREATE, '@outcome:error'] }, async ({ page }) => {
+    // blogStore.createPost has no try/catch, so any non-2xx response propagates as the raw
+    // AxiosError (admin/blog/crear/page.tsx:89-92 only reads `err.message`, never the response
+    // body) — the field-shaped body here documents intent but the surfaced text is Axios's own.
+    await page.route('**/api/blog/admin/create/**', (route) =>
+      route.fulfill({ status: 400, contentType: 'application/json', body: JSON.stringify({ title_es: ['Este campo es requerido.'] }) }),
+    );
+
+    await loginAndNavigate(page, 'admin', '/admin/blog/crear');
+    await waitForPageLoad(page);
+
+    await page.getByLabel('Título (ES)', { exact: true }).fill('Título incompleto');
+    await page.getByLabel('Title (EN)', { exact: true }).fill('Incomplete title');
+    await page.getByLabel('Resumen (ES)').fill('Resumen');
+    await page.getByLabel('Excerpt (EN)').fill('Summary');
+    await page.getByRole('button', { name: 'Crear Post' }).click();
+
+    await expect(page.getByText('Request failed with status code 400')).toBeVisible({ timeout: 10_000 });
+  });
+
+  test('shows an error message when creating a post fails at the server', { tag: [...BLOG_ADMIN_CREATE, '@outcome:failure'] }, async ({ page }) => {
+    await page.route('**/api/blog/admin/create/**', (route) =>
+      route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ detail: 'Internal Server Error' }) }),
+    );
+
+    await loginAndNavigate(page, 'admin', '/admin/blog/crear');
+    await waitForPageLoad(page);
+
+    await page.getByLabel('Título (ES)', { exact: true }).fill('Título con fallo de servidor');
+    await page.getByLabel('Title (EN)', { exact: true }).fill('Server failure title');
+    await page.getByLabel('Resumen (ES)').fill('Resumen');
+    await page.getByLabel('Excerpt (EN)').fill('Summary');
+    await page.getByRole('button', { name: 'Crear Post' }).click();
+
+    await expect(page.getByText('Request failed with status code 500')).toBeVisible({ timeout: 10_000 });
+  });
+
   test('should display admin blog edit page', { tag: [...BLOG_ADMIN_EDIT, '@outcome:display'] }, async ({ page }) => {
     // Mock the individual blog post endpoint for the edit page
     await page.route('**/api/blog/admin/1/**', (route) =>
@@ -157,6 +239,53 @@ test.describe('Blog — Admin', () => {
     // Should be on edit page
     await expect(page).toHaveURL(/\/admin\/blog\/\d+\/editar/);
     await expect(page.getByRole('heading', { name: /Editar Post/i })).toBeVisible();
+  });
+
+  test('saves changes to an existing blog post', { tag: [...BLOG_ADMIN_EDIT, '@outcome:success'] }, async ({ page }) => {
+    // Blanket handler answers GET (initial load + post-save re-fetch) and PATCH (save)
+    // alike — sufficient here since the assertion only needs the save to return 2xx.
+    await page.route('**/api/blog/admin/1/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ...mockBlogPost, id: 1, status: 'published' }) }),
+    );
+
+    await loginAndNavigate(page, 'admin', '/admin/blog');
+    await waitForPageLoad(page);
+
+    const editLink = page.getByRole('link', { name: /Editar/i }).first();
+    await expect(editLink).toBeVisible({ timeout: 15_000 });
+    await editLink.click();
+
+    await expect(page).toHaveURL(/\/admin\/blog\/\d+\/editar/);
+
+    await page.getByLabel('Título (ES)', { exact: true }).fill('Cómo adoptar responsablemente (actualizado)');
+    await page.getByRole('button', { name: 'Guardar cambios' }).click();
+
+    await expect(page.getByText('Post guardado correctamente.')).toBeVisible({ timeout: 10_000 });
+  });
+
+  test('shows an error message when saving blog post changes fails', { tag: [...BLOG_ADMIN_EDIT, '@outcome:error'] }, async ({ page }) => {
+    // blogStore.updatePost has no try/catch either — same raw-Axios-message behavior as
+    // blog-admin-create (page.tsx:92-93 only reads `err.message`).
+    await page.route('**/api/blog/admin/1/**', (route) => {
+      if (route.request().method() === 'PATCH') {
+        return route.fulfill({ status: 400, contentType: 'application/json', body: JSON.stringify({ title_es: ['Este campo es requerido.'] }) });
+      }
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ...mockBlogPost, id: 1, status: 'published' }) });
+    });
+
+    await loginAndNavigate(page, 'admin', '/admin/blog');
+    await waitForPageLoad(page);
+
+    const editLink = page.getByRole('link', { name: /Editar/i }).first();
+    await expect(editLink).toBeVisible({ timeout: 15_000 });
+    await editLink.click();
+
+    await expect(page).toHaveURL(/\/admin\/blog\/\d+\/editar/);
+
+    await page.getByLabel('Título (ES)', { exact: true }).fill('Intento de guardado fallido');
+    await page.getByRole('button', { name: 'Guardar cambios' }).click();
+
+    await expect(page.getByText('Request failed with status code 400')).toBeVisible({ timeout: 10_000 });
   });
 
   test('should display admin blog calendar page', { tag: [...BLOG_ADMIN_CALENDAR] }, async ({ page }) => {

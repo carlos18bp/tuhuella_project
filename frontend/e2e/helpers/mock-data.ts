@@ -187,6 +187,35 @@ export const mockShelterData = [
   { id: 1, name: 'Refugio E2E', legal_name: 'Refugio E2E SAS', description: 'Test shelter', city: 'Bogotá', address: 'Calle 123', phone: '+57 300 000 0000', email: 'shelter@test.com', website: '', verification_status: 'verified', owner: 1 },
 ];
 
+// ── Shelter Dashboard Metrics (ShelterDashboardPage) ──
+// Field names must mirror ShelterMetrics in app/[locale]/shelter/dashboard/page.tsx.
+export const mockShelterMetrics = {
+  total_animals: 12,
+  published_animals: 8,
+  adopted_animals: 4,
+  total_applications: 20,
+  avg_applications_per_animal: 1.67,
+  donations: { total_amount: '500000', total_count: 10, avg_amount: '50000' },
+  sponsorships: { total_amount: '150000', total_count: 3 },
+  avg_adoption_time_days: 14,
+  update_posts_count: 5,
+  active_campaigns: 2,
+};
+
+// ── Shelter Update Posts (ShelterUpdatesPage) ──
+export const mockShelterUpdates = [
+  {
+    id: 10,
+    title: 'Vacunación completada en el refugio',
+    shelter: 1,
+    shelter_name: 'Refugio E2E',
+    campaign: null,
+    animal: null,
+    image_url: null,
+    created_at: '2026-04-05T10:00:00Z',
+  },
+];
+
 // ── Follow-Up Mocks (Veterinarian workspace) ──
 
 export const mockFollowUps = [
