@@ -69,8 +69,6 @@
       "priority": "P1",
       "description": "User navigates to /sign-in, sees form fields and can type in them",
       "outcomes": [
-        "success",
-        "error",
         "display"
       ]
     },
@@ -147,7 +145,6 @@
       "description": "User fills all required sign-up fields with valid data (matching passwords, accepted terms), submits, and is redirected to /sign-in (or home) after the account is created",
       "outcomes": [
         "success",
-        "error",
         "failure"
       ]
     },

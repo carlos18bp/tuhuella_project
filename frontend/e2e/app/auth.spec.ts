@@ -73,17 +73,35 @@ test.describe('Auth — Login invalid', () => {
 });
 
 test.describe('Auth — Sign-up form', () => {
-  test('renders all required registration fields and the terms checkbox', { tag: [...AUTH_SIGN_UP_FORM, '@outcome:display'] }, async ({ page }) => {
+  // Visibility alone said nothing about whether the fields WORK: a disabled or
+  // read-only input, or one whose value never binds, is visible all the same. This
+  // mirrors the sign-in spec above — type into each field and read the value back,
+  // and check the terms box actually toggles. Fails if a registration field stops
+  // accepting input, which no toBeVisible assertion can see.
+  test('renders all required registration fields and lets the user fill them', { tag: [...AUTH_SIGN_UP_FORM, '@outcome:display'] }, async ({ page }) => {
     await page.goto('/sign-up');
     await waitForPageLoad(page);
 
     await expect(page.getByRole('heading', { name: /crear cuenta/i, level: 1 })).toBeVisible({ timeout: 10_000 });
 
-    await expect(page.getByLabel('Nombre')).toBeVisible();
-    await expect(page.getByLabel('Apellido')).toBeVisible();
-    await expect(page.getByLabel('Correo electrónico')).toBeVisible();
-    await expect(page.getByLabel('Contraseña', { exact: true })).toBeVisible();
-    await expect(page.getByRole('checkbox')).toBeVisible();
+    const nombre = page.getByLabel('Nombre');
+    const apellido = page.getByLabel('Apellido');
+    const email = page.getByLabel('Correo electrónico');
+    const password = page.getByLabel('Contraseña', { exact: true });
+
+    await nombre.fill('Camila');
+    await apellido.fill('Restrepo');
+    await email.fill('camila@example.com');
+    await password.fill('Str0ngPass!');
+
+    await expect(nombre).toHaveValue('Camila');
+    await expect(apellido).toHaveValue('Restrepo');
+    await expect(email).toHaveValue('camila@example.com');
+    await expect(password).toHaveValue('Str0ngPass!');
+
+    const terms = page.getByRole('checkbox');
+    await terms.check();
+    await expect(terms).toBeChecked();
   });
 
   test('blocks submission when terms checkbox is not checked', { tag: [...AUTH_SIGN_UP_FORM, '@outcome:error'] }, async ({ page }) => {
@@ -297,6 +315,37 @@ test.describe('Auth — Sign-up success', () => {
     // On success → router.replace(ROUTES.HOME), so user leaves sign-up
     await page.waitForURL((url) => !url.toString().includes('sign-up'), { timeout: 10_000 });
     await expect(page).not.toHaveURL(/sign-up/);
+  });
+
+  // Fails if a server-side registration failure reads as anything other than a
+  // failure. Two ways it could: leaving the user on a page that looks like it
+  // worked, or — the bug this caught — rendering the literal text "undefined",
+  // because `{}` is truthy and the old branch read data[undefined] and stringified
+  // it. Either way the person cannot tell whether they now have an account.
+  test('shows a real message, not "undefined", when registration fails server-side', { tag: [...AUTH_SIGN_UP_SUCCESS, '@outcome:failure'] }, async ({ page }) => {
+    await page.route('**/api/google-captcha/site-key/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ site_key: '' }) }),
+    );
+    await page.route('**/api/auth/sign_up/**', (route: any) =>
+      route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({}) }),
+    );
+
+    await page.goto('/sign-up');
+    await waitForPageLoad(page);
+
+    await page.getByLabel(/^Nombre$/i).fill('María');
+    await page.getByLabel(/Apellido/i).fill('García');
+    await page.getByLabel(/Correo electrónico/i).fill('newuser@example.com');
+    await page.getByLabel('Contraseña', { exact: true }).fill('SecurePass123!');
+    await page.getByLabel(/Confirmar contraseña/i).fill('SecurePass123!');
+    await page.getByRole('checkbox').check();
+
+    await page.getByRole('button', { name: /Crear cuenta/i }).click();
+
+    // The keyless-body fallback at sign-up/page.tsx:103, rendered at :276.
+    await expect(page.getByText('Registration failed')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText('undefined', { exact: true })).not.toBeVisible();
+    await expect(page).toHaveURL(/sign-up/);
   });
 });
 

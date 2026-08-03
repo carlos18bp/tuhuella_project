@@ -93,10 +93,13 @@ export default function SignUpPage() {
       router.replace(ROUTES.HOME);
     } catch (err: any) {
       const data = err.response?.data;
+      const firstKey = data ? Object.keys(data)[0] : undefined;
       if (data?.error) {
         setError(data.error);
-      } else if (data) {
-        const firstKey = Object.keys(data)[0];
+      } else if (firstKey !== undefined) {
+        // Guarded on an actual key: `{}` is truthy, so an empty 5xx body used to fall
+        // in here, read data[undefined], and render the literal text "undefined" as
+        // the error message shown to the person trying to register.
         const val = data[firstKey];
         setError(Array.isArray(val) ? val[0] : String(val));
       } else {
