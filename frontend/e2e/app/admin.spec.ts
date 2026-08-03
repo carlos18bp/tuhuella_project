@@ -226,9 +226,19 @@ test.describe('Admin Panel — Authenticated', () => {
     total_applications: 57, active_campaigns: 6, total_donations: 92, total_sponsorships: 18,
   };
 
+  // Same shape as the metrics matcher below, and for the same reason: /admin/dashboard
+  // is BOTH an API path and a page path, so a matcher that only looks for the segment
+  // answers the document request with JSON and the page never renders. Requiring /api/
+  // (or the direct backend port) keeps it to the XHR.
   const routeDashboard = (page: any, status: number, body: unknown) =>
     page.route(
-      (url: URL) => url.pathname.includes('admin/dashboard') && !url.pathname.startsWith('/es'),
+      (url: URL) => {
+        const p = url.pathname;
+        const isApiPath = p.includes('/api/') && p.includes('admin/dashboard');
+        const isDirectBackend = (url.hostname === '127.0.0.1' || url.hostname === 'localhost') &&
+          url.port === '8000' && p.includes('admin/dashboard');
+        return isApiPath || isDirectBackend;
+      },
       (route: any) => {
         if (route.request().method() !== 'GET') return route.continue();
         return route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
