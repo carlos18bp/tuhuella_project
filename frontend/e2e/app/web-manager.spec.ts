@@ -285,16 +285,33 @@ test.describe('Web Manager — Campaign List', () => {
     await paceRequestsUnderRateLimit(page);
   });
 
-  test('should display pending campaigns list with filter tabs', { tag: [...WEB_MANAGER_CAMPAIGNS] }, async ({ page }) => {
-    await page.route('**/api/admin/campaigns/**', (route: any) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAdminCampaigns) }),
-    );
+  // The title always promised filter tabs, but the spec only checked that the Pendientes
+  // button was VISIBLE and never pressed it — a tab wired to nothing passed. The page
+  // refetches per tab (`approval_status: tab || undefined`, campaigns/page.tsx:27), so
+  // pressing Aprobadas must both send that status and replace the list. Fails if the tab
+  // stops reaching the request and the reviewer keeps seeing pending campaigns under
+  // every filter.
+  test('should display pending campaigns list with filter tabs', { tag: [...WEB_MANAGER_CAMPAIGNS, '@outcome:display'] }, async ({ page }) => {
+    await page.route('**/api/admin/campaigns/**', (route: any) => {
+      const status = new URL(route.request().url()).searchParams.get('approval_status');
+      const body = status === 'approved'
+        ? { count: 0, page: 1, total_pages: 1, results: [] }
+        : mockAdminCampaigns;
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
+    });
 
     await loginAndNavigate(page, 'web_manager', '/web-manager/campaigns');
 
     await expect(page.getByText(/Esterilización urgente/i)).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/Rescate de temporada/i)).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByRole('button', { name: /Pendientes/i })).toBeVisible({ timeout: 10_000 });
+
+    const approvedRequest = page.waitForRequest((req) =>
+      req.url().includes('admin/campaigns') && req.url().includes('approval_status=approved'),
+    );
+    await page.getByRole('button', { name: 'Aprobadas' }).click();
+    await approvedRequest;
+
+    await expect(page.getByText(/Esterilización urgente/i)).not.toBeVisible({ timeout: 10_000 });
   });
 
   test('should navigate to create campaign page from list', { tag: [...WEB_MANAGER_CAMPAIGNS, '@outcome:success'] }, async ({ page }) => {
