@@ -641,6 +641,7 @@ test.describe('Shelter Campaign Detail & Create', () => {
   // Asserting the POST never fires is the half that matters — a message shown while
   // the request still goes out would create a campaign titled with blanks.
   test('refuses to submit a campaign with a blank title', { tag: [...SHELTER_PANEL_CAMPAIGN_CREATE, '@outcome:error'] }, async ({ page }) => {
+    await paceRequestsUnderRateLimit(page);
     let posted = false;
     await page.route('**/api/shelters/**', (route: any) => {
       if (route.request().method() === 'GET') {
@@ -653,11 +654,17 @@ test.describe('Shelter Campaign Detail & Create', () => {
       return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ id: 42 }) });
     });
 
+    // Wait for the owned-shelter GET itself, not just for the form to paint: the
+    // control renders before shelterId resolves, and submitting early trips the
+    // EARLIER guard ("No encontramos tu refugio.", nueva/page.tsx:43) rather than the
+    // one under test. Waiting on the response is the only ordering that removes it.
+    const sheltersLoaded = page.waitForResponse(
+      (res: any) => res.url().includes('/api/shelters') && res.request().method() === 'GET',
+      { timeout: 20_000 },
+    );
     await loginAndNavigate(page, 'shelter_admin', '/shelter/campaigns/nueva');
     await expect(page.getByRole('heading', { name: /Solicitar nueva campaña/i })).toBeVisible({ timeout: 15_000 });
-    // Wait for the submit control like the success spec does: the owned-shelter GET
-    // resolves shelterId, and submitting before it lands trips the EARLIER guard
-    // ("No encontramos tu refugio.", nueva/page.tsx:43) instead of the one under test.
+    await sheltersLoaded;
     await expect(page.getByRole('button', { name: /Enviar para revisión/i })).toBeVisible({ timeout: 10_000 });
 
     await page.getByLabel('Título').fill('   ');
@@ -673,6 +680,7 @@ test.describe('Shelter Campaign Detail & Create', () => {
   // would go looking for a campaign that was never created, and re-submitting is the
   // only recovery — which they will not do if the page told them nothing.
   test('shows an error and stays on the form when campaign creation fails', { tag: [...SHELTER_PANEL_CAMPAIGN_CREATE, '@outcome:failure'] }, async ({ page }) => {
+    await paceRequestsUnderRateLimit(page);
     await page.route('**/api/shelters/**', (route: any) => {
       if (route.request().method() === 'GET') {
         return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockShelterData) });
