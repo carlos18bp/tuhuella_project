@@ -175,4 +175,117 @@ test.describe('Adoption event creation', () => {
       await expect(created).toContainText('María López');
     },
   );
+
+  // AdoptionEventCreateModal is shared by both roles, so what separates these four
+  // specs from each other is the page the modal is opened from — the web manager
+  // reaches it from an application detail, the shelter admin from the list.
+
+  test(
+    'web manager sees the validation error and no request when the description is empty',
+    { tag: [...ADOPTION_EVENT_CREATE_WEB_MANAGER, '@outcome:error'] },
+    async ({ page }) => {
+      await mockApplicationAndEvents(page);
+
+      let posted = false;
+      await page.route('**/adoptions/5/events/**', (route: any) => {
+        if (route.request().method() === 'POST') posted = true;
+        return route.continue();
+      });
+
+      await loginAndNavigate(page, 'web_manager', '/es/web-manager/applications/5');
+
+      await expect(page.getByRole('heading', { level: 1, name: 'Luna' })).toBeVisible({ timeout: 15_000 });
+
+      await page.getByTestId('event-add-button').click();
+      await page.getByTestId('event-submit').click();
+
+      // adoption.events.validationDescription, set at AdoptionEventCreateModal.tsx:53.
+      await expect(page.getByText('La descripción es obligatoria.')).toBeVisible({ timeout: 10_000 });
+      // Fails if the guard moves server-side: an empty description must never be sent.
+      expect(posted).toBe(false);
+    },
+  );
+
+  test(
+    'web manager keeps the timeline unchanged when the event POST fails',
+    { tag: [...ADOPTION_EVENT_CREATE_WEB_MANAGER, '@outcome:failure'] },
+    async ({ page }) => {
+      await mockApplicationAndEvents(page);
+      await page.route('**/adoptions/5/events/**', (route: any) => {
+        if (route.request().method() === 'POST') {
+          return route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({}) });
+        }
+        return route.continue();
+      });
+
+      await loginAndNavigate(page, 'web_manager', '/es/web-manager/applications/5');
+
+      await expect(page.getByRole('heading', { level: 1, name: 'Luna' })).toBeVisible({ timeout: 15_000 });
+
+      const before = await page.getByTestId('event-item').count();
+
+      await page.getByTestId('event-add-button').click();
+      await page.getByTestId('event-description-input').fill('Evento que el servidor rechaza');
+      await page.getByTestId('event-submit').click();
+
+      // adoption.events.submitError, the fallback at AdoptionEventCreateModal.tsx:83.
+      await expect(page.getByText('No pudimos registrar el evento. Intenta de nuevo.')).toBeVisible({ timeout: 10_000 });
+      // Fails if the row is appended optimistically and left there: the follow-up would
+      // appear in the history of an adoption that never recorded it.
+      await expect(page.getByTestId('event-item')).toHaveCount(before);
+    },
+  );
+
+  test(
+    'shelter admin sees the validation error and no request when the description is empty',
+    { tag: [...ADOPTION_EVENT_CREATE_SHELTER, '@outcome:error'] },
+    async ({ page }) => {
+      await mockShelterApplications(page);
+
+      let posted = false;
+      await page.route('**/adoptions/5/events/**', (route: any) => {
+        if (route.request().method() === 'POST') posted = true;
+        return route.continue();
+      });
+
+      await loginAndNavigate(page, 'shelter_admin', '/es/shelter/applications');
+
+      await expect(page.getByRole('heading', { name: 'Solicitudes de Adopción' })).toBeVisible({ timeout: 15_000 });
+      await page.getByRole('button', { name: 'Detalle' }).click();
+
+      await page.getByTestId('event-add-button').click();
+      await page.getByTestId('event-submit').click();
+
+      await expect(page.getByText('La descripción es obligatoria.')).toBeVisible({ timeout: 10_000 });
+      expect(posted).toBe(false);
+    },
+  );
+
+  test(
+    'shelter admin keeps the timeline unchanged when the event POST fails',
+    { tag: [...ADOPTION_EVENT_CREATE_SHELTER, '@outcome:failure'] },
+    async ({ page }) => {
+      await mockShelterApplications(page);
+      await page.route('**/adoptions/5/events/**', (route: any) => {
+        if (route.request().method() === 'POST') {
+          return route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({}) });
+        }
+        return route.continue();
+      });
+
+      await loginAndNavigate(page, 'shelter_admin', '/es/shelter/applications');
+
+      await expect(page.getByRole('heading', { name: 'Solicitudes de Adopción' })).toBeVisible({ timeout: 15_000 });
+      await page.getByRole('button', { name: 'Detalle' }).click();
+
+      const before = await page.getByTestId('event-item').count();
+
+      await page.getByTestId('event-add-button').click();
+      await page.getByTestId('event-description-input').fill('Evento que el servidor rechaza');
+      await page.getByTestId('event-submit').click();
+
+      await expect(page.getByText('No pudimos registrar el evento. Intenta de nuevo.')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByTestId('event-item')).toHaveCount(before);
+    },
+  );
 });

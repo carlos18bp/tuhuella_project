@@ -309,6 +309,37 @@ test.describe('Blog — Admin', () => {
     await expect(page.getByText('Request failed with status code 400')).toBeVisible({ timeout: 10_000 });
   });
 
+  // Deliberately NOT a 500 twin of the spec above: the page surfaces `err.message` for
+  // both statuses, so asserting the text again would be duplicate coverage wearing a
+  // different tag. What is unique to the server-failure path is whether the edit
+  // survives — fails if a rejected save clears the editor and the admin has to retype
+  // the post they just wrote.
+  test('keeps the unsaved edit in the editor when the save fails server-side', { tag: [...BLOG_ADMIN_EDIT, '@outcome:failure'] }, async ({ page }) => {
+    await page.route('**/api/blog/admin/1/**', (route) => {
+      if (route.request().method() === 'PATCH') {
+        return route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({}) });
+      }
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ...mockBlogPost, id: 1, status: 'published' }) });
+    });
+
+    await loginAndNavigate(page, 'admin', '/admin/blog');
+    await waitForPageLoad(page);
+
+    const editLink = page.getByRole('link', { name: /Editar/i }).first();
+    await expect(editLink).toBeVisible({ timeout: 15_000 });
+    await editLink.click();
+
+    await expect(page).toHaveURL(/\/admin\/blog\/\d+\/editar/);
+
+    const titleField = page.getByLabel('Título (ES)', { exact: true });
+    await titleField.fill('Borrador que no debe perderse');
+    await page.getByRole('button', { name: 'Guardar cambios' }).click();
+
+    await expect(page.getByText('Request failed with status code 500')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText('Post guardado correctamente.')).not.toBeVisible();
+    await expect(titleField).toHaveValue('Borrador que no debe perderse');
+  });
+
   // Pages forward to December and one click past it, so the year-rollover branch runs on
   // whatever date the suite happens to execute. Catches nextMonth() losing its year bump
   // (calendario/page.tsx:77-80): drop `setYear(y => y + 1)` and every December user paging
