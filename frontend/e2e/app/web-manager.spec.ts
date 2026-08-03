@@ -527,7 +527,7 @@ test.describe('Web Manager — Profile', () => {
       await expect(accountButton).toBeVisible({ timeout: 15_000 });
       await accountButton.click();
       await page.getByRole('menuitem', { name: /Mi Perfil/i }).click();
-      await expect(page).toHaveURL(/\/my-profile/, { timeout: 10_000 });
+      await page.waitForURL(/\/my-profile/, { timeout: 15_000 });
 
       await expect(page.getByText(/Responsabilidades del web manager/i)).toBeVisible({ timeout: 15_000 });
       await expect(page.getByText(/Resumen del web manager/i)).toBeVisible({ timeout: 10_000 });
@@ -535,11 +535,13 @@ test.describe('Web Manager — Profile', () => {
       // The counts, not just the labels. All three are mocked above (3 shelters,
       // 5 applications, 2 campaigns); asserting only that the label renders would
       // pass a card stuck at 0 or wired to the wrong endpoint, which is exactly the
-      // failure a reviewer would act on.
-      const summary = page.getByText(/Resumen del web manager/i).locator('..');
-      await expect(summary).toContainText('3', { timeout: 10_000 });
-      await expect(summary).toContainText('5');
-      await expect(summary).toContainText('2');
+      // failure a reviewer would act on. Each stat renders as one <Link> wrapping
+      // both the value and its label (WebManagerProfileSection.tsx:129-139), so the
+      // link is the element that holds the pair together.
+      const stat = (label: RegExp) => page.getByRole('link').filter({ hasText: label });
+      await expect(stat(/Refugios por verificar/i)).toContainText('3', { timeout: 10_000 });
+      await expect(stat(/Solicitudes nuevas/i)).toContainText('5');
+      await expect(stat(/Campañas por revisar/i)).toContainText('2');
     },
   );
 
