@@ -1,6 +1,7 @@
 import { test, expect } from '../test-with-coverage';
 import { waitForPageLoad, loginAndNavigate } from '../fixtures';
 import { MANUAL_BROWSE, MANUAL_SEARCH, MANUAL_ROLE_FILTER } from '../helpers/flow-tags';
+import { paceRequestsUnderRateLimit } from '../helpers/pacing';
 
 test.describe('Manual — Unauthenticated', () => {
   test('should redirect unauthenticated user away from manual', { tag: [...MANUAL_BROWSE] }, async ({ page }) => {
@@ -12,11 +13,29 @@ test.describe('Manual — Unauthenticated', () => {
 });
 
 test.describe('Manual — Web Manager', () => {
+  // Drives the sidebar collapse toggle, which every other assertion in this file is blind to.
+  // ManualSidebar.tsx:37 renders aria-expanded={!isCollapsed} and :48-49 renders the anchor
+  // <ul id={`manual-section-${section.id}`}> only while expanded, so inverting that state
+  // makes the whole sidebar unusable while all the heading assertions stay green.
   test('should load the manual page and display the web manager section', { tag: [...MANUAL_BROWSE, '@outcome:display'] }, async ({ page }) => {
+    test.slow(); // paced requests trade wall time for a deterministic transition
+    await paceRequestsUnderRateLimit(page);
     await loginAndNavigate(page, 'web_manager', '/manual');
 
     await expect(page.getByRole('heading', { name: /manual/i, level: 1 })).toBeVisible({ timeout: 15_000 });
     await expect(page.getByRole('heading', { name: /Web Manager/i })).toBeVisible({ timeout: 10_000 });
+
+    // Scoped to the desktop <aside> (ManualSidebar.tsx:90-97): the same nav markup is also
+    // rendered inside the lg:hidden mobile wrapper, so an unscoped id locator would be
+    // ambiguous the moment that wrapper is opened.
+    const sidebar = page.locator('aside');
+    const toggle = sidebar.getByRole('button', { name: 'Cómo empezar' });
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+
+    await toggle.click();
+
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(sidebar.locator('#manual-section-getting-started')).toHaveCount(0);
   });
 
   test('should display the "Cómo empezar" highlighted section', { tag: [...MANUAL_BROWSE, '@outcome:display'] }, async ({ page }) => {

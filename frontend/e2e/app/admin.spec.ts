@@ -150,7 +150,7 @@ test.describe('Admin Panel — Authenticated', () => {
   });
 
   test('should display moderation page with animals and shelters', { tag: [...ADMIN_MODERATION, '@outcome:display'] }, async ({ page }) => {
-    // quality: allow-no-interaction (authenticated display test: loginAndNavigate is API-based by design; content is asserted with concrete values)
+    // quality: allow-no-interaction (read-only moderation index: this spec asserts the pending animals and shelters are listed; approving and rejecting them are separate flows with their own specs, and loginAndNavigate seeds the session by cookie rather than filling a login form)
     await page.route('**/api/animals/**', (route: any) =>
       route.fulfill({
         status: 200,
@@ -198,7 +198,7 @@ test.describe('Admin Panel — Authenticated', () => {
       },
     );
 
-    // quality: allow-no-interaction (authenticated display test: loginAndNavigate is API-based by design; content is asserted with concrete values)
+    // quality: allow-no-interaction (a metrics dashboard is read-only by nature: this spec waits for the real GET admin/metrics and asserts a formatted figure actually rendered, and there is nothing on the page to act on; loginAndNavigate seeds the session by cookie rather than filling a login form)
     const metricsResponse = page.waitForResponse(
       (r) => r.url().includes('admin/metrics') && r.request().method() === 'GET' && r.status() === 200,
       { timeout: 20_000 },
@@ -212,7 +212,7 @@ test.describe('Admin Panel — Authenticated', () => {
   });
 
   test('should display payments audit table', { tag: [...ADMIN_PAYMENTS, '@outcome:display'] }, async ({ page }) => {
-    // quality: allow-no-interaction (authenticated display test: loginAndNavigate is API-based by design; content is asserted with concrete values)
+    // quality: allow-no-interaction (read-only audit table: payments are recorded by the checkout flows and are not mutable from this view, so listing them is the whole behaviour; loginAndNavigate seeds the session by cookie rather than filling a login form)
     await page.route('**/payments/**', (route: any) =>
       route.fulfill({
         status: 200,

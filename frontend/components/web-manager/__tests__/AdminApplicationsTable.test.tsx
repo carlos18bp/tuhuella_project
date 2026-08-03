@@ -17,7 +17,11 @@ const buildApp = (overrides: Partial<AdoptionApplication> = {}): AdoptionApplica
   notes: '',
   created_at: '2026-04-10T10:00:00Z',
   updated_at: '2026-04-10T10:00:00Z',
-  ...(overrides as AdoptionApplication),
+  // No cast here: `overrides as AdoptionApplication` widened a Partial into the full
+  // type, so TS believed this spread supplied every property and reported all eight
+  // REQUIRED fields above as overwritten (TS2783 x8). The literal already satisfies
+  // AdoptionApplication on its own, so spreading the Partial needs no assertion.
+  ...overrides,
 });
 
 describe('AdminApplicationsTable', () => {

@@ -1367,11 +1367,10 @@
         "admin"
       ],
       "priority": "P2",
-      "description": "Web manager creates a campaign on behalf of any shelter (auto-approved) at /web-manager/campaigns/new using the shelter dropdown and bilingual form fields",
+      "description": "Web manager creates a campaign on behalf of any shelter (auto-approved) at /web-manager/campaigns/new using the shelter dropdown and bilingual form fields. Declares no failure class: createCampaign has no try/catch (lib/stores/campaignStore.ts:85-91), so page.tsx:49 renders the raw Axios err.message for every non-2xx — a 5xx is indistinguishable from a 4xx except for the status digit, and a test asserting that difference would verify the HTTP client, not this flow. Restore the class if 5xx ever maps to its own copy.",
       "outcomes": [
         "success",
-        "error",
-        "failure"
+        "error"
       ]
     },
     "manual-browse": {

@@ -8,6 +8,7 @@ import {
   ADOPTION_WHATSAPP_APPLICANT,
   ADOPTION_WHATSAPP_SHELTER,
 } from '../helpers/flow-tags';
+import { paceRequestsUnderRateLimit } from '../helpers/pacing';
 
 /** Fulfil GET /adoptions/5/ with the given application detail. */
 async function mockApplicationDetail(page: Page, detail: Record<string, unknown>) {
@@ -20,11 +21,41 @@ async function mockApplicationDetail(page: Page, detail: Record<string, unknown>
   );
 }
 
+/** One row for the list views that lead into application 5. */
+const listRow = {
+  id: 5,
+  animal: 1,
+  animal_name: 'Luna',
+  animal_species: 'dog',
+  shelter_name: 'Patitas Felices',
+  shelter_city: 'Bogotá',
+  user_email: 'adopter@example.com',
+  thumbnail_url: null,
+  status: 'interview',
+  created_at: '2026-01-10T00:00:00Z',
+  reviewed_at: null,
+};
+
 test.describe('Adoption application detail', () => {
   test(
     'adopter sees their application detail',
     { tag: [...ADOPTION_DETAIL_ADOPTER, '@outcome:display'] },
     async ({ page }) => {
+      // Bug caught: the application card building a wrong detail href
+      // (my-applications/page.tsx:210-212, ROUTES.MY_APPLICATION_DETAIL(app.id)) — a card
+      // that links to the wrong id renders a perfectly valid detail page for someone
+      // else's application, which the two content assertions alone would not notice.
+      test.slow();
+      await paceRequestsUnderRateLimit(page);
+      // Registered before mockApplicationDetail so the narrower /adoptions/5/ handler,
+      // registered last, still wins for the detail request.
+      await page.route('**/api/adoptions/**', (route: Route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify([listRow]),
+        }),
+      );
       await mockApplicationDetail(page, {
         id: 5,
         animal_name: 'Luna',
@@ -36,8 +67,10 @@ test.describe('Adoption application detail', () => {
         events: [],
       });
 
-      await loginAndNavigate(page, 'adopter', '/es/my-applications/5');
+      await loginAndNavigate(page, 'adopter', '/es/my-applications');
+      await page.getByRole('main').getByRole('heading', { level: 3, name: 'Luna' }).click();
 
+      await expect(page).toHaveURL(/\/my-applications\/5$/);
       await expect(page.getByRole('heading', { level: 1, name: 'Luna' })).toBeVisible({
         timeout: 15_000,
       });
@@ -49,6 +82,19 @@ test.describe('Adoption application detail', () => {
     'web manager sees the applicant on the application detail',
     { tag: [...ADOPTION_DETAIL_WEB_MANAGER, '@outcome:display'] },
     async ({ page }) => {
+      // Bug caught: the applications table row linking to the wrong detail
+      // (AdminApplicationsTable.tsx:56-62, ROUTES.WEB_MANAGER_APPLICATION_DETAIL(app.id)).
+      // A web manager who opens the wrong application reads a valid-looking page and
+      // acts on another applicant's file.
+      test.slow();
+      await paceRequestsUnderRateLimit(page);
+      await page.route('**/api/admin/applications/**', (route: Route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ results: [listRow], count: 1, page: 1, page_size: 25, total_pages: 1 }),
+        }),
+      );
       await mockApplicationDetail(page, {
         id: 5,
         animal_name: 'Luna',
@@ -61,8 +107,10 @@ test.describe('Adoption application detail', () => {
         events: [],
       });
 
-      await loginAndNavigate(page, 'web_manager', '/es/web-manager/applications/5');
+      await loginAndNavigate(page, 'web_manager', '/es/web-manager/applications');
+      await page.getByRole('link', { name: 'Luna' }).click();
 
+      await expect(page).toHaveURL(/\/web-manager\/applications\/5$/);
       await expect(page.getByRole('heading', { level: 1, name: 'Luna' })).toBeVisible({
         timeout: 15_000,
       });
