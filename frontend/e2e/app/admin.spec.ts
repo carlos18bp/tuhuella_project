@@ -261,7 +261,11 @@ test.describe('Admin Panel — Authenticated', () => {
 
     await expect(page.getByRole('heading', { name: /Panel de Administración/i })).toBeVisible({ timeout: 15_000 });
 
-    const card = (label: string) => page.locator('div').filter({ hasText: new RegExp(`^${label}$`) }).locator('..');
+    // Each card is one div holding a value <p> and a label <p> (dashboard/page.tsx:101-104),
+    // so its own text reads "128Usuarios" — filtering divs by hasText:/^Usuarios$/ matches
+    // nothing. Filter by a div that CONTAINS the exact label and take the innermost.
+    const card = (label: string) =>
+      page.locator('div').filter({ has: page.getByText(label, { exact: true }) }).last();
     await expect(page.getByText('Usuarios', { exact: true })).toBeVisible({ timeout: 10_000 });
     await expect(card('Usuarios')).toContainText('128');
     await expect(card('Pendientes de aprobación')).toContainText('3');
