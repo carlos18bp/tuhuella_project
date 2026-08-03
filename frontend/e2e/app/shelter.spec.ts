@@ -636,10 +636,12 @@ test.describe('Shelter Campaign Detail & Create', () => {
     await expect(page).toHaveURL(/shelter\/campaigns\/42/, { timeout: 10_000 });
   });
 
-  // Whitespace, not empty: the guard is `!title.trim() || !goal`
-  // (nueva/page.tsx:47), and spaces are what a natively required field accepts.
-  // Asserting the POST never fires is the half that matters — a message shown while
-  // the request still goes out would create a campaign titled with blanks.
+  // Whitespace, not empty: the title input is natively `required`, so the browser
+  // blocks an empty submit and the React guard never sees it — while a title of
+  // spaces satisfied BOTH checks and created a campaign titled with blanks. That is
+  // the hole this spec was written against, and it is why the guard now trims.
+  // Asserting the POST never fires is the half that matters: a message shown while
+  // the request still goes out is not a guard.
   test('refuses to submit a campaign with a blank title', { tag: [...SHELTER_PANEL_CAMPAIGN_CREATE, '@outcome:error'] }, async ({ page }) => {
     await paceRequestsUnderRateLimit(page);
     let posted = false;

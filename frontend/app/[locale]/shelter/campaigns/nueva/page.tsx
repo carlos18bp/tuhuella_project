@@ -43,7 +43,11 @@ export default function ShelterCampaignNewPage() {
       setError('No encontramos tu refugio.');
       return;
     }
-    if (!titleEs || !goal) {
+    // Trimmed: the input is natively `required`, so the browser already blocks an
+    // empty title and `!titleEs` could never fire for it — while a title of spaces
+    // satisfied both checks and created a campaign that reaches reviewers as a
+    // blank row. The guard now enforces what its own message promises.
+    if (!titleEs.trim() || !goal) {
       setError('Título y meta son requeridos.');
       return;
     }
