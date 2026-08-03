@@ -15,8 +15,9 @@ jest.mock('swiper/css/pagination', () => {});
 import { useSponsorshipStore } from '@/lib/stores/sponsorshipStore';
 
 import MisApadrinamientosPage from '../page';
+import type { Sponsorship } from '@/lib/types';
 
-const makeSponsorship = (overrides = {}) => ({
+const makeSponsorship = (overrides: Partial<Sponsorship> = {}): Sponsorship => ({
   id: 1,
   user: 1,
   animal: 1,

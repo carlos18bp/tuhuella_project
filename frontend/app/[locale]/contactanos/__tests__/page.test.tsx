@@ -14,8 +14,13 @@ jest.mock('react-google-recaptcha', () => {
   return MockRecaptcha;
 });
 
-const mockGet = jest.fn().mockResolvedValue({ data: { site_key: '' } });
-const mockPost = jest.fn();
+// Typed explicitly: a bare jest.fn() infers its resolved value as `never`, so
+// mockResolvedValue rejects every payload — including the captcha site-key shape
+// this suite depends on.
+type CaptchaResponse = { data: { site_key: string } };
+const mockGet = jest.fn<(...args: unknown[]) => Promise<CaptchaResponse>>()
+  .mockResolvedValue({ data: { site_key: '' } });
+const mockPost = jest.fn<(...args: unknown[]) => Promise<unknown>>();
 
 jest.mock('@/lib/services/http', () => ({
   api: {

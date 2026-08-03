@@ -3,6 +3,7 @@ import { act } from '@testing-library/react';
 
 import { useCampaignStore } from '../campaignStore';
 import { api } from '../../services/http';
+import type { Campaign, CampaignMessage } from '@/lib/types';
 
 jest.mock('../../services/http', () => ({
   api: {
@@ -14,14 +15,33 @@ jest.mock('../../services/http', () => ({
 
 const mockApi = api as jest.Mocked<typeof api>;
 
-const CAMPAIGN_FIXTURE = {
+// Typed and complete: the store spreads API responses over these objects, so a
+// partial fixture both fails the type and hides which fields a merge preserves.
+const CAMPAIGN_FIXTURE: Campaign = {
   id: 1,
   title: 'Medical Fund',
   description: 'Help us cover medical costs',
+  shelter: 1,
+  shelter_name: 'Happy Paws',
   goal_amount: '500000.00',
   raised_amount: '0.00',
+  progress_percentage: 0,
   status: 'active',
+  approval_status: 'approved',
+  created_at: '2026-04-18T10:00:00Z',
 };
+
+const message = (over: Partial<CampaignMessage> = {}): CampaignMessage => ({
+  id: 1,
+  campaign: 1,
+  author: 5,
+  author_name: 'Laura Gómez',
+  author_role: 'web_manager',
+  body: 'prev',
+  is_system: false,
+  created_at: '2026-04-18T10:00:00Z',
+  ...over,
+});
 
 describe('campaignStore', () => {
   beforeEach(() => {
@@ -293,7 +313,7 @@ describe('campaignStore', () => {
 
   it('appends new message to existing thread via sendMessage', async () => {
     useCampaignStore.setState({
-      messagesByCampaign: { 1: [{ id: 1, body: 'prev' }] },
+      messagesByCampaign: { 1: [message()] },
     });
     const sent = { id: 2, body: 'hola' };
     mockApi.post.mockResolvedValueOnce({ data: sent });
