@@ -464,7 +464,7 @@ test.describe('Web Manager — Profile', () => {
 
   test(
     'should display profile page for web_manager with common profile elements',
-    { tag: [...WEB_MANAGER_PROFILE] },
+    { tag: [...WEB_MANAGER_PROFILE, '@outcome:display'] },
     async ({ page }) => {
       await page.route('**/user/profile-stats/**', (route: any) =>
         route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockProfileStats) }),
@@ -483,7 +483,7 @@ test.describe('Web Manager — Profile', () => {
 
   test(
     'should display WebManagerProfileSection with stat labels and quick actions',
-    { tag: [...WEB_MANAGER_PROFILE] },
+    { tag: [...WEB_MANAGER_PROFILE, '@outcome:display'] },
     async ({ page }) => {
       await page.route('**/api/admin/shelters/all/**', (route: any) =>
         route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ count: 3 }) }),
@@ -513,7 +513,7 @@ test.describe('Web Manager — Profile', () => {
 
   test(
     'should render quick action links in WebManagerProfileSection',
-    { tag: [...WEB_MANAGER_PROFILE] },
+    { tag: [...WEB_MANAGER_PROFILE, '@outcome:display'] },
     async ({ page }) => {
       await page.route('**/api/admin/shelters/all/**', (route: any) =>
         route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ count: 0 }) }),

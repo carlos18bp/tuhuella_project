@@ -248,7 +248,7 @@ test.describe('Admin Profile — Authenticated', () => {
     admin_stats: { total_users: 42, total_shelters: 8, total_animals: 120, pending_verifications: 3 },
   };
 
-  test('should display admin role section and NOT adopter cards', { tag: [...ADMIN_PROFILE] }, async ({ page }) => {
+  test('should display admin role section and NOT adopter cards', { tag: [...ADMIN_PROFILE, '@outcome:display'] }, async ({ page }) => {
     await page.route('**/user/profile/**', (route: any) => {
       if (route.request().method() === 'GET') {
         return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAdminProfile) });
@@ -267,7 +267,7 @@ test.describe('Admin Profile — Authenticated', () => {
     await expect(page.getByRole('main').getByText(/Favoritos/i)).not.toBeVisible();
   });
 
-  test('should display moderation-queue widget with pending count', { tag: [...ADMIN_PROFILE] }, async ({ page }) => {
+  test('should display moderation-queue widget with pending count', { tag: [...ADMIN_PROFILE, '@outcome:display'] }, async ({ page }) => {
     await page.route('**/user/profile/**', (route: any) => {
       if (route.request().method() === 'GET') {
         return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAdminProfile) });
