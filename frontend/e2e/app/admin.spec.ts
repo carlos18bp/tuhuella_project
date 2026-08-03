@@ -66,7 +66,16 @@ test.describe('Admin Panel — Authenticated', () => {
       }),
     );
 
-    await loginAndNavigate(page, 'admin', '/admin/shelters/approve');
+    // Entered through the Admin panel menu rather than by URL: for a display flow
+    // reachability is part of what is under test, and a moderation queue no admin can
+    // navigate to is broken however well the page itself renders.
+    await loginAndNavigate(page, 'admin', '/');
+
+    const adminPanel = page.getByRole('button', { name: 'Admin' });
+    await expect(adminPanel).toBeVisible({ timeout: 15_000 });
+    await adminPanel.click();
+    await page.getByRole('menuitem', { name: /Aprobar refugios/i }).click();
+    await page.waitForURL(/\/admin\/shelters\/approve/, { timeout: 15_000 });
     await pendingResponse;
 
     await expect(page.getByRole('heading', { name: /Aprobar Refugios/i })).toBeVisible({ timeout: 15_000 });
@@ -209,6 +218,62 @@ test.describe('Admin Panel — Authenticated', () => {
     await expect(page.getByRole('heading', { name: /Métricas/i })).toBeVisible({ timeout: 15_000 });
 
     await expect(page.getByRole('main')).toContainText(/\$[\d.,]+|[\d.,]+%|\d+%/, { timeout: 20_000 });
+  });
+
+  const mockDashboard = {
+    total_users: 128, total_shelters: 14, verified_shelters: 11, pending_shelters: 3,
+    total_animals: 240, published_animals: 190, adopted_animals: 46,
+    total_applications: 57, active_campaigns: 6, total_donations: 92, total_sponsorships: 18,
+  };
+
+  const routeDashboard = (page: any, status: number, body: unknown) =>
+    page.route(
+      (url: URL) => url.pathname.includes('admin/dashboard') && !url.pathname.startsWith('/es'),
+      (route: any) => {
+        if (route.request().method() !== 'GET') return route.continue();
+        return route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
+      },
+    );
+
+  // Entered through the Admin panel menu: for a display flow reachability is part of
+  // the behaviour. The figures asserted are the fixture's own, so a card wired to the
+  // wrong field — or to a hard-coded number — fails instead of passing on layout.
+  test('should display the dashboard cards with the platform totals', { tag: [...ADMIN_DASHBOARD, '@outcome:display'] }, async ({ page }) => {
+    await routeDashboard(page, 200, mockDashboard);
+
+    await loginAndNavigate(page, 'admin', '/');
+
+    const adminPanel = page.getByRole('button', { name: 'Admin' });
+    await expect(adminPanel).toBeVisible({ timeout: 15_000 });
+    await adminPanel.click();
+    await page.getByRole('menuitem', { name: /Dashboard/i }).click();
+    await page.waitForURL(/\/admin\/dashboard/, { timeout: 15_000 });
+
+    await expect(page.getByRole('heading', { name: /Panel de Administración/i })).toBeVisible({ timeout: 15_000 });
+
+    const card = (label: string) => page.locator('div').filter({ hasText: new RegExp(`^${label}$`) }).locator('..');
+    await expect(page.getByText('Usuarios', { exact: true })).toBeVisible({ timeout: 10_000 });
+    await expect(card('Usuarios')).toContainText('128');
+    await expect(card('Pendientes de aprobación')).toContainText('3');
+    await expect(card('Adoptados')).toContainText('46');
+  });
+
+  // Fails if a dashboard outage renders as zeroes instead of as an outage. The page
+  // swallows the request error (dashboard/page.tsx:38-40) and leaves `cards` empty, so
+  // the labels must be ABSENT — an admin reading 0 users would conclude the platform
+  // emptied out rather than that the endpoint is down.
+  test('renders no cards at all when the dashboard API fails', { tag: [...ADMIN_DASHBOARD, '@outcome:failure'] }, async ({ page }) => {
+    // quality: allow-no-interaction (failure render on load of a read-only panel —
+    // the absent-cards state IS the behaviour, and there is nothing to click first)
+    await routeDashboard(page, 500, {});
+
+    await loginAndNavigate(page, 'admin', '/admin/dashboard');
+
+    await expect(page.getByRole('heading', { name: /Panel de Administración/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('Usuarios', { exact: true })).not.toBeVisible();
+    await expect(page.getByText('Donaciones pagadas', { exact: true })).not.toBeVisible();
+    // The navigation tiles are static, so the page itself is still usable.
+    await expect(page.getByText('Aprobar Refugios', { exact: true })).toBeVisible({ timeout: 10_000 });
   });
 
   // Fails if a metrics outage renders as zeroes instead of as an outage. The page

@@ -690,9 +690,14 @@ test.describe('Shelter Panel — Animal Create', () => {
 });
 
 test.describe('Shelter Panel Campaign Messages', () => {
+  // Tagged with both classes because it verifies both, which its title already
+  // said: it reads the reviewer's existing message (display) and then posts a
+  // reply, asserting the request body AND that the reply renders (success). Only
+  // the display tag was present, so the flow reported the send as uncovered and
+  // the obvious remedy would have been a second spec duplicating this setup.
   test(
     'shelter admin reads and sends a campaign approval message',
-    { tag: [...SHELTER_PANEL_CAMPAIGN_MESSAGES, '@outcome:display'] },
+    { tag: [...SHELTER_PANEL_CAMPAIGN_MESSAGES, '@outcome:display', '@outcome:success'] },
     async ({ page }) => {
       let sentBody: string | null = null;
 
