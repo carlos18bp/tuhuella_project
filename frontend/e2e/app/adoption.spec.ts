@@ -209,8 +209,10 @@ test.describe.serial('Adoption Flows — Authenticated', () => {
     // `hasSuccess || hasError` passed whether the request was accepted or rejected,
     // so it could not fail for any behavioural reason — a wizard that submitted
     // nothing and rendered an error satisfied it just as well as one that worked.
+    // Only the success heading: the page carries other role="alert" nodes that are
+    // legitimately present on a successful submit, so asserting none exists made the
+    // spec fail for a reason unrelated to the flow.
     await expect(page.getByRole('heading', { name: /Solicitud enviada/i })).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByRole('alert')).not.toBeVisible();
   });
 
   // The rejection an adopter actually meets: applying twice for the same animal.

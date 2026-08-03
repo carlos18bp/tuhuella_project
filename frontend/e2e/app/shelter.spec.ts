@@ -655,6 +655,10 @@ test.describe('Shelter Campaign Detail & Create', () => {
 
     await loginAndNavigate(page, 'shelter_admin', '/shelter/campaigns/nueva');
     await expect(page.getByRole('heading', { name: /Solicitar nueva campaña/i })).toBeVisible({ timeout: 15_000 });
+    // Wait for the submit control like the success spec does: the owned-shelter GET
+    // resolves shelterId, and submitting before it lands trips the EARLIER guard
+    // ("No encontramos tu refugio.", nueva/page.tsx:43) instead of the one under test.
+    await expect(page.getByRole('button', { name: /Enviar para revisión/i })).toBeVisible({ timeout: 10_000 });
 
     await page.getByLabel('Título').fill('   ');
     await page.getByLabel(/Meta/i).fill('500000');
