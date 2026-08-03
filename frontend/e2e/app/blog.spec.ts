@@ -110,6 +110,26 @@ test.describe('Blog — Public', () => {
 
     await expect(page.getByText(/request failed with status code 500/i)).toBeVisible({ timeout: 15_000 });
   });
+
+  // Fails if the detail page starts swallowing a server error behind its
+  // "Artículo no encontrado" copy — a 500 and a genuinely missing slug would then
+  // be indistinguishable to the reader, and to anyone reading a bug report.
+  test('shows the server error, not "not found", when the blog detail API fails', { tag: [...BLOG_DETAIL, '@outcome:failure'] }, async ({ page }) => {
+    // quality: allow-no-interaction (failure render on load — the error state IS the
+    // behavior under test; the detail page has no interactive surface before it renders)
+    // blogStore.fetchPost stores the raw Axios message (blogStore.ts:96-98) and the page
+    // renders `{error || 'Artículo no encontrado.'}` (blog/[slug]/page.tsx:86-89), so the
+    // two branches are distinguishable only by which string appears.
+    await page.route('**/api/blog/**', (route) =>
+      route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ detail: 'Internal Server Error' }) }),
+    );
+
+    await page.goto(`/blog/${mockBlogPost.slug}`);
+    await waitForPageLoad(page);
+
+    await expect(page.getByText(/request failed with status code 500/i)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('Artículo no encontrado.')).not.toBeVisible();
+  });
 });
 
 test.describe('Blog — Admin', () => {

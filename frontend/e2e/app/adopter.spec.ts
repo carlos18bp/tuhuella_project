@@ -275,6 +275,64 @@ test.describe('Adopter Profile — Authenticated', () => {
     const successMsg = page.getByText(/guardados|saved|éxito/i);
     await expect(successMsg).toBeVisible({ timeout: 10_000 });
   });
+
+  // Fails if the form stops validating the name client-side and lets an empty
+  // profile reach the API — the user would see a generic save failure, or worse,
+  // a saved profile with no name on it.
+  test('refuses to submit an empty name and never calls the API', { tag: [...PROFILE_EDIT, '@outcome:error'] }, async ({ page }) => {
+    let patched = false;
+    await page.route('**/user/profile/**', (route: any) => {
+      if (route.request().method() === 'PATCH') {
+        patched = true;
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({}) });
+      }
+      return route.continue();
+    });
+    await page.route('**/user/profile-stats/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockProfileStats) }),
+    );
+
+    await loginAndNavigate(page, 'adopter', '/my-profile/edit');
+
+    const firstNameInput = page.getByLabel(/Nombre/i).first();
+    await expect(firstNameInput).toBeVisible({ timeout: 15_000 });
+    await firstNameInput.clear();
+    await page.getByLabel(/Apellido/i).clear();
+
+    await page.getByRole('button', { name: /Guardar|Save/i }).click();
+
+    // editProfile.nameRequired (messages/es.json:741), rendered by the error
+    // container at my-profile/edit/page.tsx:223-225.
+    await expect(page.getByText('Nombre y apellido son obligatorios')).toBeVisible({ timeout: 10_000 });
+    expect(patched).toBe(false);
+  });
+
+  // Fails if a rejected save reports success anyway — the user walks away
+  // believing their phone number changed when the server never stored it.
+  test('shows the save error when the profile PATCH fails', { tag: [...PROFILE_EDIT, '@outcome:failure'] }, async ({ page }) => {
+    await page.route('**/user/profile/**', (route: any) => {
+      if (route.request().method() === 'PATCH') {
+        return route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({}) });
+      }
+      return route.continue();
+    });
+    await page.route('**/user/profile-stats/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockProfileStats) }),
+    );
+
+    await loginAndNavigate(page, 'adopter', '/my-profile/edit');
+
+    const phoneInput = page.getByLabel(/Teléfono/i);
+    await expect(phoneInput).toBeVisible({ timeout: 15_000 });
+    await phoneInput.clear();
+    await phoneInput.fill('+57 300 111 2222');
+
+    await page.getByRole('button', { name: /Guardar|Save/i }).click();
+
+    // editProfile.saveError (messages/es.json:742), set at my-profile/edit/page.tsx:135.
+    await expect(page.getByText('Error al guardar. Intenta de nuevo.')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/guardados|saved|éxito/i)).not.toBeVisible();
+  });
 });
 
 test.describe('Favorites — Authenticated', () => {

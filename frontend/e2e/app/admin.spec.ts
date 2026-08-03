@@ -211,6 +211,35 @@ test.describe('Admin Panel — Authenticated', () => {
     await expect(page.getByRole('main')).toContainText(/\$[\d.,]+|[\d.,]+%|\d+%/, { timeout: 20_000 });
   });
 
+  // Fails if a metrics outage renders as zeroes instead of as an outage. The page
+  // swallows the request error (metrics/page.tsx:33-35) and only the null-metrics
+  // branch distinguishes "nothing came back" from "everything is at 0" — an admin
+  // reading 0 donations would think the platform stopped, not the endpoint.
+  test('says the metrics could not be loaded when the API fails', { tag: [...ADMIN_METRICS, '@outcome:failure'] }, async ({ page }) => {
+    // quality: allow-no-interaction (failure render on load, same read-only page as the
+    // display spec above: there is nothing to click before the error state appears)
+    await page.route(
+      (url) => {
+        const p = url.pathname;
+        const isApiPath = p.includes('/api/') && p.includes('admin/metrics');
+        const isDirectBackend = (url.hostname === '127.0.0.1' || url.hostname === 'localhost') &&
+          url.port === '8000' &&
+          p.includes('admin/metrics');
+        return isApiPath || isDirectBackend;
+      },
+      (route: any) => {
+        if (route.request().method() !== 'GET') return route.continue();
+        return route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({}) });
+      },
+    );
+
+    await loginAndNavigate(page, 'admin', '/admin/metrics');
+
+    // metrics.loadError, rendered by the null-metrics branch at metrics/page.tsx:87.
+    await expect(page.getByText('No se pudieron cargar las métricas.')).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole('main')).not.toContainText(/\$[\d.,]+/);
+  });
+
   test('should display payments audit table', { tag: [...ADMIN_PAYMENTS, '@outcome:display'] }, async ({ page }) => {
     // quality: allow-no-interaction (read-only audit table: payments are recorded by the checkout flows and are not mutable from this view, so listing them is the whole behaviour; loginAndNavigate seeds the session by cookie rather than filling a login form)
     await page.route('**/payments/**', (route: any) =>
