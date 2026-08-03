@@ -331,7 +331,15 @@ test.describe('Web Manager — Campaign Detail', () => {
     await paceRequestsUnderRateLimit(page);
   });
 
+  // Opened from the pending list, the way a reviewer gets here, instead of by URL:
+  // for a display flow reachability is part of the behaviour, and a queue whose rows
+  // no longer open their campaign is broken however well the detail page renders.
+  // The goal amount is asserted too, because a detail view that shows the right title
+  // beside the wrong figure is exactly what a reviewer would approve by mistake.
   test('should display campaign detail with approve and reject buttons', { tag: [...WEB_MANAGER_CAMPAIGN_DETAIL, '@outcome:display'] }, async ({ page }) => {
+    await page.route('**/api/admin/campaigns/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAdminCampaigns) }),
+    );
     await page.route('**/api/campaigns/3/**', (route: any) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockCampaignDetail) }),
     );
@@ -339,9 +347,13 @@ test.describe('Web Manager — Campaign Detail', () => {
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockCampaignMessages) }),
     );
 
-    await loginAndNavigate(page, 'web_manager', '/web-manager/campaigns/3');
+    await loginAndNavigate(page, 'web_manager', '/web-manager/campaigns');
 
-    await expect(page.getByText(/Esterilización urgente/i)).toBeVisible({ timeout: 15_000 });
+    await page.getByText(/Esterilización urgente/i).first().click({ timeout: 15_000 });
+    await page.waitForURL(/\/web-manager\/campaigns\/3/, { timeout: 15_000 });
+
+    await expect(page.getByText(/Esterilización urgente/i).first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/800[.,]000/)).toBeVisible({ timeout: 10_000 });
     await expect(page.getByRole('button', { name: /Aprobar/i })).toBeVisible({ timeout: 10_000 });
     await expect(page.getByRole('button', { name: /Rechazar/i })).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText(/Conversación/i)).toBeVisible({ timeout: 10_000 });

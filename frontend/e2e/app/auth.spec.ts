@@ -207,6 +207,74 @@ test.describe('Auth — Forgot password reset', () => {
     await page.waitForURL(/sign-in/, { timeout: 10_000 });
     await expect(page).toHaveURL(/sign-in/);
   });
+
+  // Fails if the mismatch check stops running and two different passwords are sent
+  // as a reset — the user would be locked out with a password they never typed
+  // twice. Asserting the request is never made is the half that matters: a message
+  // shown while the call still goes out is not a guard.
+  test('refuses to reset when the two passwords differ', { tag: [...AUTH_FORGOT_PASSWORD_RESET, '@outcome:error'] }, async ({ page }) => {
+    let resetCalled = false;
+    await page.route('**/api/google-captcha/site-key/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ site_key: '' }) }),
+    );
+    await page.route('**/api/auth/send_passcode/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'Code sent' }) }),
+    );
+    await page.route('**/api/auth/verify_passcode_and_reset_password/**', (route: any) => {
+      resetCalled = true;
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'Password reset' }) });
+    });
+
+    await page.goto('/forgot-password');
+    await waitForPageLoad(page);
+
+    await page.getByLabel(/Correo electrónico/i).fill('test@example.com');
+    await page.getByRole('button', { name: /Enviar código/i }).click();
+
+    await expect(page.getByLabel(/Código/i)).toBeVisible({ timeout: 5_000 });
+    await page.getByLabel(/Código/i).fill('123456');
+    await page.getByLabel(/Nueva contraseña/i).fill('NewPass123!');
+    await page.getByLabel(/Confirmar contraseña/i).fill('DifferentPass123!');
+
+    await page.getByRole('button', { name: /Restablecer contraseña/i }).click();
+
+    // forgotPassword.errorPasswordsDontMatch, set at forgot-password/page.tsx:51.
+    await expect(page.getByText('Las contraseñas no coinciden')).toBeVisible({ timeout: 10_000 });
+    expect(resetCalled).toBe(false);
+    await expect(page).toHaveURL(/forgot-password/);
+  });
+
+  // Fails if a rejected reset still redirects to sign-in. The user would try their
+  // new password, be refused, and have no way to know the reset never took.
+  test('shows the reset error and stays put when the reset call fails', { tag: [...AUTH_FORGOT_PASSWORD_RESET, '@outcome:failure'] }, async ({ page }) => {
+    await page.route('**/api/google-captcha/site-key/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ site_key: '' }) }),
+    );
+    await page.route('**/api/auth/send_passcode/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'Code sent' }) }),
+    );
+    await page.route('**/api/auth/verify_passcode_and_reset_password/**', (route: any) =>
+      route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({}) }),
+    );
+
+    await page.goto('/forgot-password');
+    await waitForPageLoad(page);
+
+    await page.getByLabel(/Correo electrónico/i).fill('test@example.com');
+    await page.getByRole('button', { name: /Enviar código/i }).click();
+
+    await expect(page.getByLabel(/Código/i)).toBeVisible({ timeout: 5_000 });
+    await page.getByLabel(/Código/i).fill('123456');
+    await page.getByLabel(/Nueva contraseña/i).fill('NewPass123!');
+    await page.getByLabel(/Confirmar contraseña/i).fill('NewPass123!');
+
+    await page.getByRole('button', { name: /Restablecer contraseña/i }).click();
+
+    // The body carries no `error` key, so the page falls back to its own copy
+    // (forgotPassword.errorResetFailed, forgot-password/page.tsx:67).
+    await expect(page.getByText('No se pudo restablecer la contraseña')).toBeVisible({ timeout: 10_000 });
+    await expect(page).not.toHaveURL(/sign-in/);
+  });
 });
 
 test.describe('Auth — Protected route redirect', () => {
