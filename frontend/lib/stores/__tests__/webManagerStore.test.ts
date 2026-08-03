@@ -3,6 +3,7 @@ import { act } from '@testing-library/react';
 
 import { useWebManagerStore } from '../webManagerStore';
 import { api } from '../../services/http';
+import type { Campaign } from '@/lib/types';
 
 jest.mock('../../services/http', () => ({
   api: {
@@ -34,6 +35,25 @@ const makePaginated = <T>(results: T[]) => ({
   count: results.length,
   page: 1,
   total_pages: 1,
+});
+
+// A complete Campaign, because the store merges API responses into these objects and a
+// partial fixture cannot show what a merge preserves. `title` is the witness field: the
+// approve/reject responses deliberately omit it, so asserting it survives is what proves
+// the store MERGES rather than replaces. It used to be `title_es`, which is not on the
+// type at all — the campaign API carries `title`.
+const campaign = (over: Partial<Campaign> = {}): Campaign => ({
+  id: 5,
+  title: 'Save them',
+  shelter: 1,
+  shelter_name: 'Happy Paws',
+  status: 'draft',
+  approval_status: 'pending',
+  goal_amount: '800000.00',
+  raised_amount: '0.00',
+  progress_percentage: 0,
+  created_at: '2026-04-18T10:00:00Z',
+  ...over,
 });
 
 describe('webManagerStore', () => {
@@ -239,7 +259,7 @@ describe('webManagerStore', () => {
   });
 
   describe('fetchCampaigns', () => {
-    const CAMPAIGN_FIXTURE = { id: 5, title_es: 'Save them', approval_status: 'pending' };
+    const CAMPAIGN_FIXTURE = campaign();
 
     it('stores campaigns and meta on success', async () => {
       mockApi.get.mockResolvedValueOnce({ data: makePaginated([CAMPAIGN_FIXTURE]) });
@@ -290,7 +310,7 @@ describe('webManagerStore', () => {
   });
 
   describe('approveCampaign / rejectCampaign', () => {
-    const CAMPAIGN_FIXTURE = { id: 5, title_es: 'Save them', approval_status: 'pending' };
+    const CAMPAIGN_FIXTURE = campaign();
 
     it('merges approved campaign into the existing list', async () => {
       useWebManagerStore.setState({ campaigns: [CAMPAIGN_FIXTURE] });
@@ -304,11 +324,11 @@ describe('webManagerStore', () => {
 
       expect(result).toEqual(approved);
       expect(useWebManagerStore.getState().campaigns[0].approval_status).toBe('approved');
-      expect(useWebManagerStore.getState().campaigns[0].title_es).toBe('Save them');
+      expect(useWebManagerStore.getState().campaigns[0].title).toBe('Save them');
     });
 
     it('leaves other campaigns untouched when approving one', async () => {
-      const another = { id: 9, title_es: 'Other', approval_status: 'approved' };
+      const another = campaign({ id: 9, title: 'Other', approval_status: 'approved' });
       useWebManagerStore.setState({ campaigns: [CAMPAIGN_FIXTURE, another] });
       mockApi.post.mockResolvedValueOnce({ data: { id: 5, approval_status: 'approved' } });
 

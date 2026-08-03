@@ -42,7 +42,10 @@ describe('http service', () => {
     requestInterceptor = null;
     responseSuccessInterceptor = null;
     responseErrorInterceptor = null;
-    apiInstance = jest.fn() as jest.Mock<Promise<any>, any>;
+    // The cast has to carry `interceptors` too: apiInstance is declared as the
+    // intersection (line 21) because http.ts attaches them, and the narrower cast
+    // could not satisfy it.
+    apiInstance = jest.fn() as jest.Mock<Promise<any>, any> & { interceptors: any };
     apiInstance.interceptors = {
       request: {
         use: jest.fn((handler) => {

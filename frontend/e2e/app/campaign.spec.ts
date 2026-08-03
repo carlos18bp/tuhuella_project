@@ -60,7 +60,7 @@ test.describe('Campaign Browse & Detail', () => {
     await expect(page.getByRole('heading', { name: /Campañas activas/i })).toBeVisible({ timeout: 15_000 });
   });
 
-  test('should navigate to campaign detail from listing', { tag: [...CAMPAIGN_DETAIL] }, async ({ page }) => {
+  test('should navigate to campaign detail from listing', { tag: [...CAMPAIGN_DETAIL, '@outcome:display'] }, async ({ page }) => {
     await page.goto('/campaigns');
     await waitForPageLoad(page);
 

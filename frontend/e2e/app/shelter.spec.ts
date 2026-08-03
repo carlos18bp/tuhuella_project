@@ -636,6 +636,76 @@ test.describe('Shelter Campaign Detail & Create', () => {
     await expect(page).toHaveURL(/shelter\/campaigns\/42/, { timeout: 10_000 });
   });
 
+  // Whitespace, not empty: the title input is natively `required`, so the browser
+  // blocks an empty submit and the React guard never sees it — while a title of
+  // spaces satisfied BOTH checks and created a campaign titled with blanks. That is
+  // the hole this spec was written against, and it is why the guard now trims.
+  // Asserting the POST never fires is the half that matters: a message shown while
+  // the request still goes out is not a guard.
+  test('refuses to submit a campaign with a blank title', { tag: [...SHELTER_PANEL_CAMPAIGN_CREATE, '@outcome:error'] }, async ({ page }) => {
+    await paceRequestsUnderRateLimit(page);
+    let posted = false;
+    await page.route('**/api/shelters/**', (route: any) => {
+      if (route.request().method() === 'GET') {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockShelterData) });
+      }
+      return route.continue();
+    });
+    await page.route('**/api/campaigns/create/**', (route: any) => {
+      posted = true;
+      return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ id: 42 }) });
+    });
+
+    // Wait for the owned-shelter GET itself, not just for the form to paint: the
+    // control renders before shelterId resolves, and submitting early trips the
+    // EARLIER guard ("No encontramos tu refugio.", nueva/page.tsx:43) rather than the
+    // one under test. Waiting on the response is the only ordering that removes it.
+    const sheltersLoaded = page.waitForResponse(
+      (res: any) => res.url().includes('/api/shelters') && res.request().method() === 'GET',
+      { timeout: 20_000 },
+    );
+    await loginAndNavigate(page, 'shelter_admin', '/shelter/campaigns/nueva');
+    await expect(page.getByRole('heading', { name: /Solicitar nueva campaña/i })).toBeVisible({ timeout: 15_000 });
+    await sheltersLoaded;
+    await expect(page.getByRole('button', { name: /Enviar para revisión/i })).toBeVisible({ timeout: 10_000 });
+
+    await page.getByLabel('Título').fill('   ');
+    await page.getByLabel(/Meta/i).fill('500000');
+    await page.getByRole('button', { name: /Enviar para revisión/i }).click();
+
+    await expect(page.getByText('Título y meta son requeridos.')).toBeVisible({ timeout: 10_000 });
+    expect(posted).toBe(false);
+    await expect(page).toHaveURL(/campaigns\/nueva/);
+  });
+
+  // Fails if a rejected creation navigates away as though it worked. The shelter
+  // would go looking for a campaign that was never created, and re-submitting is the
+  // only recovery — which they will not do if the page told them nothing.
+  test('shows an error and stays on the form when campaign creation fails', { tag: [...SHELTER_PANEL_CAMPAIGN_CREATE, '@outcome:failure'] }, async ({ page }) => {
+    await paceRequestsUnderRateLimit(page);
+    await page.route('**/api/shelters/**', (route: any) => {
+      if (route.request().method() === 'GET') {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockShelterData) });
+      }
+      return route.continue();
+    });
+    await page.route('**/api/campaigns/create/**', (route: any) =>
+      route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({}) }),
+    );
+
+    await loginAndNavigate(page, 'shelter_admin', '/shelter/campaigns/nueva');
+    await expect(page.getByRole('heading', { name: /Solicitar nueva campaña/i })).toBeVisible({ timeout: 15_000 });
+
+    await page.getByLabel('Título').fill('Campaña que el servidor rechaza');
+    await page.getByLabel(/Meta/i).fill('500000');
+    await page.getByRole('button', { name: /Enviar para revisión/i }).click();
+
+    // The catch surfaces the thrown Error's message (nueva/page.tsx:63); whatever the
+    // wording, the contract is that something is said and the router does NOT push.
+    await expect(page.locator('p.text-rose-600')).toBeVisible({ timeout: 10_000 });
+    await expect(page).toHaveURL(/campaigns\/nueva/);
+  });
+
   test('should redirect unauthenticated user from campaign create', { tag: [...SHELTER_PANEL_CAMPAIGN_CREATE] }, async ({ page }) => {
     await page.goto('/shelter/campaigns/nueva');
     await waitForPageLoad(page);
@@ -690,9 +760,14 @@ test.describe('Shelter Panel — Animal Create', () => {
 });
 
 test.describe('Shelter Panel Campaign Messages', () => {
+  // Tagged with both classes because it verifies both, which its title already
+  // said: it reads the reviewer's existing message (display) and then posts a
+  // reply, asserting the request body AND that the reply renders (success). Only
+  // the display tag was present, so the flow reported the send as uncovered and
+  // the obvious remedy would have been a second spec duplicating this setup.
   test(
     'shelter admin reads and sends a campaign approval message',
-    { tag: [...SHELTER_PANEL_CAMPAIGN_MESSAGES, '@outcome:display'] },
+    { tag: [...SHELTER_PANEL_CAMPAIGN_MESSAGES, '@outcome:display', '@outcome:success'] },
     async ({ page }) => {
       let sentBody: string | null = null;
 

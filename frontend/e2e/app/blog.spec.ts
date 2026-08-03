@@ -110,6 +110,30 @@ test.describe('Blog — Public', () => {
 
     await expect(page.getByText(/request failed with status code 500/i)).toBeVisible({ timeout: 15_000 });
   });
+
+  // Fails if the detail page starts swallowing a server error behind its
+  // "Artículo no encontrado" copy — a 500 and a genuinely missing slug would then
+  // be indistinguishable to the reader, and to anyone reading a bug report.
+  test('shows the server error, not "not found", when the blog detail API fails', { tag: [...BLOG_DETAIL, '@outcome:failure'] }, async ({ page }) => {
+    // quality: allow-no-interaction (failure render on load — the error state IS the
+    // behavior under test; the detail page has no interactive surface before it renders)
+    // blogStore.fetchPost stores the raw Axios message (blogStore.ts:96-98) and the page
+    // renders `{error || 'Artículo no encontrado.'}` (blog/[slug]/page.tsx:86-89), so the
+    // two branches are distinguishable only by which string appears.
+    // Paced because this describe has no pacing of its own: adding another page load to
+    // Blog — Public pushed the suite over the rate limit and timed out the sibling
+    // listing spec's navigation.
+    await paceRequestsUnderRateLimit(page);
+    await page.route('**/api/blog/**', (route) =>
+      route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ detail: 'Internal Server Error' }) }),
+    );
+
+    await page.goto(`/blog/${mockBlogPost.slug}`);
+    await waitForPageLoad(page);
+
+    await expect(page.getByText(/request failed with status code 500/i)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('Artículo no encontrado.')).not.toBeVisible();
+  });
 });
 
 test.describe('Blog — Admin', () => {
@@ -287,6 +311,37 @@ test.describe('Blog — Admin', () => {
     await page.getByRole('button', { name: 'Guardar cambios' }).click();
 
     await expect(page.getByText('Request failed with status code 400')).toBeVisible({ timeout: 10_000 });
+  });
+
+  // Deliberately NOT a 500 twin of the spec above: the page surfaces `err.message` for
+  // both statuses, so asserting the text again would be duplicate coverage wearing a
+  // different tag. What is unique to the server-failure path is whether the edit
+  // survives — fails if a rejected save clears the editor and the admin has to retype
+  // the post they just wrote.
+  test('keeps the unsaved edit in the editor when the save fails server-side', { tag: [...BLOG_ADMIN_EDIT, '@outcome:failure'] }, async ({ page }) => {
+    await page.route('**/api/blog/admin/1/**', (route) => {
+      if (route.request().method() === 'PATCH') {
+        return route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({}) });
+      }
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ...mockBlogPost, id: 1, status: 'published' }) });
+    });
+
+    await loginAndNavigate(page, 'admin', '/admin/blog');
+    await waitForPageLoad(page);
+
+    const editLink = page.getByRole('link', { name: /Editar/i }).first();
+    await expect(editLink).toBeVisible({ timeout: 15_000 });
+    await editLink.click();
+
+    await expect(page).toHaveURL(/\/admin\/blog\/\d+\/editar/);
+
+    const titleField = page.getByLabel('Título (ES)', { exact: true });
+    await titleField.fill('Borrador que no debe perderse');
+    await page.getByRole('button', { name: 'Guardar cambios' }).click();
+
+    await expect(page.getByText('Request failed with status code 500')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText('Post guardado correctamente.')).not.toBeVisible();
+    await expect(titleField).toHaveValue('Borrador que no debe perderse');
   });
 
   // Pages forward to December and one click past it, so the year-rollover branch runs on

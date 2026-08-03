@@ -72,6 +72,67 @@ test.describe('Shelter Application', () => {
     expect(url.includes('my-profile') || url.includes('shelter-application')).toBe(true);
   });
 
+  // Whitespace rather than empty: validateStep guards on .trim()
+  // (shelter-application/page.tsx:138-141), and spaces are the input a natively
+  // `required` field would still accept. Fails if the wizard ADVANCES anyway — a
+  // validation that prints a message and moves on is worse than none, because the
+  // applicant reaches step 4 and submits a shelter with no name.
+  test('refuses to advance past step 1 when the shelter name is blank', { tag: [...SHELTER_APPLICATION_SUBMIT, '@outcome:error'] }, async ({ page }) => {
+    await page.route('**/api/shelter-applications/me/**', (route: any) =>
+      route.fulfill({ status: 404, contentType: 'application/json', body: JSON.stringify({ detail: 'No application found' }) }),
+    );
+
+    await loginAndNavigate(page, 'adopter', '/shelter-application');
+    await expect(page.getByRole('heading', { name: /Postularte como refugio/i })).toBeVisible({ timeout: 15_000 });
+
+    await page.getByLabel(/Nombre del refugio/i).fill('   ');
+    await page.getByLabel(/Descripción/i).fill('Refugio dedicado al rescate de animales');
+    await page.getByLabel(/Ciudad/i).fill('Bogotá');
+    await page.getByLabel(/Teléfono/i).fill('+57 300 123 4567');
+    await page.getByRole('button', { name: /Siguiente/i }).click();
+
+    // shelterApplication.errors.shelterNameRequired, rendered at page.tsx:218.
+    await expect(page.getByText('El nombre del refugio es obligatorio')).toBeVisible({ timeout: 10_000 });
+    // Still on step 1: the step-2 field must not have appeared.
+    await expect(page.getByLabel(/Razón social/i)).not.toBeVisible();
+  });
+
+  // Fails if a rejected submission reads as an accepted one. The applicant has just
+  // filled four steps; leaving them on a page that looks done, with no message, means
+  // they believe a shelter application exists that the server never stored.
+  test('shows the submit error when the application POST fails', { tag: [...SHELTER_APPLICATION_SUBMIT, '@outcome:failure'] }, async ({ page }) => {
+    await page.route('**/api/shelter-applications/me/**', (route: any) =>
+      route.fulfill({ status: 404, contentType: 'application/json', body: JSON.stringify({ detail: 'No application found' }) }),
+    );
+    await page.route('**/api/shelter-applications/', (route: any) =>
+      route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({}) }),
+    );
+
+    await loginAndNavigate(page, 'adopter', '/shelter-application');
+    await expect(page.getByRole('heading', { name: /Postularte como refugio/i })).toBeVisible({ timeout: 15_000 });
+
+    await page.getByLabel(/Nombre del refugio/i).fill('Refugio Test');
+    await page.getByLabel(/Descripción/i).fill('Refugio dedicado al rescate de animales');
+    await page.getByLabel(/Ciudad/i).fill('Bogotá');
+    await page.getByLabel(/Teléfono/i).fill('+57 300 123 4567');
+    await page.getByRole('button', { name: /Siguiente/i }).click();
+
+    await page.getByLabel(/Razón social/i).fill('Refugio Test SAS');
+    await page.getByLabel(/NIT \/ RUT/i).fill('900-1234567-1');
+    await page.getByLabel(/Nombre del representante legal/i).fill('Juan Pérez');
+    await page.getByLabel(/Documento del representante/i).fill('1020304050');
+    await page.getByRole('button', { name: /Siguiente/i }).click();
+
+    await page.getByRole('button', { name: /Siguiente/i }).click();
+
+    await page.getByLabel(/^Motivación/i).fill('Llevamos años rescatando animales en la comunidad.');
+    await page.getByRole('button', { name: /Enviar postulación/i }).click();
+
+    // shelterApplication.errors.submitFailed, set at page.tsx:180.
+    await expect(page.getByText('No pudimos enviar tu postulación. Intenta de nuevo.')).toBeVisible({ timeout: 10_000 });
+    await expect(page).toHaveURL(/shelter-application/);
+  });
+
   test('shows status view when an application already exists', { tag: [...SHELTER_APPLICATION_STATUS, '@outcome:display'] }, async ({ page }) => {
     // Bug caught: the reapply button not resetting the store. shelter-application/page.tsx
     // :110-121 calls reset() + setStep(1) + setForm(EMPTY_FORM); break any of the three and

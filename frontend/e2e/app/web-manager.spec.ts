@@ -285,16 +285,33 @@ test.describe('Web Manager — Campaign List', () => {
     await paceRequestsUnderRateLimit(page);
   });
 
-  test('should display pending campaigns list with filter tabs', { tag: [...WEB_MANAGER_CAMPAIGNS] }, async ({ page }) => {
-    await page.route('**/api/admin/campaigns/**', (route: any) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAdminCampaigns) }),
-    );
+  // The title always promised filter tabs, but the spec only checked that the Pendientes
+  // button was VISIBLE and never pressed it — a tab wired to nothing passed. The page
+  // refetches per tab (`approval_status: tab || undefined`, campaigns/page.tsx:27), so
+  // pressing Aprobadas must both send that status and replace the list. Fails if the tab
+  // stops reaching the request and the reviewer keeps seeing pending campaigns under
+  // every filter.
+  test('should display pending campaigns list with filter tabs', { tag: [...WEB_MANAGER_CAMPAIGNS, '@outcome:display'] }, async ({ page }) => {
+    await page.route('**/api/admin/campaigns/**', (route: any) => {
+      const status = new URL(route.request().url()).searchParams.get('approval_status');
+      const body = status === 'approved'
+        ? { count: 0, page: 1, total_pages: 1, results: [] }
+        : mockAdminCampaigns;
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
+    });
 
     await loginAndNavigate(page, 'web_manager', '/web-manager/campaigns');
 
     await expect(page.getByText(/Esterilización urgente/i)).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/Rescate de temporada/i)).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByRole('button', { name: /Pendientes/i })).toBeVisible({ timeout: 10_000 });
+
+    const approvedRequest = page.waitForRequest((req) =>
+      req.url().includes('admin/campaigns') && req.url().includes('approval_status=approved'),
+    );
+    await page.getByRole('button', { name: 'Aprobadas' }).click();
+    await approvedRequest;
+
+    await expect(page.getByText(/Esterilización urgente/i)).not.toBeVisible({ timeout: 10_000 });
   });
 
   test('should navigate to create campaign page from list', { tag: [...WEB_MANAGER_CAMPAIGNS, '@outcome:success'] }, async ({ page }) => {
@@ -314,7 +331,15 @@ test.describe('Web Manager — Campaign Detail', () => {
     await paceRequestsUnderRateLimit(page);
   });
 
+  // Opened from the pending list, the way a reviewer gets here, instead of by URL:
+  // for a display flow reachability is part of the behaviour, and a queue whose rows
+  // no longer open their campaign is broken however well the detail page renders.
+  // The goal amount is asserted too, because a detail view that shows the right title
+  // beside the wrong figure is exactly what a reviewer would approve by mistake.
   test('should display campaign detail with approve and reject buttons', { tag: [...WEB_MANAGER_CAMPAIGN_DETAIL, '@outcome:display'] }, async ({ page }) => {
+    await page.route('**/api/admin/campaigns/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAdminCampaigns) }),
+    );
     await page.route('**/api/campaigns/3/**', (route: any) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockCampaignDetail) }),
     );
@@ -322,9 +347,13 @@ test.describe('Web Manager — Campaign Detail', () => {
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockCampaignMessages) }),
     );
 
-    await loginAndNavigate(page, 'web_manager', '/web-manager/campaigns/3');
+    await loginAndNavigate(page, 'web_manager', '/web-manager/campaigns');
 
-    await expect(page.getByText(/Esterilización urgente/i)).toBeVisible({ timeout: 15_000 });
+    await page.getByText(/Esterilización urgente/i).first().click({ timeout: 15_000 });
+    await page.waitForURL(/\/web-manager\/campaigns\/3/, { timeout: 15_000 });
+
+    await expect(page.getByText(/Esterilización urgente/i).first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/800[.,]000/)).toBeVisible({ timeout: 10_000 });
     await expect(page.getByRole('button', { name: /Aprobar/i })).toBeVisible({ timeout: 10_000 });
     await expect(page.getByRole('button', { name: /Rechazar/i })).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText(/Conversación/i)).toBeVisible({ timeout: 10_000 });
@@ -464,7 +493,7 @@ test.describe('Web Manager — Profile', () => {
 
   test(
     'should display profile page for web_manager with common profile elements',
-    { tag: [...WEB_MANAGER_PROFILE] },
+    { tag: [...WEB_MANAGER_PROFILE, '@outcome:display'] },
     async ({ page }) => {
       await page.route('**/user/profile-stats/**', (route: any) =>
         route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockProfileStats) }),
@@ -483,7 +512,7 @@ test.describe('Web Manager — Profile', () => {
 
   test(
     'should display WebManagerProfileSection with stat labels and quick actions',
-    { tag: [...WEB_MANAGER_PROFILE] },
+    { tag: [...WEB_MANAGER_PROFILE, '@outcome:display'] },
     async ({ page }) => {
       await page.route('**/api/admin/shelters/all/**', (route: any) =>
         route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ count: 3 }) }),
@@ -501,19 +530,36 @@ test.describe('Web Manager — Profile', () => {
         route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockActivity) }),
       );
 
-      await loginAndNavigate(page, 'web_manager', '/my-profile');
+      // Reached through the account menu, not by deep link: for a display flow the
+      // entry point is part of the behaviour, and a profile the header no longer
+      // links to is broken even when /my-profile still renders on its own.
+      await loginAndNavigate(page, 'web_manager', '/');
+
+      const accountButton = page.getByRole('button', { name: /Abrir menú de cuenta/i });
+      await expect(accountButton).toBeVisible({ timeout: 15_000 });
+      await accountButton.click();
+      await page.getByRole('menuitem', { name: /Mi Perfil/i }).click();
+      await page.waitForURL(/\/my-profile/, { timeout: 15_000 });
 
       await expect(page.getByText(/Responsabilidades del web manager/i)).toBeVisible({ timeout: 15_000 });
       await expect(page.getByText(/Resumen del web manager/i)).toBeVisible({ timeout: 10_000 });
-      await expect(page.getByText(/Refugios por verificar/i)).toBeVisible({ timeout: 10_000 });
-      await expect(page.getByText(/Solicitudes nuevas/i)).toBeVisible({ timeout: 10_000 });
-      await expect(page.getByText(/Campañas por revisar/i)).toBeVisible({ timeout: 10_000 });
+
+      // The counts, not just the labels. All three are mocked above (3 shelters,
+      // 5 applications, 2 campaigns); asserting only that the label renders would
+      // pass a card stuck at 0 or wired to the wrong endpoint, which is exactly the
+      // failure a reviewer would act on. Each stat renders as one <Link> wrapping
+      // both the value and its label (WebManagerProfileSection.tsx:129-139), so the
+      // link is the element that holds the pair together.
+      const stat = (label: RegExp) => page.getByRole('link').filter({ hasText: label });
+      await expect(stat(/Refugios por verificar/i)).toContainText('3', { timeout: 10_000 });
+      await expect(stat(/Solicitudes nuevas/i)).toContainText('5');
+      await expect(stat(/Campañas por revisar/i)).toContainText('2');
     },
   );
 
   test(
     'should render quick action links in WebManagerProfileSection',
-    { tag: [...WEB_MANAGER_PROFILE] },
+    { tag: [...WEB_MANAGER_PROFILE, '@outcome:display'] },
     async ({ page }) => {
       await page.route('**/api/admin/shelters/all/**', (route: any) =>
         route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ count: 0 }) }),

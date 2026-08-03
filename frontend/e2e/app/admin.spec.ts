@@ -66,7 +66,16 @@ test.describe('Admin Panel — Authenticated', () => {
       }),
     );
 
-    await loginAndNavigate(page, 'admin', '/admin/shelters/approve');
+    // Entered through the Admin panel menu rather than by URL: for a display flow
+    // reachability is part of what is under test, and a moderation queue no admin can
+    // navigate to is broken however well the page itself renders.
+    await loginAndNavigate(page, 'admin', '/');
+
+    const adminPanel = page.getByRole('button', { name: 'Admin' });
+    await expect(adminPanel).toBeVisible({ timeout: 15_000 });
+    await adminPanel.click();
+    await page.getByRole('menuitem', { name: /Aprobar refugios/i }).click();
+    await page.waitForURL(/\/admin\/shelters\/approve/, { timeout: 15_000 });
     await pendingResponse;
 
     await expect(page.getByRole('heading', { name: /Aprobar Refugios/i })).toBeVisible({ timeout: 15_000 });
@@ -211,6 +220,105 @@ test.describe('Admin Panel — Authenticated', () => {
     await expect(page.getByRole('main')).toContainText(/\$[\d.,]+|[\d.,]+%|\d+%/, { timeout: 20_000 });
   });
 
+  const mockDashboard = {
+    total_users: 128, total_shelters: 14, verified_shelters: 11, pending_shelters: 3,
+    total_animals: 240, published_animals: 190, adopted_animals: 46,
+    total_applications: 57, active_campaigns: 6, total_donations: 92, total_sponsorships: 18,
+  };
+
+  // Same shape as the metrics matcher below, and for the same reason: /admin/dashboard
+  // is BOTH an API path and a page path, so a matcher that only looks for the segment
+  // answers the document request with JSON and the page never renders. Requiring /api/
+  // (or the direct backend port) keeps it to the XHR.
+  const routeDashboard = (page: any, status: number, body: unknown) =>
+    page.route(
+      (url: URL) => {
+        const p = url.pathname;
+        const isApiPath = p.includes('/api/') && p.includes('admin/dashboard');
+        const isDirectBackend = (url.hostname === '127.0.0.1' || url.hostname === 'localhost') &&
+          url.port === '8000' && p.includes('admin/dashboard');
+        return isApiPath || isDirectBackend;
+      },
+      (route: any) => {
+        if (route.request().method() !== 'GET') return route.continue();
+        return route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
+      },
+    );
+
+  // Entered through the Admin panel menu: for a display flow reachability is part of
+  // the behaviour. The figures asserted are the fixture's own, so a card wired to the
+  // wrong field — or to a hard-coded number — fails instead of passing on layout.
+  test('should display the dashboard cards with the platform totals', { tag: [...ADMIN_DASHBOARD, '@outcome:display'] }, async ({ page }) => {
+    await routeDashboard(page, 200, mockDashboard);
+
+    await loginAndNavigate(page, 'admin', '/');
+
+    const adminPanel = page.getByRole('button', { name: 'Admin' });
+    await expect(adminPanel).toBeVisible({ timeout: 15_000 });
+    await adminPanel.click();
+    await page.getByRole('menuitem', { name: /Dashboard/i }).click();
+    await page.waitForURL(/\/admin\/dashboard/, { timeout: 15_000 });
+
+    await expect(page.getByRole('heading', { name: /Panel de Administración/i })).toBeVisible({ timeout: 15_000 });
+
+    // Each card is one div holding a value <p> and a label <p> (dashboard/page.tsx:101-104),
+    // so its own text reads "128Usuarios" — filtering divs by hasText:/^Usuarios$/ matches
+    // nothing. Filter by a div that CONTAINS the exact label and take the innermost.
+    const card = (label: string) =>
+      page.locator('div').filter({ has: page.getByText(label, { exact: true }) }).last();
+    await expect(page.getByText('Usuarios', { exact: true })).toBeVisible({ timeout: 10_000 });
+    await expect(card('Usuarios')).toContainText('128');
+    await expect(card('Pendientes de aprobación')).toContainText('3');
+    await expect(card('Adoptados')).toContainText('46');
+  });
+
+  // Fails if a dashboard outage renders as zeroes instead of as an outage. The page
+  // swallows the request error (dashboard/page.tsx:38-40) and the whole body — cards
+  // AND quick-action tiles — sits inside the `metrics ? ... : ...` branch, so a failed
+  // load must show the error copy and no figures at all. An admin reading 0 users
+  // would conclude the platform emptied out rather than that the endpoint is down.
+  test('says the metrics could not be loaded when the dashboard API fails', { tag: [...ADMIN_DASHBOARD, '@outcome:failure'] }, async ({ page }) => {
+    // quality: allow-no-interaction (failure render on load of a read-only panel —
+    // the error state IS the behaviour, and there is nothing to click first)
+    await routeDashboard(page, 500, {});
+
+    await loginAndNavigate(page, 'admin', '/admin/dashboard');
+
+    await expect(page.getByRole('heading', { name: /Panel de Administración/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('No se pudieron cargar las métricas.')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText('Usuarios', { exact: true })).not.toBeVisible();
+    await expect(page.getByText('Donaciones pagadas', { exact: true })).not.toBeVisible();
+  });
+
+  // Fails if a metrics outage renders as zeroes instead of as an outage. The page
+  // swallows the request error (metrics/page.tsx:33-35) and only the null-metrics
+  // branch distinguishes "nothing came back" from "everything is at 0" — an admin
+  // reading 0 donations would think the platform stopped, not the endpoint.
+  test('says the metrics could not be loaded when the API fails', { tag: [...ADMIN_METRICS, '@outcome:failure'] }, async ({ page }) => {
+    // quality: allow-no-interaction (failure render on load, same read-only page as the
+    // display spec above: there is nothing to click before the error state appears)
+    await page.route(
+      (url) => {
+        const p = url.pathname;
+        const isApiPath = p.includes('/api/') && p.includes('admin/metrics');
+        const isDirectBackend = (url.hostname === '127.0.0.1' || url.hostname === 'localhost') &&
+          url.port === '8000' &&
+          p.includes('admin/metrics');
+        return isApiPath || isDirectBackend;
+      },
+      (route: any) => {
+        if (route.request().method() !== 'GET') return route.continue();
+        return route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({}) });
+      },
+    );
+
+    await loginAndNavigate(page, 'admin', '/admin/metrics');
+
+    // metrics.loadError, rendered by the null-metrics branch at metrics/page.tsx:87.
+    await expect(page.getByText('No se pudieron cargar las métricas.')).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole('main')).not.toContainText(/\$[\d.,]+/);
+  });
+
   test('should display payments audit table', { tag: [...ADMIN_PAYMENTS, '@outcome:display'] }, async ({ page }) => {
     // quality: allow-no-interaction (read-only audit table: payments are recorded by the checkout flows and are not mutable from this view, so listing them is the whole behaviour; loginAndNavigate seeds the session by cookie rather than filling a login form)
     await page.route('**/payments/**', (route: any) =>
@@ -248,7 +356,7 @@ test.describe('Admin Profile — Authenticated', () => {
     admin_stats: { total_users: 42, total_shelters: 8, total_animals: 120, pending_verifications: 3 },
   };
 
-  test('should display admin role section and NOT adopter cards', { tag: [...ADMIN_PROFILE] }, async ({ page }) => {
+  test('should display admin role section and NOT adopter cards', { tag: [...ADMIN_PROFILE, '@outcome:display'] }, async ({ page }) => {
     await page.route('**/user/profile/**', (route: any) => {
       if (route.request().method() === 'GET') {
         return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAdminProfile) });
@@ -267,7 +375,12 @@ test.describe('Admin Profile — Authenticated', () => {
     await expect(page.getByRole('main').getByText(/Favoritos/i)).not.toBeVisible();
   });
 
-  test('should display moderation-queue widget with pending count', { tag: [...ADMIN_PROFILE] }, async ({ page }) => {
+  // Reached through the account menu rather than by deep link: for a display flow
+  // getting there IS part of the behaviour, and a profile whose entry point vanished
+  // from the header is broken even if /my-profile still renders. The count asserted
+  // is the fixture's own pending_verifications (3), so a widget that hard-codes a
+  // number or drops the binding fails instead of passing on layout alone.
+  test('should display moderation-queue widget with pending count', { tag: [...ADMIN_PROFILE, '@outcome:display'] }, async ({ page }) => {
     await page.route('**/user/profile/**', (route: any) => {
       if (route.request().method() === 'GET') {
         return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAdminProfile) });
@@ -275,8 +388,14 @@ test.describe('Admin Profile — Authenticated', () => {
       return route.continue();
     });
 
-    await loginAndNavigate(page, 'admin', '/my-profile');
+    await loginAndNavigate(page, 'admin', '/');
 
+    const accountButton = page.getByRole('button', { name: /Abrir menú de cuenta/i });
+    await expect(accountButton).toBeVisible({ timeout: 15_000 });
+    await accountButton.click();
+    await page.getByRole('menuitem', { name: /Mi Perfil/i }).click();
+
+    await expect(page).toHaveURL(/\/my-profile/, { timeout: 10_000 });
     await expect(page.getByText(/3 refugios por verificar/i)).toBeVisible({ timeout: 10_000 });
   });
 });

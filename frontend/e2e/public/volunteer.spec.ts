@@ -98,6 +98,37 @@ test.describe('Volunteer Application', () => {
     await expect(page.getByText(/Application submitted successfully|enviada|éxito/i)).toBeVisible({ timeout: 10_000 });
   });
 
+  // Fails if a 500 leaves the success path showing — the volunteer would believe
+  // their application was filed when nothing was stored, and never re-apply.
+  test('shows the submit error when the volunteer API fails', { tag: [...VOLUNTEER_APPLY, '@outcome:failure'] }, async ({ page }) => {
+    await setupVolunteerMocks(page);
+    // Body carries neither `message` nor `detail`, so the page falls back to its own
+    // copy (apply/[positionId]/page.tsx:156) instead of echoing whatever the mock sent —
+    // that keeps the assertion on the app's behaviour, not on this fixture.
+    await page.route('**/volunteer-applications/**', (route: any) =>
+      route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({}) }),
+    );
+
+    const positionsLoaded = page.waitForResponse((res: any) => res.url().includes('volunteer-positions'));
+    await loginAndNavigate(page, 'adopter', '/work-with-us/apply/1');
+    await positionsLoaded;
+
+    await expect(page.getByLabel(/Nombre/i).first()).toBeVisible({ timeout: 15_000 });
+    await fillVolunteerForm(page);
+    await page.getByLabel(/voluntario/i).fill('Me encanta ayudar a los animales y quiero contribuir con mi tiempo y esfuerzo.');
+
+    const termsCheckbox = page.getByRole('checkbox');
+    if (await termsCheckbox.isVisible({ timeout: 2_000 }).catch(() => false)) {
+      await termsCheckbox.check();
+    }
+
+    await page.getByRole('button', { name: /Enviar|Submit/i }).click();
+
+    // workWithUs.submitError, rendered by the error container at page.tsx:236.
+    await expect(page.getByText('Error al enviar la postulación. Intenta de nuevo.')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/Application submitted successfully/i)).not.toBeVisible();
+  });
+
   test('should show validation error for short motivation', { tag: [...VOLUNTEER_APPLY, '@outcome:error'] }, async ({ page }) => {
     await setupVolunteerMocks(page);
     await page.route('**/volunteer-applications/**', (route: any) =>

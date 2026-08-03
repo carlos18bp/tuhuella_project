@@ -15,8 +15,9 @@ jest.mock('swiper/css/pagination', () => {});
 import { useAdoptionStore } from '@/lib/stores/adoptionStore';
 
 import MisSolicitudesPage from '../page';
+import type { AdoptionApplication } from '@/lib/types';
 
-const makeApp = (overrides = {}) => ({
+const makeApp = (overrides: Partial<AdoptionApplication> = {}): AdoptionApplication => ({
   id: 1,
   animal: 1,
   animal_name: 'Luna',
