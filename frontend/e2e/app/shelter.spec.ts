@@ -281,7 +281,7 @@ test.describe('Shelter Panel — Authenticated', () => {
   });
 
   test('should display shelter campaigns with progress', { tag: [...SHELTER_PANEL_CAMPAIGNS, '@outcome:display'] }, async ({ page }) => {
-    // quality: allow-no-interaction (authenticated display test: loginAndNavigate is API-based by design; content is asserted with concrete values)
+    // quality: allow-no-interaction (read-only list render: this spec asserts the two mocked campaigns are listed; creating and editing a campaign are separate flows with their own specs, and loginAndNavigate seeds the session by cookie rather than filling a login form, so there is no interactable step in scope)
     await page.route('**/api/campaigns/**', (route: any) =>
       route.fulfill({
         status: 200,

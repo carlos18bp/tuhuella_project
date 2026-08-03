@@ -80,11 +80,12 @@ test.describe('Platform Support', () => {
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   });
 
-  test('should redirect unauthenticated user from platform checkout', { tag: [...DONATION_PLATFORM_CHECKOUT] }, async ({ page }) => {
-    await page.goto('/checkout/platform');
-    await waitForPageLoad(page);
-    await expect(page).toHaveURL(/\/sign-in/);
-  });
+  // The platform-checkout auth guard is NOT tested here. It lived in this file as a
+  // byte-identical twin of e2e/public/platform-support.spec.ts 'redirects unauthenticated
+  // user from platform checkout' — the suite's only duplicate_coverage finding. The copy
+  // there is the one kept: its describe is named for the flow it owns
+  // ('Platform Donation Checkout @flow:donation-platform-checkout') and also holds the
+  // authenticated display and submit cases, so the guard sits with its siblings.
 });
 
 test.describe.serial('Checkout Flows — Authenticated', () => {

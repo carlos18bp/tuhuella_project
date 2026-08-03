@@ -140,7 +140,7 @@ test.describe('Blog — Admin', () => {
   });
 
   test('should display admin blog list for staff users', { tag: [...BLOG_ADMIN_LIST, '@outcome:display'] }, async ({ page }) => {
-    // quality: allow-no-interaction (authenticated display test: loginAndNavigate is API-based by design; content is asserted with concrete values)
+    // quality: allow-no-interaction (read-only index render: the two actions this page exposes are asserted as links here and exercised by their own specs — 'creates a new blog post…' below and the calendar spec — while loginAndNavigate seeds the session by cookie rather than filling a login form)
     await loginAndNavigate(page, 'admin', '/admin/blog');
     await waitForPageLoad(page);
 
@@ -150,7 +150,7 @@ test.describe('Blog — Admin', () => {
   });
 
   test('should display admin blog create page', { tag: [...BLOG_ADMIN_CREATE, '@outcome:display'] }, async ({ page }) => {
-    // quality: allow-no-interaction (authenticated display render: loginAndNavigate is API-based by design; form structure asserted)
+    // quality: allow-no-interaction (render check of the EMPTY create form before any input, which is the point: filling and submitting it is covered by 'creates a new blog post and redirects to its edit page' below; loginAndNavigate seeds the session by cookie, not by filling a login form)
     await loginAndNavigate(page, 'admin', '/admin/blog/crear');
     await waitForPageLoad(page);
 

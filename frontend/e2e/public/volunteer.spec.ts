@@ -55,7 +55,7 @@ test.describe('Volunteer Application', () => {
   });
 
   test('should display volunteer application form when authenticated', { tag: [...VOLUNTEER_APPLY, '@outcome:display'] }, async ({ page }) => {
-    // quality: allow-no-interaction (authenticated display render: loginAndNavigate is API-based by design; form fields asserted)
+    // quality: allow-no-interaction (render check of the EMPTY application form before any input: it asserts the seven fields exist, while filling and submitting them is covered by 'should submit volunteer application successfully' below; loginAndNavigate seeds the session by cookie, not by filling a login form)
     await setupVolunteerMocks(page);
     const positionsLoaded = page.waitForResponse((res: any) => res.url().includes('volunteer-positions'));
     await loginAndNavigate(page, 'adopter', '/work-with-us/apply/1');

@@ -4,7 +4,7 @@ import { HOME_LOADS } from '../helpers/flow-tags';
 
 test.describe('Home — Loads', () => {
   test('renders the hero with badge, headline and primary CTA', { tag: [...HOME_LOADS, '@outcome:display'] }, async ({ page }) => {
-    // quality: allow-no-interaction (authenticated display test: loginAndNavigate is API-based by design; content is asserted with concrete values)
+    // quality: allow-no-interaction (home is the app entry point: there is no prior page to navigate from, and the hero is render-only chrome — the CTA's href is asserted rather than followed, deliberately, so this stays a render check and the click path stays owned by navigation.spec.ts)
     await page.goto('/');
     await waitForPageLoad(page);
 
