@@ -183,8 +183,14 @@ export const mockShelterDonations = [
   },
 ];
 
+// `owner_email` is NOT decoration: the web-manager shelter detail info tab reads
+// `shelter?.owner_email ?? '—'` (app/[locale]/web-manager/shelters/[id]/page.tsx:96)
+// and the API really does serialize it (backend serializers/shelter_list.py:7,
+// views/admin_views.py:83, and the `Shelter` type at lib/types.ts:78 declares it
+// required). Without the field the info panel renders the em-dash fallback, so any
+// assertion about the contact data would be asserting the fallback — a tautology.
 export const mockShelterData = [
-  { id: 1, name: 'Refugio E2E', legal_name: 'Refugio E2E SAS', description: 'Test shelter', city: 'Bogotá', address: 'Calle 123', phone: '+57 300 000 0000', email: 'shelter@test.com', website: '', verification_status: 'verified', owner: 1 },
+  { id: 1, name: 'Refugio E2E', legal_name: 'Refugio E2E SAS', description: 'Test shelter', city: 'Bogotá', address: 'Calle 123', phone: '+57 300 000 0000', email: 'shelter@test.com', owner_email: 'owner-e2e@example.com', website: '', verification_status: 'verified', owner: 1 },
 ];
 
 // ── Shelter Dashboard Metrics (ShelterDashboardPage) ──

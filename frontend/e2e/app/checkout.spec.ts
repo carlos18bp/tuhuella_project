@@ -1,6 +1,7 @@
 import { test, expect } from '../test-with-coverage';
 import { waitForPageLoad, loginAndNavigate } from '../fixtures';
 import { DONATION_CHECKOUT, SPONSORSHIP_CHECKOUT, PAYMENT_CONFIRMATION, DONATION_CHECKOUT_SUBMIT, SPONSORSHIP_CHECKOUT_SUBMIT, PLATFORM_SUPPORT_INFO, DONATION_PLATFORM_CHECKOUT } from '../helpers/flow-tags';
+import { paceRequestsUnderRateLimit } from '../helpers/pacing';
 
 test.describe('Checkout Flows', () => {
   test('should redirect unauthenticated user from donation checkout', { tag: [...DONATION_CHECKOUT] }, async ({ page }) => {
@@ -21,6 +22,11 @@ test.describe('Checkout Flows', () => {
   });
 
   test('should display payment confirmation page', { tag: [...PAYMENT_CONFIRMATION] }, async ({ page }) => {
+    test.slow(); // paced requests trade wall time for a deterministic transition
+    // Registered before loginAndNavigate so its auth mocks, which come after, win
+    // for their own paths (Playwright matches route handlers in reverse order).
+    await paceRequestsUnderRateLimit(page);
+
     // The whole /checkout prefix is gated server-side by proxy.ts PROTECTED_PREFIXES:
     // without an access_token cookie the confirmation URL 302s to /sign-in before the
     // page ever renders (that is exactly what the first test in this file asserts).
@@ -32,12 +38,41 @@ test.describe('Checkout Flows', () => {
     // regression where the confirmation page renders blank/placeholder copy for a
     // real payment status instead of the actual success message.
     await expect(page.getByRole('heading', { name: 'Donación registrada' })).toBeVisible();
+
+    // The secondary CTA is type-dependent: confirmation/page.tsx:66-71 picks
+    // ROUTES.MY_SPONSORSHIPS vs ROUTES.MY_DONATIONS off `isSponsorship`. Invert that
+    // ternary and a donor lands on an empty sponsorships page — following the link is
+    // the only way to see it, since both labels render as a perfectly valid button.
+    await page.getByRole('link', { name: 'Ver mis donaciones' }).click();
+    await expect(page).toHaveURL(/\/my-donations$/);
+  });
+
+  test('should offer a retry when a donation payment is declined', { tag: [...PAYMENT_CONFIRMATION, '@outcome:failure'] }, async ({ page }) => {
+    test.slow(); // paced requests trade wall time for a deterministic transition
+    await paceRequestsUnderRateLimit(page);
+
+    // 'declined' is one of confirmation/page.tsx:14 FAILURE_STATUSES. Everything NOT in
+    // that set and not 'placeholder' falls through to the success branch, so a gateway
+    // status rename (declined → payment_declined) would tell a user whose card bounced
+    // "Tu donación ha sido registrada exitosamente" (page.tsx:50). Nothing tested that.
+    await loginAndNavigate(page, 'adopter', '/checkout/confirmation?type=donation&status=declined');
+    await waitForPageLoad(page);
+
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Tu donación no pudo procesarse');
+
+    // The primary CTA must send a failed donor back to the donation checkout, not to
+    // the animals listing it points at on success (page.tsx:60-65).
+    await page.getByRole('link', { name: 'Intentar de nuevo' }).click();
+    await expect(page).toHaveURL(/\/checkout\/donation$/);
   });
 });
 
 test.describe('Platform Support', () => {
   test('should display platform support info page', { tag: [...PLATFORM_SUPPORT_INFO] }, async ({ page }) => {
-    // quality: allow-no-interaction (authenticated display test: loginAndNavigate is API-based by design; content is asserted with concrete values)
+    // quality: allow-no-interaction (public-route guard, not a display test: it exists
+    // only to prove /apoya-la-plataforma is NOT behind proxy.ts PROTECTED_PREFIXES, and
+    // the redirect it guards against happens before any interaction is possible. The
+    // UI-entry + CTA coverage of this flow lives in e2e/public/platform-support.spec.ts.)
     await page.goto('/apoya-la-plataforma');
     await waitForPageLoad(page);
     // Public page — should not redirect to sign-in
@@ -54,6 +89,15 @@ test.describe('Platform Support', () => {
 
 test.describe.serial('Checkout Flows — Authenticated', () => {
   test.beforeEach(async ({ page }) => {
+    // Every test here loads '/' and then a /checkout page — ~80 requests with Next's
+    // link prefetch, well over the deployed nginx zone (10 r/s, burst 20). Measured
+    // against staging without this: 9 responses came back 429, the sponsorship page's
+    // client chunk was one of them, so its useEffect never ran, /api/sponsorship-amounts/
+    // was never even requested and the amount buttons never rendered. Registered first
+    // so the endpoint mocks below still win for their own paths (reverse match order).
+    test.slow();
+    await paceRequestsUnderRateLimit(page);
+
     // Mock FAQs API to prevent pending requests
     await page.route('**/api/faqs/**', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
@@ -148,7 +192,7 @@ test.describe.serial('Checkout Flows — Authenticated', () => {
     await expect(page).toHaveURL(/confirmation/);
   });
 
-  test('should submit sponsorship checkout with Nequi', { tag: [...SPONSORSHIP_CHECKOUT_SUBMIT] }, async ({ page }) => {
+  test('should submit sponsorship checkout with Nequi', { tag: [...SPONSORSHIP_CHECKOUT_SUBMIT, ...SPONSORSHIP_CHECKOUT] }, async ({ page }) => {
     // Mock sponsorship amounts API
     await page.route('**/api/sponsorship-amounts/**', (route) =>
       route.fulfill({
@@ -183,6 +227,14 @@ test.describe.serial('Checkout Flows — Authenticated', () => {
 
     // Select Nequi payment method via label click (avoids detachment from late re-renders)
     await page.getByText(/Nequi/i).click();
+
+    // The submit label is the only place the amount and the frequency meet before the
+    // charge: page.tsx:124 renders `Apadrinar — $${Number(amount||0).toLocaleString()}${
+    // frequency === 'monthly' ? '/mes' : ''}`. Drop `amount` from that template, or
+    // invert the frequency ternary, and the form still submits — it just charges the
+    // wrong thing. Nothing asserted the composed label until now. (The separator is a
+    // dot, not a comma: playwright.config.ts:42 pins the browser locale to 'es'.)
+    await expect(page.getByRole('button', { name: /^Apadrinar — / })).toHaveText('Apadrinar — $15.000/mes');
 
     // Submit the form
     await page.getByRole('button', { name: /Apadrinar/i }).click();

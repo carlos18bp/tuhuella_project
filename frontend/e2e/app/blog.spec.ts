@@ -1,5 +1,6 @@
 import { test, expect } from '../test-with-coverage';
 import { waitForPageLoad, loginAndNavigate } from '../fixtures';
+import { paceRequestsUnderRateLimit } from '../helpers/pacing';
 import {
   BLOG_BROWSE,
   BLOG_DETAIL,
@@ -288,22 +289,43 @@ test.describe('Blog — Admin', () => {
     await expect(page.getByText('Request failed with status code 400')).toBeVisible({ timeout: 10_000 });
   });
 
-  test('should display admin blog calendar page', { tag: [...BLOG_ADMIN_CALENDAR] }, async ({ page }) => {
-    // Calendar endpoint returns an array, not paginated — override the beforeEach catch-all
-    await page.route(/\/api\/blog\/admin\/calendar/, (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
-    );
+  // Pages forward to December and one click past it, so the year-rollover branch runs on
+  // whatever date the suite happens to execute. Catches nextMonth() losing its year bump
+  // (calendario/page.tsx:77-80): drop `setYear(y => y + 1)` and every December user paging
+  // forward silently refetches the SAME year's January — a one-year-off query that the
+  // month heading alone would still render plausibly.
+  test('should display admin blog calendar page', { tag: [...BLOG_ADMIN_CALENDAR, '@outcome:success'] }, async ({ page }) => {
+    test.slow(); // paced requests trade wall time for a deterministic transition
+    // Registered before this test's own mocks (Playwright matches route handlers in reverse
+    // registration order). It shadows the describe's blog-admin catch-all, which the calendar
+    // mock below replaces anyway, and loginAndNavigate re-registers the auth mocks after it.
+    await paceRequestsUnderRateLimit(page);
 
-    await loginAndNavigate(page, 'admin', '/admin/blog/calendario');
+    let lastCalendarUrl = '';
+    // Calendar endpoint returns an array, not paginated — override the beforeEach catch-all
+    await page.route(/\/api\/blog\/admin\/calendar/, (route) => {
+      lastCalendarUrl = route.request().url();
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+    });
+
+    // The locale prefix is required against a deployed target: nginx hands bare /admin/ to
+    // Django (it answers 302 → /admin/login/), so the Next admin panel is only reachable at
+    // /<locale>/admin/*. localePrefix is 'always' (i18n/routing.ts), so this is the canonical
+    // URL locally too.
+    await loginAndNavigate(page, 'admin', '/es/admin/blog/calendario');
     await waitForPageLoad(page);
 
-    await expect(page.getByRole('heading', { name: /Calendario del Blog/i })).toBeVisible();
-    // Calendar navigation buttons
-    await expect(page.getByRole('button', { name: /Anterior/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Siguiente/i })).toBeVisible();
-    // Day headers
-    await expect(page.getByText('Lun', { exact: true })).toBeVisible();
-    await expect(page.getByText('Vie', { exact: true })).toBeVisible();
+    // Derived from the same clock the page mounts with (page :54-58); a hardcoded month would
+    // rot on the first of every month.
+    const now = new Date();
+    const clicksToJanuary = 11 - now.getMonth() + 1;
+
+    await expect(page.getByRole('heading', { name: 'Calendario del Blog' })).toBeVisible({ timeout: 15_000 });
+    const nextButton = page.getByRole('button', { name: /Siguiente/i });
+    for (let i = 0; i < clicksToJanuary; i += 1) await nextButton.click();
+
+    await expect(page.getByRole('heading', { name: `enero de ${now.getFullYear() + 1}` })).toBeVisible({ timeout: 10_000 });
+    await expect.poll(() => lastCalendarUrl, { timeout: 10_000 }).toContain(`${now.getFullYear() + 1}-01-01`);
   });
 
   test('should delete a blog post with confirmation dialog', { tag: [...BLOG_ADMIN_DELETE] }, async ({ page }) => {

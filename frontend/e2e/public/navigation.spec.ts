@@ -12,6 +12,7 @@ import {
   NOTIFICATION_BELL,
   NOTIFICATION_MARK_ALL_READ,
 } from '../helpers/flow-tags';
+import { paceRequestsUnderRateLimit } from '../helpers/pacing';
 
 test.describe('Navigation', () => {
   test('should render home page with hero', { tag: [...HOME_LOADS] }, async ({ page }) => {
@@ -78,7 +79,10 @@ test.describe('Navigation', () => {
   });
 
   test('should have working footer', { tag: [...NAVIGATION_FOOTER] }, async ({ page }) => {
-    // quality: allow-no-interaction (authenticated display test: loginAndNavigate is API-based by design; content is asserted with concrete values)
+    // quality: allow-no-interaction (unauthenticated structural check of the site-wide
+    // footer: the footer is a static link block with nothing to act on, so the only
+    // observable behaviour is that it renders its links at all. There is no
+    // loginAndNavigate here — this test never authenticates.)
     await page.goto('/');
     await waitForPageLoad(page);
 
@@ -93,23 +97,32 @@ test.describe('Navigation', () => {
   });
 
   test('should maintain navigation across Tu Huella pages', { tag: [...NAVIGATION_BETWEEN_PAGES, '@outcome:success'] }, async ({ page }) => {
-    await page.goto('/', { waitUntil: 'domcontentloaded' });
-    await expect(page).toHaveURL(/\/(es\/?)?$/);
+    test.slow(); // three real hops with full prefetch; pacing trades wall time for determinism
+    await paceRequestsUnderRateLimit(page);
 
-    await page.goto('/animals', { waitUntil: 'domcontentloaded' });
-    await expect(page).toHaveURL(/.*animals/);
+    await page.goto('/');
+    const header = page.locator('header');
 
-    await page.goto('/shelters', { waitUntil: 'domcontentloaded' });
-    await expect(page).toHaveURL(/.*shelters/);
+    // Every header href is relative and next-intl rewrites it per route
+    // (Header.tsx:203-215), so the locale prefix can break only once you are ALREADY
+    // on an inner page — the regression shape is /es/animals/shelters. Chaining the
+    // hops through the header is what exposes it; the six page.goto() calls this
+    // replaces re-entered from scratch each time and asserted the path they had just
+    // been handed, so they could not fail and exercised no header code at all.
+    await header.getByRole('link', { name: 'Animales' }).click({ timeout: 10_000 });
+    await page.waitForURL(/\/es\/animals$/, { timeout: 20_000 });
+    await expect(page).toHaveURL(/\/es\/animals$/);
+    await expect(page.locator('h1')).toHaveText('Animales en adopción');
 
-    await page.goto('/campaigns', { waitUntil: 'domcontentloaded' });
-    await expect(page).toHaveURL(/.*campaigns/);
+    await header.getByRole('link', { name: 'Refugios' }).click({ timeout: 10_000 });
+    await page.waitForURL(/\/es\/shelters$/, { timeout: 20_000 });
+    await expect(page).toHaveURL(/\/es\/shelters$/);
+    await expect(page.locator('h1')).toHaveText('Refugios verificados');
 
-    await page.goto('/sign-in', { waitUntil: 'domcontentloaded' });
-    await expect(page).toHaveURL(/.*sign-in/);
-
-    await page.goto('/', { waitUntil: 'domcontentloaded' });
-    await expect(page).toHaveURL(/\/(es\/?)?$/);
+    await header.getByRole('link', { name: 'Campañas' }).click({ timeout: 10_000 });
+    await page.waitForURL(/\/es\/campaigns$/, { timeout: 20_000 });
+    await expect(page).toHaveURL(/\/es\/campaigns$/);
+    await expect(page.locator('h1')).toHaveText('Campañas activas');
   });
 
   test('should switch locale from Spanish to English', { tag: [...LOCALE_SWITCH] }, async ({ page }) => {

@@ -21,6 +21,7 @@ import {
   mockFavorites,
   mockFavoritesBella,
 } from '../helpers/mock-data';
+import { paceRequestsUnderRateLimit } from '../helpers/pacing';
 
 const mockAnimalForFavoriteToggle = {
   id: 1,
@@ -155,19 +156,44 @@ test.describe('Adopter Pages — Public', () => {
 
 test.describe.serial('Adopter Pages — Authenticated', () => {
   test('should display notification preferences page', { tag: [...NOTIFICATION_PREFERENCES] }, async ({ page }) => {
+    // Bug caught: handleToggle sending the CURRENT value instead of its negation
+    // (my-profile/notifications/page.tsx:51 `updatePreference(pref.id, !pref.enabled)`).
+    // Drop the `!` and every toggle becomes a no-op that still animates — the PATCH
+    // payload is the only witness, no visibility assertion can see it.
+    const seeded = [
+      { id: 7, event_key: 'adoption_submitted', channel: 'email', enabled: true },
+      { id: 8, event_key: 'adoption_submitted', channel: 'in_app', enabled: true },
+    ];
+    let patched: unknown[] | null = null;
+
+    test.slow();
+    await paceRequestsUnderRateLimit(page);
+    // The page seeds itself with POST /notifications/preferences/init/ and the store
+    // swallows every error, so an unmocked init leaves getPref() undefined and the
+    // click is a silent no-op.
+    await page.route('**/notifications/preferences/init/**', (route: any) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ preferences: seeded }),
+      }),
+    );
+    await page.route('**/notifications/preferences/update/**', (route: any) => {
+      patched = route.request().postDataJSON();
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ preferences: [{ ...seeded[0], enabled: false }, seeded[1]] }),
+      });
+    });
+
     await loginAndNavigate(page, 'adopter', '/my-profile/notifications');
 
-    // Verify the page loaded with the back link
-    await expect(page.getByRole('link', { name: /Volver a mi perfil/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Preferencias de notificación/i })).toBeVisible({ timeout: 15_000 });
 
-    // Verify heading
-    await expect(page.getByRole('heading', { name: /Preferencias de notificación/i })).toBeVisible();
+    await page.getByTestId('toggle-adoption_submitted-email').click();
 
-    // Verify toggle switches are visible (target a specific toggle by testid)
-    await expect(page.getByTestId('toggle-adoption_submitted-email')).toBeVisible({ timeout: 10_000 });
-
-    // Verify at least one event group heading is visible
-    await expect(page.getByRole('heading', { name: /Adopción/i })).toBeVisible();
+    await expect.poll(() => patched).toMatchObject([{ id: 7, enabled: false }]);
   });
 });
 
@@ -175,7 +201,20 @@ test.describe.serial('Adopter Pages — Authenticated', () => {
 test.describe('Adopter Profile — Authenticated', () => {
   test.describe.configure({ mode: 'serial' });
 
-  test('should display profile dashboard with stats and activity', { tag: [...ADOPTER_PROFILE, '@outcome:display'] }, async ({ page }) => {
+  test('should display profile dashboard with stats and activity', { tag: [...ADOPTER_PROFILE, ...PROFILE_ACTIVITY_FEED, '@outcome:display'] }, async ({ page }) => {
+    // Bug caught: the account-menu entry to /my-profile breaking (Header.tsx:106), or the
+    // dashboard wiring the stats/activity endpoints but rendering nothing from them. The
+    // previous `isVisible().catch(() => false)` boolean swallowed a locator error as a
+    // plain false, so a blank dashboard read the same as a populated one.
+    //
+    // Also carries PROFILE_ACTIVITY_FEED: this test IS that flow's display case. It reaches
+    // /my-profile through the UI and asserts the timeline's rendered content, while the
+    // flow's own spec ('adopter sees the recent-activity timeline on their profile', below)
+    // deep-links there and so cannot buy credit. The timeline has no interactable element in
+    // its populated branch — my-profile/page.tsx:102-121 renders divs and <p>s only; the one
+    // Link lives in the events.length === 0 branch (:34), a different state.
+    test.slow();
+    await paceRequestsUnderRateLimit(page);
     await page.route('**/user/profile-stats/**', (route: any) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockProfileStats) }),
     );
@@ -183,21 +222,15 @@ test.describe('Adopter Profile — Authenticated', () => {
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockActivity) }),
     );
 
-    await loginAndNavigate(page, 'adopter', '/my-profile');
+    await loginAndNavigate(page, 'adopter', '/');
+    await page.getByRole('button', { name: /Abrir menú de cuenta/i }).click();
+    await page.getByRole('menuitem', { name: 'Mi Perfil' }).click();
 
-    // Verify profile heading or user name is visible
-    const profileName = page.getByText(/Carlos/i);
-    const profileHeading = page.getByRole('heading', { name: /perfil|profile/i });
-    await expect(profileName.or(profileHeading)).toBeVisible({ timeout: 15_000 });
-
-    // Verify stats are rendered (donation count or amount)
-    const donationStat = page.getByText(/150.000|150,000|3.*donac/i);
-    const hasDonationStat = await donationStat.isVisible({ timeout: 5_000 }).catch(() => false);
-    expect(hasDonationStat).toBe(true);
-
-    // Verify activity timeline has entries
-    const activityEntry = page.getByText(/Luna|Refugio Amor/i).first();
-    await expect(activityEntry).toBeVisible({ timeout: 5_000 });
+    await expect(page).toHaveURL(/\/my-profile$/);
+    // mockActivity[0] → profile.activityApplication = 'Aplicaste para adoptar a {name}'
+    await expect(page.getByText('Aplicaste para adoptar a Luna')).toBeVisible({ timeout: 15_000 });
+    // mockProfileStats.donations → profile.donationsCount = '${amount} donados en {count} donaciones'
+    await expect(page.getByText('$150000 donados en 3 donaciones')).toBeVisible();
   });
 
   test('should display edit profile form and save changes', { tag: [...PROFILE_EDIT] }, async ({ page }) => {
@@ -248,6 +281,14 @@ test.describe('Favorites — Authenticated', () => {
   test.describe.configure({ mode: 'serial' });
 
   test('should display favorites list with animal cards', { tag: [...FAVORITE_LIST, '@outcome:display'] }, async ({ page }) => {
+    // Bug caught: the species filter predicate inverting or being dropped
+    // (favorites/page.tsx:404 `result.filter((f) => f.animal_species === speciesFilter)`).
+    // A cat-lover filtering to Perros and still seeing cats is invisible to any
+    // visibility assertion.
+    // Measured: run back-to-back with its siblings against staging this test loses its
+    // fixture to nginx 429s and reads as "no data"; paced, it is deterministic.
+    test.slow();
+    await paceRequestsUnderRateLimit(page);
     await mockFavoritesRoute(page);
     await loginAndNavigate(page, 'adopter', '/favorites');
 
@@ -255,6 +296,13 @@ test.describe('Favorites — Authenticated', () => {
     await expect(page.getByText('Luna')).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText('Milo')).toBeVisible();
     await expect(page.getByText('Rocky')).toBeVisible();
+
+    // Filter to dogs: mockFavorites is Luna (dog), Milo (cat), Rocky (dog)
+    await page.getByRole('main').getByRole('button', { name: 'Perros' }).click();
+
+    await expect(page.getByText('Luna')).toBeVisible();
+    await expect(page.getByText('Milo')).toHaveCount(0);
+    await expect(page.getByText(/^\d+ resultados$/)).toHaveText('2 resultados');
   });
 
   test('should compare favorited animals side-by-side', { tag: [...FAVORITES_COMPARE] }, async ({ page }) => {
@@ -439,27 +487,33 @@ test.describe('Favorite toggle — authenticated', () => {
 
 test.describe('Donation history — authenticated', () => {
   test('should display donation history when adopter has donations', { tag: [...DONATION_HISTORY, '@outcome:display'] }, async ({ page }) => {
-    const mockDonation = {
-      id: 1,
-      user: 1,
-      user_email: 'adopter-e2e@example.com',
-      destination: 'shelter' as const,
-      shelter: 1,
-      amount: '50000',
-      status: 'paid' as const,
-      shelter_name: 'Refugio Amor',
-      shelter_city: 'Bogotá',
-      campaign: null,
-      campaign_title: null,
-      paid_at: '2026-02-01T12:00:00Z',
-      created_at: '2026-02-01T12:00:00Z',
-    };
+    // Bug caught: my-donations/page.tsx:47-49 filters client-side on `status`. Drop the
+    // predicate and a failed charge shows up under "Pagada" — a money-facing wrong answer
+    // that a one-row fixture could never expose.
+    test.slow();
+    await paceRequestsUnderRateLimit(page);
+    const mockDonations = [
+      {
+        id: 1, user: 1, user_email: 'adopter-e2e@example.com',
+        destination: 'shelter' as const, shelter: 1, amount: '50000', status: 'paid' as const,
+        shelter_name: 'Refugio Amor', shelter_city: 'Bogotá',
+        campaign: null, campaign_title: null,
+        paid_at: '2026-02-01T12:00:00Z', created_at: '2026-02-01T12:00:00Z',
+      },
+      {
+        id: 2, user: 1, user_email: 'adopter-e2e@example.com',
+        destination: 'shelter' as const, shelter: 2, amount: '75000', status: 'failed' as const,
+        shelter_name: 'Huellas de Amor', shelter_city: 'Cali',
+        campaign: null, campaign_title: null,
+        paid_at: null, created_at: '2026-02-05T12:00:00Z',
+      },
+    ];
     await page.route('**/api/donations/**', (route: any) => {
       if (route.request().method() === 'GET') {
         return route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify([mockDonation]),
+          body: JSON.stringify(mockDonations),
         });
       }
       return route.continue();
@@ -469,32 +523,45 @@ test.describe('Donation history — authenticated', () => {
 
     await expect(page.getByRole('heading', { name: /Mis Donaciones/i })).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/Refugio Amor/i).first()).toBeVisible({ timeout: 10_000 });
+
+    await page.getByRole('main').getByRole('button', { name: 'Pagada' }).click();
+
+    // One row survives: each row carries exactly one 'Pagada el …' / 'Creada el …' line.
+    await expect(page.getByText(/^(Pagada|Creada) el /)).toHaveCount(1);
+    await expect(page.getByText('Huellas de Amor')).toHaveCount(0);
+    // Spanish locale groups with a dot: the paid row and the summary total both read $50.000.
+    await expect(page.getByText('$50.000', { exact: true })).toHaveCount(2);
+    await expect(page.getByText('$75.000', { exact: true })).toHaveCount(0);
   });
 });
 
 test.describe('Sponsorship history — authenticated', () => {
   test('should display sponsorship history when adopter has sponsorships', { tag: [...SPONSORSHIP_HISTORY, '@outcome:display'] }, async ({ page }) => {
-    const mockSponsorship = {
-      id: 1,
-      user: 1,
-      animal: 2,
-      animal_name: 'Milo',
-      animal_species: 'cat',
-      shelter_name: 'Patitas Felices',
-      shelter_city: 'Medellín',
-      thumbnail_url: null,
-      amount: '30000',
-      frequency: 'monthly' as const,
-      status: 'active' as const,
-      started_at: '2026-02-01T12:00:00Z',
-      created_at: '2026-02-01T12:00:00Z',
-    };
+    // Bug caught: my-sponsorships/page.tsx:46-48 filters client-side on `status`. Drop the
+    // predicate and a canceled sponsorship keeps showing under "Activo", so the adopter
+    // believes they are still funding an animal they are not.
+    test.slow();
+    await paceRequestsUnderRateLimit(page);
+    const mockSponsorships = [
+      {
+        id: 1, user: 1, animal: 2, animal_name: 'Milo', animal_species: 'cat',
+        shelter_name: 'Patitas Felices', shelter_city: 'Medellín', thumbnail_url: null,
+        amount: '30000', frequency: 'monthly' as const, status: 'active' as const,
+        started_at: '2026-02-01T12:00:00Z', created_at: '2026-02-01T12:00:00Z',
+      },
+      {
+        id: 2, user: 1, animal: 3, animal_name: 'Rocky', animal_species: 'dog',
+        shelter_name: 'Huellas de Amor', shelter_city: 'Cali', thumbnail_url: null,
+        amount: '45000', frequency: 'monthly' as const, status: 'canceled' as const,
+        started_at: '2026-01-05T12:00:00Z', created_at: '2026-01-05T12:00:00Z',
+      },
+    ];
     await page.route('**/api/sponsorships/**', (route: any) => {
       if (route.request().method() === 'GET') {
         return route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify([mockSponsorship]),
+          body: JSON.stringify(mockSponsorships),
         });
       }
       return route.continue();
@@ -504,6 +571,14 @@ test.describe('Sponsorship history — authenticated', () => {
 
     await expect(page.getByRole('heading', { name: /Mis Apadrinamientos/i })).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/Milo/i).first()).toBeVisible({ timeout: 10_000 });
+
+    await page.getByRole('main').getByRole('button', { name: 'Activo' }).click();
+
+    // Each surviving sponsorship card renders the animal name as its only h3.
+    await expect(page.getByRole('main').getByRole('heading', { level: 3 })).toHaveText('Milo');
+    await expect(page.getByText('Rocky')).toHaveCount(0);
+    // Spanish locale groups with a dot; the summary card reads '$30.000/mes', the row '$30.000'.
+    await expect(page.getByText('$30.000', { exact: true })).toHaveCount(1);
   });
 });
 
@@ -547,20 +622,43 @@ test.describe('Adoption Application History', () => {
     'should display clinical history page for an adoption application',
     { tag: [...ADOPTION_APPLICATION_HISTORY, '@outcome:display'] },
     async ({ page }) => {
+      // Bug caught: the detail → history link losing the id segment. It is the one path in
+      // my-applications/[id]/page.tsx (:96-97) concatenated by hand instead of through a
+      // ROUTES helper, even though ROUTES.MY_APPLICATION_HISTORY exists (constants.ts:72).
+      test.slow();
+      await paceRequestsUnderRateLimit(page);
       await page.route('**/api/adoptions/1/**', (route: any) =>
         route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({ id: 1, animal: 5, animal_name: 'Luna', status: 'approved' }),
+          body: JSON.stringify({
+            id: 1, animal: 5, animal_name: 'Luna', status: 'approved',
+            shelter_name: 'Patitas Felices', shelter_city: 'Bogotá',
+            created_at: '2026-01-10T00:00:00Z', events: [],
+          }),
         }),
       );
+      // One entry, not []: an empty list makes any row assertion vacuous.
       await page.route('**/api/animals/5/clinical-history/**', (route: any) =>
-        route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify([
+            {
+              id: 3, animal: 5, entry_type: 'vaccination', title: 'Refuerzo antirrábico',
+              body_es: 'Vacuna aplicada sin reacciones.', body_en: '',
+              occurred_at: '2026-02-14T09:00:00Z', created_at: '2026-02-14T09:00:00Z',
+            },
+          ]),
+        }),
       );
 
-      await loginAndNavigate(page, 'adopter', '/my-applications/1/history');
+      await loginAndNavigate(page, 'adopter', '/my-applications/1');
+      await page.getByRole('link', { name: /Ver historia clínica/i }).click();
 
+      await expect(page).toHaveURL(/\/my-applications\/1\/history$/);
       await expect(page.getByRole('heading', { name: /Historia clínica/i })).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByText('Refuerzo antirrábico')).toBeVisible();
     },
   );
 });

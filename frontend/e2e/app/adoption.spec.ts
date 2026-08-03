@@ -1,6 +1,7 @@
 import { test, expect } from '../test-with-coverage';
 import { waitForPageLoad, loginAndNavigate, fillAdoptionForm } from '../fixtures';
 import { ADOPTION_SUBMIT, ADOPTION_TRACK, ADOPTION_MANAGE, MY_APPLICATIONS_LIST, ADOPTION_FORM_WIZARD } from '../helpers/flow-tags';
+import { paceRequestsUnderRateLimit } from '../helpers/pacing';
 
 const mockAnimal = {
   id: 1,
@@ -116,20 +117,47 @@ test.describe.serial('Adoption Flows — Authenticated', () => {
     });
   });
 
-  test('should display my applications list or empty state', { tag: [...MY_APPLICATIONS_LIST, ...ADOPTION_TRACK, '@outcome:display'] }, async ({ page }) => {
-    await loginAndNavigate(page, 'adopter', '/my-applications');
+  test('should display my applications list or empty state', { tag: [...MY_APPLICATIONS_LIST, ...ADOPTION_TRACK, '@outcome:display', '@outcome:success'] }, async ({ page }) => {
+    // Two bugs at once: (a) the account-menu route to /my-applications breaking
+    // (Header.tsx:108), (b) the status filter not filtering — my-applications/page.tsx:42-45
+    // filters client-side, so dropping the predicate shows the full list under every chip
+    // while the chip still highlights as if it had filtered. The previous
+    // `hasEmpty || hasCards` boolean was true for literally any render (the Footer alone
+    // supplies an h3).
+    test.slow();
+    // Pacing FIRST: it calls route.continue() and Playwright matches handlers in reverse
+    // registration order, so anything registered after it wins for its own paths.
+    await paceRequestsUnderRateLimit(page);
+    await page.route('**/api/adoptions/**', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            id: 5, animal: 1, animal_name: 'Luna', animal_species: 'dog',
+            shelter_name: 'Patitas Felices', shelter_city: 'Bogotá', thumbnail_url: null,
+            status: 'interview', created_at: '2026-01-10T00:00:00Z', reviewed_at: null,
+          },
+          {
+            id: 6, animal: 2, animal_name: 'Milo', animal_species: 'cat',
+            shelter_name: 'Refugio Amor', shelter_city: 'Medellín', thumbnail_url: null,
+            status: 'approved', created_at: '2026-01-12T00:00:00Z', reviewed_at: null,
+          },
+        ]),
+      }),
+    );
 
-    // Verify heading is visible
-    await expect(page.getByRole('heading', { name: /Mis Solicitudes de Adopción/i })).toBeVisible();
+    await loginAndNavigate(page, 'adopter', '/');
+    await page.getByRole('button', { name: /Abrir menú de cuenta/i }).click();
+    await page.getByRole('menuitem', { name: 'Mis solicitudes' }).click();
 
-    // Either application cards or empty state should be visible
-    const emptyState = page.getByText(/No tienes solicitudes de adopción/i);
-    const applicationCard = page.getByRole('heading', { level: 3 }).first();
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Mis Solicitudes de Adopción');
 
-    const hasEmpty = await emptyState.isVisible({ timeout: 5_000 }).catch(() => false);
-    const hasCards = await applicationCard.isVisible({ timeout: 2_000 }).catch(() => false);
+    // The chips only render when counts.total > 0 (page.tsx:97), hence the two-row fixture.
+    await page.getByRole('main').getByRole('button', { name: /^Entrevista/ }).click();
 
-    expect(hasEmpty || hasCards).toBe(true);
+    await expect(page.getByRole('main').getByRole('heading', { level: 3 })).toHaveCount(1);
+    await expect(page.getByRole('main').getByRole('heading', { level: 3 })).toHaveText('Luna');
   });
 
   test('should load adoption form wizard and navigate through steps', { tag: [...ADOPTION_FORM_WIZARD] }, async ({ page }) => {

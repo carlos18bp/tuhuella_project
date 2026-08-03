@@ -6,6 +6,7 @@ import {
   SHELTER_APPLICATION_SUBMIT,
 } from '../helpers/flow-tags';
 import { mockPendingShelters } from '../helpers/mock-data';
+import { paceRequestsUnderRateLimit } from '../helpers/pacing';
 
 test.describe('Shelter Application', () => {
   test('redirects unauthenticated user to sign-in', { tag: [...SHELTER_APPLICATION_SUBMIT] }, async ({ page }) => {
@@ -72,15 +73,24 @@ test.describe('Shelter Application', () => {
   });
 
   test('shows status view when an application already exists', { tag: [...SHELTER_APPLICATION_STATUS, '@outcome:display'] }, async ({ page }) => {
+    // Bug caught: the reapply button not resetting the store. shelter-application/page.tsx
+    // :110-121 calls reset() + setStep(1) + setForm(EMPTY_FORM); break any of the three and
+    // a rejected applicant is permanently locked out of re-applying while the page still
+    // looks correct. 'rejected' is deliberately outside isPending (:60-62), so it falls
+    // through to the branch that actually carries a control.
+    // Measured: run back-to-back with its siblings against staging this test loses the
+    // status view to nginx 429s; paced, it is deterministic.
+    test.slow();
+    await paceRequestsUnderRateLimit(page);
     await page.route('**/api/shelter-applications/me/**', (route: any) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
           id: 1,
-          status: 'submitted',
+          status: 'rejected',
           shelter_name: 'Refugio Test',
-          rejection_reason: '',
+          rejection_reason: 'Faltan los documentos legales del representante.',
           document_urls: [],
         }),
       }),
@@ -88,7 +98,11 @@ test.describe('Shelter Application', () => {
 
     await loginAndNavigate(page, 'adopter', '/shelter-application');
     await expect(page.getByText(/Estado de tu postulación/i)).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText(/Enviada/i)).toBeVisible();
+    await expect(page.getByText('Faltan los documentos legales del representante.')).toBeVisible();
+
+    await page.getByRole('button', { name: 'Volver a postular' }).click();
+
+    await expect(page.getByText('Paso 1 de 4')).toBeVisible();
   });
 
   test('admin reviews and approves a pending shelter application', { tag: [...SHELTER_APPLICATION_REVIEW] }, async ({ page }) => {

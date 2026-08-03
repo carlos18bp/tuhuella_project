@@ -33,13 +33,43 @@ import {
   mockRejectedCampaignDetail,
   mockCampaignMessages,
 } from '../helpers/mock-data';
+import { paceRequestsUnderRateLimit } from '../helpers/pacing';
+
+// Field names mirror what ShelterCard.tsx actually reads (name, city, description,
+// is_verified, cover_image_url/logo_url) — mockShelterData carries `verification_status`
+// instead, which the card ignores, so a fixture built from it would render a nameless
+// card and make every assertion below vacuous.
+const mockSheltersListing = [
+  { id: 7, name: 'Refugio Patitas', city: 'Bogotá', description: 'Rescate y adopción responsable.', is_verified: true, cover_image_url: '', logo_url: '' },
+  { id: 8, name: 'Hogar Esperanza', city: 'Medellín', description: 'Refugio de acogida temporal.', is_verified: false, cover_image_url: '', logo_url: '' },
+];
 
 test.describe('Shelter Public Pages', () => {
+  // Walks the header → listing edge and pins a card's href. The previous body was
+  // goto('/shelters') + toHaveURL(/.*shelters/) — a tautology that cannot fail after its
+  // own navigation. Catches Header.tsx:84 losing ROUTES.SHELTERS and the listing
+  // rendering zero cards.
   test('should display shelters listing page', { tag: [...SHELTER_BROWSE, '@outcome:display'] }, async ({ page }) => {
-    await page.goto('/shelters');
-    await waitForPageLoad(page);
+    test.slow(); // paced requests trade wall time for a deterministic transition
+    await paceRequestsUnderRateLimit(page);
+    // Mocked on EVERY target, not just CI: the deployed GET /api/shelters/?lang=es answers
+    // HTTP 500 (re-confirmed 2026-08-02, 4 consecutive calls), so no real row can reach the
+    // grid and the card edge would be untestable there. Restore the campaign.spec.ts
+    // conditional (real payload when PLAYWRIGHT_BASE_URL is set) once that endpoint is fixed.
+    await page.route('**/api/shelters/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockSheltersListing) }),
+    );
 
-    await expect(page).toHaveURL(/.*shelters/);
+    await page.goto('/');
+    await page.locator('header').getByRole('link', { name: 'Refugios' }).click({ timeout: 20_000 });
+    await page.waitForURL(/\/shelters$/, { timeout: 20_000 });
+
+    await expect(page.locator('h1')).toHaveText('Refugios verificados');
+    const firstCard = page.getByTestId('shelter-card-link').first();
+    // ShelterCard uses the next-intl Link, so the href carries the locale prefix; pinning
+    // it whole also catches the prefix being dropped, which 404s every card.
+    await expect(firstCard).toHaveAttribute('href', '/es/shelters/7');
+    await expect(firstCard).toContainText('Refugio Patitas');
   });
 
   test('should navigate to shelter detail from listing', { tag: [...SHELTER_DETAIL, '@outcome:display'] }, async ({ page }) => {
@@ -145,11 +175,20 @@ test.describe('Shelter Public Pages', () => {
 
 test.describe('Shelter Onboarding (legacy redirect)', () => {
   test('legacy /shelter/onboarding redirects to /shelter-application', { tag: [...SHELTER_ONBOARDING, '@outcome:success'] }, async ({ page }) => {
-    await page.goto('/shelter/onboarding');
-    await page.waitForURL(/shelter-application|sign-in/, { timeout: 10_000 });
+    // quality: allow-no-interaction (legacy redirect stub: the page's entire DOM is a single
+    // <p>Redirigiendo…</p> and its only behavior is a useEffect calling router.replace —
+    // shelter/onboarding/page.tsx:1-20 is the complete file, with no button, link, input or
+    // form to drive. Nothing in the product links here either: grepping
+    // SHELTER_ONBOARDING|shelter/onboarding across app/, components/ and lib/ returns exactly
+    // one hit, the route declaration at lib/constants.ts:38.)
+    // Authenticating first collapses the old shelter-application|sign-in alternation: /shelter
+    // is proxy-protected (proxy.ts:8-19) while /shelter-application is not, so an anonymous
+    // run could satisfy the assertion by never redirecting at all.
+    await paceRequestsUnderRateLimit(page);
+    await loginAndNavigate(page, 'adopter', '/shelter/onboarding');
+    await page.waitForURL(/\/shelter-application$/, { timeout: 20_000 });
 
-    const pathname = new URL(page.url()).pathname;
-    expect(pathname.includes('/shelter-application') || pathname.includes('/sign-in')).toBe(true);
+    await expect(page).toHaveURL(/\/shelter-application$/);
   });
 });
 
@@ -479,7 +518,13 @@ test.describe('Shelter Admin Profile — Authenticated', () => {
     await expect(page.getByRole('main').getByText(/Mis Donaciones/i)).not.toBeVisible();
   });
 
+  // The count is the hook, the link is the payoff: my-profile/page.tsx:127-146 wraps the whole
+  // widget in a <Link href={ROUTES.SHELTER_APPLICATIONS}> (:429). Point that href anywhere else
+  // and the widget still renders the right number while stranding the shelter admin — which the
+  // count-only assertion below would never notice.
   test('should display pending-applications widget with correct count', { tag: [...SHELTER_ADMIN_PROFILE, '@outcome:display'] }, async ({ page }) => {
+    test.slow(); // paced requests trade wall time for a deterministic transition
+    await paceRequestsUnderRateLimit(page);
     await page.route('**/user/profile/**', (route: any) => {
       if (route.request().method() === 'GET') {
         return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockShelterProfile) });
@@ -489,7 +534,11 @@ test.describe('Shelter Admin Profile — Authenticated', () => {
 
     await loginAndNavigate(page, 'shelter_admin', '/my-profile');
 
-    await expect(page.getByText(/3 solicitudes esperando tu revisión/i)).toBeVisible({ timeout: 10_000 });
+    const pendingWidget = page.getByRole('link', { name: /3 solicitudes esperando tu revisión/i });
+    await expect(pendingWidget).toBeVisible({ timeout: 10_000 });
+    await pendingWidget.click();
+
+    await expect(page).toHaveURL(/\/shelter\/applications$/);
   });
 });
 
