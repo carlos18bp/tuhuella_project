@@ -120,6 +120,10 @@ test.describe('Blog — Public', () => {
     // blogStore.fetchPost stores the raw Axios message (blogStore.ts:96-98) and the page
     // renders `{error || 'Artículo no encontrado.'}` (blog/[slug]/page.tsx:86-89), so the
     // two branches are distinguishable only by which string appears.
+    // Paced because this describe has no pacing of its own: adding another page load to
+    // Blog — Public pushed the suite over the rate limit and timed out the sibling
+    // listing spec's navigation.
+    await paceRequestsUnderRateLimit(page);
     await page.route('**/api/blog/**', (route) =>
       route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ detail: 'Internal Server Error' }) }),
     );

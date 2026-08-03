@@ -273,21 +273,21 @@ test.describe('Admin Panel — Authenticated', () => {
   });
 
   // Fails if a dashboard outage renders as zeroes instead of as an outage. The page
-  // swallows the request error (dashboard/page.tsx:38-40) and leaves `cards` empty, so
-  // the labels must be ABSENT — an admin reading 0 users would conclude the platform
-  // emptied out rather than that the endpoint is down.
-  test('renders no cards at all when the dashboard API fails', { tag: [...ADMIN_DASHBOARD, '@outcome:failure'] }, async ({ page }) => {
+  // swallows the request error (dashboard/page.tsx:38-40) and the whole body — cards
+  // AND quick-action tiles — sits inside the `metrics ? ... : ...` branch, so a failed
+  // load must show the error copy and no figures at all. An admin reading 0 users
+  // would conclude the platform emptied out rather than that the endpoint is down.
+  test('says the metrics could not be loaded when the dashboard API fails', { tag: [...ADMIN_DASHBOARD, '@outcome:failure'] }, async ({ page }) => {
     // quality: allow-no-interaction (failure render on load of a read-only panel —
-    // the absent-cards state IS the behaviour, and there is nothing to click first)
+    // the error state IS the behaviour, and there is nothing to click first)
     await routeDashboard(page, 500, {});
 
     await loginAndNavigate(page, 'admin', '/admin/dashboard');
 
     await expect(page.getByRole('heading', { name: /Panel de Administración/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('No se pudieron cargar las métricas.')).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText('Usuarios', { exact: true })).not.toBeVisible();
     await expect(page.getByText('Donaciones pagadas', { exact: true })).not.toBeVisible();
-    // The navigation tiles are static, so the page itself is still usable.
-    await expect(page.getByText('Aprobar Refugios', { exact: true })).toBeVisible({ timeout: 10_000 });
   });
 
   // Fails if a metrics outage renders as zeroes instead of as an outage. The page
