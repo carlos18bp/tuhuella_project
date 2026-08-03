@@ -160,8 +160,14 @@ test.describe.serial('Adoption Flows — Authenticated', () => {
     await expect(page.getByRole('main').getByRole('heading', { level: 3 })).toHaveText('Luna');
   });
 
-  test('should load adoption form wizard and navigate through steps', { tag: [...ADOPTION_FORM_WIZARD] }, async ({ page }) => {
+  test('should load adoption form wizard and navigate through steps', { tag: [...ADOPTION_FORM_WIZARD, '@outcome:success'] }, async ({ page }) => {
     await setupAdoptionFormExtraMocks(page);
+    // The submit was previously left to hit the real backend, which is why the
+    // assertion below had to accept either outcome. Mocked, the wizard has one
+    // correct ending and the spec can insist on it.
+    await page.route('**/api/adoptions/create/**', (route) =>
+      route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ id: 501, animal: 1, status: 'submitted' }) }),
+    );
 
     // Use loginAndNavigate (cookie-based) for reliable auth on animal detail page
     // Navigate to home first to let auth state sync, then use client-side navigation
@@ -200,9 +206,40 @@ test.describe.serial('Adoption Flows — Authenticated', () => {
     await page.getByRole('button', { name: /Continuar/i }).click();
     await page.getByRole('button', { name: /Enviar solicitud/i }).click();
 
-    // Verify outcome
-    const hasSuccess = await page.getByRole('heading', { name: /Solicitud enviada/i }).isVisible({ timeout: 15_000 }).catch(() => false);
-    const hasError = await page.getByRole('alert').isVisible({ timeout: 500 }).catch(() => false);
-    expect(hasSuccess || hasError).toBe(true);
+    // `hasSuccess || hasError` passed whether the request was accepted or rejected,
+    // so it could not fail for any behavioural reason — a wizard that submitted
+    // nothing and rendered an error satisfied it just as well as one that worked.
+    await expect(page.getByRole('heading', { name: /Solicitud enviada/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('alert')).not.toBeVisible();
+  });
+
+  // The rejection an adopter actually meets: applying twice for the same animal.
+  // Fails if the backend's reason is swallowed and the wizard shows the success
+  // screen anyway — the adopter would believe a second application exists, and the
+  // shelter would never receive it.
+  test('shows the backend reason when the adoption request is rejected', { tag: [...ADOPTION_FORM_WIZARD, '@outcome:error'] }, async ({ page }) => {
+    await setupAdoptionFormExtraMocks(page);
+    await page.route('**/api/adoptions/create/**', (route) =>
+      route.fulfill({
+        status: 400,
+        contentType: 'application/json',
+        body: JSON.stringify({ detail: 'Ya tienes una solicitud de adopción para este animal.' }),
+      }),
+    );
+
+    await loginAndNavigate(page, 'adopter', '/adopt/1');
+
+    await expect(page.getByRole('list', { name: /Pasos del formulario/i })).toBeVisible({ timeout: 15_000 });
+    await fillAdoptionForm(page);
+
+    await page.getByRole('button', { name: /Continuar/i }).click();
+    await expect(page.getByText(/Revisa tus respuestas/i)).toBeVisible();
+    await page.getByRole('button', { name: /Continuar/i }).click();
+    await page.getByRole('button', { name: /Enviar solicitud/i }).click();
+
+    // adopt/[animalId]/page.tsx:48 prefers response.data.detail over its own copy,
+    // so the adopter reads the specific reason rather than a generic failure.
+    await expect(page.getByText('Ya tienes una solicitud de adopción para este animal.')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: /Solicitud enviada/i })).not.toBeVisible();
   });
 });
