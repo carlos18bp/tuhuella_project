@@ -57,8 +57,15 @@ function ConfirmacionContent() {
       )}
 
       <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
+        {/* Retry must return to the checkout the user actually came from. This
+            branch used to be unconditional CHECKOUT_DONATION, so a declined
+            SPONSORSHIP sent the user to the donation form — a different product
+            at a different price. The secondary CTA below already branched on
+            isSponsorship; this one did not. */}
         <Link
-          href={isFailure ? ROUTES.CHECKOUT_DONATION : ROUTES.ANIMALS}
+          href={isFailure
+            ? (isSponsorship ? ROUTES.CHECKOUT_SPONSORSHIP : ROUTES.CHECKOUT_DONATION)
+            : ROUTES.ANIMALS}
           className="inline-flex items-center justify-center min-h-11 w-full sm:w-auto bg-teal-600 text-white rounded-full px-6 py-2.5 text-sm font-medium hover:bg-teal-700 btn-base shadow-sm"
         >
           {isFailure ? 'Intentar de nuevo' : 'Explorar animales'}

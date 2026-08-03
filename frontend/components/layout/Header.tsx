@@ -748,6 +748,11 @@ function buildRolePanel(
           { label: t('applications'), href: ROUTES.WEB_MANAGER_APPLICATIONS, icon: <ClipboardList className="h-4 w-4" /> },
           { label: t('sheltersManage'), href: ROUTES.WEB_MANAGER_SHELTERS, icon: <Building2 className="h-4 w-4" /> },
           { label: t('campaignsManage'), href: ROUTES.WEB_MANAGER_CAMPAIGNS, icon: <Megaphone className="h-4 w-4" /> },
+          // The backend scopes follow-ups with is_web_manager_or_admin -> the
+          // UNFILTERED queryset (views/follow_up.py:30-38), so this role is meant
+          // to oversee every follow-up. Without this item the page was reachable
+          // only by typing the URL.
+          { label: t('followUps'), href: ROUTES.VET_FOLLOW_UPS, icon: <Stethoscope className="h-4 w-4" /> },
         ],
       };
     case 'admin':
@@ -762,6 +767,9 @@ function buildRolePanel(
           { label: t('payments'), href: ROUTES.ADMIN_PAYMENTS, icon: <CreditCard className="h-4 w-4" /> },
           { label: t('metrics'), href: ROUTES.ADMIN_METRICS, icon: <BarChart3 className="h-4 w-4" /> },
           { label: t('blogAdmin'), href: ROUTES.ADMIN_BLOG, icon: <BookText className="h-4 w-4" /> },
+          // Same grant as web_manager above: is_web_manager_or_admin returns the
+          // unfiltered follow-up queryset, so an admin is meant to see them all.
+          { label: t('followUps'), href: ROUTES.VET_FOLLOW_UPS, icon: <Stethoscope className="h-4 w-4" /> },
         ],
       };
     case 'veterinarian':
