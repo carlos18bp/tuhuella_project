@@ -296,6 +296,11 @@ test.describe('Admin Profile — Authenticated', () => {
     await expect(page.getByRole('main').getByText(/Favoritos/i)).not.toBeVisible();
   });
 
+  // Reached through the account menu rather than by deep link: for a display flow
+  // getting there IS part of the behaviour, and a profile whose entry point vanished
+  // from the header is broken even if /my-profile still renders. The count asserted
+  // is the fixture's own pending_verifications (3), so a widget that hard-codes a
+  // number or drops the binding fails instead of passing on layout alone.
   test('should display moderation-queue widget with pending count', { tag: [...ADMIN_PROFILE, '@outcome:display'] }, async ({ page }) => {
     await page.route('**/user/profile/**', (route: any) => {
       if (route.request().method() === 'GET') {
@@ -304,8 +309,14 @@ test.describe('Admin Profile — Authenticated', () => {
       return route.continue();
     });
 
-    await loginAndNavigate(page, 'admin', '/my-profile');
+    await loginAndNavigate(page, 'admin', '/');
 
+    const accountButton = page.getByRole('button', { name: /Abrir menú de cuenta/i });
+    await expect(accountButton).toBeVisible({ timeout: 15_000 });
+    await accountButton.click();
+    await page.getByRole('menuitem', { name: /Mi Perfil/i }).click();
+
+    await expect(page).toHaveURL(/\/my-profile/, { timeout: 10_000 });
     await expect(page.getByText(/3 refugios por verificar/i)).toBeVisible({ timeout: 10_000 });
   });
 });
