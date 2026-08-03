@@ -276,10 +276,13 @@ test.describe('Adopter Profile — Authenticated', () => {
     await expect(successMsg).toBeVisible({ timeout: 10_000 });
   });
 
-  // Fails if the form stops validating the name client-side and lets an empty
-  // profile reach the API — the user would see a generic save failure, or worse,
-  // a saved profile with no name on it.
-  test('refuses to submit an empty name and never calls the API', { tag: [...PROFILE_EDIT, '@outcome:error'] }, async ({ page }) => {
+  // Whitespace, not empty: the inputs carry the native `required` attribute
+  // (my-profile/edit/page.tsx:247,261), so the browser blocks a truly empty submit
+  // before React sees it and the app's own validation never runs. A name of spaces
+  // satisfies `required` and trips the trim guard at page.tsx:124 — which is the
+  // branch worth testing, since it is the one native validation does NOT cover.
+  // Fails if that guard is dropped and a profile with a blank name reaches the API.
+  test('refuses to submit a whitespace-only name and never calls the API', { tag: [...PROFILE_EDIT, '@outcome:error'] }, async ({ page }) => {
     let patched = false;
     await page.route('**/user/profile/**', (route: any) => {
       if (route.request().method() === 'PATCH') {
@@ -296,8 +299,8 @@ test.describe('Adopter Profile — Authenticated', () => {
 
     const firstNameInput = page.getByLabel(/Nombre/i).first();
     await expect(firstNameInput).toBeVisible({ timeout: 15_000 });
-    await firstNameInput.clear();
-    await page.getByLabel(/Apellido/i).clear();
+    await firstNameInput.fill('   ');
+    await page.getByLabel(/Apellido/i).fill('   ');
 
     await page.getByRole('button', { name: /Guardar|Save/i }).click();
 

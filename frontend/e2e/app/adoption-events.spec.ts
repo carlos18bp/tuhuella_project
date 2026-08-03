@@ -181,7 +181,7 @@ test.describe('Adoption event creation', () => {
   // reaches it from an application detail, the shelter admin from the list.
 
   test(
-    'web manager sees the validation error and no request when the description is empty',
+    'web manager sees the validation error and no request when the description is blank',
     { tag: [...ADOPTION_EVENT_CREATE_WEB_MANAGER, '@outcome:error'] },
     async ({ page }) => {
       await mockApplicationAndEvents(page);
@@ -197,6 +197,11 @@ test.describe('Adoption event creation', () => {
       await expect(page.getByRole('heading', { level: 1, name: 'Luna' })).toBeVisible({ timeout: 15_000 });
 
       await page.getByTestId('event-add-button').click();
+      // Whitespace, not empty: the textarea is natively `required`
+      // (AdoptionEventCreateModal.tsx:127), so the browser blocks a truly empty submit
+      // before React runs. Spaces satisfy `required` and trip the trim guard at line 52 —
+      // the branch native validation does not cover.
+      await page.getByTestId('event-description-input').fill('   ');
       await page.getByTestId('event-submit').click();
 
       // adoption.events.validationDescription, set at AdoptionEventCreateModal.tsx:53.
@@ -237,7 +242,7 @@ test.describe('Adoption event creation', () => {
   );
 
   test(
-    'shelter admin sees the validation error and no request when the description is empty',
+    'shelter admin sees the validation error and no request when the description is blank',
     { tag: [...ADOPTION_EVENT_CREATE_SHELTER, '@outcome:error'] },
     async ({ page }) => {
       await mockShelterApplications(page);
@@ -254,6 +259,7 @@ test.describe('Adoption event creation', () => {
       await page.getByRole('button', { name: 'Detalle' }).click();
 
       await page.getByTestId('event-add-button').click();
+      await page.getByTestId('event-description-input').fill('   ');
       await page.getByTestId('event-submit').click();
 
       await expect(page.getByText('La descripción es obligatoria.')).toBeVisible({ timeout: 10_000 });
