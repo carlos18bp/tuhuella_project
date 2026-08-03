@@ -100,3 +100,40 @@ def test_shelter_create_update_serializer_accepts_blank_website():
     })
 
     assert serializer.is_valid(), serializer.errors
+
+
+# ── list serializer: image URLs come from the Library, not the field ─────────
+# Regression for the HTTP 500 on GET /api/shelters/ (measured 2026-08-03, 4/4
+# calls): logo and cover_image are SingleImageField, i.e. FKs to a
+# django_attachments Library — NOT file fields. `library.url` does not exist, so
+# any shelter that actually HAS an image crashed the whole list endpoint with
+# `AttributeError: 'Library' object has no attribute 'url'`. The pre-existing
+# tests never caught it because the `shelter` fixture leaves both images unset,
+# which short-circuits the `if` before the attribute access.
+
+@pytest.mark.django_db
+def test_shelter_list_serializer_survives_a_shelter_that_has_a_cover_image(shelter):
+    """A shelter WITH a cover Library serializes instead of raising AttributeError."""
+    from django_attachments.models import Library
+
+    shelter.cover_image = Library.objects.create(title='Cover: Happy Paws')
+    shelter.save(update_fields=['cover_image'])
+
+    data = ShelterListSerializer(shelter).data
+
+    # No primary attachment yet ⇒ empty string, the same contract the detail
+    # serializer and library_primary_url already honour.
+    assert data['cover_image_url'] == ''
+
+
+@pytest.mark.django_db
+def test_shelter_list_serializer_survives_a_shelter_that_has_a_logo(shelter):
+    """A shelter WITH a logo Library serializes instead of raising AttributeError."""
+    from django_attachments.models import Library
+
+    shelter.logo = Library.objects.create(title='Logo: Happy Paws')
+    shelter.save(update_fields=['logo'])
+
+    data = ShelterListSerializer(shelter).data
+
+    assert data['logo_url'] == ''

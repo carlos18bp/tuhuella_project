@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from base_feature_app.models import Shelter
-from base_feature_app.serializers.utils import get_lang
+from base_feature_app.serializers.utils import get_lang, library_primary_url
 
 
 class ShelterListSerializer(serializers.ModelSerializer):
@@ -21,12 +21,12 @@ class ShelterListSerializer(serializers.ModelSerializer):
     def get_description(self, obj):
         return getattr(obj, f'description_{get_lang(self)}')
 
+    # logo and cover_image are SingleImageField — FKs to a django_attachments
+    # Library, not file fields. Reading `.url` off the Library raised
+    # AttributeError and 500'd the whole list endpoint for any shelter that had
+    # an image. Same helper the detail serializer uses.
     def get_logo_url(self, obj):
-        if obj.logo:
-            return obj.logo.url
-        return ''
+        return library_primary_url(obj.logo)
 
     def get_cover_image_url(self, obj):
-        if obj.cover_image:
-            return obj.cover_image.url
-        return ''
+        return library_primary_url(obj.cover_image)

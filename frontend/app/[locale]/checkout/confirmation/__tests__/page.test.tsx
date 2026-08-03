@@ -105,6 +105,18 @@ describe('CheckoutConfirmacionPage - failed payment status', () => {
 
     expect(screen.getByText('Intentar de nuevo').closest('a')).toHaveAttribute('href', '/checkout/donation');
   });
+
+  // Bug: that retry href was unconditional CHECKOUT_DONATION, so a user whose
+  // SPONSORSHIP was declined got sent to the donation form — a different
+  // product at a different price, turning a recurring commitment into a
+  // one-off. The secondary CTA already branched on type; this one did not, and
+  // the donation-only test above could not catch it.
+  it('points the retry CTA at the sponsorship checkout when a sponsorship failed', () => {
+    mockSearchParams = new URLSearchParams('type=sponsorship&status=declined');
+    render(<CheckoutConfirmacionPage />);
+
+    expect(screen.getByText('Intentar de nuevo').closest('a')).toHaveAttribute('href', '/checkout/sponsorship');
+  });
 });
 
 describe('CheckoutConfirmacionPage - default params', () => {
