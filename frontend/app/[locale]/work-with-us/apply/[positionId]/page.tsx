@@ -147,12 +147,16 @@ export default function VolunteerApplyPage() {
     } catch (err: any) {
       if (err.response?.data) {
         const data = err.response.data;
-        // Only a client error carries per-field messages. A 5xx body is not a field
-        // map, and routing it here called setFieldErrors({}) — which cleared the
-        // field errors and set no banner, so a failed submit rendered NOTHING and
-        // the applicant had no way to tell it had not gone through.
+        // A 5xx body is not a field map, and routing it here called
+        // setFieldErrors({}) — which cleared the field errors and set no banner, so a
+        // failed submit rendered NOTHING and the applicant had no way to tell it had
+        // not gone through. Only an EXPLICIT server status diverts: an absent status
+        // keeps the original behaviour, so a field-error payload still lands on its
+        // fields whether or not the caller reported one.
+        const status = err.response.status;
+        const isServerFailure = typeof status === 'number' && status >= 500;
         const isFieldErrorPayload =
-          typeof data === 'object' && !data.message && err.response.status < 500;
+          typeof data === 'object' && !data.message && !isServerFailure;
         if (isFieldErrorPayload) {
           setFieldErrors(data);
         } else {
