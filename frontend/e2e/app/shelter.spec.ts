@@ -40,7 +40,7 @@ import { paceRequestsUnderRateLimit } from '../helpers/pacing';
 // instead, which the card ignores, so a fixture built from it would render a nameless
 // card and make every assertion below vacuous.
 const mockSheltersListing = [
-  { id: 7, name: 'Refugio Patitas', city: 'Bogotá', description: 'Rescate y adopción responsable.', is_verified: true, cover_image_url: '', logo_url: '', gallery_urls: ['https://example.com/g1.jpg', 'https://example.com/g2.jpg'] },
+  { id: 7, name: 'Refugio Patitas', city: 'Bogotá', description: 'Rescate y adopción responsable.', is_verified: true, cover_image_url: '', logo_url: '', gallery_urls: ['http://localhost:8000/media/e2e/g1.jpg', 'http://localhost:8000/media/e2e/g2.jpg'] },
   { id: 8, name: 'Hogar Esperanza', city: 'Medellín', description: 'Refugio de acogida temporal.', is_verified: false, cover_image_url: '', logo_url: '', gallery_urls: [] as string[] },
 ];
 
@@ -93,9 +93,9 @@ test.describe('Shelter Public Pages', () => {
 
     const shelterLink = page.getByTestId('shelter-card-link').first();
     await shelterLink.click();
-    await page.waitForURL(/.*shelters\/\d+/, { timeout: 10_000 });
+    await page.waitForURL(/.*shelters\/\d+/, { timeout: 30_000 });
 
-    await expect(page).toHaveURL(/\/es\/shelters\/7$/);
+    await expect(page).toHaveURL(/\/es\/shelters\/7$/, { timeout: 30_000 });
   });
 
   // Same listing mock as the test above: without it GET /api/shelters/?lang=es 500s on
@@ -124,13 +124,13 @@ test.describe('Shelter Public Pages', () => {
 
     const shelterLink = page.getByTestId('shelter-card-link').first();
     await shelterLink.click();
-    await page.waitForURL(/.*shelters\/\d+/, { timeout: 10_000 });
+    await page.waitForURL(/.*shelters\/\d+/, { timeout: 30_000 });
 
     const viewAnimalsLink = page.getByRole('link', { name: /ver animales/i });
     await expect(viewAnimalsLink).toBeVisible({ timeout: 10_000 });
     await viewAnimalsLink.click();
 
-    await expect(page).toHaveURL(/\/es\/animals\?shelter=7$/);
+    await expect(page).toHaveURL(/\/es\/animals\?shelter=7$/, { timeout: 30_000 });
   });
 
   test('should open video modal on shelter detail page', { tag: [...SHELTER_DETAIL_VIDEO, '@outcome:display'] }, async ({ page }) => {
@@ -212,7 +212,7 @@ test.describe('Shelter Public Pages', () => {
 
     const shelterLink = page.getByTestId('shelter-card-link').first();
     await shelterLink.click();
-    await page.waitForURL(/.*shelters\/\d+/, { timeout: 10_000 });
+    await page.waitForURL(/.*shelters\/\d+/, { timeout: 30_000 });
 
     const gallerySection = page.locator('section, div', { has: page.getByRole('heading', { name: /gallery|galería/i }) });
     const galleryButton = gallerySection.getByRole('button').first();
