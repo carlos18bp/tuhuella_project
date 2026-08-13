@@ -127,6 +127,8 @@ describe('AnimalDetailPage', () => {
     setupMocks({ loading: false, animal: unvaccinated });
     render(<AnimalDetailPage />);
     expect(screen.queryByText('Vacunado')).not.toBeInTheDocument();
+    // Positive anchor: without it, a crash before render would also hide "Vacunado" and pass wrongly.
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Luna');
   });
 
   it('renders description when provided', () => {
@@ -140,6 +142,8 @@ describe('AnimalDetailPage', () => {
     setupMocks({ loading: false, animal: noDesc });
     render(<AnimalDetailPage />);
     expect(screen.queryByText('Perrita cariñosa y juguetona')).not.toBeInTheDocument();
+    // Positive anchor: a page that crashed before render would also hide the description and pass wrongly.
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Luna');
   });
 
   it('renders special needs section when provided', () => {
@@ -173,6 +177,8 @@ describe('AnimalDetailPage', () => {
     setupMocks({ loading: false, animal: mockAnimal, isAuthenticated: false });
     render(<AnimalDetailPage />);
     expect(screen.queryByRole('button', { name: 'favorite' })).not.toBeInTheDocument();
+    // Positive anchor: a page that crashed before render would also hide the favorite button and pass wrongly.
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Luna');
   });
 
   it('calls toggleFavorite when favorite button clicked', async () => {
@@ -244,6 +250,8 @@ describe('AnimalDetailPage', () => {
     setupMocks({ loading: false, animal: allUnknown });
     render(<AnimalDetailPage />);
     expect(screen.queryByTestId('compatibility-section')).not.toBeInTheDocument();
+    // Positive anchor: a page that crashed before render would also hide the compatibility section and pass wrongly.
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Luna');
   });
 
   it('renders adoption in progress badge for in_process status', () => {
@@ -264,6 +272,8 @@ describe('AnimalDetailPage', () => {
     setupMocks({ loading: false, animal: mockAnimal });
     render(<AnimalDetailPage />);
     expect(screen.queryByTestId('status-badge')).not.toBeInTheDocument();
+    // Positive anchor: a page that crashed before render would also hide the status badge and pass wrongly.
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Luna');
   });
 
   it('renders published ago text', () => {
@@ -284,6 +294,8 @@ describe('AnimalDetailPage', () => {
     setupMocks({ loading: false, animal: noIntake });
     render(<AnimalDetailPage />);
     expect(screen.queryByTestId('intake-date')).not.toBeInTheDocument();
+    // Positive anchor: a page that crashed before render would also hide the intake date and pass wrongly.
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Luna');
   });
 
   it('renders similar animals component', () => {

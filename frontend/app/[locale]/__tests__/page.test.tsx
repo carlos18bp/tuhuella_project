@@ -111,6 +111,9 @@ describe('HomePage', () => {
     setupMocks({ campaigns: [] });
     render(<HomePage />);
     expect(screen.queryByText('Campañas activas')).not.toBeInTheDocument();
+    // Positive anchor: a HomePage that crashed while rendering (e.g. a hook thrown before the hero
+    // section) would leave the campaign heading absent too, and this test would still pass without it.
+    expect(screen.getByText('Cada huella cuenta.')).toBeInTheDocument();
   });
 
   it('renders shelter section when shelters are loaded', () => {
@@ -124,12 +127,9 @@ describe('HomePage', () => {
     setupMocks({ shelters: [] });
     render(<HomePage />);
     expect(screen.queryByText('Refugios destacados')).not.toBeInTheDocument();
-  });
-
-  it('calls fetchAnimals when animals array is empty', () => {
-    const state = setupMocks({ animals: [] });
-    render(<HomePage />);
-    expect(state.fetchAnimals).toHaveBeenCalled();
+    // Positive anchor: a HomePage that crashed while rendering would leave the shelter heading
+    // absent too, and this test would still pass without it.
+    expect(screen.getByText('Cada huella cuenta.')).toBeInTheDocument();
   });
 
   it('calls fetchAnimals with locale even when animals already loaded', () => {

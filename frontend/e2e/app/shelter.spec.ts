@@ -40,8 +40,8 @@ import { paceRequestsUnderRateLimit } from '../helpers/pacing';
 // instead, which the card ignores, so a fixture built from it would render a nameless
 // card and make every assertion below vacuous.
 const mockSheltersListing = [
-  { id: 7, name: 'Refugio Patitas', city: 'Bogotá', description: 'Rescate y adopción responsable.', is_verified: true, cover_image_url: '', logo_url: '' },
-  { id: 8, name: 'Hogar Esperanza', city: 'Medellín', description: 'Refugio de acogida temporal.', is_verified: false, cover_image_url: '', logo_url: '' },
+  { id: 7, name: 'Refugio Patitas', city: 'Bogotá', description: 'Rescate y adopción responsable.', is_verified: true, cover_image_url: '', logo_url: '', gallery_urls: ['http://localhost:8000/media/e2e/g1.jpg', 'http://localhost:8000/media/e2e/g2.jpg'] },
+  { id: 8, name: 'Hogar Esperanza', city: 'Medellín', description: 'Refugio de acogida temporal.', is_verified: false, cover_image_url: '', logo_url: '', gallery_urls: [] as string[] },
 ];
 
 test.describe('Shelter Public Pages', () => {
@@ -72,34 +72,65 @@ test.describe('Shelter Public Pages', () => {
     await expect(firstCard).toContainText('Refugio Patitas');
   });
 
+  // Mocked for the same reason as the listing test above: GET /api/shelters/?lang=es
+  // answers HTTP 500 on every real target and CI seeds zero fixtures, so without this
+  // mock `shelterLink` never renders — the previous `if (isVisible)` guard let the
+  // whole body no-op while the test still reported PASS, crediting SHELTER_DETAIL's
+  // display outcome without ever clicking through. Catches the shelter card losing
+  // its href/route to the detail page.
   test('should navigate to shelter detail from listing', { tag: [...SHELTER_DETAIL, '@outcome:display'] }, async ({ page }) => {
+    test.slow(); // paced requests trade wall time for a deterministic transition
+    // Must stay ABOVE the mocks below: pacing is a catch-all that calls route.continue(),
+    // and Playwright matches handlers in reverse registration order, so registering it
+    // last would swallow the shelters mock and send the request to the network instead.
+    await paceRequestsUnderRateLimit(page);
+    await page.route('**/api/shelters/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockSheltersListing) }),
+    );
+
     await page.goto('/shelters');
     await waitForPageLoad(page);
 
     const shelterLink = page.getByTestId('shelter-card-link').first();
-    if (await shelterLink.isVisible({ timeout: 5000 })) {
-      await shelterLink.click();
-      await page.waitForURL(/.*shelters\/\d+/, { timeout: 10_000 });
+    await shelterLink.click();
+    await page.waitForURL(/.*shelters\/\d+/, { timeout: 30_000 });
 
-      await expect(page).toHaveURL(/.*shelters\/\d+/);
-    }
+    await expect(page).toHaveURL(/\/es\/shelters\/7$/, { timeout: 30_000 });
   });
 
+  // Same listing mock as the test above: without it GET /api/shelters/?lang=es 500s on
+  // every real target, `shelterLink` never renders, and the previous `if (isVisible)`
+  // guard let the whole click chain no-op while the test still reported PASS, crediting
+  // a success outcome that never ran. The listing mock alone is not enough here, though:
+  // it answers EVERY /api/shelters/** request (including the detail page's own
+  // single-shelter fetch) with the listing array, which would leave `shelter.id`
+  // undefined and break the "ver animales" href — so a shelter-7-specific override is
+  // registered after it (Playwright matches routes in reverse registration order, so the
+  // more specific one wins) to give the detail page the actual single-object shape it
+  // expects. Catches the "ver animales" link losing its `?shelter=<id>` query.
   test('should show view-animals link on shelter detail and navigate to filtered animals', { tag: [...SHELTER_DETAIL_VIEW_ANIMALS, '@outcome:success'] }, async ({ page }) => {
+    test.slow(); // paced requests trade wall time for a deterministic transition
+    // Registered first on purpose — see the ordering note on the detail-navigation test above.
+    await paceRequestsUnderRateLimit(page);
+    await page.route('**/api/shelters/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockSheltersListing) }),
+    );
+    await page.route('**/api/shelters/7/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockSheltersListing[0]) }),
+    );
+
     await page.goto('/shelters');
     await waitForPageLoad(page);
 
     const shelterLink = page.getByTestId('shelter-card-link').first();
-    if (await shelterLink.isVisible({ timeout: 5000 })) {
-      await shelterLink.click();
-      await page.waitForURL(/.*shelters\/\d+/, { timeout: 10_000 });
+    await shelterLink.click();
+    await page.waitForURL(/.*shelters\/\d+/, { timeout: 30_000 });
 
-      const viewAnimalsLink = page.getByRole('link', { name: /ver animales/i });
-      await expect(viewAnimalsLink).toBeVisible({ timeout: 10_000 });
-      await viewAnimalsLink.click();
+    const viewAnimalsLink = page.getByRole('link', { name: /ver animales/i });
+    await expect(viewAnimalsLink).toBeVisible({ timeout: 10_000 });
+    await viewAnimalsLink.click();
 
-      await expect(page).toHaveURL(/.*animals.*shelter=\d+/);
-    }
+    await expect(page).toHaveURL(/\/es\/animals\?shelter=7$/, { timeout: 30_000 });
   });
 
   test('should open video modal on shelter detail page', { tag: [...SHELTER_DETAIL_VIDEO, '@outcome:display'] }, async ({ page }) => {
@@ -152,23 +183,45 @@ test.describe('Shelter Public Pages', () => {
     await expect(dialog).not.toBeVisible({ timeout: 5_000 });
   });
 
+  // Same listing mock as the other detail tests, plus a shelter-7-specific override
+  // (registered after, so it wins per Playwright's reverse-match order): the general
+  // listing mock answers every /api/shelters/** request — including the detail page's
+  // own fetch — with the listing array, so without the override `shelter.gallery_urls`
+  // would resolve undefined and the gallery section (gated on `galleryUrls.length > 0`,
+  // shelters/[shelterId]/page.tsx:150) would never render, reproducing the very
+  // vacuous-execution bug this fix targets one level deeper inside the inner guard.
+  // The inner locator is also corrected: ShelterGallery's lightbox carries neither a
+  // `role="dialog"` nor any "Lightbox" text anywhere in the component (confirmed —
+  // only TermsModal.tsx and ShelterVideoModal.tsx use role="dialog" in this codebase),
+  // so `getByRole('dialog', {name:/Lightbox/i})` can never match. Asserting the enlarged
+  // `<img>` by its alt text and pinning its `src` is the concrete, role-based signal
+  // that the lightbox actually opened on the right image.
   test('should open gallery lightbox on shelter detail page', { tag: [...SHELTER_DETAIL_GALLERY, '@outcome:display'] }, async ({ page }) => {
+    test.slow(); // paced requests trade wall time for a deterministic transition
+    // Registered first on purpose — see the ordering note on the detail-navigation test above.
+    await paceRequestsUnderRateLimit(page);
+    await page.route('**/api/shelters/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockSheltersListing) }),
+    );
+    await page.route('**/api/shelters/7/**', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockSheltersListing[0]) }),
+    );
+
     await page.goto('/shelters');
     await waitForPageLoad(page);
 
     const shelterLink = page.getByTestId('shelter-card-link').first();
-    if (await shelterLink.isVisible({ timeout: 5000 })) {
-      await shelterLink.click();
-      await page.waitForURL(/.*shelters\/\d+/, { timeout: 10_000 });
+    await shelterLink.click();
+    await page.waitForURL(/.*shelters\/\d+/, { timeout: 30_000 });
 
-      const gallerySection = page.locator('section, div', { has: page.getByRole('heading', { name: /gallery|galería/i }) });
-      const galleryButton = gallerySection.getByRole('button').first();
-      if (await galleryButton.isVisible({ timeout: 5000 })) {
-        await galleryButton.click();
+    const gallerySection = page.locator('section, div', { has: page.getByRole('heading', { name: /gallery|galería/i }) });
+    const galleryButton = gallerySection.getByRole('button').first();
+    if (await galleryButton.isVisible({ timeout: 5000 })) {
+      await galleryButton.click();
 
-        const lightbox = page.getByRole('dialog', { name: /Lightbox/i });
-        await expect(lightbox).toBeVisible({ timeout: 5000 });
-      }
+      const lightboxImage = page.getByRole('img', { name: `${mockSheltersListing[0].name} - 1` });
+      await expect(lightboxImage).toBeVisible({ timeout: 5000 });
+      await expect(lightboxImage).toHaveAttribute('src', mockSheltersListing[0].gallery_urls[0]);
     }
   });
 });
@@ -201,6 +254,13 @@ test.describe('Shelter Panel', () => {
   });
 
   test('should display shelter dashboard or redirect when unauthenticated', { tag: [...SHELTER_PANEL_DASHBOARD, '@outcome:display'] }, async ({ page }) => {
+    test.slow(); // paced requests trade wall time for a deterministic transition
+    // Registered first on purpose — see the ordering note on the detail-navigation test above.
+    // Without it the unpaced /sign-in load bursts past the deployed rate limit, the RSC
+    // payload for router.replace(HOME) after signIn() comes back 429, Next falls back to a
+    // hard navigation that is limited too, and the browser's network-error page replaces the
+    // app — so the header never mounts and 'Panel Refugio' can never be found.
+    await paceRequestsUnderRateLimit(page);
     await page.route('**/api/shelters/**', (route: any) => {
       if (route.request().method() === 'GET') {
         return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockShelterData) });
@@ -544,6 +604,12 @@ test.describe('Shelter Admin Profile — Authenticated', () => {
 
 test.describe('Shelter Campaign Detail & Create', () => {
   test('should display campaign detail with approval status', { tag: [...SHELTER_PANEL_CAMPAIGN_DETAIL, '@outcome:display'] }, async ({ page }) => {
+    test.slow(); // paced requests trade wall time for a deterministic transition
+    // Registered first on purpose — see the ordering note on the detail-navigation test above.
+    // Same post-login failure as the dashboard test: unpaced, the navigation that follows
+    // signIn() is rate-limited and the browser's network-error page replaces the app, so the
+    // header never mounts and 'Panel Refugio' can never be found.
+    await paceRequestsUnderRateLimit(page);
     await page.route('**/api/campaigns/mine/**', (route: any) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockShelterCampaigns) }),
     );
