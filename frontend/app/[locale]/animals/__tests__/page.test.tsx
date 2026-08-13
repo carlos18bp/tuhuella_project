@@ -90,7 +90,9 @@ describe('AnimalesPage', () => {
   it('calls fetchAnimals on mount', () => {
     const state = setupMock();
     render(<AnimalesPage />);
-    expect(state.fetchAnimals).toHaveBeenCalled();
+    // Pins the exact mount payload — empty filters, active locale, page 1 — so a dropped locale arg or a
+    // wrong initial page would still satisfy a bare toHaveBeenCalled().
+    expect(state.fetchAnimals).toHaveBeenCalledWith({}, 'es', 1);
   });
 
   it('calls setFilters when species filter changes', async () => {
@@ -98,7 +100,9 @@ describe('AnimalesPage', () => {
     render(<AnimalesPage />);
     const speciesSelect = screen.getByTestId('filter-Especies');
     await userEvent.selectOptions(speciesSelect, 'dog');
-    expect(state.setFilters).toHaveBeenCalled();
+    // Pins the exact payload — the page builds this object by hand, so a wrong key name, a wrong
+    // join separator, or a dropped value would still satisfy a bare toHaveBeenCalled().
+    expect(state.setFilters).toHaveBeenCalledWith({ species: 'dog' });
   });
 
   it('renders pagination when totalPages > 1', () => {
@@ -139,5 +143,8 @@ describe('AnimalesPage', () => {
     render(<AnimalesPage />);
     // Only filter selects should be buttons, no pagination buttons for page numbers
     expect(screen.queryByText('2')).not.toBeInTheDocument();
+    // Positive anchor: proves the animal rows themselves rendered, not just that no page-2 button exists —
+    // a listing that silently dropped the `animals` prop would also show no "2" and stay green.
+    expect(screen.getByTestId('animal-card-list-1')).toBeInTheDocument();
   });
 });

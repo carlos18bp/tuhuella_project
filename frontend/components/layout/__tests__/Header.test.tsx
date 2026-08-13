@@ -90,6 +90,9 @@ describe('Header', () => {
     render(<Header />);
     expect(screen.queryByRole('link', { name: 'Iniciar sesión' })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Registrarse' })).not.toBeInTheDocument();
+    // Positive anchor: a Header that crashed/rendered empty for this auth state would also hide
+    // sign-in/sign-up links and pass wrongly without this check on the account-menu button.
+    expect(screen.getAllByRole('button', { name: 'Abrir menú de cuenta' })[0]).toBeVisible();
   });
 
   it('exposes Favoritos and Mi Perfil inside the account menu when authenticated', async () => {
@@ -133,6 +136,10 @@ describe('Header', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Toggle menu' }));
 
     expect(screen.queryByRole('link', { name: /Manual/ })).not.toBeInTheDocument();
+    // Positive anchor: proves the mobile panel actually opened (3 "Animales" links: desktop nav + tablet
+    // nav + the mobile panel's own copy). A toggle that silently stopped opening the panel would leave
+    // this at 2 and this test would still wrongly pass without it.
+    expect(screen.getAllByRole('link', { name: 'Animales' })).toHaveLength(3);
   });
 
   it('hides the role panel button for adopters', () => {
@@ -143,6 +150,9 @@ describe('Header', () => {
     render(<Header />);
     expect(screen.queryByRole('button', { name: /Panel Refugio/ })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Panel Web Manager/ })).not.toBeInTheDocument();
+    // Positive anchor: a Header that crashed/rendered empty for this auth state would also hide both
+    // panel buttons and pass wrongly without this check on the account-menu button.
+    expect(screen.getAllByRole('button', { name: 'Abrir menú de cuenta' })[0]).toBeVisible();
   });
 
   it('opens a panel dropdown with all shelter sub-sections for shelter_admin', async () => {
@@ -425,6 +435,8 @@ describe('Header', () => {
     setupMock();
     render(<Header />);
     expect(screen.queryByRole('link', { name: 'Notificaciones' })).not.toBeInTheDocument();
+    // Positive anchor: a Header that crashed/rendered empty would also hide the notification shortcut and pass wrongly.
+    expect(screen.getByRole('link', { name: /tu\s*huella/i })).toHaveAttribute('href', '/');
   });
 
   it('shows no-notifications message in empty dropdown', async () => {

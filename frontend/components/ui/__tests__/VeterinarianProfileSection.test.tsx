@@ -25,7 +25,9 @@ describe('VeterinarianProfileSection', () => {
 
   it('renders the follow-ups title', () => {
     render(<VeterinarianProfileSection />);
-    expect(screen.getAllByText('Seguimientos asignados').length).toBeGreaterThanOrEqual(1);
+    // followUpsTitle is rendered exactly twice: the section h2 and the quick-action link label.
+    // A >=1 check would still pass if either one silently disappeared.
+    expect(screen.getAllByText('Seguimientos asignados')).toHaveLength(2);
   });
 
   it('calls fetchMine on mount when items are empty and not loading', () => {
@@ -40,13 +42,19 @@ describe('VeterinarianProfileSection', () => {
       ],
     });
     render(<VeterinarianProfileSection />);
+    // quality: allow-mock-only (absence of the call IS the contract; nothing observable to assert)
     expect(mockFetchMine).not.toHaveBeenCalled();
+    // Proves the seeded pending item was actually bucketed into the "Pendiente" stat card, not just that
+    // fetchMine was skipped — a mis-bucketed status would leave this card at 0 while the test above still passes.
+    expect(screen.getByText('Pendiente').closest('div')).toHaveTextContent('1');
   });
 
   it('does not call fetchMine when already loading', () => {
     resetStore({ loading: true });
     render(<VeterinarianProfileSection />);
     expect(mockFetchMine).not.toHaveBeenCalled();
+    // Proves the stat grid still mounted under the early-return guard, not just that fetchMine was skipped.
+    expect(screen.getByText('Pendiente')).toBeInTheDocument();
   });
 
   it('shows empty state message when no items and not loading', () => {
@@ -62,6 +70,10 @@ describe('VeterinarianProfileSection', () => {
     });
     render(<VeterinarianProfileSection />);
     expect(screen.queryByText('No tienes seguimientos asignados')).not.toBeInTheDocument();
+    // Proves the seeded in_progress item was actually bucketed into the "En curso" stat card, not just
+    // that the empty-state message was skipped — a mis-bucketed status would leave this card at 0 while
+    // this test would still wrongly pass without it.
+    expect(screen.getByText('En curso').closest('div')).toHaveTextContent('1');
   });
 
   it('renders 4 stat cards', () => {
@@ -81,11 +93,10 @@ describe('VeterinarianProfileSection', () => {
       ],
     });
     render(<VeterinarianProfileSection />);
-    // Verify counts rendered — pending=2 at index, completed=1
-    // Use textContent since they are plain text nodes in <p>
-    const allTwos = screen.getAllByText('2');
-    expect(allTwos.length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText('1')).toBeInTheDocument();
+    // Scoped to each stat card so a mis-bucketed status (e.g. pending counted into "Completado")
+    // fails here even though an unscoped `getAllByText('2')` count would not catch it.
+    expect(screen.getByText('Pendiente').closest('div')).toHaveTextContent('2');
+    expect(screen.getByText('Completado').closest('div')).toHaveTextContent('1');
   });
 
   it('renders the quick actions section', () => {
@@ -95,7 +106,8 @@ describe('VeterinarianProfileSection', () => {
 
   it('renders a link to the follow-ups list', () => {
     render(<VeterinarianProfileSection />);
-    const links = screen.getAllByRole('link');
-    expect(links.length).toBeGreaterThanOrEqual(1);
+    // Pins the actual destination — a >=1 length check never verifies the href, so a broken/typo'd
+    // route would still pass.
+    expect(screen.getByRole('link')).toHaveAttribute('href', '/veterinarian/follow-ups');
   });
 });

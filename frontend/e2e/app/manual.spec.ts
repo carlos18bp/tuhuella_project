@@ -99,10 +99,16 @@ test.describe('Manual — Role Filtering', () => {
     await expect(page.getByRole('searchbox')).toBeVisible({ timeout: 10_000 });
   });
 
+  // Guards against filterByRole.ts rendering NO sections at all for the adopter role:
+  // the negation below (Web Manager heading not visible) would pass just as well on an
+  // empty page as on a correctly role-filtered one. This positive anchor — same shape
+  // already proven above for the adopter role (:92, :98) — confirms the page actually
+  // rendered content before trusting the negation.
   test('should hide web_manager-only section from adopter', { tag: [...MANUAL_ROLE_FILTER, '@outcome:display'] }, async ({ page }) => {
     await loginAndNavigate(page, 'adopter', '/manual');
 
     await page.waitForSelector('[role="navigation"], nav, aside', { timeout: 15_000 });
+    await expect(page.getByRole('heading', { name: /cómo empezar/i })).toBeVisible({ timeout: 10_000 });
     await expect(page.getByRole('heading', { name: /Rol: Web Manager/i })).not.toBeVisible();
   });
 
