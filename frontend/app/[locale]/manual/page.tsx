@@ -2,6 +2,9 @@
 
 import { useMemo } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { Network } from 'lucide-react';
+import { Link } from '@/i18n/navigation';
+import { ROUTES } from '@/lib/constants';
 
 import { MANUAL_SECTIONS } from '@/lib/manual/content';
 import { filterManualSectionsForRole } from '@/lib/manual/filterByRole';
@@ -34,6 +37,13 @@ export default function ManualPage() {
           <h1 className="mt-1 text-3xl font-bold text-text-primary">{t('title')}</h1>
           <p className="mt-2 max-w-3xl text-sm text-text-secondary">{t('subtitle')}</p>
         </header>
+
+        <section className="mb-6 rounded-2xl border border-teal-200 bg-teal-50 p-5 dark:border-teal-900 dark:bg-teal-950/40" aria-label={t('ecosystem.title')}>
+          <Network className="h-6 w-6 text-teal-700 dark:text-teal-300" aria-hidden="true" />
+          <h2 className="mt-3 text-xl font-semibold text-text-primary">{t('ecosystem.title')}</h2>
+          <p className="mt-2 text-sm text-text-secondary">{t('ecosystem.card')}</p>
+          <Link href={ROUTES.MANUAL_ECOSYSTEM} className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800">{t('ecosystem.enter')}</Link>
+        </section>
 
         <div className="sticky top-20 z-30 mb-8">
           <ManualSearch sections={visibleSections} locale={locale} />

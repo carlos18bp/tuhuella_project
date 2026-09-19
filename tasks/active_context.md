@@ -1,8 +1,28 @@
 # Tuhuella — Active Context
 
-> Last updated: 2026-05-03 (Phase 24 — Adoption Interview Follow-Up + WhatsApp + Event Timeline)
+> Last updated: 2026-09-19 (Explorador del ecosistema del manual)
 
 ## Current State
+
+### Implementado — Explorador del ecosistema (2026-09-19)
+
+`/{locale}/manual/ecosystem`, accesible desde el índice y la tarjeta del manual,
+replica el patrón del modo explorador de ProjectApp con 7 espacios, 33 módulos
+y las 69 pantallas reales. Todos los roles autenticados ven el mapa; la guía
+conserva su filtro por audiencia y los enlaces respetan los guards de destino.
+
+Incluye órbita de escritorio, tarjetas móviles/tablet, contexto y relaciones,
+búsqueda ES/EN, breadcrumb, recorridos, teclado/arrastre/zoom/pausa, modo oscuro
+y movimiento reducido. Nodo, tour y relaciones se conservan en URL sin esperar
+una navegación al servidor. No cambia backend, permisos ni base de datos.
+
+Verificado en Node 20: 45 tests unitarios nuevos + 15 de regresión del manual,
+27 E2E nuevos (ejecutados en slices), tipado, lint y build de producción.
+Quality Gate estricto de los tests nuevos: 100/100, sin excepciones.
+`e2e-user-flows-check`: 14/14 flows calificados, sin faltantes ni junk-only;
+mapa fresco y tags sincronizados. Las capturas de escritorio, móvil, tablet
+y modo oscuro se revisaron durante la validación local.
+Entrega en PR de sesión; no se aplica merge ni deploy desde esta sesión.
 
 The project is a mature animal adoption platform with complete backend and frontend implementations, extensive test coverage, and a methodology system for maintaining context.
 

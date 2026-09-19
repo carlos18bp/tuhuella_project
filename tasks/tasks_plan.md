@@ -1,6 +1,6 @@
 # Tuhuella — Feature Task Plan
 
-> Last updated: 2026-05-03 (Phase 24 — Adoption Interview Follow-Up + WhatsApp + Event Timeline)
+> Last updated: 2026-09-19 (Explorador del ecosistema del manual)
 
 ## Status Legend
 - ✅ Done
@@ -444,6 +444,17 @@
 | Backfill `next_follow_up_due_at = now() + 5d` para solicitudes existentes en `interview` | ⏳ | Decisión opcional al desplegar — actualmente nuevas transiciones y eventos lo programan; existentes quedan fuera hasta que ocurra alguna |
 | E2E spec específico para WhatsApp + timeline en `e2e/app/adoption.spec.ts` | ⏳ | Coverage actual via unit; flow tag por agregar |
 | UI para editar/archivar eventos individuales | ⏳ | Endpoints PATCH/DELETE existen; los componentes solo crean por ahora |
+
+## Explorador del ecosistema del manual (2026-09-19)
+
+| Tarea | Estado | Notas |
+|---|---|---|
+| Catálogo completo de la aplicación | ✅ | 69 pantallas, 33 módulos, 7 espacios; rutas reales y textos ES/EN |
+| Subpágina del manual y acceso desde índice/tarjeta | ✅ | `/{locale}/manual/ecosystem`, todos los roles autenticados |
+| Exploración orbital y alternativa por tarjetas | ✅ | Jerarquía, contexto, relaciones, búsqueda, breadcrumb, recorridos, teclado, arrastre, zoom y pausa |
+| Separación de mapa y permisos | ✅ | Mapa completo; accesos e instrucciones respetan los guards existentes |
+| Estado compartible | ✅ | Nodo/recorrido/relaciones en URL; recuperación de parámetros inválidos |
+| Tests y mapa de flujos | ✅ | Catálogo, roles e interacción; 14 flows registrados con outcomes; sin nuevos endpoints ni migraciones |
 
 ## Known Issues
 - Wompi payment SDK not integrated (placeholder only)

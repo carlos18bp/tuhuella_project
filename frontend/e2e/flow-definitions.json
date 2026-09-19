@@ -1,7 +1,223 @@
 {
-  "version": "5.10.0",
-  "lastUpdated": "2026-07-27",
+  "version": "5.11.0",
+  "lastUpdated": "2026-09-19",
   "flows": {
+    "manual-ecosystem-browse": {
+      "name": "Explore the complete ecosystem",
+      "module": "manual",
+      "roles": [
+        "adopter",
+        "shelter_admin",
+        "veterinarian",
+        "web_manager",
+        "admin"
+      ],
+      "priority": "P2",
+      "description": "Todos los roles entran desde el manual y consultan los siete espacios con sus pantallas.",
+      "outcomes": [
+        "display"
+      ]
+    },
+    "manual-ecosystem-navigate": {
+      "name": "Navigate ecosystem levels",
+      "module": "manual",
+      "roles": [
+        "adopter",
+        "shelter_admin",
+        "veterinarian",
+        "web_manager",
+        "admin"
+      ],
+      "priority": "P2",
+      "description": "Seleccionar un espacio, módulo y pantalla; volver al nivel anterior.",
+      "outcomes": [
+        "success"
+      ]
+    },
+    "manual-ecosystem-search": {
+      "name": "Search ecosystem modules",
+      "module": "manual",
+      "roles": [
+        "adopter",
+        "shelter_admin",
+        "veterinarian",
+        "web_manager",
+        "admin"
+      ],
+      "priority": "P2",
+      "description": "Buscar un módulo por su nombre o descripción y seleccionarlo.",
+      "outcomes": [
+        "success"
+      ]
+    },
+    "manual-ecosystem-search-empty": {
+      "name": "Unmatched ecosystem search",
+      "module": "manual",
+      "roles": [
+        "adopter",
+        "shelter_admin",
+        "veterinarian",
+        "web_manager",
+        "admin"
+      ],
+      "priority": "P2",
+      "description": "Buscar un término sin coincidencias y ver el estado vacío.",
+      "outcomes": [
+        "display"
+      ]
+    },
+    "manual-ecosystem-tour": {
+      "name": "Follow an ecosystem tour",
+      "module": "manual",
+      "roles": [
+        "adopter",
+        "shelter_admin",
+        "veterinarian",
+        "web_manager",
+        "admin"
+      ],
+      "priority": "P2",
+      "description": "Iniciar un recorrido, avanzar o volver entre módulos y terminar o salir.",
+      "outcomes": [
+        "success"
+      ]
+    },
+    "manual-ecosystem-relations": {
+      "name": "Toggle ecosystem connections",
+      "module": "manual",
+      "roles": [
+        "adopter",
+        "shelter_admin",
+        "veterinarian",
+        "web_manager",
+        "admin"
+      ],
+      "priority": "P2",
+      "description": "Ocultar o mostrar las conexiones operativas del nivel actual.",
+      "outcomes": [
+        "success"
+      ]
+    },
+    "manual-ecosystem-share": {
+      "name": "Restore an ecosystem selection",
+      "module": "manual",
+      "roles": [
+        "adopter",
+        "shelter_admin",
+        "veterinarian",
+        "web_manager",
+        "admin"
+      ],
+      "priority": "P2",
+      "description": "Recargar el enlace del módulo seleccionado y recuperar su contexto.",
+      "outcomes": [
+        "success"
+      ]
+    },
+    "manual-ecosystem-share-invalid": {
+      "name": "Recover an invalid ecosystem link",
+      "module": "manual",
+      "roles": [
+        "adopter",
+        "shelter_admin",
+        "veterinarian",
+        "web_manager",
+        "admin"
+      ],
+      "priority": "P2",
+      "description": "Abrir un enlace con nodo o recorrido desconocido y volver a una selección válida.",
+      "outcomes": [
+        "error"
+      ]
+    },
+    "manual-ecosystem-access": {
+      "name": "Explore restricted module descriptions",
+      "module": "manual",
+      "roles": [
+        "adopter"
+      ],
+      "priority": "P2",
+      "description": "Un adoptante consulta un módulo administrativo y ve su audiencia sin un enlace de acceso.",
+      "outcomes": [
+        "display"
+      ]
+    },
+    "manual-ecosystem-guide": {
+      "name": "Return to the role-filtered manual",
+      "module": "manual",
+      "roles": [
+        "adopter",
+        "shelter_admin",
+        "veterinarian",
+        "web_manager",
+        "admin"
+      ],
+      "priority": "P2",
+      "description": "Volver desde el mapa a la guía conservando el filtro de procesos por rol.",
+      "outcomes": [
+        "success"
+      ]
+    },
+    "manual-ecosystem-auth": {
+      "name": "Protect ecosystem access",
+      "module": "manual",
+      "roles": [
+        "guest"
+      ],
+      "priority": "P1",
+      "description": "Un visitante sin sesión recibe la redirección al inicio de sesión.",
+      "outcomes": [
+        "error"
+      ]
+    },
+    "manual-ecosystem-orbit": {
+      "name": "Control the ecosystem orbit",
+      "module": "manual",
+      "roles": [
+        "adopter",
+        "shelter_admin",
+        "veterinarian",
+        "web_manager",
+        "admin"
+      ],
+      "priority": "P2",
+      "description": "Ajustar la órbita mediante teclado, arrastre, zoom, centrado y pausa.",
+      "outcomes": [
+        "success"
+      ]
+    },
+    "manual-ecosystem-responsive": {
+      "name": "Explore ecosystem cards",
+      "module": "manual",
+      "roles": [
+        "adopter",
+        "shelter_admin",
+        "veterinarian",
+        "web_manager",
+        "admin"
+      ],
+      "priority": "P2",
+      "description": "Navegar por tarjetas en 412, 835 y 1195 px sin desbordamiento horizontal.",
+      "outcomes": [
+        "success"
+      ]
+    },
+    "manual-ecosystem-locale": {
+      "name": "Explore the English ecosystem",
+      "module": "manual",
+      "roles": [
+        "adopter",
+        "shelter_admin",
+        "veterinarian",
+        "web_manager",
+        "admin"
+      ],
+      "priority": "P2",
+      "description": "Entrar desde el manual inglés y consultar un módulo en ese idioma.",
+      "outcomes": [
+        "display"
+      ]
+    },
     "home-loads": {
       "name": "Home page loads",
       "module": "home",

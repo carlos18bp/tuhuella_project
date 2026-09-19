@@ -218,6 +218,28 @@ tuhuella_project/
 
 ## Testing Architecture
 
+### Explorador del ecosistema del manual (2026-09-19)
+
+- `/{locale}/manual/ecosystem` hereda `manual/layout.tsx` y su guard de
+  autenticación. `EcosystemExplorer` ofrece el mapa completo a los cinco roles;
+  no modifica el filtro por rol de la guía ni los permisos de destino.
+- `lib/manual/ecosystemCatalog.ts` contiene el árbol espacio → módulo → pantalla
+  y las relaciones entre hermanos. Sus 69 rutas tienen una única ubicación
+  principal, comprobada contra las páginas reales por `ecosystemCatalog.test.ts`.
+  Al agregar una página, actualizar este catálogo y sus textos ES/EN.
+- Los destinos de fichas dinámicas son listados seguros, nunca URLs con
+  placeholders/IDs inventados. La puerta de entrada sólo se muestra cuando
+  `canOpenEcosystemView` reconoce el rol, pero la autorización real permanece en
+  la pantalla y el backend. Los pagos siguen identificados como demostración.
+- Textos en `messages/{es,en}.json`, namespace `manual.ecosystem`. Los procesos
+  enlazados reutilizan `MANUAL_SECTIONS` y `canViewManualAudience`.
+- `useEcosystemNavigation` sincroniza `node`, `tour` y `relations` con la API
+  nativa de historial integrada con Next, sin navegación de servidor por clic.
+  Los parámetros inválidos se normalizan. Giro/zoom permanecen locales.
+- `useEcosystemOrbit` anima sólo en escritorio (≥1280 px), con el escenario
+  visible y sin interacción, pausa, tour o preferencia de movimiento reducido.
+  Por debajo se usan tarjetas; no se agregan dependencias gráficas ni endpoints.
+
 | Layer | Count | Tool |
 |-------|-------|------|
 | Backend tests | 99+ files | pytest + pytest-django |

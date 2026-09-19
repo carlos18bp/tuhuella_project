@@ -8,6 +8,22 @@
  *   test('...', { tag: [...AUTH_LOGIN_INVALID] }, async ({ page }) => { ... });
  */
 
+// ── Manual ecosystem ──
+export const MANUAL_ECOSYSTEM_BROWSE = ['@flow:manual-ecosystem-browse', '@module:manual', '@priority:P2'];
+export const MANUAL_ECOSYSTEM_NAVIGATE = ['@flow:manual-ecosystem-navigate', '@module:manual', '@priority:P2'];
+export const MANUAL_ECOSYSTEM_SEARCH = ['@flow:manual-ecosystem-search', '@module:manual', '@priority:P2'];
+export const MANUAL_ECOSYSTEM_SEARCH_EMPTY = ['@flow:manual-ecosystem-search-empty', '@module:manual', '@priority:P2'];
+export const MANUAL_ECOSYSTEM_TOUR = ['@flow:manual-ecosystem-tour', '@module:manual', '@priority:P2'];
+export const MANUAL_ECOSYSTEM_RELATIONS = ['@flow:manual-ecosystem-relations', '@module:manual', '@priority:P2'];
+export const MANUAL_ECOSYSTEM_SHARE = ['@flow:manual-ecosystem-share', '@module:manual', '@priority:P2'];
+export const MANUAL_ECOSYSTEM_SHARE_INVALID = ['@flow:manual-ecosystem-share-invalid', '@module:manual', '@priority:P2'];
+export const MANUAL_ECOSYSTEM_ACCESS = ['@flow:manual-ecosystem-access', '@module:manual', '@priority:P2'];
+export const MANUAL_ECOSYSTEM_GUIDE = ['@flow:manual-ecosystem-guide', '@module:manual', '@priority:P2'];
+export const MANUAL_ECOSYSTEM_AUTH = ['@flow:manual-ecosystem-auth', '@module:manual', '@priority:P1'];
+export const MANUAL_ECOSYSTEM_ORBIT = ['@flow:manual-ecosystem-orbit', '@module:manual', '@priority:P2'];
+export const MANUAL_ECOSYSTEM_RESPONSIVE = ['@flow:manual-ecosystem-responsive', '@module:manual', '@priority:P2'];
+export const MANUAL_ECOSYSTEM_LOCALE = ['@flow:manual-ecosystem-locale', '@module:manual', '@priority:P2'];
+
 // ── Home ──
 export const HOME_LOADS = ['@flow:home-loads', '@module:home', '@priority:P1'];
 export const HOME_TO_ANIMALS = ['@flow:home-to-animals', '@module:home', '@priority:P2'];
