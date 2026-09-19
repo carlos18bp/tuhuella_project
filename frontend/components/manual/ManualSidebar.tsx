@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Network } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { ROUTES } from '@/lib/constants';
 
 import type { ManualLocale, ManualSection } from '@/lib/manual/types';
 
@@ -21,6 +23,10 @@ export default function ManualSidebar({ sections, locale }: Props) {
 
   const nav = (
     <nav aria-label={label} className="flex flex-col gap-1">
+      <Link href={ROUTES.MANUAL_ECOSYSTEM} onClick={() => setMobileOpen(false)} className="mb-3 flex min-h-11 items-center gap-2 rounded-xl bg-teal-50 px-3 py-3 text-sm font-semibold text-teal-800 dark:bg-teal-950/40 dark:text-teal-300">
+        <Network className="h-5 w-5 shrink-0" aria-hidden="true" />
+        {t('ecosystem.title')}
+      </Link>
       {sections.map((section) => {
         const Icon = section.icon;
         const isCollapsed = collapsed[section.id] ?? false;

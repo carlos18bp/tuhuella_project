@@ -6,8 +6,8 @@ Use this document to understand each flow's steps, branching conditions, role re
 
 > **Flow IDs in this document match `e2e/flow-definitions.json` and `e2e/helpers/flow-tags.ts` exactly.**
 
-**Version:** 5.10.0
-**Last Updated:** 2026-07-04
+**Version:** 5.11.0
+**Last Updated:** 2026-09-19
 
 ---
 
@@ -46,6 +46,20 @@ Use this document to understand each flow's steps, branching conditions, role re
 
 | Flow ID | Name | Module | Priority | Roles | Frontend Route |
 |---------|------|--------|----------|-------|----------------|
+| `manual-ecosystem-browse` | Explore the complete ecosystem | manual | P2 | all authenticated | `/manual/ecosystem` |
+| `manual-ecosystem-navigate` | Navigate ecosystem levels | manual | P2 | all authenticated | `/manual/ecosystem` |
+| `manual-ecosystem-search` | Search ecosystem modules | manual | P2 | all authenticated | `/manual/ecosystem` |
+| `manual-ecosystem-search-empty` | Unmatched ecosystem search | manual | P2 | all authenticated | `/manual/ecosystem` |
+| `manual-ecosystem-tour` | Follow an ecosystem tour | manual | P2 | all authenticated | `/manual/ecosystem` |
+| `manual-ecosystem-relations` | Toggle ecosystem connections | manual | P2 | all authenticated | `/manual/ecosystem` |
+| `manual-ecosystem-share` | Restore an ecosystem selection | manual | P2 | all authenticated | `/manual/ecosystem` |
+| `manual-ecosystem-share-invalid` | Recover an invalid ecosystem link | manual | P2 | all authenticated | `/manual/ecosystem` |
+| `manual-ecosystem-access` | Explore restricted module descriptions | manual | P2 | adopter | `/manual/ecosystem` |
+| `manual-ecosystem-guide` | Return to the role-filtered manual | manual | P2 | all authenticated | `/manual/ecosystem` |
+| `manual-ecosystem-auth` | Protect ecosystem access | manual | P1 | guest | `/manual/ecosystem` |
+| `manual-ecosystem-orbit` | Control the ecosystem orbit | manual | P2 | all authenticated | `/manual/ecosystem` |
+| `manual-ecosystem-responsive` | Explore ecosystem cards | manual | P2 | all authenticated | `/manual/ecosystem` |
+| `manual-ecosystem-locale` | Explore the English ecosystem | manual | P2 | all authenticated | `/manual/ecosystem` |
 | `home-loads` | Home page loads | home | P1 | shared | `/` |
 | `home-to-animals` | Navigate from home to animals | home | P2 | shared | `/` → `/animals` |
 | `home-to-shelters` | Navigate from home to shelters | home | P2 | shared | `/` → `/shelters` |
@@ -3283,6 +3297,114 @@ When the shelter has no `video_url`, the button is not rendered.
 | Condition | Behavior |
 |-----------|----------|
 | Empty message body | Send does nothing / no request |
+
+---
+
+### Ecosistema del manual (2026-09-19)
+
+**Ruta:** `/{locale}/manual/ecosystem`. **Fuentes:** `frontend/lib/manual/ecosystemCatalog.ts`,
+`frontend/components/manual/ecosystem/`, `frontend/lib/manual/useEcosystemNavigation.ts`.
+Catálogo estático de 69 pantallas, 33 módulos y 7 espacios, contrastado con las páginas
+reales de App Router; no consume endpoints de negocio.
+
+#### Roles
+
+Todos los usuarios autenticados exploran el catálogo completo. Describir un módulo
+no concede permisos: sólo se ofrece el enlace de entrada cuando su guard de rol lo
+permite, y la pantalla/API de destino conserva su propia autorización.
+
+#### Convenciones
+
+- Entrada normal: menú de cuenta → Manual de usuario → Explorar el ecosistema
+  (también desde el índice del manual). Los tests parten de Inicio, abren el menú
+  de cuenta/móvil y siguen el enlace visible del manual; no sustituyen el catálogo
+  ni sus componentes.
+- Escritorio desde 1280 px: órbita; por debajo: tarjetas. Ambos comparten la misma
+  jerarquía, selección, búsqueda, panel de contexto y recorridos.
+- `node`, `tour` y `relations` viven en la URL; un valor desconocido vuelve a un
+  estado válido. La rotación/zoom son estado local de presentación.
+- Las pantallas de detalle enlazan al listado para elegir un registro real; no hay
+  IDs inventados. Los pagos indican modo demostración; el acceso `admin-login`
+  es un traspaso técnico sin enlace ejecutable.
+- Las instrucciones del manual mantienen su filtro por audiencia, aun cuando
+  el mapa muestra módulos ajenos al rol actual.
+- Pausa de animación con movimiento reducido, foco, hover, recorrido activo,
+  pestaña oculta o escenario fuera de pantalla; listeners/RAF se limpian al salir.
+
+#### Interacciones por vista y resultado
+
+| Flow ID | Inicio → acción → resultado observable | Clase | Rol |
+|---|---|---|---|
+| `manual-ecosystem-browse` | Todos los roles entran desde el manual y consultan los siete espacios con sus pantallas. | display | 5 roles |
+| `manual-ecosystem-navigate` | Seleccionar un espacio, módulo y pantalla; volver al nivel anterior. | success | 5 roles |
+| `manual-ecosystem-search` | Buscar un módulo por su nombre o descripción y seleccionarlo. | success | 5 roles |
+| `manual-ecosystem-search-empty` | Buscar un término sin coincidencias y ver el estado vacío. | display | 5 roles |
+| `manual-ecosystem-tour` | Iniciar un recorrido, avanzar o volver entre módulos y terminar o salir. | success | 5 roles |
+| `manual-ecosystem-relations` | Ocultar o mostrar las conexiones operativas del nivel actual. | success | 5 roles |
+| `manual-ecosystem-share` | Recargar el enlace del módulo seleccionado y recuperar su contexto. | success | 5 roles |
+| `manual-ecosystem-share-invalid` | Abrir un enlace con nodo o recorrido desconocido y volver a una selección válida. | error | 5 roles |
+| `manual-ecosystem-access` | Un adoptante consulta un módulo administrativo y ve su audiencia sin un enlace de acceso. | display | adopter |
+| `manual-ecosystem-guide` | Volver desde el mapa a la guía conservando el filtro de procesos por rol. | success | 5 roles |
+| `manual-ecosystem-auth` | Un visitante sin sesión recibe la redirección al inicio de sesión. | error | guest |
+| `manual-ecosystem-orbit` | Ajustar la órbita mediante teclado, arrastre, zoom, centrado y pausa. | success | 5 roles |
+| `manual-ecosystem-responsive` | Navegar por tarjetas en 412, 835 y 1195 px sin desbordamiento horizontal. | success | 5 roles |
+| `manual-ecosystem-locale` | Entrar desde el manual inglés y consultar un módulo en ese idioma. | display | 5 roles |
+
+**Análisis de las cuatro clases:** `success`: selección, controles y recorridos;
+`error`: sesión ausente y URL inválida; `display`: catálogo, contexto, búsqueda
+vacía y traducciones. `failure`: **n/a**, el explorador no envía formularios ni
+peticiones de negocio; los fallos de autenticación y de las pantallas enlazadas
+pertenecen a sus flujos existentes. No se inventan fallos HTTP del catálogo estático.
+
+#### Adoptante
+
+Puede explorar los 7 espacios, incluso administración. En `admin-metrics` ve
+descripción y audiencia, sin enlace de entrada; al volver a la guía conserva
+sólo los procesos públicos/transversales y de adoptante.
+
+#### Administrador de refugio
+
+Mismo mapa completo; enlaces de gestión de su refugio y pantallas compartidas.
+El mapa no habilita gestión de otros refugios ni permisos globales.
+
+#### Veterinario
+
+Mismo mapa completo; acceso al listado de seguimientos y sus fichas a través
+de registros reales. Recorrido del espacio veterinario con dos paradas.
+
+#### Web manager
+
+Mismo mapa completo; accesos de coordinación y pantallas compartidas, sin
+convertir la visibilidad del mapa en permiso de administración.
+
+#### Administrador
+
+Mismo mapa completo; accesos administrativos y los permisos que ya reconocen
+los guards actuales. No se asume acceso al panel de refugio por ser admin.
+
+#### Visitante sin sesión
+
+Salir de la cuenta → abrir nuevamente el explorador → redirección a
+`/{locale}/sign-in`, sin renderizar el catálogo.
+
+#### E2E Coverage Index — ecosistema
+
+- `frontend/e2e/app/manual-ecosystem.spec.ts`: entrada, niveles, buscador,
+  estado vacío, tour, relaciones, URL/recarga, restricciones, salida de sesión,
+  vuelta al manual, enlace real, teclado/arrastre/zoom/pausa.
+- `frontend/e2e/app/manual-ecosystem-responsive.spec.ts`: los cinco roles,
+  412/835/1195 px sin overflow y navegación en inglés.
+- Fixtures sólo en el límite HTTP/autenticación (`helpers/ecosystem-session.ts`);
+  sin login real, seed, mutaciones de base de datos ni cambios de permisos.
+- Unidad: integridad de rutas, destinos, textos ES/EN, relaciones y procesos;
+  reglas de acceso, estado compartible, contexto, búsqueda y controles del tour.
+
+**Auditoría del alcance (2026-09-19):** 14/14 flujos calificados (8 `success`,
+2 `error`, 4 `display`), sin `junk-only` ni faltantes; `failure` n/a por la
+razón anterior. Freshness y sincronización de tags correctas. Quality Gate
+estricto de los tests nuevos: 100/100, sin errores, warnings ni excepciones.
+El barrido estático del repo conserva 12 exenciones existentes y 7 tests sin tag
+fuera de este alcance; no equivale a ejecutar toda la suite.
 
 ---
 

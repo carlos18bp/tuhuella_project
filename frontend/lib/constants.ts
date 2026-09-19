@@ -55,6 +55,7 @@ export const ROUTES = {
   ADMIN_METRICS: '/admin/metrics',
 
   MANUAL: '/manual',
+  MANUAL_ECOSYSTEM: '/manual/ecosystem',
 
   WEB_MANAGER_SHELTERS: '/web-manager/shelters',
   WEB_MANAGER_SHELTER_DETAIL: (id: number | string) => `/web-manager/shelters/${id}`,

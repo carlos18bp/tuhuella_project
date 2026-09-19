@@ -1230,6 +1230,637 @@
     "dark": "Oscuro"
   },
   "manual": {
+    "ecosystem": {
+      "title": "Ecosistema de la aplicación",
+      "eyebrow": "Explorador de Tuhuella",
+      "intro": "Descubre todos los espacios de Tuhuella, qué hace cada módulo y cómo se conectan. Explorar el mapa no cambia los permisos de tu cuenta.",
+      "card": "Conoce el mapa completo de Tuhuella: módulos, pantallas y recorridos conectados.",
+      "enter": "Explorar el ecosistema",
+      "backManual": "Volver al manual",
+      "loading": "Cargando el explorador…",
+      "breadcrumb": "Ruta del explorador",
+      "searchLabel": "Buscar en el ecosistema",
+      "searchPlaceholder": "Buscar módulos, pantallas o beneficios…",
+      "noResults": "No encontramos módulos con ese término.",
+      "clearSearch": "Limpiar búsqueda",
+      "back": "Volver al nivel anterior",
+      "rotateLeft": "Girar a la izquierda",
+      "rotateRight": "Girar a la derecha",
+      "zoomIn": "Acercar",
+      "zoomOut": "Alejar",
+      "reset": "Centrar la órbita",
+      "pause": "Pausar giro",
+      "resume": "Reanudar giro",
+      "showRelations": "Mostrar relaciones",
+      "hideRelations": "Ocultar relaciones",
+      "stage": "Módulos disponibles",
+      "orbitHint": "Arrastra el fondo para girar. Usa Tab para recorrer módulos, flechas para girar y Escape para volver.",
+      "cardsHint": "Selecciona una tarjeta para entrar al siguiente nivel.",
+      "reducedMotion": "El giro automático está desactivado por tu preferencia de movimiento reducido.",
+      "preview": "Vista previa",
+      "context": "Contexto del módulo",
+      "value": "Para qué sirve",
+      "viewsCount": "{count, plural, one {# pantalla relacionada} other {# pantallas relacionadas}}",
+      "children": "Explorar este nivel",
+      "screens": "Pantallas de este módulo",
+      "openScreen": "Abrir pantalla",
+      "chooseRecord": "Elegir un registro",
+      "readGuide": "Ver instrucciones",
+      "restricted": "Disponible para: {role}",
+      "noChildren": "Llegaste a una pantalla. Consulta sus accesos e instrucciones.",
+      "startTour": "Iniciar recorrido",
+      "tour": "Recorrido guiado",
+      "previous": "Paso anterior",
+      "next": "Siguiente",
+      "finish": "Terminar recorrido",
+      "exit": "Salir del recorrido",
+      "progress": "Paso {current} de {total}",
+      "tourAnnouncement": "{space}. Paso {current} de {total}.",
+      "connections": "Cómo se conectan",
+      "hierarchy": "Jerarquía",
+      "relationship": "Relación entre módulos",
+      "noRelations": "En este nivel se muestran las pantallas que componen el módulo.",
+      "selection": "Primero elige un registro desde el listado.",
+      "demo": "Pagos en demostración: todavía no se realizan cobros reales.",
+      "alias": "Acceso anterior: abre la postulación actual.",
+      "handoff": "Se abre desde una sesión administrativa; no tiene un acceso directo independiente.",
+      "roles": {
+        "public": "cualquier visitante",
+        "authenticated": "usuarios con sesión",
+        "shelter_applicant": "adoptantes y administradores del refugio",
+        "shelter_admin": "administradores del refugio",
+        "veterinarian": "veterinarios y administración",
+        "web_manager": "coordinación y administración",
+        "admin": "administración"
+      },
+      "relations": {
+        "care": "permite dar atención a",
+        "prepare": "ayuda a preparar",
+        "participate": "invita a participar en",
+        "choose": "ayuda a elegir en",
+        "match": "orienta",
+        "result": "muestra su resultado en",
+        "inform": "aporta información a",
+        "sustain": "sostiene",
+        "share": "genera novedades en",
+        "coordinate": "coordina",
+        "apply": "envía solicitudes a",
+        "followup": "continúa con",
+        "support": "apoya"
+      },
+      "nodes": {
+        "home": {
+          "title": "Inicio",
+          "summary": "Explora las principales formas de ayudar.",
+          "value": "Explora las principales formas de ayudar."
+        },
+        "about": {
+          "title": "Quiénes somos",
+          "summary": "Conoce la misión y el equipo.",
+          "value": "Conoce la misión y el equipo."
+        },
+        "discover-welcome": {
+          "title": "Conoce Tuhuella",
+          "summary": "Descubre el propósito de la plataforma.",
+          "value": "Descubre el propósito de la plataforma."
+        },
+        "animals": {
+          "title": "Buscar animales",
+          "summary": "Filtra los animales por sus características.",
+          "value": "Filtra los animales por sus características."
+        },
+        "animal-detail": {
+          "title": "Ficha del animal",
+          "summary": "Consulta fotos, salud y opciones para ayudar a un animal.",
+          "value": "Consulta fotos, salud y opciones para ayudar a un animal."
+        },
+        "discover-animals": {
+          "title": "Animales",
+          "summary": "Encuentra animales y conoce sus necesidades.",
+          "value": "Encuentra animales y conoce sus necesidades."
+        },
+        "shelters": {
+          "title": "Buscar refugios",
+          "summary": "Explora los refugios participantes.",
+          "value": "Explora los refugios participantes."
+        },
+        "shelter-detail": {
+          "title": "Perfil del refugio",
+          "summary": "Conoce al refugio, su galería y sus animales.",
+          "value": "Conoce al refugio, su galería y sus animales."
+        },
+        "discover-shelters": {
+          "title": "Refugios",
+          "summary": "Conoce las organizaciones que cuidan a los animales.",
+          "value": "Conoce las organizaciones que cuidan a los animales."
+        },
+        "campaigns": {
+          "title": "Buscar campañas",
+          "summary": "Consulta las campañas publicadas.",
+          "value": "Consulta las campañas publicadas."
+        },
+        "campaign-detail": {
+          "title": "Detalle de campaña",
+          "summary": "Revisa el objetivo, avance y evidencias de una campaña.",
+          "value": "Revisa el objetivo, avance y evidencias de una campaña."
+        },
+        "discover-campaigns": {
+          "title": "Campañas públicas",
+          "summary": "Descubre iniciativas que necesitan apoyo.",
+          "value": "Descubre iniciativas que necesitan apoyo."
+        },
+        "blog": {
+          "title": "Blog",
+          "summary": "Explora los artículos publicados.",
+          "value": "Explora los artículos publicados."
+        },
+        "blog-detail": {
+          "title": "Leer un artículo",
+          "summary": "Abre una publicación completa desde el blog.",
+          "value": "Abre una publicación completa desde el blog."
+        },
+        "discover-stories": {
+          "title": "Historias y consejos",
+          "summary": "Lee contenido sobre bienestar animal.",
+          "value": "Lee contenido sobre bienestar animal."
+        },
+        "volunteer": {
+          "title": "Voluntariado",
+          "summary": "Descubre oportunidades para colaborar.",
+          "value": "Descubre oportunidades para colaborar."
+        },
+        "volunteer-apply": {
+          "title": "Postular al voluntariado",
+          "summary": "Elige una oportunidad y envía tu postulación.",
+          "value": "Elige una oportunidad y envía tu postulación."
+        },
+        "allies": {
+          "title": "Aliados estratégicos",
+          "summary": "Conoce las organizaciones aliadas.",
+          "value": "Conoce las organizaciones aliadas."
+        },
+        "contact": {
+          "title": "Contactar al equipo",
+          "summary": "Envía consultas o mensajes al equipo de Tuhuella.",
+          "value": "Envía consultas o mensajes al equipo de Tuhuella."
+        },
+        "discover-community": {
+          "title": "Comunidad",
+          "summary": "Participa como voluntario, aliado o contacta al equipo.",
+          "value": "Participa como voluntario, aliado o contacta al equipo."
+        },
+        "faq": {
+          "title": "Preguntas frecuentes",
+          "summary": "Encuentra respuestas sobre el uso de Tuhuella.",
+          "value": "Encuentra respuestas sobre el uso de Tuhuella."
+        },
+        "terms": {
+          "title": "Términos de uso",
+          "summary": "Consulta las condiciones de participación.",
+          "value": "Consulta las condiciones de participación."
+        },
+        "looking": {
+          "title": "Busco adoptar",
+          "summary": "Conoce el proceso y cómo compartir tus preferencias.",
+          "value": "Conoce el proceso y cómo compartir tus preferencias."
+        },
+        "discover-information": {
+          "title": "Orientación",
+          "summary": "Resuelve dudas antes de participar.",
+          "value": "Resuelve dudas antes de participar."
+        },
+        "discover": {
+          "title": "Descubrir y participar",
+          "summary": "Conoce a los animales, los refugios y las formas de participar.",
+          "value": "Encuentra una causa cercana y elige cómo acompañarla."
+        },
+        "sign-up": {
+          "title": "Crear cuenta",
+          "summary": "Registra tus datos para participar.",
+          "value": "Registra tus datos para participar."
+        },
+        "sign-in": {
+          "title": "Iniciar sesión",
+          "summary": "Entra con tu cuenta.",
+          "value": "Entra con tu cuenta."
+        },
+        "forgot-password": {
+          "title": "Recuperar contraseña",
+          "summary": "Solicita un código para recuperar el acceso.",
+          "value": "Solicita un código para recuperar el acceso."
+        },
+        "account-access": {
+          "title": "Acceso a la cuenta",
+          "summary": "Crea tu cuenta o recupera el acceso.",
+          "value": "Crea tu cuenta o recupera el acceso."
+        },
+        "profile": {
+          "title": "Resumen de mi perfil",
+          "summary": "Consulta tu actividad y accesos personales.",
+          "value": "Consulta tu actividad y accesos personales."
+        },
+        "profile-edit": {
+          "title": "Editar perfil",
+          "summary": "Actualiza tus datos y preferencias personales.",
+          "value": "Actualiza tus datos y preferencias personales."
+        },
+        "account-profile": {
+          "title": "Mi perfil",
+          "summary": "Mantén tu información y consulta tu actividad.",
+          "value": "Mantén tu información y consulta tu actividad."
+        },
+        "adopt": {
+          "title": "Solicitar adopción",
+          "summary": "Selecciona un animal y completa el formulario de adopción.",
+          "value": "Selecciona un animal y completa el formulario de adopción."
+        },
+        "applications": {
+          "title": "Mis solicitudes",
+          "summary": "Consulta el estado de tus solicitudes.",
+          "value": "Consulta el estado de tus solicitudes."
+        },
+        "application-detail": {
+          "title": "Detalle de mi solicitud",
+          "summary": "Consulta el avance y la comunicación disponible con el refugio.",
+          "value": "Consulta el avance y la comunicación disponible con el refugio."
+        },
+        "application-history": {
+          "title": "Historia del seguimiento",
+          "summary": "Lee el historial de atención asociado a tu adopción.",
+          "value": "Lee el historial de atención asociado a tu adopción."
+        },
+        "account-adoption": {
+          "title": "Proceso de adopción",
+          "summary": "Desde la solicitud hasta el seguimiento del animal.",
+          "value": "Desde la solicitud hasta el seguimiento del animal."
+        },
+        "favorites": {
+          "title": "Mis favoritos",
+          "summary": "Organiza animales guardados con notas, filtros y comparación.",
+          "value": "Organiza animales guardados con notas, filtros y comparación."
+        },
+        "account-favorites": {
+          "title": "Favoritos",
+          "summary": "Guarda animales y compara opciones de adopción.",
+          "value": "Guarda animales y compara opciones de adopción."
+        },
+        "intent": {
+          "title": "Mi intención de adoptar",
+          "summary": "Publica tus preferencias y controla su visibilidad.",
+          "value": "Publica tus preferencias y controla su visibilidad."
+        },
+        "account-intent": {
+          "title": "Preferencias de adopción",
+          "summary": "Comparte qué compañero estás buscando.",
+          "value": "Comparte qué compañero estás buscando."
+        },
+        "shelter-application": {
+          "title": "Postulación de refugio",
+          "summary": "Completa la postulación y consulta su estado.",
+          "value": "Completa la postulación y consulta su estado."
+        },
+        "shelter-onboarding": {
+          "title": "Acceso anterior de postulación",
+          "summary": "Este acceso te lleva al formulario actual de postulación.",
+          "value": "Este acceso te lleva al formulario actual de postulación."
+        },
+        "account-shelter": {
+          "title": "Postular un refugio",
+          "summary": "Presenta una organización para participar en la plataforma.",
+          "value": "Presenta una organización para participar en la plataforma."
+        },
+        "account": {
+          "title": "Mi cuenta y adopciones",
+          "summary": "Organiza tu perfil y acompaña tu proceso de adopción.",
+          "value": "Reúne tus preferencias, solicitudes y el cuidado posterior."
+        },
+        "donate": {
+          "title": "Realizar una donación",
+          "summary": "Explora el formulario de aportes; todavía no procesa cobros reales.",
+          "value": "Explora el formulario de aportes; todavía no procesa cobros reales."
+        },
+        "donation-history": {
+          "title": "Mis donaciones",
+          "summary": "Consulta el historial disponible de tus aportes.",
+          "value": "Consulta el historial disponible de tus aportes."
+        },
+        "support-donations": {
+          "title": "Donaciones",
+          "summary": "Apoya a una causa y consulta tu historial.",
+          "value": "Apoya a una causa y consulta tu historial."
+        },
+        "sponsor": {
+          "title": "Apadrinar",
+          "summary": "Explora montos y frecuencia; el cobro real aún no está habilitado.",
+          "value": "Explora montos y frecuencia; el cobro real aún no está habilitado."
+        },
+        "sponsorship-history": {
+          "title": "Mis apadrinamientos",
+          "summary": "Consulta tus apadrinamientos registrados.",
+          "value": "Consulta tus apadrinamientos registrados."
+        },
+        "support-sponsorship": {
+          "title": "Apadrinamientos",
+          "summary": "Conoce el apoyo periódico al cuidado de los animales.",
+          "value": "Conoce el apoyo periódico al cuidado de los animales."
+        },
+        "platform-support": {
+          "title": "Apoya la plataforma",
+          "summary": "Conoce el propósito de los aportes a Tuhuella.",
+          "value": "Conoce el propósito de los aportes a Tuhuella."
+        },
+        "platform-checkout": {
+          "title": "Aporte a la plataforma",
+          "summary": "Explora el formulario de apoyo en demostración.",
+          "value": "Explora el formulario de apoyo en demostración."
+        },
+        "support-platform": {
+          "title": "Apoyar Tuhuella",
+          "summary": "Conoce cómo contribuir al sostenimiento de la plataforma.",
+          "value": "Conoce cómo contribuir al sostenimiento de la plataforma."
+        },
+        "payment-confirmation": {
+          "title": "Confirmación del aporte",
+          "summary": "Esta pantalla aparece al terminar el formulario; los pagos están en demostración.",
+          "value": "Esta pantalla aparece al terminar el formulario; los pagos están en demostración."
+        },
+        "support-confirmation": {
+          "title": "Resultado del aporte",
+          "summary": "Comprende los mensajes al finalizar un aporte.",
+          "value": "Comprende los mensajes al finalizar un aporte."
+        },
+        "support": {
+          "title": "Donaciones y apadrinamientos",
+          "summary": "Conoce las formas de apoyar y consultar tus aportes.",
+          "value": "Relaciona cada aporte con la causa que quieres acompañar. Los pagos siguen en demostración."
+        },
+        "shelter-dashboard": {
+          "title": "Dashboard del refugio",
+          "summary": "Revisa el resumen de actividad de tu refugio.",
+          "value": "Revisa el resumen de actividad de tu refugio."
+        },
+        "shelter-overview": {
+          "title": "Resumen del refugio",
+          "summary": "Consulta los indicadores del refugio.",
+          "value": "Consulta los indicadores del refugio."
+        },
+        "shelter-animals": {
+          "title": "Gestionar animales",
+          "summary": "Administra los animales de tu refugio.",
+          "value": "Administra los animales de tu refugio."
+        },
+        "shelter-applications": {
+          "title": "Solicitudes del refugio",
+          "summary": "Revisa solicitudes y registra avances del proceso.",
+          "value": "Revisa solicitudes y registra avances del proceso."
+        },
+        "shelter-care": {
+          "title": "Animales y adopciones",
+          "summary": "Gestiona animales y revisa sus solicitudes.",
+          "value": "Gestiona animales y revisa sus solicitudes."
+        },
+        "shelter-campaigns": {
+          "title": "Mis campañas",
+          "summary": "Consulta el estado de aprobación de las campañas.",
+          "value": "Consulta el estado de aprobación de las campañas."
+        },
+        "shelter-campaign-new": {
+          "title": "Solicitar una campaña",
+          "summary": "Prepara una campaña para revisión.",
+          "value": "Prepara una campaña para revisión."
+        },
+        "shelter-campaign-detail": {
+          "title": "Editar y conversar sobre una campaña",
+          "summary": "Edita la campaña y conversa con coordinación.",
+          "value": "Edita la campaña y conversa con coordinación."
+        },
+        "shelter-donations": {
+          "title": "Donaciones recibidas",
+          "summary": "Consulta los aportes registrados para el refugio.",
+          "value": "Consulta los aportes registrados para el refugio."
+        },
+        "shelter-fundraising": {
+          "title": "Campañas y donaciones",
+          "summary": "Organiza campañas y consulta los aportes al refugio.",
+          "value": "Organiza campañas y consulta los aportes al refugio."
+        },
+        "shelter-updates": {
+          "title": "Novedades del refugio",
+          "summary": "Consulta las actualizaciones publicadas.",
+          "value": "Consulta las actualizaciones publicadas."
+        },
+        "shelter-update-new": {
+          "title": "Publicar una actualización",
+          "summary": "Comparte avances de animales o campañas.",
+          "value": "Comparte avances de animales o campañas."
+        },
+        "shelter-communication": {
+          "title": "Actualizaciones",
+          "summary": "Comparte novedades del refugio.",
+          "value": "Comparte novedades del refugio."
+        },
+        "shelter-settings": {
+          "title": "Configurar refugio",
+          "summary": "Actualiza los datos y la presentación del refugio.",
+          "value": "Actualiza los datos y la presentación del refugio."
+        },
+        "shelter-configuration": {
+          "title": "Ajustes del refugio",
+          "summary": "Mantén los datos de tu organización.",
+          "value": "Mantén los datos de tu organización."
+        },
+        "shelter": {
+          "title": "Gestión del refugio",
+          "summary": "El espacio de trabajo para cuidar animales y gestionar el refugio.",
+          "value": "Conecta el cuidado diario con adopciones, campañas y comunicación."
+        },
+        "vet-followups": {
+          "title": "Lista de seguimientos",
+          "summary": "Consulta el estado de tus seguimientos.",
+          "value": "Consulta el estado de tus seguimientos."
+        },
+        "veterinary-followups": {
+          "title": "Seguimientos asignados",
+          "summary": "Encuentra las atenciones que tienes asignadas.",
+          "value": "Encuentra las atenciones que tienes asignadas."
+        },
+        "vet-detail": {
+          "title": "Detalle del seguimiento",
+          "summary": "Consulta la historia, registra atención y marca el seguimiento completado.",
+          "value": "Consulta la historia, registra atención y marca el seguimiento completado."
+        },
+        "veterinary-history": {
+          "title": "Atención e historia clínica",
+          "summary": "Documenta la atención y completa seguimientos.",
+          "value": "Documenta la atención y completa seguimientos."
+        },
+        "veterinary": {
+          "title": "Atención veterinaria",
+          "summary": "Acompaña la salud del animal después de la adopción.",
+          "value": "Registra atención y da continuidad a los seguimientos asignados."
+        },
+        "manager-applications": {
+          "title": "Tablero de solicitudes",
+          "summary": "Filtra solicitudes y detecta procesos que necesitan seguimiento.",
+          "value": "Filtra solicitudes y detecta procesos que necesitan seguimiento."
+        },
+        "manager-application": {
+          "title": "Seguimiento de una solicitud",
+          "summary": "Revisa la bitácora y registra avances de la adopción.",
+          "value": "Revisa la bitácora y registra avances de la adopción."
+        },
+        "coordination-applications": {
+          "title": "Solicitudes globales",
+          "summary": "Acompaña procesos de adopción de distintos refugios.",
+          "value": "Acompaña procesos de adopción de distintos refugios."
+        },
+        "manager-shelters": {
+          "title": "Lista de refugios",
+          "summary": "Encuentra refugios por su estado de verificación.",
+          "value": "Encuentra refugios por su estado de verificación."
+        },
+        "manager-shelter": {
+          "title": "Detalle operativo del refugio",
+          "summary": "Consulta información y solicitudes del refugio.",
+          "value": "Consulta información y solicitudes del refugio."
+        },
+        "coordination-shelters": {
+          "title": "Acompañamiento a refugios",
+          "summary": "Consulta información y solicitudes de cada refugio.",
+          "value": "Consulta información y solicitudes de cada refugio."
+        },
+        "manager-campaigns": {
+          "title": "Tablero de campañas",
+          "summary": "Consulta campañas pendientes, aprobadas y rechazadas.",
+          "value": "Consulta campañas pendientes, aprobadas y rechazadas."
+        },
+        "manager-campaign": {
+          "title": "Revisar una campaña",
+          "summary": "Aprueba o rechaza la propuesta y conversa con el refugio.",
+          "value": "Aprueba o rechaza la propuesta y conversa con el refugio."
+        },
+        "manager-campaign-new": {
+          "title": "Crear campaña desde coordinación",
+          "summary": "Prepara una campaña para un refugio seleccionado.",
+          "value": "Prepara una campaña para un refugio seleccionado."
+        },
+        "coordination-campaigns": {
+          "title": "Revisión de campañas",
+          "summary": "Revisa propuestas y acompaña al refugio.",
+          "value": "Revisa propuestas y acompaña al refugio."
+        },
+        "coordination": {
+          "title": "Coordinación de la plataforma",
+          "summary": "Una visión compartida de solicitudes, refugios y campañas.",
+          "value": "Permite acompañar los procesos que necesitan atención entre refugios."
+        },
+        "admin-dashboard": {
+          "title": "Dashboard administrativo",
+          "summary": "Consulta el resumen de la plataforma.",
+          "value": "Consulta el resumen de la plataforma."
+        },
+        "admin-metrics": {
+          "title": "Métricas",
+          "summary": "Explora indicadores de actividad.",
+          "value": "Explora indicadores de actividad."
+        },
+        "administration-overview": {
+          "title": "Supervisión",
+          "summary": "Consulta métricas y actividad de la plataforma.",
+          "value": "Consulta métricas y actividad de la plataforma."
+        },
+        "admin-shelters": {
+          "title": "Aprobar refugios",
+          "summary": "Revisa los refugios pendientes de verificación.",
+          "value": "Revisa los refugios pendientes de verificación."
+        },
+        "admin-moderation": {
+          "title": "Moderación",
+          "summary": "Supervisa el contenido que requiere revisión.",
+          "value": "Supervisa el contenido que requiere revisión."
+        },
+        "administration-review": {
+          "title": "Aprobación y moderación",
+          "summary": "Revisa refugios y contenido de la plataforma.",
+          "value": "Revisa refugios y contenido de la plataforma."
+        },
+        "admin-payments": {
+          "title": "Registro de pagos",
+          "summary": "Revisa los pagos registrados; la pasarela real sigue pendiente.",
+          "value": "Revisa los pagos registrados; la pasarela real sigue pendiente."
+        },
+        "administration-payments": {
+          "title": "Supervisión de pagos",
+          "summary": "Consulta los registros de pagos disponibles.",
+          "value": "Consulta los registros de pagos disponibles."
+        },
+        "admin-blog": {
+          "title": "Publicaciones",
+          "summary": "Administra las publicaciones del blog.",
+          "value": "Administra las publicaciones del blog."
+        },
+        "admin-blog-new": {
+          "title": "Crear publicación",
+          "summary": "Redacta una publicación en español e inglés.",
+          "value": "Redacta una publicación en español e inglés."
+        },
+        "admin-blog-edit": {
+          "title": "Editar publicación",
+          "summary": "Selecciona una publicación y actualiza su contenido.",
+          "value": "Selecciona una publicación y actualiza su contenido."
+        },
+        "admin-blog-calendar": {
+          "title": "Calendario editorial",
+          "summary": "Organiza las publicaciones en el calendario.",
+          "value": "Organiza las publicaciones en el calendario."
+        },
+        "administration-blog": {
+          "title": "Gestión del blog",
+          "summary": "Prepara publicaciones y organiza el calendario.",
+          "value": "Prepara publicaciones y organiza el calendario."
+        },
+        "admin-login": {
+          "title": "Entrada desde administración",
+          "summary": "Este enlace se genera desde una sesión administrativa y necesita sus datos de acceso.",
+          "value": "Este enlace se genera desde una sesión administrativa y necesita sus datos de acceso."
+        },
+        "administration-access": {
+          "title": "Acceso administrativo",
+          "summary": "Conoce el acceso desde la administración.",
+          "value": "Conoce el acceso desde la administración."
+        },
+        "notifications": {
+          "title": "Mis notificaciones",
+          "summary": "Lee avisos y configura tus preferencias.",
+          "value": "Lee avisos y configura tus preferencias."
+        },
+        "manual": {
+          "title": "Manual de usuario",
+          "summary": "Consulta instrucciones paso a paso según tu rol.",
+          "value": "Consulta instrucciones paso a paso según tu rol."
+        },
+        "ecosystem": {
+          "title": "Mapa del ecosistema",
+          "summary": "Explora todos los módulos y cómo se conectan.",
+          "value": "Explora todos los módulos y cómo se conectan."
+        },
+        "help": {
+          "title": "Notificaciones y manual",
+          "summary": "Consulta avisos y aprende a usar la plataforma.",
+          "value": "Consulta avisos y aprende a usar la plataforma."
+        },
+        "administration": {
+          "title": "Administración y ayuda",
+          "summary": "Supervisa la plataforma y encuentra herramientas de ayuda.",
+          "value": "Une la supervisión administrativa con la orientación de todos los usuarios."
+        },
+        "tuhuella": {
+          "title": "Ecosistema Tuhuella",
+          "summary": "Siete espacios conectan a personas, refugios y animales.",
+          "value": "Explora qué hace cada módulo y cómo participa en el cuidado de los animales."
+        }
+      }
+    },
     "navLabel": "Manual",
     "eyebrow": "Guía paso a paso de Tuhuella",
     "title": "Manual interactivo de Tuhuella",

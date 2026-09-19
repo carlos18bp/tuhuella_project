@@ -1058,7 +1058,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
             'An admin approves it and it becomes visible in the public campaigns section.',
           ],
         },
-        route: '/shelter/campaigns/new',
+        route: '/shelter/campaigns/nueva',
         keywords: ['create campaign', 'crear campaña', 'recaudacion', 'meta', 'evidencia'],
       },
       {
